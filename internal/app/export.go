@@ -15,15 +15,16 @@ type ExportCmd struct {
 }
 
 type ExportParams struct {
-	DSN    string
-	Format string
-	OutDir string
+	DriverName string
+	DSN        string
+	Format     string
+	OutDir     string
 
 	TablePerFile bool
 }
 
 func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
-	loader, err := schemaloader.CreateLoader("postgres")
+	loader, err := schemaloader.CreateLoader(params.DriverName)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
