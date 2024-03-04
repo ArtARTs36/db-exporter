@@ -1,9 +1,10 @@
-package schema
+package schemaloader
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -24,7 +25,7 @@ type constraint struct {
 	ForeignColumnName string `db:"foreign_column_name"`
 }
 
-func (l *PGLoader) Load(ctx context.Context, dsn string) (*Schema, error) {
+func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error) {
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
@@ -43,14 +44,14 @@ from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`
 
-	var cols []*Column
+	var cols []*schema.Column
 
 	err = db.SelectContext(ctx, &cols, query, "public")
 	if err != nil {
 		return nil, err
 	}
 
-	tables := map[String]*Table{}
+	tables := map[schema.String]*schema.Table{}
 
 	constraints, err := l.loadConstraints(db, ctx, "public")
 	if err != nil {
@@ -60,7 +61,7 @@ order by c.ordinal_position`
 	for _, col := range cols {
 		table, tableExists := tables[col.TableName]
 		if !tableExists {
-			table = &Table{
+			table = &schema.Table{
 				Name: col.TableName,
 			}
 			tables[col.TableName] = table
@@ -73,14 +74,14 @@ order by c.ordinal_position`
 					Valid:  true,
 				}
 			} else if constr.Type == pgConstraintFKName {
-				col.ForeignKey = &ForeignKey{
-					Name: String{
+				col.ForeignKey = &schema.ForeignKey{
+					Name: schema.String{
 						Value: constr.Name,
 					},
-					Table: String{
+					Table: schema.String{
 						Value: constr.ForeignTableName,
 					},
-					Column: String{
+					Column: schema.String{
 						Value: constr.ForeignColumnName,
 					},
 				}
@@ -90,7 +91,7 @@ order by c.ordinal_position`
 		table.Columns = append(table.Columns, col)
 	}
 
-	return &Schema{
+	return &schema.Schema{
 		Tables: tables,
 	}, nil
 }

@@ -3,12 +3,12 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/exporter"
-	"github.com/artarts36/db-exporter/internal/template"
 	"log"
 	"os"
 
-	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/schemaloader"
+	"github.com/artarts36/db-exporter/internal/template"
 )
 
 type ExportCmd struct {
@@ -23,7 +23,7 @@ type ExportParams struct {
 }
 
 func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
-	loader, err := schema.CreateLoader("postgres")
+	loader, err := schemaloader.CreateLoader("postgres")
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}

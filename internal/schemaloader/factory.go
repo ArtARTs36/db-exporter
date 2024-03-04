@@ -1,4 +1,4 @@
-package schema
+package schemaloader
 
 import "fmt"
 
