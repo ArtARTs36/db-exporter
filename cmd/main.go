@@ -38,6 +38,7 @@ func main() {
 				Required:    true,
 				ValuesEnum: []string{
 					"md",
+					"diagram",
 				},
 			},
 			{

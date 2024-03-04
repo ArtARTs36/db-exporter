@@ -1,0 +1,18 @@
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" width="100%;">
+    <TR width="100%">
+        <TD colspan="2" width="100%" bgcolor="#3498db">
+            {{ table.Name.Value }}
+        </TD>
+    </TR>
+    {% for col in table.Columns %}
+    <TR width="100%">
+        {% if loop.index % 2 == 0 %}
+        <TD bgcolor="#dfe6e9">{{ col.Name.Value }} </TD>
+        <TD bgcolor="#dfe6e9">{{ col.PreparedType }} </TD>
+        {% else %}
+        <TD>{{ col.Name.Value }} </TD>
+        <TD>{{ col.PreparedType }} </TD>
+        {% endif %}
+    </TR>
+    {% endfor %}
+</TABLE>

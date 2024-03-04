@@ -14,6 +14,10 @@ const (
 	pgConstraintPKName     = "PRIMARY KEY"
 	pgConstraintFKName     = "FOREIGN KEY"
 	pgConstraintUniqueName = "UNIQUE"
+
+	pgTypeTimestampWithoutTZ = "timestamp without time zone"
+	pgTypeInteger            = "integer"
+	pgTypeBoolean            = "boolean"
 )
 
 type PGLoader struct {
@@ -70,6 +74,8 @@ order by c.ordinal_position`
 			tables[col.TableName] = table
 		}
 
+		col.PreparedType = l.prepareColumnType(col)
+
 		l.applyConstraintsOnColumn(col, constraints[col.TableName.Value][col.Name.Value])
 
 		table.Columns = append(table.Columns, col)
@@ -105,6 +111,19 @@ func (l *PGLoader) applyConstraintsOnColumn(col *schema.Column, constraints []*c
 				Valid:  true,
 			}
 		}
+	}
+}
+
+func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
+	switch col.Type.Value {
+	case pgTypeTimestampWithoutTZ:
+		return schema.ColumnTypeTimestamp
+	case pgTypeInteger:
+		return schema.ColumnTypeInteger
+	case pgTypeBoolean:
+		return schema.ColumnTypeBoolean
+	default:
+		return schema.ColumnTypeString
 	}
 }
 
