@@ -52,7 +52,11 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return fmt.Errorf("failed to export: %w", err)
 	}
 
-	if _, err = os.Stat(params.OutDir); err != nil {
+	return a.savePages(pages, params)
+}
+
+func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportParams) error {
+	if _, err := os.Stat(params.OutDir); err != nil {
 		log.Printf("creating directory %q", params.OutDir)
 
 		err := os.Mkdir(params.OutDir, 0755)
