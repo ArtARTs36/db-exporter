@@ -8,12 +8,17 @@ type Column struct {
 	Type       String         `db:"type"`
 	Nullable   bool           `db:"nullable"`
 	PrimaryKey sql.NullString `db:"-"`
+	UniqueKey  sql.NullString `db:"-"`
 	ForeignKey *ForeignKey    `db:"-"`
 	Comment    String         `db:"comment"`
 }
 
 func (c *Column) IsPrimaryKey() bool {
 	return c.PrimaryKey.Valid
+}
+
+func (c *Column) IsUniqueKey() bool {
+	return c.UniqueKey.Valid
 }
 
 func (c *Column) HasForeignKey() bool {

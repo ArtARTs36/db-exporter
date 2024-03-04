@@ -10,8 +10,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const pgConstraintPKName = "PRIMARY KEY"
-const pgConstraintFKName = "FOREIGN KEY"
+const (
+	pgConstraintPKName     = "PRIMARY KEY"
+	pgConstraintFKName     = "FOREIGN KEY"
+	pgConstraintUniqueName = "UNIQUE"
+)
 
 type PGLoader struct {
 }
@@ -67,26 +70,7 @@ order by c.ordinal_position`
 			tables[col.TableName] = table
 		}
 
-		for _, constr := range constraints[col.TableName.Value][col.Name.Value] {
-			if constr.Type == pgConstraintPKName {
-				col.PrimaryKey = sql.NullString{
-					String: constr.Name,
-					Valid:  true,
-				}
-			} else if constr.Type == pgConstraintFKName {
-				col.ForeignKey = &schema.ForeignKey{
-					Name: schema.String{
-						Value: constr.Name,
-					},
-					Table: schema.String{
-						Value: constr.ForeignTableName,
-					},
-					Column: schema.String{
-						Value: constr.ForeignColumnName,
-					},
-				}
-			}
-		}
+		l.applyConstraintsOnColumn(col, constraints[col.TableName.Value][col.Name.Value])
 
 		table.Columns = append(table.Columns, col)
 	}
@@ -94,6 +78,34 @@ order by c.ordinal_position`
 	return &schema.Schema{
 		Tables: tables,
 	}, nil
+}
+
+func (l *PGLoader) applyConstraintsOnColumn(col *schema.Column, constraints []*constraint) {
+	for _, constr := range constraints {
+		if constr.Type == pgConstraintPKName {
+			col.PrimaryKey = sql.NullString{
+				String: constr.Name,
+				Valid:  true,
+			}
+		} else if constr.Type == pgConstraintFKName {
+			col.ForeignKey = &schema.ForeignKey{
+				Name: schema.String{
+					Value: constr.Name,
+				},
+				Table: schema.String{
+					Value: constr.ForeignTableName,
+				},
+				Column: schema.String{
+					Value: constr.ForeignColumnName,
+				},
+			}
+		} else if constr.Type == pgConstraintUniqueName {
+			col.UniqueKey = sql.NullString{
+				String: constr.Name,
+				Valid:  true,
+			}
+		}
+	}
 }
 
 func (l *PGLoader) loadConstraints(db *sqlx.DB, ctx context.Context, schemaName string) (map[string]map[string][]*constraint, error) {
