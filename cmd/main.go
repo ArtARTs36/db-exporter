@@ -52,6 +52,10 @@ func main() {
 				Name:        "table-per-file",
 				Description: "Export one table to one file",
 			},
+			{
+				Name:        "with-diagram",
+				Description: "Export with diagram (only markdown)",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -73,5 +77,6 @@ func run(ctx *cli.Context) error {
 		Format:       ctx.GetArg("format"),
 		OutDir:       ctx.GetArg("out-dir"),
 		TablePerFile: ctx.HasOpt("table-per-file"),
+		WithDiagram:  ctx.HasOpt("with-diagram"),
 	})
 }

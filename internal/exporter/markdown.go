@@ -26,15 +26,34 @@ func NewMarkdownExporter(renderer *template.Renderer) Exporter {
 }
 
 func (e *MarkdownExporter) Export(_ context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
-	if params.TablePerFile {
-		return e.exportPerFile(schema)
+	var diagram *ExportedPage
+
+	if params.WithDiagram {
+		diagramContent, err := buildGraphviz(e.renderer, schema)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build diagram: %w", err)
+		}
+
+		diagram = &ExportedPage{
+			FileName: "diagram.svg",
+			Content:  diagramContent,
+		}
 	}
 
-	return e.exportToSingleFile(schema)
+	if params.TablePerFile {
+		return e.exportPerFile(schema, diagram)
+	}
+
+	return e.exportToSingleFile(schema, diagram)
 }
 
-func (e *MarkdownExporter) exportPerFile(sc *schema.Schema) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, len(sc.Tables)+1)
+func (e *MarkdownExporter) exportPerFile(sc *schema.Schema, diagram *ExportedPage) ([]*ExportedPage, error) {
+	pagesCap := len(sc.Tables) + 1
+	if diagram != nil {
+		pagesCap += 1
+	}
+
+	pages := make([]*ExportedPage, 0, pagesCap)
 	preparedTables := make([]*markdownPreparedTable, 0, len(sc.Tables))
 
 	for _, table := range sc.Tables {
@@ -56,7 +75,8 @@ func (e *MarkdownExporter) exportPerFile(sc *schema.Schema) ([]*ExportedPage, er
 	}
 
 	indexPage, err := render(e.renderer, "markdown/per-index.md", "index.md", map[string]stick.Value{
-		"tables": preparedTables,
+		"tables":  preparedTables,
+		"diagram": diagram,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to export index file: %w", err)
@@ -64,18 +84,30 @@ func (e *MarkdownExporter) exportPerFile(sc *schema.Schema) ([]*ExportedPage, er
 
 	pages = append(pages, indexPage)
 
+	if diagram != nil {
+		pages = append(pages, diagram)
+	}
+
 	return pages, nil
 }
 
-func (e *MarkdownExporter) exportToSingleFile(sc *schema.Schema) ([]*ExportedPage, error) {
+func (e *MarkdownExporter) exportToSingleFile(sc *schema.Schema, diagram *ExportedPage) ([]*ExportedPage, error) {
 	page, err := render(e.renderer, "markdown/single-tables.md", "tables.md", map[string]stick.Value{
-		"schema": sc,
+		"schema":        sc,
+		"diagram":       diagram,
+		"diagramExists": diagram != nil,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return []*ExportedPage{
+	pages := []*ExportedPage{
 		page,
-	}, nil
+	}
+
+	if diagram != nil {
+		pages = append(pages, diagram)
+	}
+
+	return pages, nil
 }

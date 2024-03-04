@@ -21,6 +21,7 @@ type ExportParams struct {
 	OutDir     string
 
 	TablePerFile bool
+	WithDiagram  bool
 }
 
 func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
@@ -47,6 +48,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	pages, err := exp.Export(ctx, sc, &exporter.ExportParams{
 		TablePerFile: params.TablePerFile,
+		WithDiagram:  params.WithDiagram,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to export: %w", err)

@@ -4,6 +4,8 @@
 - [{{ table.Name.Value }}](#{{ table.Name.Replace('_', '') }})
 {% endfor %}
 
+{% if diagram.Valid() %}![](./{{ diagram.FileName }}){% endif%}
+
 {% for table in schema.Tables %}
 ## {{ table.Name.Value }}
 

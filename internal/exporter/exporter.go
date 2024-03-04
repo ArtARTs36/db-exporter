@@ -12,9 +12,14 @@ type Exporter interface {
 
 type ExportParams struct {
 	TablePerFile bool
+	WithDiagram  bool
 }
 
 type ExportedPage struct {
 	FileName string
 	Content  []byte
+}
+
+func (p *ExportedPage) Valid() bool {
+	return p != nil
 }
