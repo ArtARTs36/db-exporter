@@ -58,6 +58,10 @@ func main() {
 				Name:        "with-diagram",
 				Description: "Export with diagram (only markdown)",
 			},
+			{
+				Name:        "without-migrations-table",
+				Description: "Export without migrations table",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -74,11 +78,12 @@ func run(ctx *cli.Context) error {
 	cmd := &app.ExportCmd{}
 
 	return cmd.Export(ctx.Context, &app.ExportParams{
-		DriverName:   ctx.GetArg("driver-name"),
-		DSN:          ctx.GetArg("dsn"),
-		Format:       ctx.GetArg("format"),
-		OutDir:       ctx.GetArg("out-dir"),
-		TablePerFile: ctx.HasOpt("table-per-file"),
-		WithDiagram:  ctx.HasOpt("with-diagram"),
+		DriverName:             ctx.GetArg("driver-name"),
+		DSN:                    ctx.GetArg("dsn"),
+		Format:                 ctx.GetArg("format"),
+		OutDir:                 ctx.GetArg("out-dir"),
+		TablePerFile:           ctx.HasOpt("table-per-file"),
+		WithDiagram:            ctx.HasOpt("with-diagram"),
+		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
 	})
 }

@@ -22,8 +22,9 @@ type ExportParams struct {
 	Format     string
 	OutDir     string
 
-	TablePerFile bool
-	WithDiagram  bool
+	TablePerFile           bool
+	WithDiagram            bool
+	WithoutMigrationsTable bool
 }
 
 func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
@@ -74,7 +75,8 @@ func (a *ExportCmd) export(
 	var pages []*exporter.ExportedPage
 	var err error
 	exporterParams := &exporter.ExportParams{
-		WithDiagram: params.WithDiagram,
+		WithDiagram:            params.WithDiagram,
+		WithoutMigrationsTable: params.WithoutMigrationsTable,
 	}
 
 	if params.TablePerFile {

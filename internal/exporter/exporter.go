@@ -12,7 +12,8 @@ type Exporter interface {
 }
 
 type ExportParams struct {
-	WithDiagram bool
+	WithDiagram            bool
+	WithoutMigrationsTable bool
 }
 
 type ExportedPage struct {
