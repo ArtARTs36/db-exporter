@@ -14,3 +14,12 @@ type ForeignKey struct {
 	Table  String
 	Column String
 }
+
+func (s *Schema) TablesNames() []string {
+	names := make([]string, 0, len(s.Tables))
+	for _, table := range s.Tables {
+		names = append(names, table.Name.Value)
+	}
+
+	return names
+}

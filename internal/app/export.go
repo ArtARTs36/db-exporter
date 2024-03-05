@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schemaloader"
@@ -39,12 +40,14 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	// processing
 
+	log.Printf("[exportcmd] loading db schema from %s", params.DriverName)
+
 	sc, err := loader.Load(ctx, params.DSN)
 	if err != nil {
 		return fmt.Errorf("unable to load schema: %w", err)
 	}
 
-	log.Printf("loaded %d tables", len(sc.Tables))
+	log.Printf("[exportcmd] loaded %d tables: [%s]", len(sc.Tables), strings.Join(sc.TablesNames(), ","))
 
 	pages, err := exp.Export(ctx, sc, &exporter.ExportParams{
 		TablePerFile: params.TablePerFile,
@@ -54,7 +57,14 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return fmt.Errorf("failed to export: %w", err)
 	}
 
-	return a.savePages(pages, params)
+	err = a.savePages(pages, params)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[exportcmd] successful generated %d files", len(pages))
+
+	return nil
 }
 
 func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportParams) error {
@@ -70,7 +80,7 @@ func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportPara
 	for _, page := range pages {
 		path := fmt.Sprintf("%s/%s", params.OutDir, page.FileName)
 
-		log.Printf("saving %q", path)
+		log.Printf("[exportcmd] saving %q", path)
 
 		err := os.WriteFile(path, page.Content, 0755)
 		if err != nil {

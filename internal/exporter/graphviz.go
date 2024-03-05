@@ -29,6 +29,8 @@ func buildGraphviz(renderer *template.Renderer, sc *schema.Schema) ([]byte, erro
 		}
 	}()
 
+	log.Print("[graphviz] mapping graph")
+
 	tablesNodes := map[string]*cgraph.Node{}
 	for _, table := range sc.Tables {
 		node, err := graph.CreateNode(table.Name.Value)
@@ -78,6 +80,8 @@ func buildGraphviz(renderer *template.Renderer, sc *schema.Schema) ([]byte, erro
 			))
 		}
 	}
+
+	log.Println("[graphviz] generating svg diagram")
 
 	var buf bytes.Buffer
 	if err := g.Render(graph, "svg", &buf); err != nil {
