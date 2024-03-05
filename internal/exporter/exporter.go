@@ -7,12 +7,12 @@ import (
 )
 
 type Exporter interface {
+	ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
 	Export(ctx context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
 }
 
 type ExportParams struct {
-	TablePerFile bool
-	WithDiagram  bool
+	WithDiagram bool
 }
 
 type ExportedPage struct {

@@ -25,32 +25,16 @@ func NewMarkdownExporter(renderer *template.Renderer) Exporter {
 	}
 }
 
-func (e *MarkdownExporter) Export(_ context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+func (e *MarkdownExporter) ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
-
+	pagesCap := len(sc.Tables) + 1
 	if params.WithDiagram {
-		diagramContent, err := buildGraphviz(e.renderer, schema)
+		pagesCap += 1
+		var err error
+		diagram, err = buildDiagramPage(e.renderer, sc.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diagram: %w", err)
 		}
-
-		diagram = &ExportedPage{
-			FileName: "diagram.svg",
-			Content:  diagramContent,
-		}
-	}
-
-	if params.TablePerFile {
-		return e.exportPerFile(schema, diagram)
-	}
-
-	return e.exportToSingleFile(schema, diagram)
-}
-
-func (e *MarkdownExporter) exportPerFile(sc *schema.Schema, diagram *ExportedPage) ([]*ExportedPage, error) {
-	pagesCap := len(sc.Tables) + 1
-	if diagram != nil {
-		pagesCap += 1
 	}
 
 	pages := make([]*ExportedPage, 0, pagesCap)
@@ -91,9 +75,20 @@ func (e *MarkdownExporter) exportPerFile(sc *schema.Schema, diagram *ExportedPag
 	return pages, nil
 }
 
-func (e *MarkdownExporter) exportToSingleFile(sc *schema.Schema, diagram *ExportedPage) ([]*ExportedPage, error) {
+func (e *MarkdownExporter) Export(_ context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+	var diagram *ExportedPage
+
+	if params.WithDiagram {
+		var err error
+
+		diagram, err = buildDiagramPage(e.renderer, schema.Tables, "diagram.svg")
+		if err != nil {
+			return nil, fmt.Errorf("failed to build diagram: %w", err)
+		}
+	}
+
 	page, err := render(e.renderer, "markdown/single-tables.md", "tables.md", map[string]stick.Value{
-		"schema":        sc,
+		"schema":        schema,
 		"diagram":       diagram,
 		"diagramExists": diagram != nil,
 	})

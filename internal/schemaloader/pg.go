@@ -18,6 +18,7 @@ const (
 	pgTypeTimestampWithoutTZ = "timestamp without time zone"
 	pgTypeInteger            = "integer"
 	pgTypeBoolean            = "boolean"
+	pgTypeReal               = "real"
 )
 
 type PGLoader struct {
@@ -122,6 +123,8 @@ func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 		return schema.ColumnTypeInteger
 	case pgTypeBoolean:
 		return schema.ColumnTypeBoolean
+	case pgTypeReal:
+		return schema.ColumnTypeFloat
 	default:
 		return schema.ColumnTypeString
 	}

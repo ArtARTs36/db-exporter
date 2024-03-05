@@ -13,7 +13,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-func buildGraphviz(renderer *template.Renderer, sc *schema.Schema) ([]byte, error) {
+func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema.Table) ([]byte, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()
 	if err != nil {
@@ -32,7 +32,7 @@ func buildGraphviz(renderer *template.Renderer, sc *schema.Schema) ([]byte, erro
 	log.Print("[graphviz] mapping graph")
 
 	tablesNodes := map[string]*cgraph.Node{}
-	for _, table := range sc.Tables {
+	for _, table := range tables {
 		node, err := graph.CreateNode(table.Name.Value)
 		if err != nil {
 			return nil, err
@@ -53,15 +53,23 @@ func buildGraphviz(renderer *template.Renderer, sc *schema.Schema) ([]byte, erro
 		tablesNodes[table.Name.Value] = node
 	}
 
-	for _, table := range sc.Tables {
-		tableNode, _ := tablesNodes[table.Name.Value]
+	for _, table := range tables {
+		tableNode, tnExists := tablesNodes[table.Name.Value]
+		if !tnExists {
+			continue
+		}
 
 		for _, col := range table.Columns {
 			if !col.HasForeignKey() {
 				continue
 			}
 
-			edge, err := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, tablesNodes[col.ForeignKey.Table.Value])
+			foreignTableNode, ftnExists := tablesNodes[col.ForeignKey.Table.Value]
+			if !ftnExists {
+				continue
+			}
+
+			edge, err := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, foreignTableNode)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"failed to create edge from %s.%s to %s.%s: %w",

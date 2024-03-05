@@ -39,6 +39,8 @@ func main() {
 				ValuesEnum: []string{
 					"md",
 					"diagram",
+					"go-structs",
+					"goose",
 				},
 			},
 			{

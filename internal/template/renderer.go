@@ -3,6 +3,7 @@ package template
 import (
 	"bytes"
 	"github.com/tyler-sommer/stick"
+	"strings"
 )
 
 type Renderer struct {
@@ -10,8 +11,18 @@ type Renderer struct {
 }
 
 func InitRenderer(rootDir string) *Renderer {
+	eng := stick.New(stick.NewFilesystemLoader(rootDir))
+	eng.Functions["spaces"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
+		count := args[0].(int)
+		if count < 0 {
+			count = 0
+		}
+
+		return strings.Repeat(" ", count)
+	}
+
 	return &Renderer{
-		engine: stick.New(stick.NewFilesystemLoader(rootDir)),
+		engine: eng,
 	}
 }
 

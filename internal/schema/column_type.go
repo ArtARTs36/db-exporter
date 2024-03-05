@@ -7,6 +7,7 @@ const (
 	ColumnTypeString    ColumnType = iota
 	ColumnTypeTimestamp ColumnType = iota
 	ColumnTypeBoolean   ColumnType = iota
+	ColumnTypeFloat     ColumnType = iota
 )
 
 func (t ColumnType) String() string {
@@ -19,6 +20,8 @@ func (t ColumnType) String() string {
 		return "timestamp"
 	case ColumnTypeBoolean:
 		return "boolean"
+	case ColumnTypeFloat:
+		return "float"
 	default:
 		return "string"
 	}

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"github.com/fatih/camelcase"
+	"github.com/iancoleman/strcase"
+	"github.com/jinzhu/inflection"
 )
 
 type String struct {
@@ -35,4 +39,45 @@ func (s *String) String() string {
 
 func (s *String) Replace(old string, new string) string {
 	return strings.ReplaceAll(s.Value, old, new)
+}
+
+func (s *String) Pascal() *String {
+	return &String{
+		Value: strcase.ToCamel(s.Value),
+	}
+}
+
+func (s *String) Len() int {
+	return len(s.Value)
+}
+
+func (s *String) Singular() *String {
+	return &String{
+		Value: inflection.Singular(s.Value),
+	}
+}
+
+func (s *String) Ends(suffix string) bool {
+	return strings.HasSuffix(s.Value, suffix)
+}
+
+func (s *String) SplitCamel() []string {
+	return camelcase.Split(s.Value)
+}
+
+func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
+	words := s.SplitCamel()
+	for i, word := range words {
+		w := strings.ToLower(word)
+		_, exists := abbrSet[w]
+		if !exists {
+			continue
+		}
+
+		words[i] = strings.ToUpper(w)
+	}
+
+	return &String{
+		Value: strings.Join(words, ""),
+	}
 }

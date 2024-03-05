@@ -15,5 +15,13 @@ func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) 
 		return NewDiagramExporter(renderer), nil
 	}
 
+	if name == "go-structs" || name == "gostructs" {
+		return NewGoStructsExporter(renderer), nil
+	}
+
+	if name == "goose" {
+		return NewGooseExporter(renderer), nil
+	}
+
 	return nil, fmt.Errorf("format %q unsupported", name)
 }

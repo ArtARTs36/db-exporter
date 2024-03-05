@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"log"
 	"os"
 	"strings"
@@ -49,10 +50,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	log.Printf("[exportcmd] loaded %d tables: [%s]", len(sc.Tables), strings.Join(sc.TablesNames(), ","))
 
-	pages, err := exp.Export(ctx, sc, &exporter.ExportParams{
-		TablePerFile: params.TablePerFile,
-		WithDiagram:  params.WithDiagram,
-	})
+	pages, err := a.export(exp, ctx, sc, params)
 	if err != nil {
 		return fmt.Errorf("failed to export: %w", err)
 	}
@@ -65,6 +63,31 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 	log.Printf("[exportcmd] successful generated %d files", len(pages))
 
 	return nil
+}
+
+func (a *ExportCmd) export(
+	exp exporter.Exporter,
+	ctx context.Context,
+	sc *schema.Schema,
+	params *ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	var pages []*exporter.ExportedPage
+	var err error
+	exporterParams := &exporter.ExportParams{
+		WithDiagram: params.WithDiagram,
+	}
+
+	if params.TablePerFile {
+		pages, err = exp.ExportPerFile(ctx, sc, exporterParams)
+	} else {
+		pages, err = exp.Export(ctx, sc, exporterParams)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to export: %w", err)
+	}
+
+	return pages, nil
 }
 
 func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportParams) error {
