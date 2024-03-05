@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/goose"
 
 	"github.com/cockroachdb/cockroachdb-parser/pkg/sql/sem/tree"
 	"github.com/huandu/go-sqlbuilder"
@@ -55,10 +56,15 @@ func (e *GooseExporter) Export(_ context.Context, schema *schema.Schema, _ *Expo
 		downQueries = append(downQueries, fmt.Sprintf("DROP TABLE %s;", table.Name.Value))
 	}
 
-	p, err := render(e.renderer, "goose/single.sql", "init.sql", map[string]stick.Value{
-		"up_queries":   upQueries,
-		"down_queries": downQueries,
-	})
+	p, err := render(
+		e.renderer,
+		"goose/single.sql",
+		goose.CreateMigrationFilename("init"),
+		map[string]stick.Value{
+			"up_queries":   upQueries,
+			"down_queries": downQueries,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
