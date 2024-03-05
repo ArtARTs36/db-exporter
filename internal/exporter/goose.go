@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/cockroachdb/cockroachdb-parser/pkg/sql/sem/tree"
 	"github.com/huandu/go-sqlbuilder"
@@ -31,6 +32,8 @@ func NewGooseExporter(renderer *template.Renderer) *GooseExporter {
 
 func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, len(sch.Tables))
+
+	log.Printf("[gooseexporter] building queries and rendering migration files")
 
 	for _, table := range sch.Tables {
 		if params.WithoutMigrationsTable && goose.IsMigrationsTable(table.Name.Value) {
@@ -68,6 +71,8 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, params *Ex
 	upQueries := make([]string, 0, len(sch.Tables))
 	downQueries := make([]string, 0, len(sch.Tables))
 
+	log.Printf("[gooseexporter] building queries")
+
 	for _, table := range sch.Tables {
 		if params.WithoutMigrationsTable && goose.IsMigrationsTable(table.Name.Value) {
 			continue
@@ -81,6 +86,8 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, params *Ex
 		upQueries = append(upQueries, migration.upQueries...)
 		downQueries = append(downQueries, migration.downQueries...)
 	}
+
+	log.Printf("[gooseexporter] rendering migration file")
 
 	p, err := render(
 		e.renderer,
