@@ -2,8 +2,9 @@ package template
 
 import (
 	"bytes"
-	"github.com/tyler-sommer/stick"
 	"strings"
+
+	"github.com/tyler-sommer/stick"
 )
 
 type Renderer struct {

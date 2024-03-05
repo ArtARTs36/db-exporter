@@ -3,7 +3,10 @@ package exporter
 import (
 	"context"
 	"fmt"
+
+	"github.com/cockroachdb/cockroachdb-parser/pkg/sql/sem/tree"
 	"github.com/huandu/go-sqlbuilder"
+	"github.com/mjibson/sqlfmt"
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -39,8 +42,17 @@ func (e *GooseExporter) Export(_ context.Context, schema *schema.Schema, _ *Expo
 			upQuery.Define(defs...)
 		}
 
-		upQueries = append(upQueries, upQuery.String())
-		downQueries = append(downQueries, fmt.Sprintf("DROP TABLE %s", table.Name.Value))
+		upSql, err := sqlfmt.FmtSQL(tree.PrettyCfg{
+			LineWidth:                4,
+			TabWidth:                 4,
+			DoNotNewLineAfterColName: true,
+		}, []string{upQuery.String()})
+		if err != nil {
+			return nil, fmt.Errorf("failed to format up query: %w", err)
+		}
+
+		upQueries = append(upQueries, upSql)
+		downQueries = append(downQueries, fmt.Sprintf("DROP TABLE %s;", table.Name.Value))
 	}
 
 	p, err := render(e.renderer, "goose/single.sql", "init.sql", map[string]stick.Value{
