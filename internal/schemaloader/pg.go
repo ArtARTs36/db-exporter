@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/schema"
+	"slices"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 const (
@@ -31,6 +33,15 @@ type constraint struct {
 	Type              string `db:"type"`
 	ForeignTableName  string `db:"foreign_table_name"`
 	ForeignColumnName string `db:"foreign_column_name"`
+}
+
+type squashedConstraint struct {
+	Name              string
+	TableName         string
+	ColumnsNames      []string
+	Type              string
+	ForeignTableName  string
+	ForeignColumnName string
 }
 
 func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error) {
@@ -77,7 +88,7 @@ order by c.ordinal_position`
 
 		col.PreparedType = l.prepareColumnType(col)
 
-		l.applyConstraintsOnColumn(col, constraints[col.TableName.Value][col.Name.Value])
+		l.applyConstraintsOnColumn(table, col, constraints[col.TableName.Value][col.Name.Value])
 
 		table.Columns = append(table.Columns, col)
 	}
@@ -87,13 +98,19 @@ order by c.ordinal_position`
 	}, nil
 }
 
-func (l *PGLoader) applyConstraintsOnColumn(col *schema.Column, constraints []*constraint) {
+func (l *PGLoader) applyConstraintsOnColumn(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
 	for _, constr := range constraints {
 		if constr.Type == pgConstraintPKName {
-			col.PrimaryKey = sql.NullString{
-				String: constr.Name,
-				Valid:  true,
+			pk := &schema.PrimaryKey{
+				Name: schema.String{
+					Value: constr.Name,
+				},
+				ColumnsNames: constr.ColumnsNames,
 			}
+
+			table.PrimaryKey = pk
+
+			col.PrimaryKey = pk
 		} else if constr.Type == pgConstraintFKName {
 			col.ForeignKey = &schema.ForeignKey{
 				Name: schema.String{
@@ -130,7 +147,7 @@ func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 	}
 }
 
-func (l *PGLoader) loadConstraints(db *sqlx.DB, ctx context.Context, schemaName string) (map[string]map[string][]*constraint, error) {
+func (l *PGLoader) loadConstraints(db *sqlx.DB, ctx context.Context, schemaName string) (map[string]map[string][]*squashedConstraint, error) {
 	query := `select
        tco.constraint_name as "name",
        kcu.table_name,
@@ -157,16 +174,37 @@ order by kcu.table_schema,
 		return nil, err
 	}
 
-	constraintMap := map[string]map[string][]*constraint{}
+	squashed := map[string]*squashedConstraint{}
+	constraintMap := map[string]map[string][]*squashedConstraint{}
 
 	for _, constr := range constraints {
+		sc, scExists := squashed[constr.Name]
+		if scExists {
+			if !slices.Contains(sc.ColumnsNames, constr.ColumnName) {
+				sc.ColumnsNames = append(sc.ColumnsNames, constr.ColumnName)
+			}
+		} else {
+			sc = &squashedConstraint{
+				Name:      constr.Name,
+				TableName: constr.TableName,
+				ColumnsNames: []string{
+					constr.ColumnName,
+				},
+				Type:              constr.Type,
+				ForeignTableName:  constr.ForeignTableName,
+				ForeignColumnName: constr.ForeignColumnName,
+			}
+
+			squashed[constr.Name] = sc
+		}
+
 		_, exists := constraintMap[constr.TableName]
 		if !exists {
-			constraintMap[constr.TableName] = map[string][]*constraint{}
+			constraintMap[constr.TableName] = map[string][]*squashedConstraint{}
 		}
 		constraintMap[constr.TableName][constr.ColumnName] = append(
 			constraintMap[constr.TableName][constr.ColumnName],
-			constr,
+			sc,
 		)
 	}
 

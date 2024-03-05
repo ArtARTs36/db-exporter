@@ -7,12 +7,19 @@ type Schema struct {
 type Table struct {
 	Name    String    `db:"name"`
 	Columns []*Column `db:"-"`
+
+	PrimaryKey *PrimaryKey `db:"-"`
 }
 
 type ForeignKey struct {
 	Name   String
 	Table  String
 	Column String
+}
+
+type PrimaryKey struct {
+	Name         String
+	ColumnsNames []string
 }
 
 func (s *Schema) TablesNames() []string {

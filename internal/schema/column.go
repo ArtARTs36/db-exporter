@@ -7,7 +7,7 @@ type Column struct {
 	TableName    String         `db:"table_name"`
 	Type         String         `db:"type"`
 	Nullable     bool           `db:"nullable"`
-	PrimaryKey   sql.NullString `db:"-"`
+	PrimaryKey   *PrimaryKey    `db:"-"`
 	UniqueKey    sql.NullString `db:"-"`
 	ForeignKey   *ForeignKey    `db:"-"`
 	Comment      String         `db:"comment"`
@@ -15,7 +15,7 @@ type Column struct {
 }
 
 func (c *Column) IsPrimaryKey() bool {
-	return c.PrimaryKey.Valid
+	return c.PrimaryKey != nil
 }
 
 func (c *Column) IsUniqueKey() bool {

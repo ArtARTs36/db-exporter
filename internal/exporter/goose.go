@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/cockroachdb/cockroachdb-parser/pkg/sql/sem/tree"
 	"github.com/huandu/go-sqlbuilder"
@@ -117,6 +118,15 @@ func (e *GooseExporter) makeMigration(table *schema.Table) (*gooseMigration, err
 		}
 
 		upQuery.Define(defs...)
+	}
+
+	if table.PrimaryKey != nil {
+		upQuery.Define(
+			"constraint",
+			table.PrimaryKey.Name.Value,
+			"primary key",
+			fmt.Sprintf("(%s)", strings.Join(table.PrimaryKey.ColumnsNames, ", ")),
+		)
 	}
 
 	upSql, err := sqlfmt.FmtSQL(tree.PrettyCfg{
