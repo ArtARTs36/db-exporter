@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/sql"
 
 	"github.com/artarts36/db-exporter/internal/template"
 )
@@ -28,11 +29,11 @@ func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) 
 	}
 
 	if name == "goose" {
-		return NewGooseExporter(renderer), nil
+		return NewGooseExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
 	if name == "laravel-migrations-raw" {
-		return NewLaravelMigrationsExporter(renderer), nil
+		return NewLaravelMigrationsExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
 	return nil, fmt.Errorf("format %q unsupported", name)

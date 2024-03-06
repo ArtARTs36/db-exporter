@@ -13,7 +13,8 @@ import (
 )
 
 type LaravelMigrationsExporter struct {
-	renderer *template.Renderer
+	renderer   *template.Renderer
+	ddlBuilder *sql.DDLBuilder
 }
 
 type laravelMigration struct {
@@ -26,9 +27,10 @@ type laravelMigrationQueries struct {
 	Down []string
 }
 
-func NewLaravelMigrationsExporter(renderer *template.Renderer) *LaravelMigrationsExporter {
+func NewLaravelMigrationsExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *LaravelMigrationsExporter {
 	return &LaravelMigrationsExporter{
-		renderer: renderer,
+		renderer:   renderer,
+		ddlBuilder: ddlBuilder,
 	}
 }
 
@@ -112,7 +114,7 @@ func (e *LaravelMigrationsExporter) Export(
 
 func (e *LaravelMigrationsExporter) makeMigrationQueries(table *schema.Table) *laravelMigrationQueries {
 	return &laravelMigrationQueries{
-		Up: sql.BuildDDL(table),
+		Up: e.ddlBuilder.BuildDDL(table),
 		Down: []string{
 			sqlquery.BuildDropTable(table.Name.Value),
 		},

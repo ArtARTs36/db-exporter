@@ -8,7 +8,16 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
 )
 
-func BuildDDL(table *schema.Table) []string {
+type DDLBuilder struct {
+}
+
+func NewDDLBuilder() *DDLBuilder {
+	return &DDLBuilder{}
+}
+
+type isLastLine func() bool
+
+func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 	var upQueries []string
 
 	createTableQuery := []string{
@@ -21,6 +30,12 @@ func BuildDDL(table *schema.Table) []string {
 		lines++
 	}
 	lineID := 0
+
+	isLast := func() bool {
+		lineID++
+
+		return lineID == lines
+	}
 
 	maxColumnLen := 0
 	for _, column := range table.Columns {
@@ -69,57 +84,15 @@ func BuildDDL(table *schema.Table) []string {
 	}
 
 	if table.PrimaryKey != nil {
-		lineID++
-
-		comma := ","
-		if lineID == lines {
-			comma = ""
-		}
-
-		q := fmt.Sprintf(
-			"    %s%s",
-			sqlquery.BuildPK(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
-			comma,
-		)
-
-		createTableQuery = append(createTableQuery, q)
+		createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
 	}
 
 	if len(table.ForeignKeys) > 0 {
-		for _, fk := range table.ForeignKeys {
-			lineID++
-
-			comma := ","
-			if lineID == lines {
-				comma = ""
-			}
-
-			q := fmt.Sprintf(
-				"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s",
-				fk.Name.Value,
-				fk.ColumnsNames.Join(", "),
-				fk.ForeignTable.Value,
-				fk.ForeignColumn.Value,
-				comma,
-			)
-
-			createTableQuery = append(createTableQuery, q)
-		}
+		createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
 	}
 
 	if len(table.UniqueKeys) > 0 {
-		for _, uk := range table.UniqueKeys {
-			lineID++
-
-			comma := ","
-			if lineID == lines {
-				comma = ""
-			}
-
-			q := fmt.Sprintf("%s%s", sqlquery.BuildUK(uk.Name.Value, uk.ColumnsNames), comma)
-
-			createTableQuery = append(createTableQuery, q)
-		}
+		createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
 	}
 
 	createTableQuery = append(createTableQuery, ");")
@@ -129,4 +102,58 @@ func BuildDDL(table *schema.Table) []string {
 	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries
+}
+
+func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {
+	comma := ","
+	if isLast() {
+		comma = ""
+	}
+
+	return fmt.Sprintf(
+		"    %s%s",
+		sqlquery.BuildPK(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
+		comma,
+	)
+}
+
+func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []string {
+	queries := make([]string, 0, len(table.ForeignKeys))
+
+	for _, fk := range table.ForeignKeys {
+		comma := ","
+		if isLast() {
+			comma = ""
+		}
+
+		q := fmt.Sprintf(
+			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s",
+			fk.Name.Value,
+			fk.ColumnsNames.Join(", "),
+			fk.ForeignTable.Value,
+			fk.ForeignColumn.Value,
+			comma,
+		)
+
+		queries = append(queries, q)
+	}
+
+	return queries
+}
+
+func (b *DDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine) []string {
+	queries := make([]string, 0, len(table.UniqueKeys))
+
+	for _, uk := range table.UniqueKeys {
+		comma := ","
+		if isLast() {
+			comma = ""
+		}
+
+		q := fmt.Sprintf("%s%s", sqlquery.BuildUK(uk.Name.Value, uk.ColumnsNames), comma)
+
+		queries = append(queries, q)
+	}
+
+	return queries
 }

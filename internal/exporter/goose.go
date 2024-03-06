@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
-
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
+	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
 	"github.com/artarts36/db-exporter/internal/sql"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
 type GooseExporter struct {
-	renderer *template.Renderer
+	renderer   *template.Renderer
+	ddlBuilder *sql.DDLBuilder
 }
 
 type gooseMigration struct {
@@ -24,9 +24,10 @@ type gooseMigration struct {
 	downQueries []string
 }
 
-func NewGooseExporter(renderer *template.Renderer) *GooseExporter {
+func NewGooseExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *GooseExporter {
 	return &GooseExporter{
-		renderer: renderer,
+		renderer:   renderer,
+		ddlBuilder: ddlBuilder,
 	}
 }
 
@@ -103,7 +104,7 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, params *Ex
 
 func (e *GooseExporter) makeMigration(table *schema.Table) *gooseMigration {
 	return &gooseMigration{
-		upQueries: sql.BuildDDL(table),
+		upQueries: e.ddlBuilder.BuildDDL(table),
 		downQueries: []string{
 			sqlquery.BuildDropTable(table.Name.Value),
 		},
