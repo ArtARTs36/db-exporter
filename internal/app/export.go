@@ -3,14 +3,15 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
-	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log"
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/schemaloader"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -138,7 +139,7 @@ func (a *ExportCmd) loadSchema(
 		return sc, nil
 	}
 
-	tables := make(map[schema.String]*schema.Table)
+	tables := make(map[ds.String]*schema.Table)
 
 	for _, table := range sc.Tables {
 		if a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames()) {

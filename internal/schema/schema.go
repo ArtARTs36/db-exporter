@@ -3,35 +3,24 @@ package schema
 import "github.com/artarts36/db-exporter/internal/shared/ds"
 
 type Schema struct {
-	Tables map[String]*Table
-}
-
-type Table struct {
-	Name    String    `db:"name"`
-	Columns []*Column `db:"-"`
-
-	PrimaryKey  *PrimaryKey            `db:"-"`
-	ForeignKeys map[string]*ForeignKey `db:"-"`
-	UniqueKeys  map[string]*UniqueKey  `db:"-"`
-
-	columnsNames []string `db:"-"`
+	Tables map[ds.String]*Table
 }
 
 type ForeignKey struct {
-	Name          String
-	Table         String
+	Name          ds.String
+	Table         ds.String
 	ColumnsNames  *ds.Strings
-	ForeignTable  String
-	ForeignColumn String
+	ForeignTable  ds.String
+	ForeignColumn ds.String
 }
 
 type PrimaryKey struct {
-	Name         String
+	Name         ds.String
 	ColumnsNames *ds.Strings
 }
 
 type UniqueKey struct {
-	Name         String
+	Name         ds.String
 	ColumnsNames *ds.Strings
 }
 
@@ -45,8 +34,8 @@ func (s *Schema) TablesNames() []string {
 }
 
 func (s *Schema) SortByRelations() {
-	tables := map[String]*Table{}
-	queue := map[String]*Table{}
+	tables := map[ds.String]*Table{}
+	queue := map[ds.String]*Table{}
 
 	for _, table := range s.Tables {
 		if len(table.ForeignKeys) == 0 {
@@ -72,16 +61,4 @@ func (s *Schema) SortByRelations() {
 	}
 
 	s.Tables = tables
-}
-
-func (t *Table) ColumnsNames() []string {
-	if t.columnsNames == nil {
-		t.columnsNames = make([]string, 0, len(t.Columns))
-
-		for _, column := range t.Columns {
-			t.columnsNames = append(t.columnsNames, column.Name.Value)
-		}
-	}
-
-	return t.columnsNames
 }

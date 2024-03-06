@@ -3,12 +3,13 @@ package schemaloader
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
-	"github.com/artarts36/db-exporter/internal/shared/pg"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // for pg driver
 
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
 type PGLoader struct {
@@ -92,7 +93,7 @@ order by c.ordinal_position`
 		return nil, err
 	}
 
-	tables := map[schema.String]*schema.Table{}
+	tables := map[ds.String]*schema.Table{}
 
 	constraints, err := l.loadConstraints(ctx, db, "public")
 	if err != nil {
@@ -129,7 +130,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			pk := table.PrimaryKey
 			if pk == nil {
 				pk = &schema.PrimaryKey{
-					Name: schema.String{
+					Name: ds.String{
 						Value: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,
@@ -144,15 +145,15 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 
 			if fk == nil {
 				fk = &schema.ForeignKey{
-					Name: schema.String{
+					Name: ds.String{
 						Value: constr.Name,
 					},
 					Table:        table.Name,
 					ColumnsNames: constr.ColumnsNames,
-					ForeignTable: schema.String{
+					ForeignTable: ds.String{
 						Value: constr.ForeignTableName,
 					},
-					ForeignColumn: schema.String{
+					ForeignColumn: ds.String{
 						Value: constr.ForeignColumnName,
 					},
 				}
@@ -166,7 +167,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 
 			if uk == nil {
 				uk = &schema.UniqueKey{
-					Name: schema.String{
+					Name: ds.String{
 						Value: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,

@@ -3,11 +3,11 @@ package exporter
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -28,7 +28,7 @@ type goSchema struct {
 }
 
 type goStruct struct {
-	Name       schema.String
+	Name       ds.String
 	Properties []*goProperty
 }
 
@@ -57,7 +57,7 @@ func (e *GoStructsExporter) ExportPerFile(
 	pages := make([]*ExportedPage, 0, len(sch.Tables))
 
 	for _, table := range sch.Tables {
-		goSch := e.makeGoSchema(map[schema.String]*schema.Table{
+		goSch := e.makeGoSchema(map[ds.String]*schema.Table{
 			table.Name: table,
 		})
 
@@ -173,7 +173,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 	}
 }
 
-func (e *GoStructsExporter) makeGoSchema(tables map[schema.String]*schema.Table) *goSchema {
+func (e *GoStructsExporter) makeGoSchema(tables map[ds.String]*schema.Table) *goSchema {
 	goSch := &goSchema{
 		Tables:  make([]*goStruct, 0, len(tables)),
 		Imports: ds.NewSet(),

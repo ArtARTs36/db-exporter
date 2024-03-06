@@ -23,8 +23,10 @@ func (s *Strings) Items() []string {
 	return s.items
 }
 
-func (s *Strings) Join(sep string) string {
-	return strings.Join(s.items, sep)
+func (s *Strings) Join(sep string) *String {
+	return &String{
+		Value: strings.Join(s.items, sep),
+	}
 }
 
 func (s *Strings) Contains(str string) bool {
@@ -41,4 +43,8 @@ func (s *Strings) Once() bool {
 
 func (s *Strings) First() string {
 	return s.items[0]
+}
+
+func (s *Strings) List() []string {
+	return s.items
 }

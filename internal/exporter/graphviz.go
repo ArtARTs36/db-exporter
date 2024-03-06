@@ -3,19 +3,20 @@ package exporter
 import (
 	"bytes"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/template"
-	"github.com/goccy/go-graphviz/cgraph"
-	"github.com/tyler-sommer/stick"
 	"log"
 
 	"github.com/goccy/go-graphviz"
+	"github.com/goccy/go-graphviz/cgraph"
+	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/template"
 )
 
 func buildGraphviz( //nolint:gocognit // hard to split
 	renderer *template.Renderer,
-	tables map[schema.String]*schema.Table,
+	tables map[ds.String]*schema.Table,
 ) ([]byte, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()

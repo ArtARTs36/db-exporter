@@ -129,7 +129,7 @@ func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []
 		q := fmt.Sprintf(
 			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s",
 			fk.Name.Value,
-			fk.ColumnsNames.Join(", "),
+			fk.ColumnsNames.Join(", ").Value,
 			fk.ForeignTable.Value,
 			fk.ForeignColumn.Value,
 			comma,
