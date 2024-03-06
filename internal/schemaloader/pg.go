@@ -14,6 +14,39 @@ import (
 type PGLoader struct {
 }
 
+var pgTypeMap = map[string]schema.ColumnType{
+	pg.TypeText:             schema.ColumnTypeString,
+	pg.TypeUUID:             schema.ColumnTypeString,
+	pg.TypeCharacter:        schema.ColumnTypeString,
+	pg.TypeCharacterVarying: schema.ColumnTypeString,
+
+	pg.TypeTimestampWithoutTZ: schema.ColumnTypeTimestamp,
+	pg.TypeTimestampWithTZ:    schema.ColumnTypeTimestamp,
+
+	pg.TypeInteger: schema.ColumnTypeInteger,
+	pg.TypeInt4:    schema.ColumnTypeInteger,
+	pg.TypeInt8:    schema.ColumnTypeInteger,
+	pg.TypeSerial:  schema.ColumnTypeInteger,
+
+	pg.TypeSmallInt:    schema.ColumnTypeInteger16,
+	pg.TypeSmallSerial: schema.ColumnTypeInteger16,
+
+	pg.TypeBigint: schema.ColumnTypeInteger64,
+
+	pg.TypeBoolean: schema.ColumnTypeBoolean,
+	pg.TypeBit:     schema.ColumnTypeBoolean,
+
+	pg.TypeDoublePrecision: schema.ColumnTypeFloat32,
+	pg.TypeFloat8:          schema.ColumnTypeFloat32,
+	pg.TypeDecimal:         schema.ColumnTypeFloat32,
+
+	pg.TypeMoney:   schema.ColumnTypeFloat64,
+	pg.TypeReal:    schema.ColumnTypeFloat64,
+	pg.TypeNumeric: schema.ColumnTypeFloat64,
+
+	pg.TypeBytea: schema.ColumnTypeBytes,
+}
+
 type constraint struct {
 	Name              string `db:"name"`
 	TableName         string `db:"table_name"`
@@ -148,16 +181,9 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 }
 
 func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
-	switch col.Type.Value {
-	case pg.TypeTimestampWithoutTZ:
-	case pg.TypeTimestampWithTZ:
-		return schema.ColumnTypeTimestamp
-	case pg.TypeInteger:
-		return schema.ColumnTypeInteger
-	case pg.TypeBoolean:
-		return schema.ColumnTypeBoolean
-	case pg.TypeReal:
-		return schema.ColumnTypeFloat
+	t, exists := pgTypeMap[col.Type.Value]
+	if exists {
+		return t
 	}
 
 	return schema.ColumnTypeString

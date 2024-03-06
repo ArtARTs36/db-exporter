@@ -104,6 +104,22 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 		}
 
 		return "int64"
+	case schema.ColumnTypeInteger16:
+		if col.Nullable {
+			imports.Add("database/sql")
+
+			return "sql.NullInt16"
+		}
+
+		return "int16"
+	case schema.ColumnTypeInteger64:
+		if col.Nullable {
+			imports.Add("database/sql")
+
+			return "sql.NullInt64"
+		}
+
+		return "int64"
 	case schema.ColumnTypeString:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -126,11 +142,11 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 		if col.Nullable {
 			imports.Add("database/sql")
 
-			return "*sql.NullBool"
+			return "sql.NullBool"
 		}
 
 		return "bool"
-	case schema.ColumnTypeFloat:
+	case schema.ColumnTypeFloat64:
 		if col.Nullable {
 			imports.Add("database/sql")
 
@@ -138,6 +154,20 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 		}
 
 		return "float64"
+	case schema.ColumnTypeFloat32:
+		if col.Nullable {
+			imports.Add("database/sql")
+
+			return "*float32"
+		}
+
+		return "float32"
+	case schema.ColumnTypeBytes:
+		if col.Nullable {
+			return "*[]byte"
+		}
+
+		return "[]byte"
 	default:
 		return "string"
 	}
