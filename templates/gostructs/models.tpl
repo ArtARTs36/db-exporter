@@ -1,7 +1,7 @@
 package models
 
-{% if has_imports %}import (
-{% for im in imports %}    "{{ im }}"{% if loop.last == false %}
+{% if schema.Imports.Valid() %}import (
+{% for im in schema.Imports.List() %}    "{{ im }}"{% if loop.last == false %}
 {% endif %}{% endfor %}
 ){% endif %}
 {% for table in schema.Tables %}

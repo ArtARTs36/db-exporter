@@ -15,6 +15,7 @@ var goAbbreviationsSet = map[string]bool{
 	"id":   true,
 	"uuid": true,
 	"json": true,
+	"db":   true,
 }
 
 type GoStructsExporter struct {
@@ -22,7 +23,8 @@ type GoStructsExporter struct {
 }
 
 type goSchema struct {
-	Tables []*goStruct
+	Tables  []*goStruct
+	Imports *ds.Set
 }
 
 type goStruct struct {
@@ -49,67 +51,46 @@ func NewGoStructsExporter(renderer *template.Renderer) Exporter {
 
 func (e *GoStructsExporter) ExportPerFile(
 	_ context.Context,
-	_ *schema.Schema,
+	sch *schema.Schema,
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
-	return nil, fmt.Errorf("export per file unsupported")
+	pages := make([]*ExportedPage, 0, len(sch.Tables))
+
+	for _, table := range sch.Tables {
+		goSch := e.makeGoSchema(map[schema.String]*schema.Table{
+			table.Name: table,
+		})
+
+		page, err := render(
+			e.renderer,
+			"gostructs/models.tpl",
+			fmt.Sprintf("%s.go", table.Name.Singular().Lower()),
+			map[string]stick.Value{
+				"schema": goSch,
+			},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to render: %w", err)
+		}
+
+		pages = append(pages, page)
+	}
+
+	return pages, nil
 }
 
 func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	goSch := &goSchema{
-		Tables: make([]*goStruct, 0, len(schema.Tables)),
-	}
+	goSch := e.makeGoSchema(schema.Tables)
 
-	imports := ds.NewSet()
-
-	for _, t := range schema.Tables {
-		str := &goStruct{
-			Name:       *t.Name.Singular(),
-			Properties: make([]*goProperty, 0, len(t.Columns)),
-		}
-
-		goSch.Tables = append(goSch.Tables, str)
-
-		propNameOffset := 0
-		propTypeOffset := 0
-		for _, c := range t.Columns {
-			prop := &goProperty{
-				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
-				Type:       e.mapGoType(c, imports),
-				ColumnName: c.Name.Value,
-			}
-
-			str.Properties = append(str.Properties, prop)
-
-			if len(prop.Name) > propNameOffset {
-				propNameOffset = c.Name.Pascal().Len()
-			}
-
-			if len(prop.Type) > propTypeOffset {
-				propTypeOffset = len(prop.Type)
-			}
-		}
-
-		for _, prop := range str.Properties {
-			prop.NameOffset = propNameOffset - len(prop.Name)
-			prop.TypeOffset = propTypeOffset - len(prop.Type)
-		}
-	}
-
-	content, err := e.renderer.Render("gostructs/single-models.tpl", map[string]stick.Value{
-		"schema":      goSch,
-		"imports":     imports.List(),
-		"has_imports": imports.Valid(),
+	page, err := render(e.renderer, "gostructs/models.tpl", "models.go", map[string]stick.Value{
+		"schema": goSch,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return []*ExportedPage{
-		{
-			FileName: "models.go",
-			Content:  content,
-		},
+		page,
 	}, nil
 }
 
@@ -160,4 +141,47 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 	default:
 		return "string"
 	}
+}
+
+func (e *GoStructsExporter) makeGoSchema(tables map[schema.String]*schema.Table) *goSchema {
+	goSch := &goSchema{
+		Tables:  make([]*goStruct, 0, len(tables)),
+		Imports: ds.NewSet(),
+	}
+
+	for _, t := range tables {
+		str := &goStruct{
+			Name:       *t.Name.Singular(),
+			Properties: make([]*goProperty, 0, len(t.Columns)),
+		}
+
+		goSch.Tables = append(goSch.Tables, str)
+
+		propNameOffset := 0
+		propTypeOffset := 0
+		for _, c := range t.Columns {
+			prop := &goProperty{
+				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
+				Type:       e.mapGoType(c, goSch.Imports),
+				ColumnName: c.Name.Value,
+			}
+
+			str.Properties = append(str.Properties, prop)
+
+			if len(prop.Name) > propNameOffset {
+				propNameOffset = c.Name.Pascal().Len()
+			}
+
+			if len(prop.Type) > propTypeOffset {
+				propTypeOffset = len(prop.Type)
+			}
+		}
+
+		for _, prop := range str.Properties {
+			prop.NameOffset = propNameOffset - len(prop.Name)
+			prop.TypeOffset = propTypeOffset - len(prop.Type)
+		}
+	}
+
+	return goSch
 }

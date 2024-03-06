@@ -85,3 +85,9 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 		Value: strings.Join(words, ""),
 	}
 }
+
+func (s *String) Lower() *String {
+	return &String{
+		Value: strings.ToLower(s.Value),
+	}
+}
