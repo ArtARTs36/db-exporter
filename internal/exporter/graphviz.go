@@ -64,7 +64,7 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 				continue
 			}
 
-			foreignTableNode, ftnExists := tablesNodes[col.ForeignKey.Table.Value]
+			foreignTableNode, ftnExists := tablesNodes[col.ForeignKey.ForeignTable.Value]
 			if !ftnExists {
 				continue
 			}
@@ -75,8 +75,8 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 					"failed to create edge from %s.%s to %s.%s: %w",
 					table.Name.Value,
 					col.Name.Value,
-					col.ForeignKey.Table,
-					col.ForeignKey.Column,
+					col.ForeignKey.ForeignTable,
+					col.ForeignKey.ForeignColumn,
 					err,
 				)
 			}
@@ -84,7 +84,7 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 			edge.SetLabel(fmt.Sprintf(
 				"  %s:%s",
 				col.Name.Value,
-				col.ForeignKey.Column.Value,
+				col.ForeignKey.ForeignColumn.Value,
 			))
 		}
 	}

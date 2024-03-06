@@ -3,11 +3,11 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -56,7 +56,7 @@ func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *
 		Tables: make([]*goStruct, 0, len(schema.Tables)),
 	}
 
-	imports := shared.NewSet()
+	imports := ds.NewSet()
 
 	for _, t := range schema.Tables {
 		str := &goStruct{
@@ -109,7 +109,7 @@ func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *
 	}, nil
 }
 
-func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *shared.Set) string {
+func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
 	switch col.PreparedType {
 	case schema.ColumnTypeInteger:
 		if col.Nullable {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 )
 
 type ExportCmd struct {
+	migrationsTblDetector *migrations.TableDetector
 }
 
 type ExportParams struct {
@@ -25,6 +27,12 @@ type ExportParams struct {
 	TablePerFile           bool
 	WithDiagram            bool
 	WithoutMigrationsTable bool
+}
+
+func NewExportCmd() *ExportCmd {
+	return &ExportCmd{
+		migrationsTblDetector: migrations.NewTableDetector(),
+	}
 }
 
 func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
@@ -44,7 +52,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	log.Printf("[exportcmd] loading db schema from %s", params.DriverName)
 
-	sc, err := loader.Load(ctx, params.DSN)
+	sc, err := a.loadSchema(ctx, loader, params)
 	if err != nil {
 		return fmt.Errorf("unable to load schema: %w", err)
 	}
@@ -114,4 +122,29 @@ func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportPara
 	}
 
 	return nil
+}
+
+func (a *ExportCmd) loadSchema(ctx context.Context, loader schemaloader.Loader, params *ExportParams) (*schema.Schema, error) {
+	sc, err := loader.Load(ctx, params.DSN)
+	if err != nil {
+		return nil, err
+	}
+
+	if !params.WithoutMigrationsTable {
+		return sc, nil
+	}
+
+	tables := make(map[schema.String]*schema.Table)
+
+	for _, table := range sc.Tables {
+		if a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames()) {
+			continue
+		}
+
+		tables[table.Name] = table
+	}
+
+	sc.Tables = tables
+
+	return sc, nil
 }

@@ -1,4 +1,4 @@
-package shared
+package ds
 
 type Set struct {
 	set  map[string]bool

@@ -7,6 +7,13 @@ import (
 
 const MigrationsTable = "goose_db_version"
 
+var MigrationsTableColumns = []string{
+	"id",
+	"version_id",
+	"is_applied",
+	"tstamp",
+}
+
 func IsMigrationsTable(table string) bool {
 	return table == MigrationsTable
 }

@@ -51,6 +51,10 @@ func (s *String) Len() int {
 	return len(s.Value)
 }
 
+func (s *String) IsNotEmpty() bool {
+	return s.Len() != 0
+}
+
 func (s *String) Singular() *String {
 	return &String{
 		Value: inflection.Singular(s.Value),

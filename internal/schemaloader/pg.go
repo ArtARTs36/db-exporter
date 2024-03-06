@@ -2,25 +2,13 @@ package schemaloader
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
-	"slices"
-
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/shared/pg"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-)
-
-const (
-	pgConstraintPKName     = "PRIMARY KEY"
-	pgConstraintFKName     = "FOREIGN KEY"
-	pgConstraintUniqueName = "UNIQUE"
-
-	pgTypeTimestampWithoutTZ = "timestamp without time zone"
-	pgTypeInteger            = "integer"
-	pgTypeBoolean            = "boolean"
-	pgTypeReal               = "real"
 )
 
 type PGLoader struct {
@@ -38,7 +26,7 @@ type constraint struct {
 type squashedConstraint struct {
 	Name              string
 	TableName         string
-	ColumnsNames      []string
+	ColumnsNames      *ds.Strings
 	Type              string
 	ForeignTableName  string
 	ForeignColumnName string
@@ -81,7 +69,9 @@ order by c.ordinal_position`
 		table, tableExists := tables[col.TableName]
 		if !tableExists {
 			table = &schema.Table{
-				Name: col.TableName,
+				Name:        col.TableName,
+				ForeignKeys: map[string]*schema.ForeignKey{},
+				UniqueKeys:  map[string]*schema.UniqueKey{},
 			}
 			tables[col.TableName] = table
 		}
@@ -100,47 +90,70 @@ order by c.ordinal_position`
 
 func (l *PGLoader) applyConstraintsOnColumn(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
 	for _, constr := range constraints {
-		if constr.Type == pgConstraintPKName {
-			pk := &schema.PrimaryKey{
-				Name: schema.String{
-					Value: constr.Name,
-				},
-				ColumnsNames: constr.ColumnsNames,
-			}
+		if constr.Type == pg.ConstraintPKName {
+			pk := table.PrimaryKey
+			if pk == nil {
+				pk = &schema.PrimaryKey{
+					Name: schema.String{
+						Value: constr.Name,
+					},
+					ColumnsNames: constr.ColumnsNames,
+				}
 
-			table.PrimaryKey = pk
+				table.PrimaryKey = pk
+			}
 
 			col.PrimaryKey = pk
-		} else if constr.Type == pgConstraintFKName {
-			col.ForeignKey = &schema.ForeignKey{
-				Name: schema.String{
-					Value: constr.Name,
-				},
-				Table: schema.String{
-					Value: constr.ForeignTableName,
-				},
-				Column: schema.String{
-					Value: constr.ForeignColumnName,
-				},
+		} else if constr.Type == pg.ConstraintFKName {
+			fk := table.ForeignKeys[constr.Name]
+
+			if fk == nil {
+				fk = &schema.ForeignKey{
+					Name: schema.String{
+						Value: constr.Name,
+					},
+					Table:        table.Name,
+					ColumnsNames: constr.ColumnsNames,
+					ForeignTable: schema.String{
+						Value: constr.ForeignTableName,
+					},
+					ForeignColumn: schema.String{
+						Value: constr.ForeignColumnName,
+					},
+				}
+
+				table.ForeignKeys[constr.Name] = fk
 			}
-		} else if constr.Type == pgConstraintUniqueName {
-			col.UniqueKey = sql.NullString{
-				String: constr.Name,
-				Valid:  true,
+
+			col.ForeignKey = fk
+		} else if constr.Type == pg.ConstraintUniqueName {
+			uk := table.UniqueKeys[constr.Name]
+
+			if uk == nil {
+				uk = &schema.UniqueKey{
+					Name: schema.String{
+						Value: constr.Name,
+					},
+					ColumnsNames: constr.ColumnsNames,
+				}
+
+				table.UniqueKeys[constr.Name] = uk
 			}
+
+			col.UniqueKey = uk
 		}
 	}
 }
 
 func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 	switch col.Type.Value {
-	case pgTypeTimestampWithoutTZ:
+	case pg.TypeTimestampWithoutTZ:
 		return schema.ColumnTypeTimestamp
-	case pgTypeInteger:
+	case pg.TypeInteger:
 		return schema.ColumnTypeInteger
-	case pgTypeBoolean:
+	case pg.TypeBoolean:
 		return schema.ColumnTypeBoolean
-	case pgTypeReal:
+	case pg.TypeReal:
 		return schema.ColumnTypeFloat
 	default:
 		return schema.ColumnTypeString
@@ -180,16 +193,14 @@ order by kcu.table_schema,
 	for _, constr := range constraints {
 		sc, scExists := squashed[constr.Name]
 		if scExists {
-			if !slices.Contains(sc.ColumnsNames, constr.ColumnName) {
-				sc.ColumnsNames = append(sc.ColumnsNames, constr.ColumnName)
+			if !sc.ColumnsNames.Contains(constr.ColumnName) {
+				sc.ColumnsNames.Add(constr.ColumnName)
 			}
 		} else {
 			sc = &squashedConstraint{
-				Name:      constr.Name,
-				TableName: constr.TableName,
-				ColumnsNames: []string{
-					constr.ColumnName,
-				},
+				Name:              constr.Name,
+				TableName:         constr.TableName,
+				ColumnsNames:      ds.NewStrings(constr.ColumnName),
 				Type:              constr.Type,
 				ForeignTableName:  constr.ForeignTableName,
 				ForeignColumnName: constr.ForeignColumnName,
