@@ -71,7 +71,7 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
-	cmd := &app.ExportCmd{}
+	cmd := app.NewExportCmd()
 
 	return cmd.Export(ctx.Context, &app.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
