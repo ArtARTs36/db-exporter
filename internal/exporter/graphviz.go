@@ -13,7 +13,10 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema.Table) ([]byte, error) {
+func buildGraphviz( //nolint:gocognit // hard to split
+	renderer *template.Renderer,
+	tables map[schema.String]*schema.Table,
+) ([]byte, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()
 	if err != nil {
