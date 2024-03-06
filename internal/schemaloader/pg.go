@@ -150,6 +150,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 	switch col.Type.Value {
 	case pg.TypeTimestampWithoutTZ:
+	case pg.TypeTimestampWithTZ:
 		return schema.ColumnTypeTimestamp
 	case pg.TypeInteger:
 		return schema.ColumnTypeInteger
@@ -157,9 +158,9 @@ func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 		return schema.ColumnTypeBoolean
 	case pg.TypeReal:
 		return schema.ColumnTypeFloat
-	default:
-		return schema.ColumnTypeString
 	}
+
+	return schema.ColumnTypeString
 }
 
 func (l *PGLoader) loadConstraints(
