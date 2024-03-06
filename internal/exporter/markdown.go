@@ -25,7 +25,11 @@ func NewMarkdownExporter(renderer *template.Renderer) Exporter {
 	}
 }
 
-func (e *MarkdownExporter) ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+func (e *MarkdownExporter) ExportPerFile(
+	_ context.Context,
+	sc *schema.Schema,
+	params *ExportParams,
+) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
 	pagesCap := len(sc.Tables) + 1
 	if params.WithDiagram {
@@ -75,7 +79,11 @@ func (e *MarkdownExporter) ExportPerFile(_ context.Context, sc *schema.Schema, p
 	return pages, nil
 }
 
-func (e *MarkdownExporter) Export(_ context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+func (e *MarkdownExporter) Export(
+	_ context.Context,
+	schema *schema.Schema,
+	params *ExportParams,
+) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
 
 	if params.WithDiagram {

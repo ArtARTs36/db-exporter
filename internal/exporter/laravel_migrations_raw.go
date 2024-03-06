@@ -32,7 +32,11 @@ func NewLaravelMigrationsExporter(renderer *template.Renderer) *LaravelMigration
 	}
 }
 
-func (e *LaravelMigrationsExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *LaravelMigrationsExporter) ExportPerFile(
+	_ context.Context,
+	sch *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, len(sch.Tables))
 	i := 0
 
@@ -69,7 +73,11 @@ func (e *LaravelMigrationsExporter) ExportPerFile(_ context.Context, sch *schema
 	return pages, nil
 }
 
-func (e *LaravelMigrationsExporter) Export(_ context.Context, schema *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *LaravelMigrationsExporter) Export(
+	_ context.Context,
+	schema *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	migration := &laravelMigration{
 		Name: "InitMigration",
 		Queries: &laravelMigrationQueries{

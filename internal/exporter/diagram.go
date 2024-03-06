@@ -18,7 +18,11 @@ func NewDiagramExporter(renderer *template.Renderer) Exporter {
 	}
 }
 
-func (e *DiagramExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *DiagramExporter) ExportPerFile(
+	_ context.Context,
+	sch *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, len(sch.Tables))
 	for _, table := range sch.Tables {
 		p, err := buildDiagramPage(e.renderer, map[schema.String]*schema.Table{
@@ -43,7 +47,11 @@ func (e *DiagramExporter) Export(_ context.Context, sch *schema.Schema, _ *Expor
 	return []*ExportedPage{diagram}, nil
 }
 
-func buildDiagramPage(renderer *template.Renderer, tables map[schema.String]*schema.Table, filename string) (*ExportedPage, error) {
+func buildDiagramPage(
+	renderer *template.Renderer,
+	tables map[schema.String]*schema.Table,
+	filename string,
+) (*ExportedPage, error) {
 	c, err := buildGraphviz(renderer, tables)
 	if err != nil {
 		return nil, err

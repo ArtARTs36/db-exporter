@@ -42,7 +42,8 @@ func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error)
 select c.column_name as name,
        c.table_name,
        c.data_type as type,
-       pg_catalog.col_description(format('%s.%s',c.table_schema,c.table_name)::regclass::oid,c.ordinal_position) as "comment",
+       pg_catalog.col_description(format('%s.%s',c.table_schema,c.table_name)::regclass::oid,c.ordinal_position)
+           as "comment",
        case
 			when is_nullable = 'NO' THEN false
 			else true
@@ -90,7 +91,8 @@ order by c.ordinal_position`
 
 func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
 	for _, constr := range constraints {
-		if constr.Type == pg.ConstraintPKName {
+		switch constr.Type {
+		case pg.ConstraintPKName:
 			pk := table.PrimaryKey
 			if pk == nil {
 				pk = &schema.PrimaryKey{
@@ -104,7 +106,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			}
 
 			col.PrimaryKey = pk
-		} else if constr.Type == pg.ConstraintFKName {
+		case pg.ConstraintFKName:
 			fk := table.ForeignKeys[constr.Name]
 
 			if fk == nil {
@@ -126,7 +128,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			}
 
 			col.ForeignKey = fk
-		} else if constr.Type == pg.ConstraintUniqueName {
+		case pg.ConstraintUniqueName:
 			uk := table.UniqueKeys[constr.Name]
 
 			if uk == nil {
