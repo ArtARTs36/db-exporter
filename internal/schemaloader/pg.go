@@ -6,7 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // for pg driver
 
 	"github.com/artarts36/db-exporter/internal/schema"
 )
@@ -60,7 +60,7 @@ order by c.ordinal_position`
 
 	tables := map[schema.String]*schema.Table{}
 
-	constraints, err := l.loadConstraints(db, ctx, "public")
+	constraints, err := l.loadConstraints(ctx, db, "public")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load constraints: %w", err)
 	}
@@ -78,7 +78,7 @@ order by c.ordinal_position`
 
 		col.PreparedType = l.prepareColumnType(col)
 
-		l.applyConstraintsOnColumn(table, col, constraints[col.TableName.Value][col.Name.Value])
+		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
 		table.Columns = append(table.Columns, col)
 	}
@@ -88,7 +88,7 @@ order by c.ordinal_position`
 	}, nil
 }
 
-func (l *PGLoader) applyConstraintsOnColumn(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
+func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
 	for _, constr := range constraints {
 		if constr.Type == pg.ConstraintPKName {
 			pk := table.PrimaryKey
@@ -160,7 +160,11 @@ func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
 	}
 }
 
-func (l *PGLoader) loadConstraints(db *sqlx.DB, ctx context.Context, schemaName string) (map[string]map[string][]*squashedConstraint, error) {
+func (l *PGLoader) loadConstraints(
+	ctx context.Context,
+	db *sqlx.DB,
+	schemaName string,
+) (map[string]map[string][]*squashedConstraint, error) {
 	query := `select
        tco.constraint_name as "name",
        kcu.table_name,

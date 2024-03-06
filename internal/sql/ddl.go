@@ -124,9 +124,9 @@ func BuildDDL(table *schema.Table) []string {
 
 	createTableQuery = append(createTableQuery, ");")
 
-	upSql := strings.Join(createTableQuery, "\n")
+	upSQL := strings.Join(createTableQuery, "\n")
 
-	upQueries = append([]string{upSql}, upQueries...)
+	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries
 }

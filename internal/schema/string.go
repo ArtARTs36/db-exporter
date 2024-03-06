@@ -37,7 +37,7 @@ func (s *String) String() string {
 	return s.Value
 }
 
-func (s *String) Replace(old string, new string) string {
+func (s *String) Replace(old, new string) string {
 	return strings.ReplaceAll(s.Value, old, new)
 }
 

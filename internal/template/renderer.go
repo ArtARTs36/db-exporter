@@ -14,8 +14,8 @@ type Renderer struct {
 func InitRenderer(rootDir string) *Renderer {
 	eng := stick.New(stick.NewFilesystemLoader(rootDir))
 	eng.Functions["spaces"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
-		count := args[0].(int)
-		if count < 0 {
+		count, valid := args[0].(int)
+		if !valid || count < 0 {
 			count = 0
 		}
 

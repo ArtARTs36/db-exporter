@@ -47,7 +47,7 @@ func NewGoStructsExporter(renderer *template.Renderer) Exporter {
 	}
 }
 
-func (e *GoStructsExporter) ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+func (e *GoStructsExporter) ExportPerFile(_ context.Context, sc *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
 	return nil, fmt.Errorf("export per file unsupported")
 }
 

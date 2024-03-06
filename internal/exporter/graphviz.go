@@ -21,10 +21,10 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 	}
 
 	defer func() {
-		if err := graph.Close(); err != nil {
+		if err = graph.Close(); err != nil {
 			log.Printf("failed to close graph: %v", err.Error())
 		}
-		if err := g.Close(); err != nil {
+		if err = g.Close(); err != nil {
 			log.Printf("failed to close graph: %v", err.Error())
 		}
 	}()
@@ -33,19 +33,19 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 
 	tablesNodes := map[string]*cgraph.Node{}
 	for _, table := range tables {
-		node, err := graph.CreateNode(table.Name.Value)
-		if err != nil {
+		node, graphErr := graph.CreateNode(table.Name.Value)
+		if graphErr != nil {
 			return nil, err
 		}
 
 		node.SetShape(cgraph.PlainTextShape)
 		node.SafeSet("class", "db-tables", "")
 
-		ht, err := renderer.Render("graphviz/table.html", map[string]stick.Value{
+		ht, tableErr := renderer.Render("graphviz/table.html", map[string]stick.Value{
 			"table": table,
 		})
-		if err != nil {
-			return nil, err
+		if tableErr != nil {
+			return nil, tableErr
 		}
 
 		node.SetLabel(graph.StrdupHTML(string(ht)))
@@ -69,15 +69,15 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 				continue
 			}
 
-			edge, err := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, foreignTableNode)
-			if err != nil {
+			edge, edgeErr := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, foreignTableNode)
+			if edgeErr != nil {
 				return nil, fmt.Errorf(
 					"failed to create edge from %s.%s to %s.%s: %w",
 					table.Name.Value,
 					col.Name.Value,
 					col.ForeignKey.ForeignTable,
 					col.ForeignKey.ForeignColumn,
-					err,
+					edgeErr,
 				)
 			}
 
@@ -92,7 +92,7 @@ func buildGraphviz(renderer *template.Renderer, tables map[schema.String]*schema
 	log.Println("[graphviz] generating svg diagram")
 
 	var buf bytes.Buffer
-	if err := g.Render(graph, "svg", &buf); err != nil {
+	if err = g.Render(graph, "svg", &buf); err != nil {
 		return nil, err
 	}
 

@@ -30,16 +30,13 @@ func NewGooseExporter(renderer *template.Renderer) *GooseExporter {
 	}
 }
 
-func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, params *ExportParams) ([]*ExportedPage, error) {
+func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, len(sch.Tables))
 
 	log.Printf("[gooseexporter] building queries and rendering migration files")
 
 	for _, table := range sch.Tables {
-		migration, err := e.makeMigration(table)
-		if err != nil {
-			return nil, fmt.Errorf("making migration queries failed: %w", err)
-		}
+		migration := e.makeMigration(table)
 
 		p, err := render(
 			e.renderer,
@@ -78,10 +75,7 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, params *Ex
 			continue
 		}
 
-		migration, err := e.makeMigration(table)
-		if err != nil {
-			return nil, fmt.Errorf("making migration queries failed: %w", err)
-		}
+		migration := e.makeMigration(table)
 
 		upQueries = append(upQueries, migration.upQueries...)
 		downQueries = append(downQueries, migration.downQueries...)
@@ -107,11 +101,11 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, params *Ex
 	}, nil
 }
 
-func (e *GooseExporter) makeMigration(table *schema.Table) (*gooseMigration, error) {
+func (e *GooseExporter) makeMigration(table *schema.Table) *gooseMigration {
 	return &gooseMigration{
 		upQueries: sql.BuildDDL(table),
 		downQueries: []string{
 			sqlquery.BuildDropTable(table.Name.Value),
 		},
-	}, nil
+	}
 }

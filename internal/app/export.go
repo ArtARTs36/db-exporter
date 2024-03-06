@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/exporter"
@@ -59,7 +59,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	log.Printf("[exportcmd] loaded %d tables: [%s]", len(sc.Tables), strings.Join(sc.TablesNames(), ","))
 
-	pages, err := a.export(exp, ctx, sc, params)
+	pages, err := a.export(ctx, exp, sc, params)
 	if err != nil {
 		return fmt.Errorf("failed to export: %w", err)
 	}
@@ -75,8 +75,8 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 }
 
 func (a *ExportCmd) export(
-	exp exporter.Exporter,
 	ctx context.Context,
+	exp exporter.Exporter,
 	sc *schema.Schema,
 	params *ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -101,10 +101,10 @@ func (a *ExportCmd) export(
 }
 
 func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportParams) error {
-	if _, err := os.Stat(params.OutDir); err != nil {
+	if !fs.Exists(params.OutDir) {
 		log.Printf("creating directory %q", params.OutDir)
 
-		err := os.Mkdir(params.OutDir, 0755)
+		err := fs.Mkdir(params.OutDir)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
@@ -115,7 +115,7 @@ func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportPara
 
 		log.Printf("[exportcmd] saving %q", path)
 
-		err := os.WriteFile(path, page.Content, 0755)
+		err := fs.CreateFile(path, page.Content)
 		if err != nil {
 			return fmt.Errorf("unable to write file: %w", err)
 		}
@@ -124,7 +124,11 @@ func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportPara
 	return nil
 }
 
-func (a *ExportCmd) loadSchema(ctx context.Context, loader schemaloader.Loader, params *ExportParams) (*schema.Schema, error) {
+func (a *ExportCmd) loadSchema(
+	ctx context.Context,
+	loader schemaloader.Loader,
+	params *ExportParams,
+) (*schema.Schema, error) {
 	sc, err := loader.Load(ctx, params.DSN)
 	if err != nil {
 		return nil, err

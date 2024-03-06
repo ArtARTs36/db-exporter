@@ -29,7 +29,7 @@ func (e *MarkdownExporter) ExportPerFile(_ context.Context, sc *schema.Schema, p
 	var diagram *ExportedPage
 	pagesCap := len(sc.Tables) + 1
 	if params.WithDiagram {
-		pagesCap += 1
+		pagesCap++
 		var err error
 		diagram, err = buildDiagramPage(e.renderer, sc.Tables, "diagram.svg")
 		if err != nil {
