@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/artarts36/db-exporter/internal/exporter"
 	"time"
 
 	"github.com/artarts36/singlecli"
@@ -36,12 +37,7 @@ func main() {
 				Name:        "format",
 				Description: "exporting format",
 				Required:    true,
-				ValuesEnum: []string{
-					"md",
-					"diagram",
-					"go-structs",
-					"goose",
-				},
+				ValuesEnum:  exporter.Names,
 			},
 			{
 				Name:        "out-dir",
@@ -65,7 +61,7 @@ func main() {
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
-				Command:     "db-exporter \"host=postgres user=root password=root dbname=cars\" md ./docs",
+				Command:     "db-exporter pg \"host=postgres user=root password=root dbname=cars\" md ./docs",
 				Description: "Export from postgres to markdown",
 			},
 		},
