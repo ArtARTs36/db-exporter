@@ -93,7 +93,7 @@ func (s *String) SplitWords() []*SplitWord {
 		currChar := string(b)
 		currCharIsLower := strings.ToLower(currChar) == currChar
 
-		if b == '_' || b == '-' || b == ' ' {
+		if b == '_' || b == '-' || b == ' ' { //nolint:gocritic // not required
 			words = append(words, &SplitWord{
 				Word:           string(currWordBytes),
 				SeparatorAfter: currChar,
