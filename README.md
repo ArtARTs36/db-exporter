@@ -1,11 +1,12 @@
 # db-exporter
 
 db-exporter - simple app for export db schema to formats:
-* markdown `md`
-* class diagram `diagram`
-* go structs `go-structs`
-* goose migrations `goose`
-* raw laravel migrations `laravel-migrations-raw`
+* Markdown `md`
+* Class diagram `diagram`
+* Go structures with db tags `go-structs`
+* Goose migrations `goose`
+* Migrations for golang-migrate `golang-migrate`
+* Raw SQL Laravel migrations `laravel-migrations-raw`
 
 usage:
 ```text

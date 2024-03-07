@@ -1,14 +1,15 @@
 package migrations
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/laravel"
 	"slices"
 
+	"github.com/artarts36/db-exporter/internal/shared/golangmigrate"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
+	"github.com/artarts36/db-exporter/internal/shared/laravel"
 )
 
 type TableDetector struct {
-	migrationsTables map[string]*Table
+	migrationsTables map[string][]*Table
 }
 
 type Table struct {
@@ -18,31 +19,45 @@ type Table struct {
 
 func NewTableDetector() *TableDetector {
 	return &TableDetector{
-		migrationsTables: map[string]*Table{
+		migrationsTables: map[string][]*Table{
 			goose.MigrationsTable: {
-				Name:         goose.MigrationsTable,
-				ColumnsNames: goose.MigrationsTableColumns,
+				{
+					Name:         goose.MigrationsTable,
+					ColumnsNames: goose.MigrationsTableColumns,
+				},
 			},
 			laravel.MigrationsTable: {
-				Name:         laravel.MigrationsTable,
-				ColumnsNames: laravel.MigrationsTableColumns,
+				{
+					Name:         laravel.MigrationsTable,
+					ColumnsNames: laravel.MigrationsTableColumns,
+				},
+				{
+					Name:         golangmigrate.Table,
+					ColumnsNames: golangmigrate.TableColumns,
+				},
 			},
 		},
 	}
 }
 
 func (d *TableDetector) IsMigrationsTable(tableName string, columnsNames []string) bool {
-	table, exists := d.migrationsTables[tableName]
+	tables, exists := d.migrationsTables[tableName]
 	if !exists {
 		return false
 	}
 
-	if len(table.ColumnsNames) != len(columnsNames) {
-		return false
+	for _, table := range tables {
+		if len(table.ColumnsNames) != len(columnsNames) {
+			return false
+		}
+
+		slices.Sort(table.ColumnsNames)
+		slices.Sort(columnsNames)
+
+		if slices.Equal(table.ColumnsNames, columnsNames) {
+			return true
+		}
 	}
 
-	slices.Sort(table.ColumnsNames)
-	slices.Sort(columnsNames)
-
-	return slices.Equal(table.ColumnsNames, columnsNames)
+	return false
 }

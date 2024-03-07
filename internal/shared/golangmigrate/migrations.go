@@ -1,18 +1,16 @@
-package goose
+package golangmigrate
 
 import (
 	"fmt"
 	"time"
 )
 
-const MigrationsTable = "goose_db_version"
+const Table = "migrations"
 const migrationTimeFormat = "20060102150405"
 
-var MigrationsTableColumns = []string{
+var TableColumns = []string{
 	"id",
-	"version_id",
-	"is_applied",
-	"tstamp",
+	"applied_at",
 }
 
 func CreateMigrationFilename(migrationName string) string {

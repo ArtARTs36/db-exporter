@@ -12,7 +12,9 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type LaravelMigrationsExporter struct {
+const LaravelMigrationsRawExporterName = "laravel-migrations-raw"
+
+type LaravelMigrationsRawExporter struct {
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }
@@ -27,14 +29,17 @@ type laravelMigrationQueries struct {
 	Down []string
 }
 
-func NewLaravelMigrationsExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *LaravelMigrationsExporter {
-	return &LaravelMigrationsExporter{
+func NewLaravelMigrationsRawExporter(
+	renderer *template.Renderer,
+	ddlBuilder *sql.DDLBuilder,
+) *LaravelMigrationsRawExporter {
+	return &LaravelMigrationsRawExporter{
 		renderer:   renderer,
 		ddlBuilder: ddlBuilder,
 	}
 }
 
-func (e *LaravelMigrationsExporter) ExportPerFile(
+func (e *LaravelMigrationsRawExporter) ExportPerFile(
 	_ context.Context,
 	sch *schema.Schema,
 	_ *ExportParams,
@@ -75,7 +80,7 @@ func (e *LaravelMigrationsExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *LaravelMigrationsExporter) Export(
+func (e *LaravelMigrationsRawExporter) Export(
 	_ context.Context,
 	schema *schema.Schema,
 	_ *ExportParams,
@@ -112,7 +117,7 @@ func (e *LaravelMigrationsExporter) Export(
 	}, nil
 }
 
-func (e *LaravelMigrationsExporter) makeMigrationQueries(table *schema.Table) *laravelMigrationQueries {
+func (e *LaravelMigrationsRawExporter) makeMigrationQueries(table *schema.Table) *laravelMigrationQueries {
 	return &laravelMigrationQueries{
 		Up: e.ddlBuilder.BuildDDL(table),
 		Down: []string{

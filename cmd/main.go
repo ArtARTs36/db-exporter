@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/artarts36/db-exporter/internal/exporter"
 	"time"
 
 	"github.com/artarts36/singlecli"
 
 	"github.com/artarts36/db-exporter/internal/app"
+	"github.com/artarts36/db-exporter/internal/exporter"
 )
 
 func main() {

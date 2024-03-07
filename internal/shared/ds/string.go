@@ -14,6 +14,12 @@ type String struct {
 	Value string
 }
 
+func NewString(val string) *String {
+	return &String{
+		Value: val,
+	}
+}
+
 func (s *String) Scan(val any) error {
 	switch v := val.(type) {
 	case string:
@@ -42,9 +48,7 @@ func (s *String) Replace(old, new string) string {
 }
 
 func (s *String) Pascal() *String {
-	return &String{
-		Value: strcase.ToCamel(s.Value),
-	}
+	return NewString(strcase.ToCamel(s.Value))
 }
 
 func (s *String) Len() int {
@@ -56,9 +60,7 @@ func (s *String) IsNotEmpty() bool {
 }
 
 func (s *String) Singular() *String {
-	return &String{
-		Value: inflection.Singular(s.Value),
-	}
+	return NewString(inflection.Singular(s.Value))
 }
 
 func (s *String) Ends(suffix string) bool {
@@ -81,13 +83,9 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 		words[i] = strings.ToUpper(w)
 	}
 
-	return &String{
-		Value: strings.Join(words, ""),
-	}
+	return NewString(strings.Join(words, ""))
 }
 
 func (s *String) Lower() *String {
-	return &String{
-		Value: strings.ToLower(s.Value),
-	}
+	return NewString(strings.ToLower(s.Value))
 }

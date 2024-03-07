@@ -8,32 +8,37 @@ import (
 )
 
 var Names = []string{
-	"md",
-	"diagram",
-	"go-structs",
-	"goose",
-	"laravel-migrations-raw",
+	MarkdownExporterName,
+	DiagramExporterName,
+	GoStructsExporterName,
+	GooseExporterName,
+	GolangMigrateExporterName,
+	LaravelMigrationsRawExporterName,
 }
 
 func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) {
-	if name == "md" {
+	if name == MarkdownExporterName {
 		return NewMarkdownExporter(renderer), nil
 	}
 
-	if name == "diagram" {
+	if name == DiagramExporterName {
 		return NewDiagramExporter(renderer), nil
 	}
 
-	if name == "go-structs" {
+	if name == GoStructsExporterName {
 		return NewGoStructsExporter(renderer), nil
 	}
 
-	if name == "goose" {
+	if name == GooseExporterName {
 		return NewGooseExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
-	if name == "laravel-migrations-raw" {
-		return NewLaravelMigrationsExporter(renderer, sql.NewDDLBuilder()), nil
+	if name == GolangMigrateExporterName {
+		return NewGolangMigrateExporter(renderer, sql.NewDDLBuilder()), nil
+	}
+
+	if name == LaravelMigrationsRawExporterName {
+		return NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
 	return nil, fmt.Errorf("format %q unsupported", name)

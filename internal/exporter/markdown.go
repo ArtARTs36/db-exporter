@@ -10,6 +10,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
+const MarkdownExporterName = "md"
+
 type MarkdownExporter struct {
 	renderer *template.Renderer
 }

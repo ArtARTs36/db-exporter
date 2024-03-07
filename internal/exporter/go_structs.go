@@ -11,6 +11,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
+const GoStructsExporterName = "go-structs"
+
 var goAbbreviationsSet = map[string]bool{
 	"id":   true,
 	"uuid": true,

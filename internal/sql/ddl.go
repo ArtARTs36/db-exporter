@@ -20,6 +20,12 @@ type isLastLine func() bool
 func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 	var upQueries []string
 
+	if len(table.Columns) == 0 {
+		return []string{
+			fmt.Sprintf("CREATE TABLE %s()", table.Name.Value),
+		}
+	}
+
 	createTableQuery := []string{
 		fmt.Sprintf("CREATE TABLE %s", table.Name.Value),
 		"(",
