@@ -14,6 +14,11 @@ type String struct {
 	Value string
 }
 
+type SplitWord struct {
+	Word           string
+	SeparatorAfter string
+}
+
 func NewString(val string) *String {
 	return &String{
 		Value: val,
@@ -71,37 +76,69 @@ func (s *String) SplitCamel() []string {
 	return camelcase.Split(s.Value)
 }
 
-func (s *String) SplitWords() []string {
+func (s *String) SplitWords() []*SplitWord {
+	if len(s.Value) == 0 {
+		return []*SplitWord{}
+	}
+
 	srcBytes := []byte(s.Value)
 
-	words := []string{}
+	var words []*SplitWord
 	currWordBytes := []byte{}
 
+	prevCharIsLower := strings.ToLower(string(srcBytes[0])) == string(srcBytes[0])
+	wordPos := 0
+
 	for i, b := range srcBytes {
+		currChar := string(b)
+		currCharIsLower := strings.ToLower(currChar) == currChar
+
 		if b == '_' || b == '-' || b == ' ' {
-			words = append(words, string(currWordBytes))
+			words = append(words, &SplitWord{
+				Word:           string(currWordBytes),
+				SeparatorAfter: currChar,
+			})
+			wordPos = 0
+			currWordBytes = []byte{}
+		} else if prevCharIsLower != currCharIsLower && wordPos > 1 { // currWord: Aaa, currChar: B
+			words = append(words, &SplitWord{
+				Word: string(currWordBytes),
+			})
+			wordPos = 1
+			currWordBytes = []byte{
+				b,
+			}
 		} else {
 			currWordBytes = append(currWordBytes, b)
 
 			if i == len(srcBytes)-1 {
-				words = append(words, string(currWordBytes))
+				words = append(words, &SplitWord{
+					Word: string(currWordBytes),
+				})
+				break
 			}
+
+			wordPos++
 		}
+
+		prevCharIsLower = currCharIsLower
 	}
 
 	return words
 }
 
 func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
-	words := s.SplitCamel()
-	for i, word := range words {
-		w := strings.ToLower(word)
-		_, exists := abbrSet[w]
-		if !exists {
-			continue
-		}
+	split := s.SplitWords()
+	words := make([]string, 0, len(split))
 
-		words[i] = strings.ToUpper(w)
+	for _, word := range split {
+		w := strings.ToLower(word.Word)
+		_, exists := abbrSet[w]
+		if exists {
+			words = append(words, strings.ToUpper(w), word.SeparatorAfter)
+		} else {
+			words = append(words, word.Word, word.SeparatorAfter)
+		}
 	}
 
 	return NewString(strings.Join(words, ""))
