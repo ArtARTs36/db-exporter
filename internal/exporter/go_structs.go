@@ -183,7 +183,7 @@ func (e *GoStructsExporter) makeGoSchema(tables map[ds.String]*schema.Table) *go
 
 	for _, t := range tables {
 		str := &goStruct{
-			Name:       *t.Name.Singular(),
+			Name:       *t.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
 			Properties: make([]*goProperty, 0, len(t.Columns)),
 		}
 

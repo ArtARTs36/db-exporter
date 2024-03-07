@@ -1,0 +1,8 @@
+rules:
+  "@mr-linter/title_conventional": {}
+  "@mr-linter/description_not_empty": {}
+
+ci:
+  github_actions:
+    credentials:
+      token: "env(MR_LINTER_HTTP_TOKEN)"
