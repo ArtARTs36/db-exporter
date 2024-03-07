@@ -10,7 +10,7 @@ on:
       - edited
 
 jobs:
-  build:
+  lint:
 
     runs-on: ubuntu-latest
 
