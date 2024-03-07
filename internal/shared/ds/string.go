@@ -71,6 +71,27 @@ func (s *String) SplitCamel() []string {
 	return camelcase.Split(s.Value)
 }
 
+func (s *String) SplitWords() []string {
+	srcBytes := []byte(s.Value)
+
+	words := []string{}
+	currWordBytes := []byte{}
+
+	for i, b := range srcBytes {
+		if b == '_' || b == '-' || b == ' ' {
+			words = append(words, string(currWordBytes))
+		} else {
+			currWordBytes = append(currWordBytes, b)
+
+			if i == len(srcBytes)-1 {
+				words = append(words, string(currWordBytes))
+			}
+		}
+	}
+
+	return words
+}
+
 func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 	words := s.SplitCamel()
 	for i, word := range words {
