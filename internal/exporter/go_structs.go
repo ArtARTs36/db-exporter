@@ -56,11 +56,11 @@ func (e *GoStructsExporter) ExportPerFile(
 	sch *schema.Schema,
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, len(sch.Tables))
+	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
-	for _, table := range sch.Tables {
-		goSch := e.makeGoSchema(map[ds.String]*schema.Table{
-			table.Name: table,
+	for _, table := range sch.Tables.List() {
+		goSch := e.makeGoSchema([]*schema.Table{
+			table,
 		})
 
 		page, err := render(
@@ -82,7 +82,7 @@ func (e *GoStructsExporter) ExportPerFile(
 }
 
 func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	goSch := e.makeGoSchema(schema.Tables)
+	goSch := e.makeGoSchema(schema.Tables.List())
 
 	page, err := render(e.renderer, "gostructs/models.tpl", "models.go", map[string]stick.Value{
 		"schema": goSch,
@@ -175,7 +175,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 	}
 }
 
-func (e *GoStructsExporter) makeGoSchema(tables map[ds.String]*schema.Table) *goSchema {
+func (e *GoStructsExporter) makeGoSchema(tables []*schema.Table) *goSchema {
 	goSch := &goSchema{
 		Tables:  make([]*goStruct, 0, len(tables)),
 		Imports: ds.NewSet(),

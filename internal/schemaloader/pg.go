@@ -93,7 +93,7 @@ order by c.ordinal_position`
 		return nil, err
 	}
 
-	tables := map[ds.String]*schema.Table{}
+	tables := schema.NewTableMap()
 
 	constraints, err := l.loadConstraints(ctx, db, "public")
 	if err != nil {
@@ -101,14 +101,15 @@ order by c.ordinal_position`
 	}
 
 	for _, col := range cols {
-		table, tableExists := tables[col.TableName]
+		table, tableExists := tables.Get(col.TableName)
 		if !tableExists {
 			table = &schema.Table{
 				Name:        col.TableName,
 				ForeignKeys: map[string]*schema.ForeignKey{},
 				UniqueKeys:  map[string]*schema.UniqueKey{},
 			}
-			tables[col.TableName] = table
+
+			tables.Add(table)
 		}
 
 		col.PreparedType = l.prepareColumnType(col)

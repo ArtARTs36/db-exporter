@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -26,19 +25,20 @@ func (e *DiagramExporter) ExportPerFile(
 	sch *schema.Schema,
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, len(sch.Tables))
-	for _, table := range sch.Tables {
-		p, err := buildDiagramPage(e.renderer, map[ds.String]*schema.Table{
-			table.Name: table,
-		}, fmt.Sprintf("diagram_%s.svg", table.Name.Value))
+	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+
+	err := sch.Tables.EachWithErr(func(table *schema.Table) error {
+		p, err := buildDiagramPage(e.renderer, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		pages = append(pages, p)
-	}
 
-	return pages, nil
+		return nil
+	})
+
+	return pages, err
 }
 
 func (e *DiagramExporter) Export(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
@@ -52,7 +52,7 @@ func (e *DiagramExporter) Export(_ context.Context, sch *schema.Schema, _ *Expor
 
 func buildDiagramPage(
 	renderer *template.Renderer,
-	tables map[ds.String]*schema.Table,
+	tables *schema.TableMap,
 	filename string,
 ) (*ExportedPage, error) {
 	c, err := buildGraphviz(renderer, tables)

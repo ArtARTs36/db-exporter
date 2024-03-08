@@ -40,3 +40,13 @@ func (t *Table) GetFirstUniqueKey() *UniqueKey {
 
 	return nil
 }
+
+func (t *Table) HasForeignKeyTo(tableName string) bool {
+	for _, key := range t.ForeignKeys {
+		if key.ForeignTable.Equal(tableName) {
+			return true
+		}
+	}
+
+	return false
+}

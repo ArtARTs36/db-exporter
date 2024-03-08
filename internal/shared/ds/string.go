@@ -147,3 +147,7 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 func (s *String) Lower() *String {
 	return NewString(strings.ToLower(s.Value))
 }
+
+func (s *String) Equal(str string) bool {
+	return s.Value == str
+}

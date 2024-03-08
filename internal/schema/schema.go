@@ -1,9 +1,11 @@
 package schema
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import (
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+)
 
 type Schema struct {
-	Tables map[ds.String]*Table
+	Tables *TableMap
 }
 
 type ForeignKey struct {
@@ -25,40 +27,43 @@ type UniqueKey struct {
 }
 
 func (s *Schema) TablesNames() []string {
-	names := make([]string, 0, len(s.Tables))
-	for _, table := range s.Tables {
+	names := make([]string, 0, s.Tables.Len())
+
+	s.Tables.Each(func(table *Table) {
 		names = append(names, table.Name.Value)
-	}
+	})
 
 	return names
 }
 
 func (s *Schema) SortByRelations() {
-	tables := map[ds.String]*Table{}
-	queue := map[ds.String]*Table{}
+	tableList := s.Tables.List()
+	tableMap := NewTableMap()
 
-	for _, table := range s.Tables {
-		if len(table.ForeignKeys) == 0 {
-			tables[table.Name] = table
+	for _, table := range tableList {
+		s.appendTableMapByRelations(tableMap, table)
+	}
 
+	s.Tables = tableMap
+}
+
+func (s *Schema) appendTableMapByRelations(tableMap *TableMap, table *Table) {
+	for _, key := range table.ForeignKeys {
+		foreignTable, exists := s.Tables.Get(key.ForeignTable)
+		if !exists {
 			continue
 		}
 
-		queue[table.Name] = table
-	}
-
-	for len(queue) > 0 {
-		for _, t := range queue {
-			for _, fk := range t.ForeignKeys {
-				if _, exists := tables[fk.Table]; !exists {
-					break
-				}
-			}
-
-			tables[t.Name] = t
-			delete(queue, t.Name)
+		if tableMap.Has(foreignTable.Name) {
+			continue
 		}
+
+		if foreignTable.HasForeignKeyTo(table.Name.Value) {
+			continue
+		}
+
+		s.appendTableMapByRelations(tableMap, foreignTable)
 	}
 
-	s.Tables = tables
+	tableMap.Add(table)
 }

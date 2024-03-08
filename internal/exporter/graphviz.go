@@ -10,13 +10,12 @@ import (
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
 func buildGraphviz( //nolint:gocognit // hard to split
 	renderer *template.Renderer,
-	tables map[ds.String]*schema.Table,
+	tables *schema.TableMap,
 ) ([]byte, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()
@@ -36,10 +35,11 @@ func buildGraphviz( //nolint:gocognit // hard to split
 	log.Print("[graphviz] mapping graph")
 
 	tablesNodes := map[string]*cgraph.Node{}
-	for _, table := range tables {
+
+	err = tables.EachWithErr(func(table *schema.Table) error {
 		node, graphErr := graph.CreateNode(table.Name.Value)
 		if graphErr != nil {
-			return nil, err
+			return err
 		}
 
 		node.SetShape(cgraph.PlainTextShape)
@@ -49,18 +49,24 @@ func buildGraphviz( //nolint:gocognit // hard to split
 			"table": table,
 		})
 		if tableErr != nil {
-			return nil, tableErr
+			return tableErr
 		}
 
 		node.SetLabel(graph.StrdupHTML(string(ht)))
 
 		tablesNodes[table.Name.Value] = node
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
-	for _, table := range tables {
+	err = tables.EachWithErr(func(table *schema.Table) error {
 		tableNode, tnExists := tablesNodes[table.Name.Value]
 		if !tnExists {
-			continue
+			return nil
 		}
 
 		for _, col := range table.Columns {
@@ -75,7 +81,7 @@ func buildGraphviz( //nolint:gocognit // hard to split
 
 			edge, edgeErr := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, foreignTableNode)
 			if edgeErr != nil {
-				return nil, fmt.Errorf(
+				return fmt.Errorf(
 					"failed to create edge from %s.%s to %s.%s: %w",
 					table.Name.Value,
 					col.Name.Value,
@@ -91,6 +97,12 @@ func buildGraphviz( //nolint:gocognit // hard to split
 				col.ForeignKey.ForeignColumn.Value,
 			))
 		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
 
 	log.Println("[graphviz] generating svg diagram")

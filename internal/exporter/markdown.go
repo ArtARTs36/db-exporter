@@ -33,7 +33,7 @@ func (e *MarkdownExporter) ExportPerFile(
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
-	pagesCap := len(sc.Tables) + 1
+	pagesCap := sc.Tables.Len() + 1
 	if params.WithDiagram {
 		pagesCap++
 		var err error
@@ -44,9 +44,9 @@ func (e *MarkdownExporter) ExportPerFile(
 	}
 
 	pages := make([]*ExportedPage, 0, pagesCap)
-	preparedTables := make([]*markdownPreparedTable, 0, len(sc.Tables))
+	preparedTables := make([]*markdownPreparedTable, 0, sc.Tables.Len())
 
-	for _, table := range sc.Tables {
+	for _, table := range sc.Tables.List() {
 		fileName := fmt.Sprintf("table_%s.md", table.Name.Value)
 
 		page, err := render(e.renderer, "markdown/per-table.md", fileName, map[string]stick.Value{

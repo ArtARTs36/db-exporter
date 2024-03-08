@@ -34,11 +34,11 @@ func NewGooseExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *
 }
 
 func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, len(sch.Tables))
+	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	log.Printf("[gooseexporter] building queries and rendering migration files")
 
-	for _, table := range sch.Tables {
+	for _, table := range sch.Tables.List() {
 		migration := e.makeMigration(table)
 
 		p, err := render(
@@ -64,16 +64,14 @@ func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *
 }
 
 func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	upQueries := make([]string, 0, len(sch.Tables))
-	downQueries := make([]string, 0, len(sch.Tables))
+	upQueries := make([]string, 0, sch.Tables.Len())
+	downQueries := make([]string, 0, sch.Tables.Len())
 
 	log.Printf("[gooseexporter] sorting tables")
 
-	sch.SortByRelations()
-
 	log.Printf("[gooseexporter] building queries")
 
-	for _, table := range sch.Tables {
+	for _, table := range sch.Tables.List() {
 		migration := e.makeMigration(table)
 
 		upQueries = append(upQueries, migration.upQueries...)

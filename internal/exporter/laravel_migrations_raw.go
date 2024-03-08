@@ -44,10 +44,10 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 	sch *schema.Schema,
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, len(sch.Tables))
+	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 	i := 0
 
-	for _, table := range sch.Tables {
+	for _, table := range sch.Tables.List() {
 		queries := e.makeMigrationQueries(table)
 
 		migration := &laravelMigration{
@@ -93,7 +93,7 @@ func (e *LaravelMigrationsRawExporter) Export(
 		},
 	}
 
-	for _, table := range schema.Tables {
+	for _, table := range schema.Tables.List() {
 		queries := e.makeMigrationQueries(table)
 
 		migration.Queries.Up = append(migration.Queries.Up, queries.Up...)

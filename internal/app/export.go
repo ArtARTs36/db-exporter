@@ -9,7 +9,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/schemaloader"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -58,7 +57,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return fmt.Errorf("unable to load schema: %w", err)
 	}
 
-	log.Printf("[exportcmd] loaded %d tables: [%s]", len(sc.Tables), strings.Join(sc.TablesNames(), ","))
+	log.Printf("[exportcmd] loaded %d tables: [%s]", sc.Tables.Len(), strings.Join(sc.TablesNames(), ","))
 
 	pages, err := a.export(ctx, exp, sc, params)
 	if err != nil {
@@ -135,21 +134,17 @@ func (a *ExportCmd) loadSchema(
 		return nil, err
 	}
 
+	log.Println("[exportcmd] sorting tables by relations")
+
+	sc.SortByRelations()
+
 	if !params.WithoutMigrationsTable {
 		return sc, nil
 	}
 
-	tables := make(map[ds.String]*schema.Table)
-
-	for _, table := range sc.Tables {
-		if a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames()) {
-			continue
-		}
-
-		tables[table.Name] = table
-	}
-
-	sc.Tables = tables
+	sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
+		return a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames())
+	})
 
 	return sc, nil
 }
