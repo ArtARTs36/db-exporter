@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"time"
 
 	"github.com/artarts36/singlecli"
 
@@ -10,12 +9,17 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter"
 )
 
+var (
+	Version   = "0.1.0"
+	BuildDate = "2024-03-09 03:09:15"
+)
+
 func main() {
 	application := cli.App{
 		BuildInfo: &cli.BuildInfo{
 			Name:      "db-exporter",
-			Version:   "0.1.0",
-			BuildDate: time.Now().String(),
+			Version:   Version,
+			BuildDate: BuildDate,
 		},
 		Action: run,
 		Args: []*cli.ArgDefinition{
