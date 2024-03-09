@@ -6,12 +6,15 @@ import (
 	"log"
 	"strings"
 
+	"github.com/tyler-sommer/stick"
+
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/schemaloader"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
+	"github.com/artarts36/db-exporter/templates"
 )
 
 type ExportCmd struct {
@@ -41,7 +44,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
 
-	renderer := template.InitRenderer("./templates")
+	renderer := a.createRenderer()
 
 	exp, err := exporter.CreateExporter(params.Format, renderer)
 	if err != nil {
@@ -147,4 +150,16 @@ func (a *ExportCmd) loadSchema(
 	})
 
 	return sc, nil
+}
+
+func (a *ExportCmd) createRenderer() *template.Renderer {
+	var templateLoader stick.Loader
+
+	if fs.Exists("./db-exporter-templates") {
+		templateLoader = stick.NewFilesystemLoader("./db-exporter-templates")
+	} else {
+		templateLoader = template.NewEmbedLoader(templates.FS)
+	}
+
+	return template.NewRenderer(templateLoader)
 }
