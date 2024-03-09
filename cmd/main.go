@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"github.com/artarts36/singlecli"
 
@@ -62,6 +63,10 @@ func main() {
 				Name:        "without-migrations-table",
 				Description: "Export without migrations table",
 			},
+			{
+				Name:        "tables",
+				Description: "Table list for export, separator: \",\"",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -77,6 +82,13 @@ func main() {
 func run(ctx *cli.Context) error {
 	cmd := app.NewExportCmd()
 
+	var tables []string
+
+	tablesOpt, hasTablesOpt := ctx.GetOpt("tables")
+	if hasTablesOpt {
+		tables = strings.Split(tablesOpt, ",")
+	}
+
 	return cmd.Export(ctx.Context, &app.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
 		DSN:                    ctx.GetArg("dsn"),
@@ -85,5 +97,6 @@ func run(ctx *cli.Context) error {
 		TablePerFile:           ctx.HasOpt("table-per-file"),
 		WithDiagram:            ctx.HasOpt("with-diagram"),
 		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
+		Tables:                 tables,
 	})
 }

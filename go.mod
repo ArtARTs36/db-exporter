@@ -3,14 +3,14 @@ module github.com/artarts36/db-exporter
 go 1.21.0
 
 require (
-	github.com/artarts36/singlecli v0.0.0-20240304182104-3c408cd1b113
+	github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb
 	github.com/fatih/camelcase v1.0.0
 	github.com/goccy/go-graphviz v0.1.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.9
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.9.0
 	github.com/tyler-sommer/stick v1.0.6
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 )

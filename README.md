@@ -17,6 +17,7 @@ Arguments
   dsn                        data source name, required
   format                     exporting format, required, available values: [md, diagram, go-structs, goose, laravel-migrations-raw]
   out-dir                    Output directory, required
+  tables                     Table list for export, separator: ","
 
 Options
   table-per-file             Export one table to one file
