@@ -3,6 +3,7 @@ package schemaloader
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // for pg driver
@@ -67,6 +68,8 @@ type squashedConstraint struct {
 }
 
 func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error) {
+	log.Print("[pgloader] connecting to database")
+
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
@@ -88,17 +91,25 @@ order by c.ordinal_position`
 
 	var cols []*schema.Column
 
+	log.Print("[pgloader] loading columns")
+
 	err = db.SelectContext(ctx, &cols, query, "public")
 	if err != nil {
 		return nil, err
 	}
 
+	log.Printf("[pgloader] loaded %d columns", len(cols))
+
 	tables := schema.NewTableMap()
 
-	constraints, err := l.loadConstraints(ctx, db, "public")
+	log.Print("[pgloader] loading constraints")
+
+	constraints, constraintsCount, err := l.loadConstraints(ctx, db, "public")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load constraints: %w", err)
 	}
+
+	log.Printf("[pgloader] loaded %d constraints", constraintsCount)
 
 	for _, col := range cols {
 		table, tableExists := tables.Get(col.TableName)
@@ -195,7 +206,9 @@ func (l *PGLoader) loadConstraints(
 	ctx context.Context,
 	db *sqlx.DB,
 	schemaName string,
-) (map[string]map[string][]*squashedConstraint, error) {
+) (map[string]map[string][]*squashedConstraint, int, error) {
+	count := 0
+
 	query := `select
        tco.constraint_name as "name",
        kcu.table_name,
@@ -219,7 +232,7 @@ order by kcu.table_schema,
 
 	err := db.SelectContext(ctx, &constraints, query, schemaName)
 	if err != nil {
-		return nil, err
+		return nil, count, err
 	}
 
 	squashed := map[string]*squashedConstraint{}
@@ -242,6 +255,8 @@ order by kcu.table_schema,
 			}
 
 			squashed[constr.Name] = sc
+
+			count++
 		}
 
 		_, exists := constraintMap[constr.TableName]
@@ -254,5 +269,5 @@ order by kcu.table_schema,
 		)
 	}
 
-	return constraintMap, nil
+	return constraintMap, count, nil
 }

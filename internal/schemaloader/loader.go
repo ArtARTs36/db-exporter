@@ -7,5 +7,6 @@ import (
 )
 
 type Loader interface {
+	// Load database schema
 	Load(ctx context.Context, dsn string) (*schema.Schema, error)
 }
