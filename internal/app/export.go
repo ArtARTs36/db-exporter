@@ -17,6 +17,8 @@ import (
 	"github.com/artarts36/db-exporter/templates"
 )
 
+const localTemplatesFolder = "./db-exporter-templates"
+
 type ExportCmd struct {
 	migrationsTblDetector *migrations.TableDetector
 }
@@ -155,9 +157,13 @@ func (a *ExportCmd) loadSchema(
 func (a *ExportCmd) createRenderer() *template.Renderer {
 	var templateLoader stick.Loader
 
-	if fs.Exists("./db-exporter-templates") {
+	if fs.Exists(localTemplatesFolder) {
+		log.Printf("[exportcmd] loading templates from folder %q", localTemplatesFolder)
+
 		templateLoader = stick.NewFilesystemLoader("./db-exporter-templates")
 	} else {
+		log.Print("[exportcmd] loading templates from embedded files")
+
 		templateLoader = template.NewEmbedLoader(templates.FS)
 	}
 
