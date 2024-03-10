@@ -10,8 +10,8 @@ permissions:
   checks: write
 
 jobs:
-  lint:
-    name: lint
+  code-lint:
+    name: code-lint
     runs-on: ubuntu-latest
     steps:
       - name: install deps
