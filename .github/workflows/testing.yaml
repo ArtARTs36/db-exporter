@@ -36,7 +36,7 @@ jobs:
           args: -v --timeout=10m --out-format=colored-line-number
 
   unit-test:
-    name: code-lint
+    name: unit-test
     runs-on: ubuntu-latest
     steps:
       - name: install deps
@@ -67,7 +67,7 @@ jobs:
         ports:
           - 5499:5432
 
-    name: functest
+    name: func-test
     runs-on: ubuntu-latest
     steps:
       - name: install deps
