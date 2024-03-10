@@ -24,7 +24,7 @@ func initPgTestEnvironment() *pgTestEnvironment {
 	}
 
 	binaryPath := os.Getenv("DB_EXPORTER_BIN")
-	if dsn == "" {
+	if binaryPath == "" {
 		panic("DB_EXPORTER_BIN not found")
 	}
 
