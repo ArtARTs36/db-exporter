@@ -79,7 +79,7 @@ func TestPG(t *testing.T) {
 				}
 			}
 
-			cmdErr := exec.Command("./../db-exporter", tCase.BinArgs...).Run()
+			cmdErr := exec.Command("./db-exporter", tCase.BinArgs...).Run()
 
 			assert.NoError(t, cmdErr)
 
