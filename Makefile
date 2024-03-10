@@ -21,3 +21,4 @@ functest:
 	sleep 5
 	FUNCTEST=on DB_EXPORTER_BIN=${PWD}/functest/db-exporter PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
 	docker-compose down
+	rm ./functest/db-exporter

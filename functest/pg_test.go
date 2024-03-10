@@ -59,6 +59,8 @@ func TestPG(t *testing.T) {
 (
     id   integer NOT NULL,
     name character varying,
+    created_at timestamp NOT NULL,
+    updated_at timestamp,
 
     CONSTRAINT users_pk PRIMARY KEY (id)
 );`,
@@ -86,6 +88,15 @@ func TestPG(t *testing.T) {
 				}
 			}
 
+			defer func() {
+				for _, query := range tCase.DownQueries {
+					_, err := env.db.Exec(query)
+					if err != nil {
+						panic(err)
+					}
+				}
+			}()
+
 			cmdErr := exec.Command(env.BinaryPath, tCase.BinArgs...).Run()
 			if cmdErr != nil {
 				t.Fatalf("failed to exec command: %s", cmdErr)
@@ -103,13 +114,6 @@ func TestPG(t *testing.T) {
 			}
 
 			removeDir("./out")
-
-			for _, query := range tCase.DownQueries {
-				_, err := env.db.Exec(query)
-				if err != nil {
-					panic(err)
-				}
-			}
 		})
 	}
 }
