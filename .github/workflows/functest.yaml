@@ -39,4 +39,7 @@ jobs:
         run: go mod download
 
       - name: Run functional tests
-        run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go && \ FUNCTEST=on PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
+        env:
+          FUNCTEST: on
+          PG_DSN: host=localhost port=5499 user=test password=test dbname=users sslmode=disable
+        run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go && go test ./functest
