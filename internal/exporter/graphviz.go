@@ -32,7 +32,7 @@ func buildGraphviz( //nolint:gocognit // hard to split
 		}
 	}()
 
-	log.Print("[graphviz] mapping graph")
+	log.Print("[diagram] mapping graph")
 
 	tablesNodes := map[string]*cgraph.Node{}
 
@@ -45,7 +45,7 @@ func buildGraphviz( //nolint:gocognit // hard to split
 		node.SetShape(cgraph.PlainTextShape)
 		node.SafeSet("class", "db-tables", "")
 
-		ht, tableErr := renderer.Render("graphviz/table.html", map[string]stick.Value{
+		ht, tableErr := renderer.Render("diagram/table.html", map[string]stick.Value{
 			"table": table,
 		})
 		if tableErr != nil {
@@ -105,7 +105,7 @@ func buildGraphviz( //nolint:gocognit // hard to split
 		return nil, err
 	}
 
-	log.Println("[graphviz] generating svg diagram")
+	log.Println("[diagram] generating svg diagram")
 
 	var buf bytes.Buffer
 	if err = g.Render(graph, "svg", &buf); err != nil {

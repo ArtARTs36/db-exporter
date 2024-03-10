@@ -49,7 +49,7 @@ func (e *MarkdownExporter) ExportPerFile(
 	for _, table := range sc.Tables.List() {
 		fileName := fmt.Sprintf("table_%s.md", table.Name.Value)
 
-		page, err := render(e.renderer, "markdown/per-table.md", fileName, map[string]stick.Value{
+		page, err := render(e.renderer, "md/per-table.md", fileName, map[string]stick.Value{
 			"table": table,
 		})
 		if err != nil {
@@ -64,7 +64,7 @@ func (e *MarkdownExporter) ExportPerFile(
 		})
 	}
 
-	indexPage, err := render(e.renderer, "markdown/per-index.md", "index.md", map[string]stick.Value{
+	indexPage, err := render(e.renderer, "md/per-index.md", "index.md", map[string]stick.Value{
 		"tables":  preparedTables,
 		"diagram": diagram,
 	})
@@ -97,7 +97,7 @@ func (e *MarkdownExporter) Export(
 		}
 	}
 
-	page, err := render(e.renderer, "markdown/single-tables.md", "tables.md", map[string]stick.Value{
+	page, err := render(e.renderer, "md/single-tables.md", "tables.md", map[string]stick.Value{
 		"schema":        schema,
 		"diagram":       diagram,
 		"diagramExists": diagram != nil,

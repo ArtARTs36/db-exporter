@@ -29,3 +29,22 @@ Options
 **Export from postgres to markdown**
 
 ```db-exporter pg "host=postgres user=root password=root dbname=cars" md ./docs```
+
+## Using custom templates
+
+[Twig syntax](https://twig.symfony.com) is used to compile templates. The Twig port is a [Stick](https://github.com/tyler-sommer/stick).
+
+| Exporter       | Template                     | Description                                                  |
+|----------------|------------------------------|--------------------------------------------------------------|
+| md             | md/single-tables.md          | Template for generate single markdown file                   |
+| md             | md/per-index.md              | Template for generate index markdown file (--table-per-file) |
+| md             | md/per-table.tmd             | Template for generate table markdown file (--table-per-file) |
+| diagram        | diagram/table.html           | Template for generate table                                  |
+| go-structs     | go-structs/model.go.tpl      | Template for generate table                                  |
+| goose          | goose/migration.sql          | Template for generate migration                              |
+| golang-migrate | golang-migrate/migration.sql | Template for generate migration                              |
+| laravel        | laravel/migration-raw.php    | Template for generate migration                              |
+
+You can download templates from [/templates](./templates)
+
+In order for the db-exporter to use **your** templates, you need to place them in the `./db-exporter-templates` folder

@@ -40,14 +40,14 @@ func (e *GolangMigrateExporter) ExportPerFile(
 ) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
-	log.Printf("[golangmigrate-exporter] building queries and rendering migration files")
+	log.Printf("[golang-migrate-exporter] building queries and rendering migration files")
 
 	for _, table := range sch.Tables.List() {
 		migration := e.makeMigration(table)
 
 		p, err := render(
 			e.renderer,
-			"golangmigrate/migration.sql",
+			"golang-migrate/migration.sql",
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"create_%s_table",
 				table.Name.Value,
@@ -75,7 +75,7 @@ func (e *GolangMigrateExporter) Export(
 	upQueries := make([]string, 0, sch.Tables.Len())
 	downQueries := make([]string, 0, sch.Tables.Len())
 
-	log.Printf("[golangmigrate-exporter] building queries")
+	log.Printf("[golang-migrate-exporter] building queries")
 
 	for _, table := range sch.Tables.List() {
 		migration := e.makeMigration(table)
@@ -84,11 +84,11 @@ func (e *GolangMigrateExporter) Export(
 		downQueries = append(downQueries, migration.downQueries...)
 	}
 
-	log.Printf("[golangmigrate-exporter] rendering migration file")
+	log.Printf("[golang-migrate-exporter] rendering migration file")
 
 	p, err := render(
 		e.renderer,
-		"golangmigrate/migration.sql",
+		"golang-migrate/migration.sql",
 		goose.CreateMigrationFilename("init"),
 		map[string]stick.Value{
 			"up_queries":   upQueries,

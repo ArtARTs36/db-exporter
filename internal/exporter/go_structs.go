@@ -67,7 +67,7 @@ func (e *GoStructsExporter) ExportPerFile(
 
 		page, err := render(
 			e.renderer,
-			"gostructs/models.tpl",
+			"go-structs/model.go.tpl",
 			fmt.Sprintf("%s.go", table.Name.Singular().Lower()),
 			map[string]stick.Value{
 				"schema":  goSch,
@@ -92,7 +92,7 @@ func (e *GoStructsExporter) Export(
 	goSch := e.makeGoSchema(schema.Tables.List())
 	pkg := e.selectPackage(params)
 
-	page, err := render(e.renderer, "gostructs/models.tpl", "models.go", map[string]stick.Value{
+	page, err := render(e.renderer, "go-structs/model.go.tpl", "models.go", map[string]stick.Value{
 		"schema":  goSch,
 		"package": pkg,
 	})

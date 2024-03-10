@@ -57,7 +57,7 @@ func main() {
 			},
 			{
 				Name:        "with-diagram",
-				Description: "Export with diagram (only markdown)",
+				Description: "Export with diagram (only md)",
 			},
 			{
 				Name:        "without-migrations-table",
@@ -75,7 +75,7 @@ func main() {
 		UsageExamples: []*cli.UsageExample{
 			{
 				Command:     "db-exporter pg \"host=postgres user=root password=root dbname=cars\" md ./docs",
-				Description: "Export from postgres to markdown",
+				Description: "Export from postgres to md",
 			},
 		},
 	}
