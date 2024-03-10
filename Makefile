@@ -13,3 +13,10 @@ test:
 
 lint:
 	golangci-lint run
+
+.PHONY: functest
+functest:
+	docker-compose up postgres -d
+	sleep 5
+	FUNCTEST=on PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
+	docker-compose down
