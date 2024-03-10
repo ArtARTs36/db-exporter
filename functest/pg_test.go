@@ -1,4 +1,4 @@
-package functest //nolint: testpackage // not need
+package functest
 
 import (
 	"fmt"
