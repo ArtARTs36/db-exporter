@@ -12,8 +12,9 @@ import (
 )
 
 type pgTestEnvironment struct {
-	DSN string
-	db  *sqlx.DB
+	DSN        string
+	BinaryPath string
+	db         *sqlx.DB
 }
 
 func initPgTestEnvironment() *pgTestEnvironment {
@@ -22,14 +23,20 @@ func initPgTestEnvironment() *pgTestEnvironment {
 		panic("PG_DSN not found")
 	}
 
+	binaryPath := os.Getenv("DB_EXPORTER_BIN")
+	if dsn == "" {
+		panic("DB_EXPORTER_BIN not found")
+	}
+
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic(fmt.Sprintf("failed connect to db: %s", err))
 	}
 
 	return &pgTestEnvironment{
-		DSN: dsn,
-		db:  db,
+		DSN:        dsn,
+		BinaryPath: binaryPath,
+		db:         db,
 	}
 }
 
@@ -79,7 +86,7 @@ func TestPG(t *testing.T) {
 				}
 			}
 
-			cmdErr := exec.Command("./db-exporter", tCase.BinArgs...).Run()
+			cmdErr := exec.Command(env.BinaryPath, tCase.BinArgs...).Run()
 
 			assert.NoError(t, cmdErr)
 

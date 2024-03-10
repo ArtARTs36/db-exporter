@@ -42,4 +42,5 @@ jobs:
         env:
           FUNCTEST: on
           PG_DSN: host=localhost port=5499 user=test password=test dbname=users sslmode=disable
+          BINARY_PATH: ./db-exporter
         run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go && go test ./functest
