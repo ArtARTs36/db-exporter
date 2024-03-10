@@ -42,7 +42,7 @@ Options
 | diagram        | diagram/table.html           | Template for generate table                                  |
 | go-structs     | go-structs/model.go.tpl      | Template for generate table                                  |
 | goose          | goose/migration.sql          | Template for generate migration                              |
-| golang-migrate | golang-migrate/migration.sql | Template for generate migration                              |
+| go-sql-migrate | go-sql-migrate/migration.sql | Template for generate migration                              |
 | laravel        | laravel/migration-raw.php    | Template for generate migration                              |
 
 You can download templates from [/templates](./templates)
