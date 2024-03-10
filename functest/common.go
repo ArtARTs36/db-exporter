@@ -22,7 +22,7 @@ func loadExpectedFiles(testName string, i int) map[string]string {
 func loadFiles(dir string) map[string]string {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to read directory %q: %s", dir, err))
 	}
 
 	files := map[string]string{}

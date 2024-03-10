@@ -87,10 +87,13 @@ func TestPG(t *testing.T) {
 			}
 
 			cmdErr := exec.Command(env.BinaryPath, tCase.BinArgs...).Run()
+			if cmdErr != nil {
+				t.Fatalf("failed to exec command: %s", cmdErr)
+			}
 
 			assert.NoError(t, cmdErr)
 
-			outFiles := loadFiles("out")
+			outFiles := loadFiles("./out")
 
 			for expFileName, expFileContent := range expectedFiles {
 				outFileContent, outFileExists := outFiles[expFileName]
@@ -99,7 +102,7 @@ func TestPG(t *testing.T) {
 				assert.Equal(t, expFileContent, outFileContent)
 			}
 
-			removeDir("out")
+			removeDir("./out")
 
 			for _, query := range tCase.DownQueries {
 				_, err := env.db.Exec(query)
