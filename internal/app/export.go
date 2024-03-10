@@ -33,6 +33,7 @@ type ExportParams struct {
 	WithDiagram            bool
 	WithoutMigrationsTable bool
 	Tables                 []string
+	Package                string
 }
 
 func NewExportCmd() *ExportCmd {
@@ -91,6 +92,7 @@ func (a *ExportCmd) export(
 	exporterParams := &exporter.ExportParams{
 		WithDiagram:            params.WithDiagram,
 		WithoutMigrationsTable: params.WithoutMigrationsTable,
+		Package:                params.Package,
 	}
 
 	if params.TablePerFile {

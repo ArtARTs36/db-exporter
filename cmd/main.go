@@ -67,6 +67,10 @@ func main() {
 				Name:        "tables",
 				Description: "Table list for export, separator: \",\"",
 			},
+			{
+				Name:        "package",
+				Description: "Package name for code gen, e.g: models",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -89,6 +93,8 @@ func run(ctx *cli.Context) error {
 		tables = strings.Split(tablesOpt, ",")
 	}
 
+	pkg, _ := ctx.GetOpt("package")
+
 	return cmd.Export(ctx.Context, &app.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
 		DSN:                    ctx.GetArg("dsn"),
@@ -98,5 +104,6 @@ func run(ctx *cli.Context) error {
 		WithDiagram:            ctx.HasOpt("with-diagram"),
 		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
 		Tables:                 tables,
+		Package:                pkg,
 	})
 }

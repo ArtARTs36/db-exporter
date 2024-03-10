@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/tyler-sommer/stick"
 
@@ -54,9 +55,10 @@ func NewGoStructsExporter(renderer *template.Renderer) Exporter {
 func (e *GoStructsExporter) ExportPerFile(
 	_ context.Context,
 	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pkg := e.selectPackage(params)
 
 	for _, table := range sch.Tables.List() {
 		goSch := e.makeGoSchema([]*schema.Table{
@@ -68,7 +70,8 @@ func (e *GoStructsExporter) ExportPerFile(
 			"gostructs/models.tpl",
 			fmt.Sprintf("%s.go", table.Name.Singular().Lower()),
 			map[string]stick.Value{
-				"schema": goSch,
+				"schema":  goSch,
+				"package": pkg,
 			},
 		)
 		if err != nil {
@@ -81,11 +84,17 @@ func (e *GoStructsExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *GoStructsExporter) Export(
+	_ context.Context,
+	schema *schema.Schema,
+	params *ExportParams,
+) ([]*ExportedPage, error) {
 	goSch := e.makeGoSchema(schema.Tables.List())
+	pkg := e.selectPackage(params)
 
 	page, err := render(e.renderer, "gostructs/models.tpl", "models.go", map[string]stick.Value{
-		"schema": goSch,
+		"schema":  goSch,
+		"package": pkg,
 	})
 	if err != nil {
 		return nil, err
@@ -94,6 +103,14 @@ func (e *GoStructsExporter) Export(_ context.Context, schema *schema.Schema, _ *
 	return []*ExportedPage{
 		page,
 	}, nil
+}
+
+func (e *GoStructsExporter) selectPackage(params *ExportParams) string {
+	if params.Package != "" {
+		return strings.ToLower(params.Package)
+	}
+
+	return "models"
 }
 
 func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) string {

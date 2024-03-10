@@ -14,6 +14,7 @@ type Exporter interface {
 type ExportParams struct {
 	WithDiagram            bool
 	WithoutMigrationsTable bool
+	Package                string
 }
 
 type ExportedPage struct {
