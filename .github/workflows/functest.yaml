@@ -10,7 +10,17 @@ permissions:
   checks: write
 
 jobs:
-  lint:
+  functest:
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: users
+        ports:
+          - 5499:5432
+
     name: lint
     runs-on: ubuntu-latest
     steps:
@@ -30,3 +40,6 @@ jobs:
 
       - name: Build binary
         run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go
+
+      - name: Run functional tests
+        run: FUNCTEST=on PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
