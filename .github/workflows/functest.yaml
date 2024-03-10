@@ -21,7 +21,7 @@ jobs:
         ports:
           - 5499:5432
 
-    name: lint
+    name: functest
     runs-on: ubuntu-latest
     steps:
       - name: install deps
@@ -38,8 +38,5 @@ jobs:
       - name: Install Go dependencies
         run: go mod download
 
-      - name: Build binary
-        run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go
-
       - name: Run functional tests
-        run: FUNCTEST=on PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
+        run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go && \ FUNCTEST=on PG_DSN="host=localhost port=5499 user=test password=test dbname=users sslmode=disable" go test ./functest
