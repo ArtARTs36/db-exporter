@@ -1,0 +1,46 @@
+name: Functional testing
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  functest:
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: users
+        ports:
+          - 5499:5432
+
+    name: functest
+    runs-on: ubuntu-latest
+    steps:
+      - name: install deps
+        run: sudo apt install gcc
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4 # action page: <https://github.com/actions/setup-go>
+        with:
+          go-version: stable
+
+      - name: Install Go dependencies
+        run: go mod download
+
+      - name: Run functional tests
+        env:
+          FUNCTEST: on
+          PG_DSN: host=localhost port=5499 user=test password=test dbname=users sslmode=disable
+          DB_EXPORTER_BIN: ${{ github.workspace }}/functest/db-exporter
+        run: go build ${BUILD_FLAGS} -o ./functest/db-exporter cmd/main.go && go test ./functest

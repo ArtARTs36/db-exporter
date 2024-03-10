@@ -10,12 +10,12 @@ permissions:
   checks: write
 
 jobs:
-  lint:
-    name: lint
+  code-lint:
+    name: code-lint
     runs-on: ubuntu-latest
     steps:
       - name: install deps
-        run: sudo apt install gcc libpcre3 libpcre3-dev
+        run: sudo apt install gcc
 
       - name: Check out code
         uses: actions/checkout@v3
