@@ -12,7 +12,7 @@ var Names = []string{
 	DiagramExporterName,
 	GoStructsExporterName,
 	GooseExporterName,
-	GolangMigrateExporterName,
+	GoSQLMigrateExporterName,
 	LaravelMigrationsRawExporterName,
 }
 
@@ -33,8 +33,8 @@ func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) 
 		return NewGooseExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
-	if name == GolangMigrateExporterName {
-		return NewGolangMigrateExporter(renderer, sql.NewDDLBuilder()), nil
+	if name == GoSQLMigrateExporterName {
+		return NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()), nil
 	}
 
 	if name == LaravelMigrationsRawExporterName {

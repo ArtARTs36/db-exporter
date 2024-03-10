@@ -5,7 +5,7 @@ db-exporter - simple app for export db schema to formats:
 * Class diagram `diagram`
 * Go structures with db tags `go-structs`
 * Goose migrations `goose`
-* Migrations for golang-migrate `golang-migrate`
+* Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
 * Raw SQL Laravel migrations `laravel-migrations-raw`
 
 usage:
@@ -15,7 +15,7 @@ usage:
 Arguments
   driver-name                database driver name, required, available values: [pg, postgres]
   dsn                        data source name, required
-  format                     exporting format, required, available values: [md, diagram, go-structs, goose, laravel-migrations-raw]
+  format                     exporting format, required, available values: [md, diagram, go-structs, goose, go-sql-migrate, laravel-migrations-raw]
   out-dir                    Output directory, required
 
 Options

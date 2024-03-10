@@ -38,7 +38,7 @@ func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *
 
 	log.Printf("[gooseexporter] building queries and rendering migration files")
 
-	for _, table := range sch.Tables.List() {
+	for i, table := range sch.Tables.List() {
 		migration := e.makeMigration(table)
 
 		p, err := render(
@@ -47,7 +47,7 @@ func (e *GooseExporter) ExportPerFile(_ context.Context, sch *schema.Schema, _ *
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"create_%s_table",
 				table.Name.Value,
-			)),
+			), i),
 			map[string]stick.Value{
 				"up_queries":   migration.upQueries,
 				"down_queries": migration.downQueries,
@@ -83,7 +83,7 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, _ *ExportP
 	p, err := render(
 		e.renderer,
 		"goose/migration.sql",
-		goose.CreateMigrationFilename("init"),
+		goose.CreateMigrationFilename("init", 1),
 		map[string]stick.Value{
 			"up_queries":   upQueries,
 			"down_queries": downQueries,

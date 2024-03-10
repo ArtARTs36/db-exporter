@@ -15,11 +15,11 @@ var MigrationsTableColumns = []string{
 	"tstamp",
 }
 
-func CreateMigrationFilename(migrationName string) string {
+func CreateMigrationFilename(migrationName string, offset int) string {
 	// 20240229220526_create_cars_table.sql
 	return fmt.Sprintf(
 		"%s_%s.sql",
-		time.Now().Format(migrationTimeFormat),
+		time.Now().Add(time.Duration(offset)*time.Second).Format(migrationTimeFormat),
 		migrationName,
 	)
 }

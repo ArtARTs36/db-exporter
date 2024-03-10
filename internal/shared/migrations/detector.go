@@ -3,8 +3,8 @@ package migrations
 import (
 	"slices"
 
-	"github.com/artarts36/db-exporter/internal/shared/golangmigrate"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
+	"github.com/artarts36/db-exporter/internal/shared/gosqlmigrate"
 	"github.com/artarts36/db-exporter/internal/shared/laravel"
 )
 
@@ -32,8 +32,8 @@ func NewTableDetector() *TableDetector {
 					ColumnsNames: laravel.MigrationsTableColumns,
 				},
 				{
-					Name:         golangmigrate.Table,
-					ColumnsNames: golangmigrate.TableColumns,
+					Name:         gosqlmigrate.Table,
+					ColumnsNames: gosqlmigrate.TableColumns,
 				},
 			},
 		},
