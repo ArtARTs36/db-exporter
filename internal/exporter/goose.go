@@ -67,8 +67,6 @@ func (e *GooseExporter) Export(_ context.Context, sch *schema.Schema, _ *ExportP
 	upQueries := make([]string, 0, sch.Tables.Len())
 	downQueries := make([]string, 0, sch.Tables.Len())
 
-	log.Printf("[gooseexporter] sorting tables")
-
 	log.Printf("[gooseexporter] building queries")
 
 	for _, table := range sch.Tables.List() {
