@@ -58,12 +58,24 @@ func TestPG(t *testing.T) {
 				`CREATE TABLE users
 (
     id   integer NOT NULL,
-    name character varying,
+    name character varying NOT NULL,
+    country_id integer,
+    balance real NOT NULL,
+    prev_balance real,
+    phone character varying,
     created_at timestamp NOT NULL,
     updated_at timestamp,
 
     CONSTRAINT users_pk PRIMARY KEY (id)
 );`,
+				`CREATE TABLE countries
+(
+    id integer NOT NULL,
+    name character varying NOT NULL,
+    
+    CONSTRAINT countries_pk PRIMARY KEY (id)
+)`,
+				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
 			},
 			DownQueries: []string{
 				"DROP TABLE users",

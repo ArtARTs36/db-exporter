@@ -8,6 +8,7 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/app"
 	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 var (
@@ -84,7 +85,7 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
-	cmd := app.NewExportCmd()
+	cmd := app.NewExportCmd(fs.NewLocal())
 
 	var tables []string
 

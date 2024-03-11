@@ -21,6 +21,8 @@ const localTemplatesFolder = "./db-exporter-templates"
 
 type ExportCmd struct {
 	migrationsTblDetector *migrations.TableDetector
+	pageStorage           *pageStorage
+	fs                    fs.Driver
 }
 
 type ExportParams struct {
@@ -36,9 +38,11 @@ type ExportParams struct {
 	Package                string
 }
 
-func NewExportCmd() *ExportCmd {
+func NewExportCmd(fs fs.Driver) *ExportCmd {
 	return &ExportCmd{
 		migrationsTblDetector: migrations.NewTableDetector(),
+		pageStorage:           &pageStorage{fs},
+		fs:                    fs,
 	}
 }
 
@@ -71,9 +75,9 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return fmt.Errorf("failed to export: %w", err)
 	}
 
-	err = a.savePages(pages, params)
+	err = a.pageStorage.Save(params.OutDir, pages)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to save generated pages: %w", err)
 	}
 
 	log.Printf("[exportcmd] successful generated %d files", len(pages))
@@ -106,30 +110,6 @@ func (a *ExportCmd) export(
 	}
 
 	return pages, nil
-}
-
-func (a *ExportCmd) savePages(pages []*exporter.ExportedPage, params *ExportParams) error {
-	if !fs.Exists(params.OutDir) {
-		log.Printf("creating directory %q", params.OutDir)
-
-		err := fs.Mkdir(params.OutDir)
-		if err != nil {
-			return fmt.Errorf("failed to create directory: %w", err)
-		}
-	}
-
-	for _, page := range pages {
-		path := fmt.Sprintf("%s/%s", params.OutDir, page.FileName)
-
-		log.Printf("[exportcmd] saving %q", path)
-
-		err := fs.CreateFile(path, page.Content)
-		if err != nil {
-			return fmt.Errorf("unable to write file: %w", err)
-		}
-	}
-
-	return nil
 }
 
 func (a *ExportCmd) loadSchema(
@@ -173,10 +153,10 @@ func (a *ExportCmd) loadSchema(
 func (a *ExportCmd) createRenderer() *template.Renderer {
 	var templateLoader stick.Loader
 
-	if fs.Exists(localTemplatesFolder) {
+	if a.fs.Exists(localTemplatesFolder) {
 		log.Printf("[exportcmd] loading templates from folder %q", localTemplatesFolder)
 
-		templateLoader = stick.NewFilesystemLoader("./db-exporter-templates")
+		templateLoader = stick.NewFilesystemLoader(localTemplatesFolder)
 	} else {
 		log.Print("[exportcmd] loading templates from embedded files")
 

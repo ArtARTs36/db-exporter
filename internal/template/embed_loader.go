@@ -16,7 +16,7 @@ type fileTemplate struct {
 	reader io.Reader
 }
 
-// NewEmbedLoader creates a new EmbedLoader with the specified root directory.
+// NewEmbedLoader creates a new EmbedLoader.
 func NewEmbedLoader(fs embed.FS) *EmbedLoader {
 	return &EmbedLoader{fs: fs}
 }
