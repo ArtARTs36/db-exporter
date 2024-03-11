@@ -13,7 +13,8 @@ import (
 const MarkdownExporterName = "md"
 
 type MarkdownExporter struct {
-	renderer *template.Renderer
+	renderer     *template.Renderer
+	graphBuilder *graphBuilder
 }
 
 type markdownPreparedTable struct {
@@ -23,7 +24,8 @@ type markdownPreparedTable struct {
 
 func NewMarkdownExporter(renderer *template.Renderer) Exporter {
 	return &MarkdownExporter{
-		renderer: renderer,
+		renderer:     renderer,
+		graphBuilder: &graphBuilder{renderer: renderer},
 	}
 }
 
@@ -37,7 +39,7 @@ func (e *MarkdownExporter) ExportPerFile(
 	if params.WithDiagram {
 		pagesCap++
 		var err error
-		diagram, err = buildDiagramPage(e.renderer, sc.Tables, "diagram.svg")
+		diagram, err = buildDiagramPage(e.graphBuilder, sc.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diagram: %w", err)
 		}
@@ -91,7 +93,7 @@ func (e *MarkdownExporter) Export(
 	if params.WithDiagram {
 		var err error
 
-		diagram, err = buildDiagramPage(e.renderer, schema.Tables, "diagram.svg")
+		diagram, err = buildDiagramPage(e.graphBuilder, schema.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diagram: %w", err)
 		}

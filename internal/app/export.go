@@ -72,7 +72,7 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 
 	pages, err := a.export(ctx, exp, sc, params)
 	if err != nil {
-		return fmt.Errorf("failed to export: %w", err)
+		return err
 	}
 
 	err = a.pageStorage.Save(params.OutDir, pages)
