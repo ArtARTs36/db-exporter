@@ -31,7 +31,6 @@ func main() {
 				Required:    true,
 				ValuesEnum: []string{
 					"pg",
-					"postgres",
 				},
 			},
 			{

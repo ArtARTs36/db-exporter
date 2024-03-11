@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
 )
 
 func skipIfRunningShortTests(t *testing.T) {
@@ -48,5 +50,14 @@ func removeDir(dir string) {
 	err := os.RemoveAll(dir)
 	if err != nil {
 		log.Printf("failed to remove %q: %s", dir, err)
+	}
+}
+
+func mustExecQueries(db *sqlx.DB, queries []string) {
+	for _, query := range queries {
+		_, err := db.Exec(query)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

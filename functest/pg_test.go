@@ -93,20 +93,10 @@ func TestPG(t *testing.T) {
 		t.Run(tCase.Name, func(t *testing.T) {
 			expectedFiles := loadExpectedFiles("pg_test", i)
 
-			for _, query := range tCase.InitQueries {
-				_, err := env.db.Exec(query)
-				if err != nil {
-					panic(err)
-				}
-			}
+			mustExecQueries(env.db, tCase.InitQueries)
 
 			defer func() {
-				for _, query := range tCase.DownQueries {
-					_, err := env.db.Exec(query)
-					if err != nil {
-						panic(err)
-					}
-				}
+				mustExecQueries(env.db, tCase.DownQueries)
 			}()
 
 			cmdErr := exec.Command(env.BinaryPath, tCase.BinArgs...).Run()

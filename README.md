@@ -13,7 +13,7 @@ usage:
 ./db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<table_name>,...] [--package=<package name>]
 
 Arguments
-  driver-name                database driver name, required, available values: [pg, postgres]
+  driver-name                database driver name, required, available values: [pg]
   dsn                        data source name, required
   format                     exporting format, required, available values: [md, diagram, go-structs, goose, go-sql-migrate, laravel-migrations-raw]
   out-dir                    Output directory, required

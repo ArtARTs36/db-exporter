@@ -123,16 +123,9 @@ func (a *ExportCmd) loadSchema(
 	}
 
 	if len(params.Tables) > 0 {
-		tableFilter := map[string]bool{}
-		for _, table := range params.Tables {
-			tableFilter[table] = true
-		}
-
 		log.Println("[exportcmd] filtering tables")
 
-		sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
-			return !tableFilter[table.Name.Value]
-		})
+		sc.Tables = sc.Tables.Without(params.Tables)
 	}
 
 	log.Println("[exportcmd] sorting tables by relations")

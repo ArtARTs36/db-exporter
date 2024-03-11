@@ -3,7 +3,7 @@ module github.com/artarts36/db-exporter
 go 1.21.0
 
 require (
-	github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb
+	github.com/artarts36/singlecli v0.0.0-20240311170259-2f16e57e2c1c
 	github.com/fatih/camelcase v1.0.0
 	github.com/goccy/go-graphviz v0.1.2
 	github.com/iancoleman/strcase v0.3.0

@@ -76,6 +76,17 @@ func (m *TableMap) Reject(callback func(table *Table) bool) *TableMap {
 	return tm
 }
 
+func (m *TableMap) Without(tableNames []string) *TableMap {
+	tableFilter := map[string]bool{}
+	for _, table := range tableNames {
+		tableFilter[table] = true
+	}
+
+	return m.Reject(func(table *Table) bool {
+		return !tableFilter[table.Name.Value]
+	})
+}
+
 func (m *TableMap) List() []*Table {
 	return m.list
 }

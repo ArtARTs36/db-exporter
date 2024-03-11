@@ -3,7 +3,7 @@ package schemaloader
 import "fmt"
 
 func CreateLoader(driverName string) (Loader, error) {
-	if driverName == "pg" || driverName == "postgres" {
+	if driverName == "pg" {
 		return &PGLoader{}, nil
 	}
 
