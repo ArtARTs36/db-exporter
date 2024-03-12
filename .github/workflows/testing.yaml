@@ -37,7 +37,10 @@ jobs:
 
   unit-test:
     name: unit-test
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows, darwin ]
     steps:
       - name: install deps
         run: sudo apt install gcc

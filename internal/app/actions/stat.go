@@ -43,10 +43,8 @@ func (c *Stat) Run(_ context.Context, params *params.ActionParams) error {
 		if err != nil {
 			log.Printf("[stataction] failed to stat %q: %s", path, err)
 			state = "unknown"
-		} else {
-			if params.StartedAt.After(fileStat.CreatedAt) {
-				state = "updated"
-			}
+		} else if params.StartedAt.After(fileStat.CreatedAt) {
+			state = "updated"
 		}
 
 		fmt.Printf("%s%s| %s\n", path, strings.Repeat(" ", maxPathLen-len(path)+1), state)
