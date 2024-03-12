@@ -6,9 +6,12 @@ import (
 
 	"github.com/artarts36/singlecli"
 
-	"github.com/artarts36/db-exporter/internal/app"
+	"github.com/artarts36/db-exporter/internal/app/actions"
+	"github.com/artarts36/db-exporter/internal/app/cmd"
+	"github.com/artarts36/db-exporter/internal/app/params"
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/artarts36/db-exporter/internal/shared/git"
 )
 
 var (
@@ -75,6 +78,14 @@ func main() {
 				Name:        "file-prefix",
 				Description: "Prefix for generated files",
 			},
+			{
+				Name:        "commit-message",
+				Description: "Add commit with generated files and your message",
+			},
+			{
+				Name:        "commit-push",
+				Description: "Push commit with generated files",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -88,7 +99,9 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
-	cmd := app.NewExportCmd(fs.NewLocal())
+	command := cmd.NewExportCmd(fs.NewLocal(), map[string]actions.Action{
+		"commit generated files": actions.NewCommit(git.NewGit("git")),
+	})
 
 	var tables []string
 
@@ -99,8 +112,9 @@ func run(ctx *cli.Context) error {
 
 	pkg, _ := ctx.GetOpt("package")
 	filePrefix, _ := ctx.GetOpt("file-prefix")
+	commitMessage, _ := ctx.GetOpt("commit-message")
 
-	return cmd.Export(ctx.Context, &app.ExportParams{
+	return command.Export(ctx.Context, &params.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
 		DSN:                    ctx.GetArg("dsn"),
 		Format:                 ctx.GetArg("format"),
@@ -111,5 +125,7 @@ func run(ctx *cli.Context) error {
 		Tables:                 tables,
 		Package:                pkg,
 		FilePrefix:             filePrefix,
+		CommitMessage:          commitMessage,
+		CommitPush:             ctx.HasOpt("commit-push"),
 	})
 }

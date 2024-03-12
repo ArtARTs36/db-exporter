@@ -1,4 +1,4 @@
-package app
+package cmd
 
 import (
 	"fmt"
@@ -17,13 +17,15 @@ type savePageParams struct {
 	FilePrefix string
 }
 
-func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) error {
+func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) ([]string, error) {
+	paths := make([]string, 0, len(pages))
+
 	if !s.fs.Exists(params.Dir) {
 		log.Printf("[pagestorage] creating directory %q", params.Dir)
 
 		err := s.fs.Mkdir(params.Dir)
 		if err != nil {
-			return fmt.Errorf("failed to create directory: %w", err)
+			return paths, fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
 
@@ -34,11 +36,13 @@ func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParam
 
 		err := s.fs.CreateFile(path, page.Content)
 		if err != nil {
-			return fmt.Errorf("unable to write file %q: %w", path, err)
+			return paths, fmt.Errorf("unable to write file %q: %w", path, err)
 		}
+
+		paths = append(paths, path)
 	}
 
-	return nil
+	return paths, nil
 }
 
 func (s *pageStorage) createPath(page *exporter.ExportedPage, params *savePageParams) string {
