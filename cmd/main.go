@@ -86,6 +86,10 @@ func main() {
 				Name:        "commit-push",
 				Description: "Push commit with generated files",
 			},
+			{
+				Name:        "stat",
+				Description: "Print stat",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -99,8 +103,11 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
-	command := cmd.NewExportCmd(fs.NewLocal(), map[string]actions.Action{
+	fsystem := fs.NewLocal()
+
+	command := cmd.NewExportCmd(fsystem, map[string]actions.Action{
 		"commit generated files": actions.NewCommit(git.NewGit("git")),
+		"print stat":             actions.NewStat(fsystem),
 	})
 
 	var tables []string
@@ -127,5 +134,6 @@ func run(ctx *cli.Context) error {
 		FilePrefix:             filePrefix,
 		CommitMessage:          commitMessage,
 		CommitPush:             ctx.HasOpt("commit-push"),
+		Stat:                   ctx.HasOpt("stat"),
 	})
 }

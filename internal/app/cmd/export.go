@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/tyler-sommer/stick"
 
@@ -38,6 +39,8 @@ func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 }
 
 func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
+	startedAt := time.Now()
+
 	loader, err := schemaloader.CreateLoader(expParams.DriverName)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
@@ -77,6 +80,7 @@ func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) 
 	log.Printf("[exportcmd] successful generated %d files", len(pages))
 
 	err = a.runActions(ctx, &params.ActionParams{
+		StartedAt:           startedAt,
 		ExportParams:        expParams,
 		GeneratedFilesPaths: paths,
 	})

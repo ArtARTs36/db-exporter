@@ -1,6 +1,11 @@
 package fs
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
+
+var ErrFileNotFound = fmt.Errorf("file not found")
 
 type Driver interface {
 	Exists(path string) bool

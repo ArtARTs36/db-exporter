@@ -14,4 +14,5 @@ type ExportParams struct {
 	FilePrefix             string
 	CommitMessage          string
 	CommitPush             bool
+	Stat                   bool
 }
