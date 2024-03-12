@@ -14,12 +14,12 @@ func (*Local) Stat(path string) (*FileInfo, error) {
 		return nil, err
 	}
 
-	sysStat, err := stat.Sys().(*syscall.Stat_t)
-	if err != nil {
-		return nil, err
-	}
+	sysStat, sysStatValid := stat.Sys().(*syscall.Stat_t)
 
-	ctime := time.Unix(int64(sysStat.Ctim.Sec), int64(sysStat.Ctim.Nsec))
+	ctime := stat.ModTime()
+	if sysStatValid {
+		ctime = time.Unix(sysStat.Birthtimespec.Sec, sysStat.Birthtimespec.Nsec)
+	}
 
 	return &FileInfo{
 		Path:      path,
