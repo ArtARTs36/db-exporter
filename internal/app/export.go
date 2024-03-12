@@ -36,6 +36,7 @@ type ExportParams struct {
 	WithoutMigrationsTable bool
 	Tables                 []string
 	Package                string
+	FilePrefix             string
 }
 
 func NewExportCmd(fs fs.Driver) *ExportCmd {
@@ -75,7 +76,10 @@ func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
 		return err
 	}
 
-	err = a.pageStorage.Save(params.OutDir, pages)
+	err = a.pageStorage.Save(pages, &savePageParams{
+		Dir:        params.OutDir,
+		FilePrefix: params.FilePrefix,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to save generated pages: %w", err)
 	}

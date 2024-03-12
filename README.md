@@ -10,7 +10,7 @@ db-exporter - simple app for export db schema to formats:
 
 usage:
 ```text
-./db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<table_name>,...] [--package=<package name>]
+./db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<table_name>,...] [--package=<package name>] [--file-prefix=<prefix>]
 
 Arguments
   driver-name                database driver name, required, available values: [pg]
@@ -24,6 +24,7 @@ Options
   without-migrations-table   Export without migrations table
   tables                     Table list for export, separator: ","
   package                    Package name for code gen, e.g: models
+  file-prefix                Prefix for generated files
 ```
 
 **Export from postgres to markdown**

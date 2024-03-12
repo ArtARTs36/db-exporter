@@ -12,26 +12,35 @@ type pageStorage struct {
 	fs fs.Driver
 }
 
-func (s *pageStorage) Save(dir string, pages []*exporter.ExportedPage) error {
-	if !s.fs.Exists(dir) {
-		log.Printf("[pagestorage] creating directory %q", dir)
+type savePageParams struct {
+	Dir        string
+	FilePrefix string
+}
 
-		err := s.fs.Mkdir(dir)
+func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) error {
+	if !s.fs.Exists(params.Dir) {
+		log.Printf("[pagestorage] creating directory %q", params.Dir)
+
+		err := s.fs.Mkdir(params.Dir)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
 
 	for _, page := range pages {
-		path := fmt.Sprintf("%s/%s", dir, page.FileName)
+		path := s.createPath(page, params)
 
 		log.Printf("[pagestorage] saving %q", path)
 
 		err := s.fs.CreateFile(path, page.Content)
 		if err != nil {
-			return fmt.Errorf("unable to write file: %w", err)
+			return fmt.Errorf("unable to write file %q: %w", path, err)
 		}
 	}
 
 	return nil
+}
+
+func (s *pageStorage) createPath(page *exporter.ExportedPage, params *savePageParams) string {
+	return fmt.Sprintf("%s/%s%s", params.Dir, params.FilePrefix, page.FileName)
 }

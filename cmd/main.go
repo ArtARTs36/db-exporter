@@ -71,6 +71,10 @@ func main() {
 				Name:        "package",
 				Description: "Package name for code gen, e.g: models",
 			},
+			{
+				Name:        "file-prefix",
+				Description: "Prefix for generated files",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -94,6 +98,7 @@ func run(ctx *cli.Context) error {
 	}
 
 	pkg, _ := ctx.GetOpt("package")
+	filePrefix, _ := ctx.GetOpt("file-prefix")
 
 	return cmd.Export(ctx.Context, &app.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
@@ -105,5 +110,6 @@ func run(ctx *cli.Context) error {
 		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
 		Tables:                 tables,
 		Package:                pkg,
+		FilePrefix:             filePrefix,
 	})
 }

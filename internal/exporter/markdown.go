@@ -7,6 +7,7 @@ import (
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -49,7 +50,7 @@ func (e *MarkdownExporter) ExportPerFile(
 	preparedTables := make([]*markdownPreparedTable, 0, sc.Tables.Len())
 
 	for _, table := range sc.Tables.List() {
-		fileName := fmt.Sprintf("table_%s.md", table.Name.Value)
+		fileName := fmt.Sprintf("%s.md", table.Name.Value)
 
 		page, err := render(e.renderer, "md/per-table.md", fileName, map[string]stick.Value{
 			"table": table,
@@ -99,11 +100,16 @@ func (e *MarkdownExporter) Export(
 		}
 	}
 
-	page, err := render(e.renderer, "md/single-tables.md", "tables.md", map[string]stick.Value{
-		"schema":        schema,
-		"diagram":       diagram,
-		"diagramExists": diagram != nil,
-	})
+	page, err := render(
+		e.renderer,
+		"md/single-tables.md",
+		e.createIndexPageName(schema),
+		map[string]stick.Value{
+			"schema":        schema,
+			"diagram":       diagram,
+			"diagramExists": diagram != nil,
+		},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -117,4 +123,12 @@ func (e *MarkdownExporter) Export(
 	}
 
 	return pages, nil
+}
+
+func (e *MarkdownExporter) createIndexPageName(sch *schema.Schema) string {
+	if sch.Tables.Has(ds.String{Value: "INDEX"}) {
+		return "index.md"
+	}
+
+	return "INDEX.md"
 }
