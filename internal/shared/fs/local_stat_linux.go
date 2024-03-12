@@ -15,7 +15,7 @@ func (*Local) Stat(path string) (*FileInfo, error) {
 	}
 
 	sysStat := stat.Sys().(*syscall.Stat_t)
-	ctime := time.Unix(sysStat.Birthtimespec.Sec, sysStat.Birthtimespec.Nsec)
+	ctime := time.Unix(int64(st.Ctim.Sec), int64(st.Ctim.Nsec))
 
 	return &FileInfo{
 		Path:      path,
