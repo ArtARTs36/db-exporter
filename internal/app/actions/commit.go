@@ -45,7 +45,7 @@ func (c *Commit) createCommitMessage(params *params.ActionParams) string {
 	msg := params.ExportParams.CommitMessage
 
 	if msg == "" {
-		msg = "added documentation for database schema"
+		msg = "add documentation for database schema"
 	}
 
 	return msg
