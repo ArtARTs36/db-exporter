@@ -4,6 +4,8 @@ github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb h1:RGjdsg6eet3
 github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
 github.com/artarts36/singlecli v0.0.0-20240311170259-2f16e57e2c1c h1:Ivqy/CtQPqV2abeg88WuqZLOc9V16QamtbB9xKDA8VE=
 github.com/artarts36/singlecli v0.0.0-20240311170259-2f16e57e2c1c/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
+github.com/artarts36/singlecli v0.0.0-20240313001344-a4892b1d088d h1:tQIGgZzGBDCLEmJFGQwR5t8h5PM1YMMXadOY0nasF6Y=
+github.com/artarts36/singlecli v0.0.0-20240313001344-a4892b1d088d/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=

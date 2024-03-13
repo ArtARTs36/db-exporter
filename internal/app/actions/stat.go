@@ -2,21 +2,22 @@ package actions
 
 import (
 	"context"
-	"fmt"
-	"log"
-	"strings"
-
 	"github.com/artarts36/db-exporter/internal/app/params"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"log"
 )
 
 type Stat struct {
-	fs fs.Driver
+	fs         fs.Driver
+	tblPrinter tablePrinter
 }
 
-func NewStat(fs fs.Driver) *Stat {
+type tablePrinter func(headers []string, rows [][]string)
+
+func NewStat(fs fs.Driver, tblPrinter tablePrinter) *Stat {
 	return &Stat{
-		fs: fs,
+		fs:         fs,
+		tblPrinter: tblPrinter,
 	}
 }
 
@@ -25,16 +26,7 @@ func (*Stat) Supports(params *params.ActionParams) bool {
 }
 
 func (c *Stat) Run(_ context.Context, params *params.ActionParams) error {
-	maxPathLen := 0
-
-	for _, path := range params.GeneratedFilesPaths {
-		if len(path) > maxPathLen {
-			maxPathLen = len(path)
-		}
-	}
-
-	fmt.Printf("file%s| state\n", strings.Repeat(" ", maxPathLen-3))
-	fmt.Println(strings.Repeat("-", maxPathLen+10))
+	rows := make([][]string, 0, len(params.GeneratedFilesPaths))
 
 	for _, path := range params.GeneratedFilesPaths {
 		state := "created"
@@ -47,8 +39,13 @@ func (c *Stat) Run(_ context.Context, params *params.ActionParams) error {
 			state = "updated"
 		}
 
-		fmt.Printf("%s%s| %s\n", path, strings.Repeat(" ", maxPathLen-len(path)+1), state)
+		rows = append(rows, []string{
+			path,
+			state,
+		})
 	}
+
+	c.tblPrinter([]string{"file", "state"}, rows)
 
 	return nil
 }

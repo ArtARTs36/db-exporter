@@ -107,7 +107,7 @@ func run(ctx *cli.Context) error {
 
 	command := cmd.NewExportCmd(fsystem, map[string]actions.Action{
 		"commit generated files": actions.NewCommit(git.NewGit("git")),
-		"print stat":             actions.NewStat(fsystem),
+		"print stat":             actions.NewStat(fsystem, ctx.Output.PrintMarkdownTable),
 	})
 
 	var tables []string
