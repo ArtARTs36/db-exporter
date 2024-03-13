@@ -18,7 +18,7 @@ func (*Local) Stat(path string) (*FileInfo, error) {
 
 	ctime := stat.ModTime()
 	if sysStatValid {
-		ctime = time.Unix(int64(sysStat.Ctim.Sec), int64(sysStat.Ctim.Nsec))
+		ctime = time.Unix(sysStat.Ctim.Sec, sysStat.Ctim.Nsec)
 	}
 
 	return &FileInfo{
