@@ -1,13 +1,16 @@
-package app
+package cmd
 
 import (
 	"context"
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/tyler-sommer/stick"
 
+	"github.com/artarts36/db-exporter/internal/app/actions"
+	"github.com/artarts36/db-exporter/internal/app/params"
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/schemaloader"
@@ -23,68 +26,67 @@ type ExportCmd struct {
 	migrationsTblDetector *migrations.TableDetector
 	pageStorage           *pageStorage
 	fs                    fs.Driver
+	actions               map[string]actions.Action
 }
 
-type ExportParams struct {
-	DriverName string
-	DSN        string
-	Format     string
-	OutDir     string
-
-	TablePerFile           bool
-	WithDiagram            bool
-	WithoutMigrationsTable bool
-	Tables                 []string
-	Package                string
-	FilePrefix             string
-}
-
-func NewExportCmd(fs fs.Driver) *ExportCmd {
+func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 	return &ExportCmd{
 		migrationsTblDetector: migrations.NewTableDetector(),
 		pageStorage:           &pageStorage{fs},
 		fs:                    fs,
+		actions:               actions,
 	}
 }
 
-func (a *ExportCmd) Export(ctx context.Context, params *ExportParams) error {
-	loader, err := schemaloader.CreateLoader(params.DriverName)
+func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
+	startedAt := time.Now()
+
+	loader, err := schemaloader.CreateLoader(expParams.DriverName)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
 
 	renderer := a.createRenderer()
 
-	exp, err := exporter.CreateExporter(params.Format, renderer)
+	exp, err := exporter.CreateExporter(expParams.Format, renderer)
 	if err != nil {
 		return fmt.Errorf("failed to create exporter: %w", err)
 	}
 
 	// processing
 
-	log.Printf("[exportcmd] loading db schema from %s", params.DriverName)
+	log.Printf("[exportcmd] loading db schema from %s", expParams.DriverName)
 
-	sc, err := a.loadSchema(ctx, loader, params)
+	sc, err := a.loadSchema(ctx, loader, expParams)
 	if err != nil {
 		return fmt.Errorf("unable to load schema: %w", err)
 	}
 
 	log.Printf("[exportcmd] loaded %d tables: [%s]", sc.Tables.Len(), strings.Join(sc.TablesNames(), ","))
 
-	pages, err := a.export(ctx, exp, sc, params)
+	pages, err := a.export(ctx, exp, sc, expParams)
 	if err != nil {
 		return err
 	}
 
-	err = a.pageStorage.Save(pages, &savePageParams{
-		Dir:        params.OutDir,
-		FilePrefix: params.FilePrefix,
+	paths, err := a.pageStorage.Save(pages, &savePageParams{
+		Dir:        expParams.OutDir,
+		FilePrefix: expParams.FilePrefix,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to save generated pages: %w", err)
 	}
 
 	log.Printf("[exportcmd] successful generated %d files", len(pages))
+
+	err = a.runActions(ctx, &params.ActionParams{
+		StartedAt:           startedAt,
+		ExportParams:        expParams,
+		GeneratedFilesPaths: paths,
+	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -93,7 +95,7 @@ func (a *ExportCmd) export(
 	ctx context.Context,
 	exp exporter.Exporter,
 	sc *schema.Schema,
-	params *ExportParams,
+	params *params.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	var pages []*exporter.ExportedPage
 	var err error
@@ -119,7 +121,7 @@ func (a *ExportCmd) export(
 func (a *ExportCmd) loadSchema(
 	ctx context.Context,
 	loader schemaloader.Loader,
-	params *ExportParams,
+	params *params.ExportParams,
 ) (*schema.Schema, error) {
 	sc, err := loader.Load(ctx, params.DSN)
 	if err != nil {
@@ -161,4 +163,19 @@ func (a *ExportCmd) createRenderer() *template.Renderer {
 	}
 
 	return template.NewRenderer(templateLoader)
+}
+
+func (a *ExportCmd) runActions(ctx context.Context, p *params.ActionParams) error {
+	for actionName, action := range a.actions {
+		if action.Supports(p) {
+			log.Printf("[exportcmd] running action %q", actionName)
+
+			err := action.Run(ctx, p)
+			if err != nil {
+				return fmt.Errorf("failed to run action %q: %w", actionName, err)
+			}
+		}
+	}
+
+	return nil
 }

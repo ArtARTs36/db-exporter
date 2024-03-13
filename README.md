@@ -25,6 +25,9 @@ Options
   tables                     Table list for export, separator: ","
   package                    Package name for code gen, e.g: models
   file-prefix                Prefix for generated files
+  commit-message             Add commit with generated files and your message
+  commit-push                Push commit with generated files
+  stat                       Print stat
 ```
 
 **Export from postgres to markdown**

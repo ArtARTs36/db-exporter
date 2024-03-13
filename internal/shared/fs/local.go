@@ -1,6 +1,8 @@
 package fs
 
-import "os"
+import (
+	"os"
+)
 
 type Local struct {
 }
