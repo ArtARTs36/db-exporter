@@ -13,6 +13,7 @@ type ExportParams struct {
 	Package                string
 	FilePrefix             string
 	CommitMessage          string
+	CommitAuthor           string
 	CommitPush             bool
 	Stat                   bool
 }

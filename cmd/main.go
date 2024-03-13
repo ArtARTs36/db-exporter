@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"strings"
 
 	"github.com/artarts36/singlecli"
@@ -69,26 +71,39 @@ func main() {
 			{
 				Name:        "tables",
 				Description: "Table list for export, separator: \",\"",
+				WithValue:   true,
 			},
 			{
 				Name:        "package",
 				Description: "Package name for code gen, e.g: models",
+				WithValue:   true,
 			},
 			{
 				Name:        "file-prefix",
 				Description: "Prefix for generated files",
+				WithValue:   true,
 			},
 			{
 				Name:        "commit-message",
 				Description: "Add commit with generated files and your message",
+				WithValue:   true,
 			},
 			{
 				Name:        "commit-push",
 				Description: "Push commit with generated files",
 			},
 			{
+				Name:        "commit-author",
+				Description: "Author for commit, like git syntax: `name <email>`",
+				WithValue:   true,
+			},
+			{
 				Name:        "stat",
-				Description: "Print stat",
+				Description: "Print stat for generated files",
+			},
+			{
+				Name:        "debug",
+				Description: "Show debug logs",
 			},
 		},
 		UsageExamples: []*cli.UsageExample{
@@ -107,7 +122,7 @@ func run(ctx *cli.Context) error {
 
 	command := cmd.NewExportCmd(fsystem, map[string]actions.Action{
 		"commit generated files": actions.NewCommit(git.NewGit("git")),
-		"print stat":             actions.NewStat(fsystem, ctx.Output.PrintMarkdownTable),
+		"print stat":             actions.NewStat(ctx.Output.PrintMarkdownTable),
 	})
 
 	var tables []string
@@ -120,6 +135,15 @@ func run(ctx *cli.Context) error {
 	pkg, _ := ctx.GetOpt("package")
 	filePrefix, _ := ctx.GetOpt("file-prefix")
 	commitMessage, _ := ctx.GetOpt("commit-message")
+	commitAuthor, _ := ctx.GetOpt("commit-author")
+
+	if ctx.HasOpt("debug") {
+		l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		}))
+
+		slog.SetDefault(l)
+	}
 
 	return command.Export(ctx.Context, &params.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
@@ -133,6 +157,7 @@ func run(ctx *cli.Context) error {
 		Package:                pkg,
 		FilePrefix:             filePrefix,
 		CommitMessage:          commitMessage,
+		CommitAuthor:           commitAuthor,
 		CommitPush:             ctx.HasOpt("commit-push"),
 		Stat:                   ctx.HasOpt("stat"),
 	})

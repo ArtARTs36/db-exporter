@@ -1,14 +1,21 @@
 package git
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os/exec"
+	"strings"
 )
 
 type Git struct {
 	bin string
+}
+
+type cmdResult struct {
+	stdout string
+	stderr string
 }
 
 func NewGit(binary string) *Git {
@@ -18,35 +25,43 @@ func NewGit(binary string) *Git {
 }
 
 type Commit struct {
-	Message   string
-	FilePaths []string
+	Message string
+	Author  string
 }
 
 func (g *Git) Commit(ctx context.Context, commit *Commit) error {
-	if len(commit.FilePaths) > 0 {
-		log.Printf("[git] adding files")
+	log.Printf("[git] commiting changes")
 
-		for _, filename := range commit.FilePaths {
-			err := g.AddFile(ctx, filename)
-			if err != nil {
-				return fmt.Errorf("failed to add file %q: %w", filename, err)
-			}
-		}
-
-		log.Printf("[git] added %d files", len(commit.FilePaths))
+	args := []string{
+		"commit",
+		"-m",
+		commit.Message,
 	}
 
-	return g.commit(ctx, commit)
+	if commit.Author != "" {
+		args = append(args, fmt.Sprintf("--author=%s", commit.Author))
+	}
+
+	cmd := exec.CommandContext(ctx, g.bin, args...)
+	if msg, err := cmd.Output(); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, msg)
+	}
+
+	log.Printf("[git] changes commited")
+
+	return nil
 }
 
 func (g *Git) AddFile(ctx context.Context, filename string) error {
+	log.Printf("[git] adding file %q", filename)
+
 	cmd := exec.CommandContext(ctx, g.bin, "add", filename)
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
 	}
 
-	log.Printf("[git] adding file %q", filename)
+	log.Printf("[git] added file %q", filename)
 
 	return nil
 }
@@ -65,15 +80,39 @@ func (g *Git) Push(ctx context.Context) error {
 	return nil
 }
 
-func (g *Git) commit(ctx context.Context, commit *Commit) error {
-	log.Printf("[git] commiting changes")
-
-	cmd := exec.CommandContext(ctx, g.bin, "commit", "-m", commit.Message)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
+func (g *Git) GetAddedAndModifiedFiles(ctx context.Context) ([]string, error) {
+	cmd := exec.CommandContext(
+		ctx,
+		g.bin,
+		"diff",
+		"--diff-filter=A",
+		"--diff-filter=M",
+		"--name-only",
+		"HEAD",
+	)
+	res, err := g.run(cmd)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
 	}
 
-	log.Printf("[git] changes commited")
+	if res.stdout == "" {
+		return []string{}, nil
+	}
 
-	return nil
+	return strings.Split(strings.Trim(res.stdout, "\n "), "\n"), nil
+}
+
+func (g *Git) run(cmd *exec.Cmd) (*cmdResult, error) {
+	var outBuffer bytes.Buffer
+	var errBuffer bytes.Buffer
+
+	cmd.Stdout = &outBuffer
+	cmd.Stderr = &errBuffer
+
+	err := cmd.Run()
+
+	return &cmdResult{
+		stdout: outBuffer.String(),
+		stderr: errBuffer.String(),
+	}, err
 }

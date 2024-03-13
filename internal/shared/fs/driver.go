@@ -1,21 +1,12 @@
 package fs
 
-import (
-	"fmt"
-	"time"
-)
-
-var ErrFileNotFound = fmt.Errorf("file not found")
-
 type Driver interface {
 	Exists(path string) bool
 	Mkdir(path string) error
-	CreateFile(path string, content []byte) error
-	Stat(path string) (*FileInfo, error)
+	Write(path string, content []byte) (FileInfo, error)
 }
 
 type FileInfo struct {
-	Path      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Path string
+	Size int64
 }

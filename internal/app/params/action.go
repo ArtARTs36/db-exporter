@@ -1,9 +1,13 @@
 package params
 
-import "time"
+import (
+	"time"
+
+	"github.com/artarts36/db-exporter/internal/shared/fs"
+)
 
 type ActionParams struct {
-	StartedAt           time.Time
-	ExportParams        *ExportParams
-	GeneratedFilesPaths []string
+	StartedAt      time.Time
+	ExportParams   *ExportParams
+	GeneratedFiles []fs.FileInfo
 }
