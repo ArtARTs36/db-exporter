@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -55,21 +55,26 @@ func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) 
 
 	// processing
 
-	log.Printf("[exportcmd] loading db schema from %s", expParams.DriverName)
+	slog.DebugContext(ctx, fmt.Sprintf("[exportcmd] loading db schema from %s", expParams.DriverName))
 
 	sc, err := a.loadSchema(ctx, loader, expParams)
 	if err != nil {
 		return fmt.Errorf("unable to load schema: %w", err)
 	}
 
-	log.Printf("[exportcmd] loaded %d tables: [%s]", sc.Tables.Len(), strings.Join(sc.TablesNames(), ","))
+	slog.DebugContext(
+		ctx,
+		fmt.Sprintf(
+			"[exportcmd] loaded %d tables: [%s]", sc.Tables.Len(), strings.Join(sc.TablesNames(), ","),
+		),
+	)
 
 	pages, err := a.export(ctx, exp, sc, expParams)
 	if err != nil {
 		return err
 	}
 
-	paths, err := a.pageStorage.Save(pages, &savePageParams{
+	generatedFiles, err := a.pageStorage.Save(pages, &savePageParams{
 		Dir:        expParams.OutDir,
 		FilePrefix: expParams.FilePrefix,
 	})
@@ -77,12 +82,12 @@ func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) 
 		return fmt.Errorf("failed to save generated pages: %w", err)
 	}
 
-	log.Printf("[exportcmd] successful generated %d files", len(pages))
+	slog.InfoContext(ctx, fmt.Sprintf("[exportcmd] successful generated %d files", len(pages)))
 
 	err = a.runActions(ctx, &params.ActionParams{
-		StartedAt:           startedAt,
-		ExportParams:        expParams,
-		GeneratedFilesPaths: paths,
+		StartedAt:      startedAt,
+		ExportParams:   expParams,
+		GeneratedFiles: generatedFiles,
 	})
 	if err != nil {
 		return err
@@ -129,12 +134,12 @@ func (a *ExportCmd) loadSchema(
 	}
 
 	if len(params.Tables) > 0 {
-		log.Println("[exportcmd] filtering tables")
+		slog.DebugContext(ctx, "[exportcmd] filtering tables")
 
 		sc.Tables = sc.Tables.Without(params.Tables)
 	}
 
-	log.Println("[exportcmd] sorting tables by relations")
+	slog.DebugContext(ctx, "[exportcmd] sorting tables by relations")
 
 	sc.SortByRelations()
 
@@ -153,11 +158,11 @@ func (a *ExportCmd) createRenderer() *template.Renderer {
 	var templateLoader stick.Loader
 
 	if a.fs.Exists(localTemplatesFolder) {
-		log.Printf("[exportcmd] loading templates from folder %q", localTemplatesFolder)
+		slog.Debug(fmt.Sprintf("[exportcmd] loading templates from folder %q", localTemplatesFolder))
 
 		templateLoader = stick.NewFilesystemLoader(localTemplatesFolder)
 	} else {
-		log.Print("[exportcmd] loading templates from embedded files")
+		slog.Debug("[exportcmd] loading templates from embedded files")
 
 		templateLoader = template.NewEmbedLoader(templates.FS)
 	}
@@ -168,7 +173,7 @@ func (a *ExportCmd) createRenderer() *template.Renderer {
 func (a *ExportCmd) runActions(ctx context.Context, p *params.ActionParams) error {
 	for actionName, action := range a.actions {
 		if action.Supports(p) {
-			log.Printf("[exportcmd] running action %q", actionName)
+			slog.DebugContext(ctx, fmt.Sprintf("[exportcmd] running action %q", actionName))
 
 			err := action.Run(ctx, p)
 			if err != nil {

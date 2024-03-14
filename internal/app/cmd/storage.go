@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
@@ -17,32 +17,36 @@ type savePageParams struct {
 	FilePrefix string
 }
 
-func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) ([]string, error) {
-	paths := make([]string, 0, len(pages))
+func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) ([]fs.FileInfo, error) {
+	writtenFiles := make([]fs.FileInfo, 0, len(pages))
 
 	if !s.fs.Exists(params.Dir) {
-		log.Printf("[pagestorage] creating directory %q", params.Dir)
+		slog.Info(fmt.Sprintf("[pagestorage] creating directory %q", params.Dir))
 
 		err := s.fs.Mkdir(params.Dir)
 		if err != nil {
-			return paths, fmt.Errorf("failed to create directory: %w", err)
+			return writtenFiles, fmt.Errorf("failed to create directory: %w", err)
 		}
 	}
+
+	slog.Debug(fmt.Sprintf("[pagestorage] saving %d files", len(pages)))
 
 	for _, page := range pages {
 		path := s.createPath(page, params)
 
-		log.Printf("[pagestorage] saving %q", path)
+		slog.Debug(fmt.Sprintf("[pagestorage] saving %q", path))
 
-		err := s.fs.CreateFile(path, page.Content)
+		wrFile, err := s.fs.Write(path, page.Content)
 		if err != nil {
-			return paths, fmt.Errorf("unable to write file %q: %w", path, err)
+			return writtenFiles, fmt.Errorf("unable to write file %q: %w", path, err)
 		}
 
-		paths = append(paths, path)
+		writtenFiles = append(writtenFiles, wrFile)
 	}
 
-	return paths, nil
+	slog.Info(fmt.Sprintf("[pagestorage] saved %d files", len(pages)))
+
+	return writtenFiles, nil
 }
 
 func (s *pageStorage) createPath(page *exporter.ExportedPage, params *savePageParams) string {

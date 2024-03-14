@@ -10,7 +10,8 @@ db-exporter - simple app for export db schema to formats:
 
 usage:
 ```text
-./db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<table_name>,...] [--package=<package name>] [--file-prefix=<prefix>]
+db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<value>] [--package=<value>] [--file-prefix=<value>]
+[--commit-message=<value>] [--commit-push] [--commit-author=<value>] [--stat] [--debug]
 
 Arguments
   driver-name                database driver name, required, available values: [pg]
