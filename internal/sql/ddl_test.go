@@ -68,6 +68,59 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 );`,
 			},
 		},
+		{
+			Name: "table with deferrable foreign keys",
+			Table: &schema.Table{
+				Name: ds.String{Value: "users"},
+				Columns: []*schema.Column{
+					{
+						Name: *ds.NewString("id"),
+						Type: *ds.NewString("integer"),
+					},
+					{
+						Name: *ds.NewString("car_id"),
+						Type: *ds.NewString("integer"),
+					},
+					{
+						Name: *ds.NewString("mobile_id"),
+						Type: *ds.NewString("integer"),
+					},
+				},
+				PrimaryKey: &schema.PrimaryKey{
+					Name:         *ds.NewString("users_pk"),
+					ColumnsNames: ds.NewStrings("id"),
+				},
+				ForeignKeys: map[string]*schema.ForeignKey{
+					"users_car_id_fk": {
+						Name:          *ds.NewString("users_car_id_fk"),
+						ColumnsNames:  ds.NewStrings("car_id"),
+						ForeignTable:  *ds.NewString("cars"),
+						ForeignColumn: *ds.NewString("id"),
+						IsDeferrable:  true,
+					},
+					"users_mobile_id_fk": {
+						Name:                *ds.NewString("users_mobile_id_fk"),
+						ColumnsNames:        ds.NewStrings("mobile_id"),
+						ForeignTable:        *ds.NewString("mobiles"),
+						ForeignColumn:       *ds.NewString("id"),
+						IsDeferrable:        true,
+						IsInitiallyDeferred: true,
+					},
+				},
+			},
+			ExpectedQueries: []string{
+				`CREATE TABLE users
+(
+    id        integer NOT NULL,
+    car_id    integer NOT NULL,
+    mobile_id integer NOT NULL,
+
+    CONSTRAINT users_pk PRIMARY KEY (id),
+    CONSTRAINT users_car_id_fk FOREIGN KEY (car_id) REFERENCES cars (id) DEFERRABLE,
+    CONSTRAINT users_mobile_id_fk FOREIGN KEY (mobile_id) REFERENCES mobiles (id) DEFERRABLE INITIALLY DEFERRED
+);`,
+			},
+		},
 	}
 
 	builder := sql.NewDDLBuilder()

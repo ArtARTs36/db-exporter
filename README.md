@@ -8,6 +8,8 @@ db-exporter - simple app for export db schema to formats:
 * Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
 * Raw SQL Laravel migrations `laravel-migrations-raw`
 
+Supported database: PostgreSQL
+
 usage:
 ```text
 db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [--without-migrations-table] [--tables=<value>] [--package=<value>] [--file-prefix=<value>]

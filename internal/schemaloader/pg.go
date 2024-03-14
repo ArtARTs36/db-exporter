@@ -50,21 +50,29 @@ var pgTypeMap = map[string]schema.ColumnType{
 }
 
 type constraint struct {
-	Name              string `db:"name"`
-	TableName         string `db:"table_name"`
-	ColumnName        string `db:"column_name"`
-	Type              string `db:"type"`
+	Name       string `db:"name"`
+	TableName  string `db:"table_name"`
+	ColumnName string `db:"column_name"`
+	Type       string `db:"type"`
+
 	ForeignTableName  string `db:"foreign_table_name"`
 	ForeignColumnName string `db:"foreign_column_name"`
+
+	IsDeferrable        bool `db:"is_deferrable"`
+	IsInitiallyDeferred bool `db:"initially_deferred"`
 }
 
 type squashedConstraint struct {
-	Name              string
-	TableName         string
-	ColumnsNames      *ds.Strings
-	Type              string
+	Name         string
+	TableName    string
+	ColumnsNames *ds.Strings
+	Type         string
+
 	ForeignTableName  string
 	ForeignColumnName string
+
+	IsDeferrable        bool
+	IsInitiallyDeferred bool
 }
 
 func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error) {
@@ -170,6 +178,8 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 					ForeignColumn: ds.String{
 						Value: constr.ForeignColumnName,
 					},
+					IsDeferrable:        constr.IsDeferrable,
+					IsInitiallyDeferred: constr.IsInitiallyDeferred,
 				}
 
 				table.ForeignKeys[constr.Name] = fk
@@ -217,7 +227,15 @@ func (l *PGLoader) loadConstraints(
        kcu.column_name,
        tco.constraint_type as "type",
        ccu.table_name AS foreign_table_name,
-       ccu.column_name AS foreign_column_name
+       ccu.column_name AS foreign_column_name,
+       case
+			when is_deferrable = 'NO' THEN false
+			else true
+	   END as is_deferrable,
+       case
+			when initially_deferred = 'NO' THEN false
+			else true
+	   END as initially_deferred
 from information_schema.table_constraints tco
          join information_schema.key_column_usage kcu
               on kcu.constraint_name = tco.constraint_name
@@ -248,12 +266,14 @@ order by kcu.table_schema,
 			}
 		} else {
 			sc = &squashedConstraint{
-				Name:              constr.Name,
-				TableName:         constr.TableName,
-				ColumnsNames:      ds.NewStrings(constr.ColumnName),
-				Type:              constr.Type,
-				ForeignTableName:  constr.ForeignTableName,
-				ForeignColumnName: constr.ForeignColumnName,
+				Name:                constr.Name,
+				TableName:           constr.TableName,
+				ColumnsNames:        ds.NewStrings(constr.ColumnName),
+				Type:                constr.Type,
+				ForeignTableName:    constr.ForeignTableName,
+				ForeignColumnName:   constr.ForeignColumnName,
+				IsDeferrable:        constr.IsDeferrable,
+				IsInitiallyDeferred: constr.IsInitiallyDeferred,
 			}
 
 			squashed[constr.Name] = sc

@@ -14,6 +14,9 @@ type ForeignKey struct {
 	ColumnsNames  *ds.Strings
 	ForeignTable  ds.String
 	ForeignColumn ds.String
+
+	IsDeferrable        bool
+	IsInitiallyDeferred bool
 }
 
 type PrimaryKey struct {

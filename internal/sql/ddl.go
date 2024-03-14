@@ -2,6 +2,7 @@ package sql
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -126,18 +127,37 @@ func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) str
 func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []string {
 	queries := make([]string, 0, len(table.ForeignKeys))
 
+	fks := make([]*schema.ForeignKey, 0, len(table.ForeignKeys))
 	for _, fk := range table.ForeignKeys {
+		fks = append(fks, fk)
+	}
+
+	slices.SortFunc(fks, func(a, b *schema.ForeignKey) int {
+		return strings.Compare(a.Name.Value, b.Name.Value)
+	})
+
+	for _, fk := range fks {
 		comma := ","
 		if isLast() {
 			comma = ""
 		}
 
+		deferrableString := ""
+		if fk.IsDeferrable {
+			deferrableString = " DEFERRABLE"
+
+			if fk.IsInitiallyDeferred {
+				deferrableString += " INITIALLY DEFERRED"
+			}
+		}
+
 		q := fmt.Sprintf(
-			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s",
+			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s%s",
 			fk.Name.Value,
 			fk.ColumnsNames.Join(", ").Value,
 			fk.ForeignTable.Value,
 			fk.ForeignColumn.Value,
+			deferrableString,
 			comma,
 		)
 
