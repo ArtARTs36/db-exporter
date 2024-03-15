@@ -1,0 +1,18 @@
+name: db-exporter
+description: App for export db schema to formats
+
+branding:
+    icon: 'database'
+    color: 'yellow'
+
+inputs:
+    args:
+        description: 'Arguments for db-exporter'
+        required: true
+        default: '--help'
+
+runs:
+    using: 'docker'
+    image: 'docker://artarts36/db-exporter:0.1.0'
+    args:
+        - ${{ inputs.args }}
