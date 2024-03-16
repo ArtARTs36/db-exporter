@@ -1,78 +1,70 @@
 name: db-exporter
 description: App for export db schema to formats
-
 inputs:
     driver-name:
-        description: 'database driver name'
+        description: database driver name
         required: true
-
     dsn:
-        description: 'data source name'
+        description: data source name
         required: true
-
     format:
-        description: 'exporting format'
+        description: exporting format
         required: true
-
     out-dir:
-        description: 'Output directory'
+        description: Output directory
         required: true
-
     table-per-file:
-        description: 'Export one table to one file'
+        description: Export one table to one file
         required: false
-        default: false
-
     with-diagram:
-        description: 'Export with diagram (only md)'
+        description: Export with diagram (only md)
         required: false
-        default: false
-
     without-migrations-table:
-        description: 'Export without migrations table'
+        description: Export without migrations table
         required: false
-        default: false
-
     tables:
         description: 'Table list for export, separator: ","'
         required: false
-
     package:
         description: 'Package name for code gen, e.g: models'
         required: false
-
     file-prefix:
-        description: 'Prefix for generated files'
+        description: Prefix for generated files
         required: false
-
     commit-message:
-        description: 'Add commit with generated files and your message'
+        description: Add commit with generated files and your message
         required: false
-
     commit-push:
-        description: 'Push commit with generated files'
+        description: Push commit with generated files
         required: false
-        default: false
-
     commit-author:
         description: 'Author for commit, like git syntax: `name <email>`'
         required: false
-
     stat:
-        description: 'Print stat for generated files'
+        description: Print stat for generated files
         required: false
-        default: false
-
     debug:
-        description: 'Show debug logs'
+        description: Show debug logs
         required: false
-        default: false
-
+branding:
+    icon: archive
+    color: yellow
 runs:
-    using: 'docker'
-    image: 'docker://artarts36/db-exporter:0.1.0'
+    using: docker
+    image: docker://artarts36/db-exporter:0.1.0
     args:
         - ${{ inputs.driver-name }}
         - ${{ inputs.dsn }}
         - ${{ inputs.format }}
         - ${{ inputs.out-dir }}
+        - ${{ inputs.table-per-file != '' && '--table-per-file' }}
+        - ${{ inputs.with-diagram != '' && '--with-diagram' }}
+        - ${{ inputs.without-migrations-table != '' && '--without-migrations-table' }}
+        - ${{ inputs.tables != '' && format('--tables={0}', inputs.tables) }}
+        - ${{ inputs.package != '' && format('--package={0}', inputs.package) }}
+        - ${{ inputs.file-prefix != '' && format('--file-prefix={0}', inputs.file-prefix) }}
+        - ${{ inputs.commit-message != '' && format('--commit-message={0}', inputs.commit-message) }}
+        - ${{ inputs.commit-push != '' && '--commit-push' }}
+        - ${{ inputs.commit-author != '' && format('--commit-author={0}', inputs.commit-author) }}
+        - ${{ inputs.stat != '' && '--stat' }}
+        - ${{ inputs.debug != '' && '--debug' }}
