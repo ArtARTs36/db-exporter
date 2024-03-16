@@ -55,3 +55,56 @@ Options
 You can download templates from [/templates](./templates)
 
 In order for the db-exporter to use **your** templates, you need to place them in the `./db-exporter-templates` folder
+
+## Use with GitHub Actions
+
+You can run `db-exporter` as a GitHub action as follows:
+
+```yaml
+name: Generate documentation
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  generate-docs:
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: cars
+        ports:
+          - 5499:5432
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4 # action page: <https://github.com/actions/setup-go>
+        with:
+          go-version: 1.21.0
+
+      - name: Install migrator
+        run: go install github.com/pressly/goose/v3/cmd/goose@latest
+
+      - name: Run migrations
+        env:
+          GOOSE_MIGRATION_DIR: './migrations'
+        run: goose postgres "host=localhost port=5499 user=test password=test dbname=cars sslmode=disable" up
+
+      - name: Generate markdown docs
+        uses: artarts36/db-exporter@master
+        with:
+          driver-name: pg
+          dsn: "host=localhost port=5499 user=test password=test dbname=cars sslmode=disable"
+          format: md
+          out-dir: ./docs
+          commit-message: "chore: generate documentation for database schema"
+          commit-push: true
+````
