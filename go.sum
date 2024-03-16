@@ -2,6 +2,8 @@ github.com/artarts36/singlecli v0.0.0-20240316123133-e764b453c7bf h1:NtLx9qi0q4p
 github.com/artarts36/singlecli v0.0.0-20240316123133-e764b453c7bf/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
 github.com/artarts36/singlecli v0.0.0-20240316132429-aeff831d4b11 h1:AnyY7Dn2QnWCte5A0Kzw8NBAAYlcogtkUHW8NmoUC54=
 github.com/artarts36/singlecli v0.0.0-20240316132429-aeff831d4b11/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
+github.com/artarts36/singlecli v0.0.0-20240316135146-1ba519c4a683 h1:kjuOamUXnfZkF4AFHlHCotUb580XTCVWCp6rA1SVl6U=
+github.com/artarts36/singlecli v0.0.0-20240316135146-1ba519c4a683/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
