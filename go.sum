@@ -1,13 +1,5 @@
-github.com/artarts36/singlecli v0.0.0-20240304182104-3c408cd1b113 h1:Ce29Ft2wf6bUxqlvKTAgrIeyQDtzaI8VpfsPuizvbP8=
-github.com/artarts36/singlecli v0.0.0-20240304182104-3c408cd1b113/go.mod h1:2m+Tn4LFzrg1qbrFaaxjLjJplN3VOKnPHyWRPYUaNqc=
-github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb h1:RGjdsg6eet3v8WormBsE2fqUKhvb3wj7T0ohVG5UFDg=
-github.com/artarts36/singlecli v0.0.0-20240309200637-51784bcb64cb/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
-github.com/artarts36/singlecli v0.0.0-20240311170259-2f16e57e2c1c h1:Ivqy/CtQPqV2abeg88WuqZLOc9V16QamtbB9xKDA8VE=
-github.com/artarts36/singlecli v0.0.0-20240311170259-2f16e57e2c1c/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
-github.com/artarts36/singlecli v0.0.0-20240313001344-a4892b1d088d h1:tQIGgZzGBDCLEmJFGQwR5t8h5PM1YMMXadOY0nasF6Y=
-github.com/artarts36/singlecli v0.0.0-20240313001344-a4892b1d088d/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
-github.com/artarts36/singlecli v0.0.0-20240314183802-6f21f453129b h1:ZL0Je2esRPU1fd4NN7OIIHrEcrkXkMKQFDv5LIkmL/k=
-github.com/artarts36/singlecli v0.0.0-20240314183802-6f21f453129b/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
+github.com/artarts36/singlecli v0.0.0-20240316123133-e764b453c7bf h1:NtLx9qi0q4pg3i/L8SS9gw1GkUQZm/ve+5NE1qk7Yow=
+github.com/artarts36/singlecli v0.0.0-20240316123133-e764b453c7bf/go.mod h1:CRTkVYqpRe3tK4DJzLsr+C7pvaecf34iN3GzoiYA4FA=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
@@ -15,7 +7,6 @@ github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx2
 github.com/corona10/goimagehash v1.0.2 h1:pUfB0LnsJASMPGEZLj7tGY251vF+qLGqOgEP4rUs6kA=
 github.com/corona10/goimagehash v1.0.2/go.mod h1:/l9umBhvcHQXVtQO1V6Gp1yD20STawkhRnnX0D1bvVI=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
@@ -56,13 +47,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 h1:pntxY8Ary0t43dCZ5dqY4YTJCObLY1kIXl0uzMv+7DE=
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
-github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
-github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
-github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
-github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
-github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
-github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tyler-sommer/stick v1.0.6 h1:LLdJ8oGotXCsAuVx2BRZZT6s3bYXHe0ImQ+azF4HtJg=
@@ -74,6 +58,5 @@ golang.org/x/image v0.14.0/go.mod h1:HUYqC05R2ZcZ3ejNQsIHQDQiwWM4JBqmm6MKANTp4LE
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f h1:BLraFXnmrev5lT+xlilqcH8XK9/i0At2xKjWk4p6zsU=
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
-gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
