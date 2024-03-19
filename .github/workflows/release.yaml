@@ -7,8 +7,8 @@ on:
       - prereleased
 
 jobs:
-  docker:
-    name: Build docker image
+  release-docker:
+    name: Release docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -45,69 +45,19 @@ jobs:
           tags: |
             artarts36/db-exporter:${{ steps.values.outputs.version_full}}
 
-  binary:
-    permissions: write-all
-    name: Build for ${{ matrix.os }} (${{ matrix.arch }}, ${{ matrix.compiler }})
+  release-binaries:
+    name: Release binaries
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows, darwin ] # linux, darwin, windows
-        compiler: [ gcc ] # gcc, musl-gcc
-        archiver: [ zip ] # tar, zip
-        arch: [ amd64 ]   # amd64, 386
-        include:
-          - os: linux
-            compiler: gcc
-            archiver: tar
-            arch: amd64
-            # -----
-          - os: linux
-            compiler: gcc
-            archiver: tar
-            arch: arm64
-            # -----
-          - os: darwin
-            compiler: gcc
-            archiver: tar
-            arch: arm64
-            # -----
-          - os: freebsd
-            compiler: gcc
-            archiver: tar
-            arch: amd64
-            # -----
-          - os: ''
-            compiler: musl-gcc # more info: <https://musl.libc.org/>
-            archiver: tar
-            arch: amd64
+    permissions: write-all
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
       - name: Check out code
         uses: actions/checkout@v4
-
-      - name: Install musl
-        if: matrix.compiler == 'musl-gcc'
-        run: sudo apt-get install -y musl-tools
-
-      - name: Download dependencies
-        run: go mod download # `-x` means "verbose" mode
 
       - name: Generate builder values
         id: values
         run: |
           echo "version=$(echo ${GITHUB_REF##*/} | sed -e 's/^[vV ]*//')" >> $GITHUB_OUTPUT
           echo "buildDate=$(echo $(date +%FT%T%z))" >> $GITHUB_OUTPUT
-          echo "binary-name=$(echo $(echo db-exporter`[ ${{ matrix.os }} = 'windows' ] && echo '.exe'`))" >> $GITHUB_OUTPUT
-          if [ ${{ matrix.os }} == "windows" ]; then
-            echo "sign-cert-name=db-exporter.exe.asc" >> $GITHUB_OUTPUT
-          else
-            echo "sign-cert-name=db-exporter.asc" >> $GITHUB_OUTPUT
-          fi
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
@@ -117,70 +67,56 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: false
 
-      - name: Compile binary file
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-          CC: ${{ matrix.compiler }}
-          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
-          GPG_PASS: ${{secrets.GPG_PASS}}
-          CGO_ENABLED: 0
-          LDFLAGS: >-
-            -s
-            -X main.Version=${{ steps.values.outputs.version }}
-            -X main.BuildDate=${{ steps.values.outputs.buildDate }}
+      - name: Compile binary files
+        uses: crazy-max/ghaction-xgo@v3
+        with:
+          xgo_version: latest
+          go_version: 1.21
+          dest: dist
+          pkg: ./cmd
+          prefix: db-exporter
+          targets: windows/amd64,linux/amd64,linux/arm64,darwin/arm64,darwin/amd64
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w -X main.Version=${{ steps.values.outputs.version }} -X main.BuildDate=${{ steps.values.outputs.buildDate }}
+          buildmode: default
+          trimpath: true
+
+      - name: Print compiled files
+        run: ls -la ./dist
+
+      - name: Sign and compress dist files
         run: |
           export GPG_TTY=$(tty); echo "tty: $(tty)"
-          go build -trimpath -ldflags "$LDFLAGS" -o "./${{ steps.values.outputs.binary-name }}" ./cmd/main.go && \
-          stat "./${{ steps.values.outputs.binary-name }}" && \
-          gpg --detach-sign --armor "./${{ steps.values.outputs.binary-name }}"
+          
+          cd dist
+          
+          for file in *; do
+            if [ -f "$file" ]; then
+              filename=$(basename -- "$file")
+              extension="${filename##*.}"
+              newFilename="db-exporter.$extension"
+              if [ "${filename}" == "${extension}" ]; then
+                extension=""
+                newFilename="db-exporter"
+              fi
 
-      - name: Generate distributive directory name
-        id: dist-dir
-        run: >
-          echo "name=$(echo db-exporter-${{ steps.values.outputs.version }}-$(
-            [ ${{ matrix.os }} != '' ] && echo '${{ matrix.os }}' || echo 'unknown'
-          )$(
-            [ ${{ matrix.compiler }} = 'musl-gcc' ] && echo '-musl'
-          ))-${{ matrix.arch }}" >> $GITHUB_OUTPUT
+              mv $file $newFilename
 
-      - name: Generate distributive archive name
-        id: dist-arch
-        run: >
-          echo "name=$(echo ${{ steps.dist-dir.outputs.name }}.$(
-            case ${{ matrix.archiver }} in
-              zip) echo 'zip';;
-              tar) echo 'tar.gz';;
-              *)   exit 10;
-            esac
-          ))" >> $GITHUB_OUTPUT
+              gpg --detach-sign --armor "./$newFilename"
 
-      - name: Create distributive
-        run: |
-          mkdir ${{ steps.dist-dir.outputs.name }}
-          mv "./${{ steps.values.outputs.binary-name }}"  "./${{ steps.values.outputs.sign-cert-name }}" ./${{ steps.dist-dir.outputs.name }}/
-          cp  ./README.md ./LICENSE ./${{ steps.dist-dir.outputs.name }}
+              zip -r "$file.zip" "$newFilename" README.md LICENSE "$newFilename.asc"
+          
+              rm $newFilename
+            fi
+          done
 
-      - name: Pack distributive using tar
-        if: matrix.archiver == 'tar'
-        run: tar -zcf "${{ steps.dist-arch.outputs.name }}" "${{ steps.dist-dir.outputs.name }}"
+          ls -la ./dist
 
-      - name: Pack distributive using zip
-        if: matrix.archiver == 'zip'
-        run: zip -r -q "${{ steps.dist-arch.outputs.name }}" "${{ steps.dist-dir.outputs.name }}"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Attach binary files to release
+        uses: ncipollo/release-action@v1
         with:
-          name: ${{ steps.dist-dir.outputs.name }}
-          path: ${{ steps.dist-arch.outputs.name }}
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.dist-arch.outputs.name }}
-          asset_name: ${{ steps.dist-arch.outputs.name }}
-          tag: ${{ github.ref }}
+          artifacts: "dist/*.zip"
+          generateReleaseNotes: false
+          allowUpdates: true
