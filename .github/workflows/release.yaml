@@ -87,12 +87,17 @@ jobs:
         run: ls -la ./dist
 
       - name: Sign and compress dist files
+        env:
+          GPG_SIGNING_KEY: ${{ secrets.GPG_SIGNING_KEY }}
+          GPG_PASS: ${{secrets.GPG_PASS}}
         run: |
-          export GPG_TTY=$(tty); echo "tty: $(tty)"
+          files=("db-exporter-darwin-amd64" "db-exporter-darwin-arm64" "db-exporter-linux-amd64" "db-exporter-linux-arm64" "db-exporter-windows-amd64.exe")
+          
+          cp README.md LICENSE dist
           
           cd dist
-          
-          for file in *; do
+
+          for file in "${files[@]}"; do
             if [ -f "$file" ]; then
               filename=$(basename -- "$file")
               extension="${filename##*.}"
@@ -104,15 +109,14 @@ jobs:
 
               mv $file $newFilename
 
-              gpg --detach-sign --armor "./$newFilename"
+              gpg --batch --detach-sign --armor "./$newFilename"
 
               zip -r "$file.zip" "$newFilename" README.md LICENSE "$newFilename.asc"
           
               rm $newFilename
+              rm $newFilename.asc
             fi
           done
-
-          ls -la ./dist
 
       - name: Attach binary files to release
         uses: ncipollo/release-action@v1
