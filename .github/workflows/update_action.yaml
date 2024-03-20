@@ -32,14 +32,14 @@ jobs:
 
       - name: Hash prev version
         id: prev_version
-        run: echo 'hash="${{ hashFiles('action.yaml') }}"' >> $GITHUB_OUTPUT
+        run: echo "hash=${{ hashFiles('action.yaml') }}" >> $GITHUB_OUTPUT
 
       - name: Generate new config file
         run: |
           go run ./cmd/main.go --singlecli-codegen-ga
 
       - name: Commit changes
-        if: ${{ steps.prev_version.hash != hashFiles('action.yaml') }}
+        if: ${{ steps.prev_version.outputs.hash != hashFiles('action.yaml') }}
         run: |
           git add action.yaml
           git commit -m "chore: actualize ga config"
