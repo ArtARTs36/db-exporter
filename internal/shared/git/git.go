@@ -43,8 +43,8 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 	}
 
 	cmd := exec.CommandContext(ctx, g.bin, args...)
-	if msg, err := cmd.Output(); err != nil {
-		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, msg)
+	if res, err := g.run(cmd); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
 	}
 
 	log.Printf("[git] changes commited")
