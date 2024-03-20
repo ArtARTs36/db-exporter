@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os/exec"
 	"strings"
 )
@@ -30,7 +30,7 @@ type Commit struct {
 }
 
 func (g *Git) Commit(ctx context.Context, commit *Commit) error {
-	log.Printf("[git] commiting changes")
+	slog.InfoContext(ctx, "[git] committing changes")
 
 	args := []string{
 		"commit",
@@ -47,13 +47,13 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
 	}
 
-	log.Printf("[git] changes commited")
+	slog.InfoContext(ctx, "[git] changes committed")
 
 	return nil
 }
 
 func (g *Git) AddFile(ctx context.Context, filename string) error {
-	log.Printf("[git] adding file %q", filename)
+	slog.InfoContext(ctx, "[git] adding file %q", filename)
 
 	cmd := exec.CommandContext(ctx, g.bin, "add", filename)
 
@@ -61,13 +61,13 @@ func (g *Git) AddFile(ctx context.Context, filename string) error {
 		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
 	}
 
-	log.Printf("[git] added file %q", filename)
+	slog.InfoContext(ctx, "[git] added file %q", filename)
 
 	return nil
 }
 
 func (g *Git) Push(ctx context.Context) error {
-	log.Printf("[git] pushing")
+	slog.InfoContext(ctx, "[git] pushing")
 
 	cmd := exec.CommandContext(ctx, g.bin, "push")
 
@@ -75,7 +75,7 @@ func (g *Git) Push(ctx context.Context) error {
 		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
 	}
 
-	log.Printf("[git] pushed")
+	slog.InfoContext(ctx, "[git] pushed")
 
 	return nil
 }
