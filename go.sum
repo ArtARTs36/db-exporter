@@ -1,5 +1,7 @@
 github.com/artarts36/singlecli v0.0.0-20240320221443-fb393bc980ac h1:DvMG7KjWJvpRjXWYxHY4AjO+RwaFsL48EnIs3z5dOew=
 github.com/artarts36/singlecli v0.0.0-20240320221443-fb393bc980ac/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
+github.com/artarts36/singlecli v0.0.0-20240320230751-41d6b8f4d72e h1:W98C5urQPxqwuySru1p4zN911eoVrj0JU3kELfkuUD8=
+github.com/artarts36/singlecli v0.0.0-20240320230751-41d6b8f4d72e/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
