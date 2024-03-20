@@ -34,12 +34,14 @@ inputs:
     commit-message:
         description: Add commit with generated files and your message
         required: false
+        default: 'add documentation for database schema'
     commit-push:
         description: Push commit with generated files
         required: false
     commit-author:
         description: 'Author for commit, like git syntax: `name <email>`'
         required: false
+        default: 'github-actions[bot] <github-actions[bot]@users.noreply.github.com>'
     stat:
         description: Print stat for generated files
         required: false
