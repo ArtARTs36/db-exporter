@@ -1,4 +1,7 @@
 name: update github action config
+
+permissions: write-all
+
 on:
   push:
     branches:
@@ -22,9 +25,22 @@ jobs:
       - name: Install Go dependencies
         run: go mod download
 
-      - name: Generate new config
+      - name: Configure git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Hash prev version
+        id: prev_version
+        run: echo 'hash="${{ hashFiles('action.yaml') }}"' >> $GITHUB_OUTPUT
+
+      - name: Generate new config file
         run: |
           go run ./cmd/main.go --singlecli-codegen-ga
+
+      - name: Commit changes
+        if: ${{ steps.prev_version.hash != hashFiles('action.yaml') }}
+        run: |
           git add action.yaml
           git commit -m "chore: actualize ga config"
           git push
