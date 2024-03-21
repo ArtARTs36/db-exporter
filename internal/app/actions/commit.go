@@ -50,9 +50,17 @@ func (c *Commit) Run(ctx context.Context, params *params.ActionParams) error {
 		return nil
 	}
 
+	var gitAuthor *git.Author
+	if params.ExportParams.CommitAuthor != "" {
+		gitAuthor, err = git.NewAuthor(params.ExportParams.CommitAuthor)
+		if err != nil {
+			return fmt.Errorf("failed to create git author: %w", err)
+		}
+	}
+
 	err = c.git.Commit(ctx, &git.Commit{
 		Message: c.createCommitMessage(params),
-		Author:  params.ExportParams.CommitAuthor,
+		Author:  gitAuthor,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to commit: %w", err)

@@ -26,21 +26,24 @@ func NewGit(binary string) *Git {
 
 type Commit struct {
 	Message string
-	Author  string
+	Author  *Author
 }
 
 func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 	slog.InfoContext(ctx, "[git] committing changes")
 
-	args := []string{
-		"commit",
-		"-m",
-		commit.Message,
+	args := make([]string, 0)
+
+	if commit.Author != nil {
+		args = append(args, "-c")
+		args = append(args, fmt.Sprintf("user.name=%s", commit.Author.Name))
+		args = append(args, "-c")
+		args = append(args, fmt.Sprintf("user.email=%s", commit.Author.Email))
 	}
 
-	if commit.Author != "" {
-		args = append(args, fmt.Sprintf("--author=%s", commit.Author))
-	}
+	args = append(args, "commit")
+	args = append(args, "-m")
+	args = append(args, commit.Message)
 
 	cmd := exec.CommandContext(ctx, g.bin, args...)
 	if res, err := g.run(cmd); err != nil {
@@ -53,7 +56,7 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 }
 
 func (g *Git) AddFile(ctx context.Context, filename string) error {
-	slog.InfoContext(ctx, "[git] adding file %q", filename)
+	slog.InfoContext(ctx, fmt.Sprintf("[git] adding file %q", filename))
 
 	cmd := exec.CommandContext(ctx, g.bin, "add", filename)
 
@@ -61,7 +64,7 @@ func (g *Git) AddFile(ctx context.Context, filename string) error {
 		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
 	}
 
-	slog.InfoContext(ctx, "[git] added file %q", filename)
+	slog.InfoContext(ctx, fmt.Sprintf("[git] added file %q", filename))
 
 	return nil
 }
