@@ -63,6 +63,8 @@ You can run `db-exporter` as a GitHub action as follows:
 ```yaml
 name: Generate documentation
 
+permissions: write-all
+
 on:
   push:
     branches:
@@ -107,4 +109,6 @@ jobs:
           out-dir: ./docs
           commit-message: "chore: generate documentation for database schema"
           commit-push: true
+          without-migrations-table: true
+          with-diagram: true
 ````
