@@ -59,9 +59,8 @@ func (g *Git) AddFile(ctx context.Context, filename string) error {
 	slog.InfoContext(ctx, fmt.Sprintf("[git] adding file %q", filename))
 
 	cmd := exec.CommandContext(ctx, g.bin, "add", filename)
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
+	if res, err := g.run(cmd); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
 	}
 
 	slog.InfoContext(ctx, fmt.Sprintf("[git] added file %q", filename))
@@ -74,8 +73,8 @@ func (g *Git) Push(ctx context.Context) error {
 
 	cmd := exec.CommandContext(ctx, g.bin, "push")
 
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to execute %q: %w", cmd.String(), err)
+	if res, err := g.run(cmd); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
 	}
 
 	slog.InfoContext(ctx, "[git] pushed")
