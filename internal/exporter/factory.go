@@ -14,6 +14,7 @@ var Names = []string{
 	GooseExporterName,
 	GoSQLMigrateExporterName,
 	LaravelMigrationsRawExporterName,
+	GrpcCrudExporterName,
 }
 
 func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) {
@@ -39,6 +40,10 @@ func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) 
 
 	if name == LaravelMigrationsRawExporterName {
 		return NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()), nil
+	}
+
+	if name == GrpcCrudExporterName {
+		return NewGrpcCrudExporter(renderer), nil
 	}
 
 	return nil, fmt.Errorf("format %q unsupported", name)

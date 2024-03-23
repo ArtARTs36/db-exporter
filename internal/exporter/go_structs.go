@@ -9,6 +9,7 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -115,6 +116,7 @@ func (e *GoStructsExporter) selectPackage(params *ExportParams) string {
 
 func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
 	switch col.PreparedType {
+	case schema.ColumnTypeInteger64:
 	case schema.ColumnTypeInteger:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -122,7 +124,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 			return "sql.NullInt64"
 		}
 
-		return "int64"
+		return golang.TypeInt64
 	case schema.ColumnTypeInteger16:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -130,15 +132,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 			return "sql.NullInt16"
 		}
 
-		return "int16"
-	case schema.ColumnTypeInteger64:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullInt64"
-		}
-
-		return "int64"
+		return golang.TypeInt16
 	case schema.ColumnTypeString:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -146,7 +140,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 			return "sql.NullString"
 		}
 
-		return "string"
+		return golang.TypeString
 	case schema.ColumnTypeTimestamp:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -164,7 +158,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 			return "sql.NullBool"
 		}
 
-		return "bool"
+		return golang.TypeBool
 	case schema.ColumnTypeFloat64:
 		if col.Nullable {
 			imports.Add("database/sql")
@@ -172,24 +166,24 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 			return "sql.NullFloat64"
 		}
 
-		return "float64"
+		return golang.TypeFloat64
 	case schema.ColumnTypeFloat32:
 		if col.Nullable {
 			imports.Add("database/sql")
 
-			return "*float32"
+			return golang.Ptr(golang.TypeFloat32)
 		}
 
-		return "float32"
+		return golang.TypeFloat32
 	case schema.ColumnTypeBytes:
 		if col.Nullable {
-			return "*[]byte"
+			return golang.Ptr(golang.TypeByteSlice)
 		}
 
-		return "[]byte"
-	default:
-		return "string"
+		return golang.TypeByteSlice
 	}
+
+	return golang.TypeString
 }
 
 func (e *GoStructsExporter) makeGoSchema(tables []*schema.Table) *goSchema {
