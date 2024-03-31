@@ -25,3 +25,7 @@ func (c *Column) IsUniqueKey() bool {
 func (c *Column) HasForeignKey() bool {
 	return c.ForeignKey != nil
 }
+
+func (c *Column) IsUniqueOrPrimaryKey() bool {
+	return c.IsUniqueKey() || c.IsPrimaryKey()
+}
