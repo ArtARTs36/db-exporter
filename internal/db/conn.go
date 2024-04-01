@@ -8,15 +8,11 @@ import (
 
 type Connection struct {
 	db         *sqlx.DB
-	driverName string
+	driverName DriverName
 	dsn        string
 }
 
-func NewConnection(driverName, dsn string) *Connection {
-	if driverName == "pg" {
-		driverName = "postgres"
-	}
-
+func NewConnection(driverName DriverName, dsn string) *Connection {
 	return &Connection{driverName: driverName, dsn: dsn}
 }
 
@@ -24,7 +20,7 @@ func (c *Connection) Connect(ctx context.Context) (*sqlx.DB, error) {
 	if c.db == nil {
 		slog.DebugContext(ctx, "[db-connection] connecting to database")
 
-		db, err := sqlx.Connect(c.driverName, c.dsn)
+		db, err := sqlx.Connect(c.driverName.String(), c.dsn)
 		if err != nil {
 			return nil, err
 		}
@@ -35,4 +31,12 @@ func (c *Connection) Connect(ctx context.Context) (*sqlx.DB, error) {
 	}
 
 	return c.db, nil
+}
+
+func (c *Connection) Close() error {
+	if c.db == nil {
+		return nil
+	}
+
+	return c.db.Close()
 }

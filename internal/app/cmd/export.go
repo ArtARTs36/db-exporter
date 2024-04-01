@@ -41,9 +41,25 @@ func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
 	startedAt := time.Now()
 
-	connection := db.NewConnection(expParams.DriverName, expParams.DSN)
+	driverName, err := db.CreateDriverName(expParams.DriverName)
+	if err != nil {
+		return err
+	}
 
-	loader, err := db.CreateSchemaLoader(expParams.DriverName, connection)
+	connection := db.NewConnection(driverName, expParams.DSN)
+	defer func() {
+		closeErr := connection.Close()
+
+		if closeErr == nil {
+			slog.InfoContext(ctx, "[exportcmd] db connection closed")
+
+			return
+		}
+
+		slog.ErrorContext(ctx, fmt.Sprintf("failed to close db connection: %s", closeErr))
+	}()
+
+	loader, err := db.CreateSchemaLoader(connection)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
