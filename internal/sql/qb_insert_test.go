@@ -52,10 +52,9 @@ func TestInsertBuilder_Build(t *testing.T) {
 				},
 			},
 			Expected: `INSERT INTO users (id, name)
-VALUES (
+VALUES
     (1, 'dev'),
-    (2, null)
-);`,
+    (2, null);`,
 			ExpectedErr: fmt.Errorf("rows is empty"),
 		},
 	}
