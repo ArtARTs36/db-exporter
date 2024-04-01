@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"log/slog"
 )
 
 type TableData []map[string]interface{}
@@ -29,6 +30,15 @@ func (l *DataLoader) Load(ctx context.Context, table string) (TableData, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data: %w", err)
 	}
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("failed to fetch data: %w", rows.Err())
+	}
+	defer func() {
+		closeErr := rows.Close()
+		if closeErr != nil {
+			slog.ErrorContext(ctx, fmt.Sprintf("failed to close rows: %s", closeErr))
+		}
+	}()
 
 	cols, err := rows.Columns()
 	if err != nil {
@@ -38,17 +48,18 @@ func (l *DataLoader) Load(ctx context.Context, table string) (TableData, error) 
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
 		columnPointers := make([]interface{}, len(cols))
-		for i, _ := range columns {
+		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
 
-		if err := rows.Scan(columnPointers...); err != nil {
-			return nil, fmt.Errorf("failed to scan: %w", err)
+		if scanErr := rows.Scan(columnPointers...); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan: %w", scanErr)
 		}
 
 		m := make(map[string]interface{})
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val, _ := columnPointers[i].(*interface{})
+
 			m[colName] = *val
 		}
 

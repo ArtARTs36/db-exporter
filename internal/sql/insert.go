@@ -8,13 +8,15 @@ import (
 )
 
 func (b *QueryBuilder) BuildInsertQuery(table *schema.Table, rows []map[string]interface{}) (string, error) {
+	const qPlusCapacity = 3
+
 	if len(rows) == 0 {
 		return "", fmt.Errorf("rows is empty")
 	}
 
 	values := b.buildValues(table, rows)
 
-	q := make([]string, 0, len(values)+3)
+	q := make([]string, 0, len(values)+qPlusCapacity)
 	q = append(q, b.buildInsertInto(table))
 	q = append(q, "VALUES")
 	q = append(q, values...)

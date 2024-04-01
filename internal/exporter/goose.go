@@ -33,7 +33,11 @@ func NewGooseExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *
 	}
 }
 
-func (e *GooseExporter) ExportPerFile(ctx context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *GooseExporter) ExportPerFile(
+	ctx context.Context,
+	sch *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-exporter] building queries and rendering migration files")

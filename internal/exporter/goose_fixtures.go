@@ -34,7 +34,11 @@ func NewGooseFixturesExporter(
 	}
 }
 
-func (e *GooseFixturesExporter) ExportPerFile(ctx context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *GooseFixturesExporter) ExportPerFile(
+	ctx context.Context,
+	sch *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries and rendering migration files")
@@ -78,7 +82,11 @@ func (e *GooseFixturesExporter) ExportPerFile(ctx context.Context, sch *schema.S
 	return pages, nil
 }
 
-func (e *GooseFixturesExporter) Export(ctx context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
+func (e *GooseFixturesExporter) Export(
+	ctx context.Context,
+	sch *schema.Schema,
+	_ *ExportParams,
+) ([]*ExportedPage, error) {
 	upQueries := make([]string, 0, sch.Tables.Len())
 	downQueries := make([]string, 0, sch.Tables.Len())
 

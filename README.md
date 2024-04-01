@@ -18,7 +18,7 @@ db-exporter driver-name dsn format out-dir [--table-per-file] [--with-diagram] [
 Arguments
   driver-name                database driver name, required, available values: [pg]
   dsn                        data source name, required
-  format                     exporting format, required, available values: [md, diagram, go-structs, goose, go-sql-migrate, laravel-migrations-raw]
+  format                     exporting format, required, available values: [md, diagram, go-structs, goose, go-sql-migrate, laravel-migrations-raw, goose-fixtures]
   out-dir                    Output directory, required
 
 Options
@@ -49,6 +49,7 @@ Options
 | diagram        | diagram/table.html           | Template for generate table                                  |
 | go-structs     | go-structs/model.go.tpl      | Template for generate table                                  |
 | goose          | goose/migration.sql          | Template for generate migration                              |
+| goose-fixtures | goose/migration.sql          | Template for generate migration with fixtures                |
 | go-sql-migrate | go-sql-migrate/migration.sql | Template for generate migration                              |
 | laravel        | laravel/migration-raw.php    | Template for generate migration                              |
 | grpc-crud      | grpc-crud/gprc.proto         | Template for generate protobuf                               |

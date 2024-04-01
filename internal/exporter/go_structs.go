@@ -116,8 +116,7 @@ func (e *GoStructsExporter) selectPackage(params *ExportParams) string {
 
 func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
 	switch col.PreparedType {
-	case schema.ColumnTypeInteger64:
-	case schema.ColumnTypeInteger:
+	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
 		if col.Nullable {
 			imports.Add("database/sql")
 
