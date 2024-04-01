@@ -1,4 +1,4 @@
-package schemaloader
+package db
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 )
 
 type PGLoader struct {
+	conn *Connection
 }
 
 var pgTypeMap = map[string]schema.ColumnType{
@@ -75,15 +76,15 @@ type squashedConstraint struct {
 	IsInitiallyDeferred bool
 }
 
-func (l *PGLoader) Load(ctx context.Context, dsn string) (*schema.Schema, error) {
-	slog.DebugContext(ctx, "[pgloader] connecting to database")
+func NewPGLoader(conn *Connection) *PGLoader {
+	return &PGLoader{conn: conn}
+}
 
-	db, err := sqlx.Connect("postgres", dsn)
+func (l *PGLoader) Load(ctx context.Context) (*schema.Schema, error) {
+	db, err := l.conn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
 	}
-
-	slog.InfoContext(ctx, "[pgloader] connected to database")
 
 	query := `
 select c.column_name as name,

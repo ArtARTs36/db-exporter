@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/sql"
 
 	"github.com/artarts36/db-exporter/internal/template"
@@ -15,9 +16,10 @@ var Names = []string{
 	GoSQLMigrateExporterName,
 	LaravelMigrationsRawExporterName,
 	GrpcCrudExporterName,
+	GooseFixturesExporterName,
 }
 
-func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) {
+func CreateExporter(name string, renderer *template.Renderer, connection *db.Connection) (Exporter, error) {
 	if name == MarkdownExporterName {
 		return NewMarkdownExporter(renderer), nil
 	}
@@ -44,6 +46,14 @@ func CreateExporter(name string, renderer *template.Renderer) (Exporter, error) 
 
 	if name == GrpcCrudExporterName {
 		return NewGrpcCrudExporter(renderer), nil
+	}
+
+	if name == GooseFixturesExporterName {
+		return NewGooseFixturesExporter(
+			db.NewDataLoader(connection),
+			renderer,
+			sql.NewInsertBuilder(),
+		), nil
 	}
 
 	return nil, fmt.Errorf("format %q unsupported", name)
