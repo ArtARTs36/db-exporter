@@ -8,6 +8,17 @@ import (
 )
 
 func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string]interface{}) []string {
+	if table.PrimaryKey.ColumnsNames.Len() == 1 && len(rows) > 1 {
+		col := table.PrimaryKey.ColumnsNames.First()
+		values := make([]interface{}, 0, len(rows))
+
+		for _, row := range rows {
+			values = append(values, row[col])
+		}
+
+		return []string{b.BuildDeleteInQuery(table.Name.Value, col, values)}
+	}
+
 	queries := make([]string, 0, len(rows))
 
 	for _, row := range rows {
@@ -33,4 +44,14 @@ func (b *QueryBuilder) BuildDeleteQuery(table string, fields map[string]interfac
 	}
 
 	return fmt.Sprintf("%s;", strings.Join(q, " "))
+}
+
+func (b *QueryBuilder) BuildDeleteInQuery(table string, field string, values []interface{}) string {
+	valuesStr := make([]string, 0, len(values))
+
+	for _, val := range values {
+		valuesStr = append(valuesStr, b.mapValue(val))
+	}
+
+	return fmt.Sprintf("DELETE FROM %s WHERE %s IN (%s);", table, field, strings.Join(valuesStr, ", "))
 }
