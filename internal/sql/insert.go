@@ -10,6 +10,10 @@ import (
 type InsertBuilder struct {
 }
 
+func NewInsertBuilder() *InsertBuilder {
+	return &InsertBuilder{}
+}
+
 func (b *InsertBuilder) Build(table *schema.Table, rows []map[string]interface{}) (string, error) {
 	if len(rows) == 0 {
 		return "", fmt.Errorf("rows is empty")
@@ -19,9 +23,10 @@ func (b *InsertBuilder) Build(table *schema.Table, rows []map[string]interface{}
 
 	q := make([]string, 0, len(values)+3)
 	q = append(q, b.buildInsertInto(table))
-	q = append(q, "VALUES (")
+	q = append(q, "VALUES")
 	q = append(q, values...)
-	q = append(q, ");")
+
+	q[len(q)-1] = fmt.Sprintf("%s;", q[len(q)-1])
 
 	return strings.Join(q, "\n"), nil
 }

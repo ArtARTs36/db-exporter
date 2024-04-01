@@ -41,14 +41,16 @@ func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
 	startedAt := time.Now()
 
-	loader, err := schemaloader.CreateLoader(expParams.DriverName)
+	connection := schemaloader.NewConnection(expParams.DriverName, expParams.DSN)
+
+	loader, err := schemaloader.CreateLoader(expParams.DriverName, connection)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
 
 	renderer := a.createRenderer()
 
-	exp, err := exporter.CreateExporter(expParams.Format, renderer)
+	exp, err := exporter.CreateExporter(expParams.Format, renderer, connection)
 	if err != nil {
 		return fmt.Errorf("failed to create exporter: %w", err)
 	}
@@ -128,7 +130,7 @@ func (a *ExportCmd) loadSchema(
 	loader schemaloader.Loader,
 	params *params.ExportParams,
 ) (*schema.Schema, error) {
-	sc, err := loader.Load(ctx, params.DSN)
+	sc, err := loader.Load(ctx)
 	if err != nil {
 		return nil, err
 	}
