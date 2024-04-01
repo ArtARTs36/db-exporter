@@ -8,6 +8,16 @@ import (
 )
 
 func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string]interface{}) []string {
+	if table.PrimaryKey == nil {
+		queries := make([]string, 0, len(rows))
+
+		for _, row := range rows {
+			queries = append(queries, b.BuildDeleteQuery(table.Name.Value, row))
+		}
+
+		return queries
+	}
+
 	if table.PrimaryKey.ColumnsNames.Len() == 1 && len(rows) > 1 {
 		col := table.PrimaryKey.ColumnsNames.First()
 		values := make([]interface{}, 0, len(rows))
@@ -35,15 +45,13 @@ func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string
 }
 
 func (b *QueryBuilder) BuildDeleteQuery(table string, fields map[string]interface{}) string {
-	q := []string{
-		fmt.Sprintf("DELETE FROM %s WHERE", table),
-	}
+	q := make([]string, 0, len(fields))
 
 	for field, val := range fields {
 		q = append(q, fmt.Sprintf("%s = %s", field, b.mapValue(val)))
 	}
 
-	return fmt.Sprintf("%s;", strings.Join(q, " "))
+	return fmt.Sprintf("DELETE FROM %s WHERE %s;", table, strings.Join(q, " AND "))
 }
 
 func (b *QueryBuilder) BuildDeleteInQuery(table string, field string, values []interface{}) string {
