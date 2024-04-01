@@ -60,11 +60,11 @@ VALUES (
 		},
 	}
 
-	builder := &sql.InsertBuilder{}
+	builder := &sql.QueryBuilder{}
 
 	for i, tCase := range cases {
 		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {
-			got, err := builder.Build(tCase.Table, tCase.Rows)
+			got, err := builder.BuildInsertQuery(tCase.Table, tCase.Rows)
 			if tCase.ExpectedErr == nil {
 				require.NoError(t, err)
 			}

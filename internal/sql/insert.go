@@ -7,14 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-type InsertBuilder struct {
-}
-
-func NewInsertBuilder() *InsertBuilder {
-	return &InsertBuilder{}
-}
-
-func (b *InsertBuilder) Build(table *schema.Table, rows []map[string]interface{}) (string, error) {
+func (b *QueryBuilder) BuildInsertQuery(table *schema.Table, rows []map[string]interface{}) (string, error) {
 	if len(rows) == 0 {
 		return "", fmt.Errorf("rows is empty")
 	}
@@ -31,7 +24,7 @@ func (b *InsertBuilder) Build(table *schema.Table, rows []map[string]interface{}
 	return strings.Join(q, "\n"), nil
 }
 
-func (b *InsertBuilder) buildValues(table *schema.Table, rows []map[string]interface{}) []string {
+func (b *QueryBuilder) buildValues(table *schema.Table, rows []map[string]interface{}) []string {
 	values := make([]string, 0, len(rows))
 	cols := table.ColumnsNames()
 
@@ -53,11 +46,11 @@ func (b *InsertBuilder) buildValues(table *schema.Table, rows []map[string]inter
 	return values
 }
 
-func (b *InsertBuilder) buildInsertInto(table *schema.Table) string {
+func (b *QueryBuilder) buildInsertInto(table *schema.Table) string {
 	return fmt.Sprintf("INSERT INTO %s (%s)", table.Name.Value, strings.Join(table.ColumnsNames(), ", "))
 }
 
-func (b *InsertBuilder) mapValue(val interface{}) string {
+func (b *QueryBuilder) mapValue(val interface{}) string {
 	colValStr := "null"
 
 	switch tColVal := val.(type) {

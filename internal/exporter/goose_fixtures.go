@@ -17,20 +17,20 @@ import (
 const GooseFixturesExporterName = "goose-fixtures"
 
 type GooseFixturesExporter struct {
-	dataLoader    *schemaloader.DataLoader
-	renderer      *template.Renderer
-	insertBuilder *sql.InsertBuilder
+	dataLoader   *schemaloader.DataLoader
+	renderer     *template.Renderer
+	queryBuilder *sql.QueryBuilder
 }
 
 func NewGooseFixturesExporter(
 	dataLoader *schemaloader.DataLoader,
 	renderer *template.Renderer,
-	insertBuilder *sql.InsertBuilder,
+	insertBuilder *sql.QueryBuilder,
 ) *GooseFixturesExporter {
 	return &GooseFixturesExporter{
-		dataLoader:    dataLoader,
-		renderer:      renderer,
-		insertBuilder: insertBuilder,
+		dataLoader:   dataLoader,
+		renderer:     renderer,
+		queryBuilder: insertBuilder,
 	}
 }
 
@@ -49,12 +49,12 @@ func (e *GooseFixturesExporter) ExportPerFile(ctx context.Context, sch *schema.S
 			continue
 		}
 
-		upQuery, err := e.insertBuilder.Build(table, data)
+		upQuery, err := e.queryBuilder.BuildInsertQuery(table, data)
 		if err != nil {
 			return nil, err
 		}
 
-		migration := e.makeMigration([]string{upQuery})
+		migration := e.makeMigration([]string{upQuery}, []string{})
 
 		p, err := render(
 			e.renderer,
@@ -94,12 +94,12 @@ func (e *GooseFixturesExporter) Export(ctx context.Context, sch *schema.Schema, 
 			continue
 		}
 
-		upQuery, err := e.insertBuilder.Build(table, data)
+		upQuery, err := e.queryBuilder.BuildInsertQuery(table, data)
 		if err != nil {
 			return nil, err
 		}
 
-		migration := e.makeMigration([]string{upQuery})
+		migration := e.makeMigration([]string{upQuery}, e.queryBuilder.BuildDeleteQueries(table, data))
 
 		upQueries = append(upQueries, migration.upQueries...)
 		downQueries = append(downQueries, migration.downQueries...)
@@ -125,8 +125,9 @@ func (e *GooseFixturesExporter) Export(ctx context.Context, sch *schema.Schema, 
 	}, nil
 }
 
-func (e *GooseFixturesExporter) makeMigration(upQueries []string) *gooseMigration {
+func (e *GooseFixturesExporter) makeMigration(upQueries []string, downQueries []string) *gooseMigration {
 	return &gooseMigration{
-		upQueries: upQueries,
+		upQueries:   upQueries,
+		downQueries: downQueries,
 	}
 }
