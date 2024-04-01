@@ -7,8 +7,8 @@ import (
 
 	"github.com/tyler-sommer/stick"
 
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/schemaloader"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
 	"github.com/artarts36/db-exporter/internal/sql"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -17,13 +17,13 @@ import (
 const GooseFixturesExporterName = "goose-fixtures"
 
 type GooseFixturesExporter struct {
-	dataLoader   *schemaloader.DataLoader
+	dataLoader   *db.DataLoader
 	renderer     *template.Renderer
 	queryBuilder *sql.QueryBuilder
 }
 
 func NewGooseFixturesExporter(
-	dataLoader *schemaloader.DataLoader,
+	dataLoader *db.DataLoader,
 	renderer *template.Renderer,
 	insertBuilder *sql.QueryBuilder,
 ) *GooseFixturesExporter {
@@ -54,7 +54,7 @@ func (e *GooseFixturesExporter) ExportPerFile(ctx context.Context, sch *schema.S
 			return nil, err
 		}
 
-		migration := e.makeMigration([]string{upQuery}, []string{})
+		migration := e.makeMigration([]string{upQuery}, e.queryBuilder.BuildDeleteQueries(table, data))
 
 		p, err := render(
 			e.renderer,

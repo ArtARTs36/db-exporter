@@ -2,7 +2,7 @@ package exporter
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/schemaloader"
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/sql"
 
 	"github.com/artarts36/db-exporter/internal/template"
@@ -19,7 +19,7 @@ var Names = []string{
 	GooseFixturesExporterName,
 }
 
-func CreateExporter(name string, renderer *template.Renderer, connection *schemaloader.Connection) (Exporter, error) {
+func CreateExporter(name string, renderer *template.Renderer, connection *db.Connection) (Exporter, error) {
 	if name == MarkdownExporterName {
 		return NewMarkdownExporter(renderer), nil
 	}
@@ -50,7 +50,7 @@ func CreateExporter(name string, renderer *template.Renderer, connection *schema
 
 	if name == GooseFixturesExporterName {
 		return NewGooseFixturesExporter(
-			schemaloader.NewDataLoader(connection),
+			db.NewDataLoader(connection),
 			renderer,
 			sql.NewInsertBuilder(),
 		), nil

@@ -11,9 +11,9 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/app/actions"
 	"github.com/artarts36/db-exporter/internal/app/params"
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/schemaloader"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -41,9 +41,9 @@ func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
 	startedAt := time.Now()
 
-	connection := schemaloader.NewConnection(expParams.DriverName, expParams.DSN)
+	connection := db.NewConnection(expParams.DriverName, expParams.DSN)
 
-	loader, err := schemaloader.CreateLoader(expParams.DriverName, connection)
+	loader, err := db.CreateSchemaLoader(expParams.DriverName, connection)
 	if err != nil {
 		return fmt.Errorf("unable to create schema loader: %w", err)
 	}
@@ -127,7 +127,7 @@ func (a *ExportCmd) export(
 
 func (a *ExportCmd) loadSchema(
 	ctx context.Context,
-	loader schemaloader.Loader,
+	loader db.SchemaLoader,
 	params *params.ExportParams,
 ) (*schema.Schema, error) {
 	sc, err := loader.Load(ctx)

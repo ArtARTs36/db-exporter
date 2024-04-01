@@ -1,8 +1,8 @@
-package schemaloader
+package db
 
 import "fmt"
 
-func CreateLoader(driverName string, conn *Connection) (Loader, error) {
+func CreateSchemaLoader(driverName string, conn *Connection) (SchemaLoader, error) {
 	if driverName == "pg" {
 		return &PGLoader{
 			conn: conn,

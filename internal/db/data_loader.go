@@ -1,4 +1,4 @@
-package schemaloader
+package db
 
 import (
 	"context"
