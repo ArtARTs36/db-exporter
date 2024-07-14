@@ -11,7 +11,10 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const YamlFixturesExporterName = "yaml-fixtures"
+const (
+	YamlFixturesExporterName = "yaml-fixtures"
+	yamlFixturesFilename     = "fixtures.yaml"
+)
 
 type YamlFixturesExporter struct {
 	unimplementedImporter
@@ -57,9 +60,13 @@ func (e *YamlFixturesExporter) ExportPerFile(
 			continue
 		}
 
-		content, err := yaml.Marshal(map[string]interface{}{
-			"rows": data,
-		})
+		fixture := yamlFixture{
+			Tables: *orderedmap.New[string, yamlFixtureTable](),
+		}
+
+		fixture.Tables.Set(table.Name.Val, yamlFixtureTable{Rows: data})
+
+		content, err := yaml.Marshal(fixture)
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to build yaml content: %w", err)
@@ -81,7 +88,9 @@ func (e *YamlFixturesExporter) Export(
 	sch *schema.Schema,
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
-	tablesData := map[string]map[string]interface{}{}
+	fixture := &yamlFixture{
+		Tables: *orderedmap.New[string, yamlFixtureTable](),
+	}
 
 	for _, table := range sch.Tables.List() {
 		data, err := e.dataLoader.Load(ctx, table.Name.Val)
@@ -93,24 +102,18 @@ func (e *YamlFixturesExporter) Export(
 			continue
 		}
 
-		_, tableDataExists := tablesData[table.Name.Val]
-		if !tableDataExists {
-			tablesData[table.Name.Val] = map[string]interface{}{}
-		}
-
-		tablesData[table.Name.Val]["rows"] = data
+		fixture.Tables.Set(table.Name.Val, yamlFixtureTable{
+			Rows: data,
+		})
 	}
 
-	content, err := yaml.Marshal(map[string]interface{}{
-		"tables": tablesData,
-	})
-
+	content, err := yaml.Marshal(fixture)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build yaml content: %w", err)
 	}
 
 	p := &ExportedPage{
-		FileName: "fixtures.yaml",
+		FileName: yamlFixturesFilename,
 		Content:  content,
 	}
 
@@ -119,24 +122,31 @@ func (e *YamlFixturesExporter) Export(
 	}, nil
 }
 
-func (e *YamlFixturesExporter) Import(ctx context.Context, _ *schema.Schema, params *ExportParams) error {
-	file, err := params.Directory.ReadFile("fixtures.yaml")
+func (e *YamlFixturesExporter) Import(ctx context.Context, _ *schema.Schema, params *ImportParams) (
+	[]ImportedFile,
+	error,
+) {
+	file, err := params.Directory.ReadFile(yamlFixturesFilename)
 	if err != nil {
-		return fmt.Errorf("failed to read fixtures.yaml: %w", err)
+		return nil, fmt.Errorf("failed to read %s: %w", yamlFixturesFilename, err)
 	}
 
 	var fixture yamlFixture
 
 	if err = yaml.Unmarshal(file, &fixture); err != nil {
-		return fmt.Errorf("failed to unmarshal fixtures.yaml: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal %s: %w", yamlFixturesFilename, err)
 	}
 
 	for table := fixture.Tables.Oldest(); table != nil; table = table.Next() {
+		if !params.TableFilter(table.Key) {
+			continue
+		}
+
 		err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
 		if err != nil {
-			return fmt.Errorf("failed to insert: %w", err)
+			return nil, fmt.Errorf("failed to insert: %w", err)
 		}
 	}
 
-	return nil
+	return []ImportedFile{}, nil
 }

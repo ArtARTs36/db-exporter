@@ -16,7 +16,11 @@ type ExportParams struct {
 	WithDiagram            bool
 	WithoutMigrationsTable bool
 	Package                string
-	Directory              *fs.Directory
+}
+
+type ImportParams struct {
+	Directory   *fs.Directory
+	TableFilter func(tableName string) bool
 }
 
 type ExportedPage struct {
