@@ -13,7 +13,7 @@ type Renderer struct {
 
 func NewRenderer(templateLoader stick.Loader) *Renderer {
 	eng := stick.New(templateLoader)
-	eng.Functions["spaces"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
+	eng.Functions["spaces"] = func(_ stick.Context, args ...stick.Value) stick.Value {
 		count, valid := args[0].(int)
 		if !valid || count < 0 {
 			count = 0

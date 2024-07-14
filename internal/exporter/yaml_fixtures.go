@@ -3,10 +3,11 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"gopkg.in/yaml.v3"
+
 	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
-	"gopkg.in/yaml.v3"
 )
 
 const YamlFixturesExporterName = "yaml-fixtures"
@@ -54,10 +55,6 @@ func (e *YamlFixturesExporter) ExportPerFile(
 		p := &ExportedPage{
 			FileName: fmt.Sprintf("%s.yaml", table.Name.String()),
 			Content:  content,
-		}
-
-		if err != nil {
-			return nil, err
 		}
 
 		pages = append(pages, p)
