@@ -7,6 +7,7 @@ db-exporter - simple app for export db schema to formats:
 * Goose migrations `goose`
 * Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
 * Raw SQL Laravel migrations `laravel-migrations-raw`
+* YAML fixtures `yaml-fixtures`
 
 Supported database: PostgreSQL
 

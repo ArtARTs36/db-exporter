@@ -107,10 +107,8 @@ func (e *GooseFixturesExporter) Export(
 			return nil, err
 		}
 
-		migration := e.makeMigration([]string{upQuery}, e.queryBuilder.BuildDeleteQueries(table, data))
-
-		upQueries = append(upQueries, migration.upQueries...)
-		downQueries = append(downQueries, migration.downQueries...)
+		upQueries = append(upQueries, upQuery)
+		downQueries = append(downQueries, e.queryBuilder.BuildDeleteQueries(table, data)...)
 	}
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] rendering migration file")

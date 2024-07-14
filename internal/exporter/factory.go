@@ -17,6 +17,7 @@ var Names = []string{
 	LaravelMigrationsRawExporterName,
 	GrpcCrudExporterName,
 	GooseFixturesExporterName,
+	YamlFixturesExporterName,
 }
 
 func CreateExporter(name string, renderer *template.Renderer, connection *db.Connection) (Exporter, error) {
@@ -53,6 +54,13 @@ func CreateExporter(name string, renderer *template.Renderer, connection *db.Con
 			db.NewDataLoader(connection),
 			renderer,
 			sql.NewInsertBuilder(),
+		), nil
+	}
+
+	if name == YamlFixturesExporterName {
+		return NewYamlFixturesExporter(
+			db.NewDataLoader(connection),
+			renderer,
 		), nil
 	}
 
