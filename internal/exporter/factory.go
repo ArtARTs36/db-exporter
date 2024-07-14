@@ -61,6 +61,7 @@ func CreateExporter(name string, renderer *template.Renderer, connection *db.Con
 		return NewYamlFixturesExporter(
 			db.NewDataLoader(connection),
 			renderer,
+			db.NewInserter(connection),
 		), nil
 	}
 

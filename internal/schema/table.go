@@ -18,7 +18,7 @@ func (t *Table) ColumnsNames() []string {
 		t.columnsNames = make([]string, 0, len(t.Columns))
 
 		for _, column := range t.Columns {
-			t.columnsNames = append(t.columnsNames, column.Name.Value)
+			t.columnsNames = append(t.columnsNames, column.Name.Val)
 		}
 	}
 

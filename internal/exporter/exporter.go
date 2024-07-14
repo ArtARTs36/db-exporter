@@ -2,11 +2,12 @@ package exporter
 
 import (
 	"context"
-
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 type Exporter interface {
+	Importer
 	ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
 	Export(ctx context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
 }
@@ -15,6 +16,7 @@ type ExportParams struct {
 	WithDiagram            bool
 	WithoutMigrationsTable bool
 	Package                string
+	Directory              *fs.Directory
 }
 
 type ExportedPage struct {

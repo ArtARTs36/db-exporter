@@ -136,7 +136,7 @@ order by c.ordinal_position`
 
 		col.PreparedType = l.prepareColumnType(col)
 
-		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
+		l.applyConstraints(table, col, constraints[col.TableName.Val][col.Name.Val])
 
 		table.Columns = append(table.Columns, col)
 	}
@@ -154,7 +154,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			if pk == nil {
 				pk = &schema.PrimaryKey{
 					Name: ds.String{
-						Value: constr.Name,
+						Val: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,
 				}
@@ -169,15 +169,15 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			if fk == nil {
 				fk = &schema.ForeignKey{
 					Name: ds.String{
-						Value: constr.Name,
+						Val: constr.Name,
 					},
 					Table:        table.Name,
 					ColumnsNames: constr.ColumnsNames,
 					ForeignTable: ds.String{
-						Value: constr.ForeignTableName,
+						Val: constr.ForeignTableName,
 					},
 					ForeignColumn: ds.String{
-						Value: constr.ForeignColumnName,
+						Val: constr.ForeignColumnName,
 					},
 					IsDeferrable:        constr.IsDeferrable,
 					IsInitiallyDeferred: constr.IsInitiallyDeferred,
@@ -193,7 +193,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			if uk == nil {
 				uk = &schema.UniqueKey{
 					Name: ds.String{
-						Value: constr.Name,
+						Val: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,
 				}
@@ -207,7 +207,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 }
 
 func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
-	t, exists := pgTypeMap[col.Type.Value]
+	t, exists := pgTypeMap[col.Type.Val]
 	if exists {
 		return t
 	}

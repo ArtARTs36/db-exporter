@@ -126,12 +126,27 @@ func (a *ExportCmd) export(
 		WithDiagram:            params.WithDiagram,
 		WithoutMigrationsTable: params.WithoutMigrationsTable,
 		Package:                params.Package,
+		Directory:              fs.NewDirectory(a.fs, params.OutDir),
 	}
 
-	if params.TablePerFile {
-		pages, err = exp.ExportPerFile(ctx, sc, exporterParams)
+	if params.Import {
+		if params.TablePerFile {
+			err = exp.ImportPerFile(ctx, sc, exporterParams)
+		} else {
+			err = exp.Import(ctx, sc, exporterParams)
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to import: %w", err)
+		}
+
+		return pages, nil
 	} else {
-		pages, err = exp.Export(ctx, sc, exporterParams)
+		if params.TablePerFile {
+			pages, err = exp.ExportPerFile(ctx, sc, exporterParams)
+		} else {
+			pages, err = exp.Export(ctx, sc, exporterParams)
+		}
 	}
 
 	if err != nil {
@@ -166,7 +181,7 @@ func (a *ExportCmd) loadSchema(
 	}
 
 	sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
-		return a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames())
+		return a.migrationsTblDetector.IsMigrationsTable(table.Name.Val, table.ColumnsNames())
 	})
 
 	return sc, nil

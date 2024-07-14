@@ -11,6 +11,7 @@ import (
 const DiagramExporterName = "diagram"
 
 type DiagramExporter struct {
+	unimplementedImporter
 	graphBuilder *graphBuilder
 }
 
@@ -28,7 +29,7 @@ func (e *DiagramExporter) ExportPerFile(
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	err := sch.Tables.EachWithErr(func(table *schema.Table) error {
-		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
+		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Val))
 		if err != nil {
 			return err
 		}

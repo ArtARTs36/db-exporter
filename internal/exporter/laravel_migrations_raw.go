@@ -15,6 +15,7 @@ import (
 const LaravelMigrationsRawExporterName = "laravel-migrations-raw"
 
 type LaravelMigrationsRawExporter struct {
+	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }
@@ -53,7 +54,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 		migration := &laravelMigration{
 			Name: fmt.Sprintf(
 				"Create%sTable",
-				table.Name.Pascal().Value,
+				table.Name.Pascal().Val,
 			),
 			Queries: &laravelMigrationQueries{
 				Up:   queries.Up,
@@ -64,7 +65,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 		page, err := render(
 			e.renderer,
 			"laravel/migration-raw.php",
-			laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Value), i),
+			laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Val), i),
 			map[string]stick.Value{
 				"migration": migration,
 			},
@@ -121,7 +122,7 @@ func (e *LaravelMigrationsRawExporter) makeMigrationQueries(table *schema.Table)
 	return &laravelMigrationQueries{
 		Up: e.ddlBuilder.BuildDDL(table),
 		Down: []string{
-			sqlquery.BuildDropTable(table.Name.Value),
+			sqlquery.BuildDropTable(table.Name.Val),
 		},
 	}
 }

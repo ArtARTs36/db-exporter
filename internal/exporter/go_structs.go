@@ -23,6 +23,7 @@ var goAbbreviationsSet = map[string]bool{
 }
 
 type GoStructsExporter struct {
+	unimplementedImporter
 	renderer *template.Renderer
 }
 
@@ -203,9 +204,9 @@ func (e *GoStructsExporter) makeGoSchema(tables []*schema.Table) *goSchema {
 		propTypeOffset := 0
 		for _, c := range t.Columns {
 			prop := &goProperty{
-				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
+				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Val,
 				Type:       e.mapGoType(c, goSch.Imports),
-				ColumnName: c.Name.Value,
+				ColumnName: c.Name.Val,
 			}
 
 			str.Properties = append(str.Properties, prop)

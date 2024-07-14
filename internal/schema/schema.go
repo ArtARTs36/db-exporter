@@ -33,7 +33,7 @@ func (s *Schema) TablesNames() []string {
 	names := make([]string, 0, s.Tables.Len())
 
 	s.Tables.Each(func(table *Table) {
-		names = append(names, table.Name.Value)
+		names = append(names, table.Name.Val)
 	})
 
 	return names
@@ -61,7 +61,7 @@ func (s *Schema) appendTableMapByRelations(tableMap *TableMap, table *Table) {
 			continue
 		}
 
-		if foreignTable.HasForeignKeyTo(table.Name.Value) {
+		if foreignTable.HasForeignKeyTo(table.Name.Val) {
 			continue
 		}
 

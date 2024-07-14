@@ -105,6 +105,10 @@ func main() {
 				Name:        "debug",
 				Description: "Show debug logs",
 			},
+			{
+				Name:        "import",
+				Description: "import data from exported files",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -160,5 +164,6 @@ func run(ctx *cli.Context) error {
 		CommitAuthor:           commitAuthor,
 		CommitPush:             ctx.HasOpt("commit-push"),
 		Stat:                   ctx.HasOpt("stat"),
+		Import:                 ctx.HasOpt("import"),
 	})
 }

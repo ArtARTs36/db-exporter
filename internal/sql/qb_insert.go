@@ -49,5 +49,5 @@ func (b *QueryBuilder) buildValues(table *schema.Table, rows []map[string]interf
 }
 
 func (b *QueryBuilder) buildInsertInto(table *schema.Table) string {
-	return fmt.Sprintf("INSERT INTO %s (%s)", table.Name.Value, strings.Join(table.ColumnsNames(), ", "))
+	return fmt.Sprintf("INSERT INTO %s (%s)", table.Name.Val, strings.Join(table.ColumnsNames(), ", "))
 }
