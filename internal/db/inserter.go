@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/doug-martin/goqu/v9"
 )
 
@@ -27,6 +28,42 @@ func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[strin
 	}
 
 	q, _, err := goqu.Insert(table).Rows(rows...).ToSQL()
+	if err != nil {
+		return fmt.Errorf("failed to build insert query: %w", err)
+	}
+
+	_, err = db.ExecContext(ctx, q)
+	if err != nil {
+		return fmt.Errorf("failed to insert dataset into database: %w", err)
+	}
+
+	return nil
+}
+
+func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []map[string]interface{}) error {
+	db, err := i.db.Connect(ctx)
+	if err != nil {
+		return err
+	}
+
+	rows := make([]interface{}, 0, len(dataset))
+	for _, row := range dataset {
+		rows = append(rows, row)
+	}
+
+	updateRecord := goqu.Record{}
+	for col := range dataset[0] {
+		updateRecord[col] = goqu.I(fmt.Sprintf("excluded.%s", col))
+	}
+
+	q, _, err := goqu.
+		Insert(table.Name.Val).
+		Rows(rows...).
+		OnConflict(goqu.DoUpdate(
+			table.PrimaryKey.ColumnsNames.Join(",").Val,
+			updateRecord,
+		)).
+		ToSQL()
 	if err != nil {
 		return fmt.Errorf("failed to build insert query: %w", err)
 	}

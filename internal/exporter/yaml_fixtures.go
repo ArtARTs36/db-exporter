@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v3"
@@ -29,6 +30,9 @@ type yamlFixture struct {
 }
 
 type yamlFixtureTable struct {
+	Options struct {
+		Upsert bool `yaml:"upsert"`
+	} `yaml:"options"`
 	Rows []map[string]interface{} `yaml:"rows"`
 }
 
@@ -123,7 +127,7 @@ func (e *YamlFixturesExporter) Export(
 	}, nil
 }
 
-func (e *YamlFixturesExporter) Import(ctx context.Context, _ *schema.Schema, params *ImportParams) (
+func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, params *ImportParams) (
 	[]ImportedFile,
 	error,
 ) {
@@ -143,11 +147,23 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, _ *schema.Schema, par
 			continue
 		}
 
-		err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
-		if err != nil {
-			return nil, fmt.Errorf("failed to insert: %w", err)
+		if table.Value.Options.Upsert && sch.Tables.Has(*ds.NewString(table.Key)) {
+			tbl, _ := sch.Tables.Get(*ds.NewString(table.Key))
+			err = e.inserter.Upsert(ctx, tbl, table.Value.Rows)
+			if err != nil {
+				return nil, fmt.Errorf("failed to insert: %w", err)
+			}
+		} else {
+			err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
+			if err != nil {
+				return nil, fmt.Errorf("failed to insert: %w", err)
+			}
 		}
 	}
 
-	return []ImportedFile{}, nil
+	return []ImportedFile{
+		{
+			Name: yamlFixturesFilename,
+		},
+	}, nil
 }
