@@ -62,6 +62,7 @@ func CreateExporter(name string, renderer *template.Renderer, connection *db.Con
 			db.NewDataLoader(connection),
 			renderer,
 			db.NewInserter(connection),
+			connection,
 		), nil
 	}
 

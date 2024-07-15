@@ -16,7 +16,7 @@ func NewInserter(db *Connection) *Inserter {
 }
 
 func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[string]interface{}) (int64, error) {
-	db, err := i.db.Connect(ctx)
+	db, err := i.db.extContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -40,7 +40,7 @@ func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[strin
 }
 
 func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []map[string]interface{}) (int64, error) {
-	db, err := i.db.Connect(ctx)
+	db, err := i.db.extContext(ctx)
 	if err != nil {
 		return 0, err
 	}

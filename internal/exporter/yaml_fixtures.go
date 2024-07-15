@@ -23,9 +23,13 @@ type YamlFixturesExporter struct {
 	dataLoader *db.DataLoader
 	renderer   *template.Renderer
 	inserter   *db.Inserter
+	conn       *db.Connection
 }
 
 type yamlFixture struct {
+	Options struct {
+		Transaction bool `yaml:"transaction"`
+	} `yaml:"options"`
 	Tables *orderedmap.OrderedMap[string, *yamlFixtureTable] `yaml:"tables"`
 }
 
@@ -40,11 +44,13 @@ func NewYamlFixturesExporter(
 	dataLoader *db.DataLoader,
 	renderer *template.Renderer,
 	inserter *db.Inserter,
+	conn *db.Connection,
 ) *YamlFixturesExporter {
 	return &YamlFixturesExporter{
 		dataLoader: dataLoader,
 		renderer:   renderer,
 		inserter:   inserter,
+		conn:       conn,
 	}
 }
 
@@ -142,6 +148,41 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 		return nil, fmt.Errorf("failed to unmarshal %s: %w", yamlFixturesFilename, err)
 	}
 
+	doImport := e.doImport
+	if fixture.Options.Transaction {
+		doImport = func(ctx context.Context, sch *schema.Schema, fixture *yamlFixture, params *ImportParams) (
+			ImportedFile,
+			error,
+		) {
+			var importedFile ImportedFile
+
+			trErr := e.conn.Transact(ctx, func(ctx context.Context) error {
+				importedFile, err = e.doImport(ctx, sch, fixture, params)
+				if err != nil {
+					return fmt.Errorf("transaction canceled: %w", err)
+				}
+
+				return nil
+			})
+
+			return importedFile, trErr
+		}
+	}
+
+	importedFile, err := doImport(ctx, sch, &fixture, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return []ImportedFile{importedFile}, nil
+}
+
+func (e *YamlFixturesExporter) doImport(
+	ctx context.Context,
+	sch *schema.Schema,
+	fixture *yamlFixture,
+	params *ImportParams,
+) (ImportedFile, error) {
 	affectedRows := map[string]int64{}
 
 	for table := fixture.Tables.Oldest(); table != nil; table = table.Next() {
@@ -150,27 +191,26 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 		}
 
 		var ar int64
+		var err error
 
 		if table.Value.Options.Upsert && sch.Tables.Has(*ds.NewString(table.Key)) {
 			tbl, _ := sch.Tables.Get(*ds.NewString(table.Key))
 			ar, err = e.inserter.Upsert(ctx, tbl, table.Value.Rows)
 			if err != nil {
-				return nil, fmt.Errorf("failed to insert: %w", err)
+				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}
 		} else {
 			ar, err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
 			if err != nil {
-				return nil, fmt.Errorf("failed to insert: %w", err)
+				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}
 		}
 
 		affectedRows[table.Key] = ar
 	}
 
-	return []ImportedFile{
-		{
-			AffectedRows: affectedRows,
-			Name:         yamlFixturesFilename,
-		},
+	return ImportedFile{
+		AffectedRows: affectedRows,
+		Name:         yamlFixturesFilename,
 	}, nil
 }
