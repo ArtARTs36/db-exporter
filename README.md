@@ -32,6 +32,7 @@ Options
   commit-message             Add commit with generated files and your message
   commit-push                Push commit with generated files
   stat                       Print stat
+  import                     Import data from exported files
 ```
 
 **Export from postgres to markdown**
