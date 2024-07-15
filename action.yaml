@@ -14,13 +14,13 @@ inputs:
         description: Output directory
         required: true
     table-per-file:
-        description: Export one table to one file
+        description: Run one table to one file
         required: false
     with-diagram:
-        description: Export with diagram (only md)
+        description: Run with diagram (only md)
         required: false
     without-migrations-table:
-        description: Export without migrations table
+        description: Run without migrations table
         required: false
     tables:
         description: 'Table list for export, separator: ","'
@@ -48,6 +48,9 @@ inputs:
     debug:
         description: Show debug logs
         required: false
+    import:
+        description: import data from exported files
+        required: false
 branding:
     icon: archive
     color: yellow
@@ -62,4 +65,4 @@ runs:
           run: eval "./db-exporter ${CMD_RUN_ARGS}"
           shell: bash
           env:
-            CMD_RUN_ARGS: "'${{ inputs.driver-name }}' '${{ inputs.dsn }}' '${{ inputs.format }}' '${{ inputs.out-dir }}' '${{ inputs.table-per-file != '' && '--table-per-file' || '' }}' '${{ inputs.with-diagram != '' && '--with-diagram' || '' }}' '${{ inputs.without-migrations-table != '' && '--without-migrations-table' || '' }}' '${{ inputs.tables != '' && format('--tables={0}', inputs.tables) || '' }}' '${{ inputs.package != '' && format('--package={0}', inputs.package) || '' }}' '${{ inputs.file-prefix != '' && format('--file-prefix={0}', inputs.file-prefix) || '' }}' '${{ inputs.commit-message != '' && format('--commit-message={0}', inputs.commit-message) || '' }}' '${{ inputs.commit-push != '' && '--commit-push' || '' }}' '${{ inputs.commit-author != '' && format('--commit-author={0}', inputs.commit-author) || '' }}' '${{ inputs.stat != '' && '--stat' || '' }}' '${{ inputs.debug != '' && '--debug' || '' }}'"
+            CMD_RUN_ARGS: "'${{ inputs.driver-name }}' '${{ inputs.dsn }}' '${{ inputs.format }}' '${{ inputs.out-dir }}' '${{ inputs.table-per-file != '' && '--table-per-file' || '' }}' '${{ inputs.with-diagram != '' && '--with-diagram' || '' }}' '${{ inputs.without-migrations-table != '' && '--without-migrations-table' || '' }}' '${{ inputs.tables != '' && format('--tables={0}', inputs.tables) || '' }}' '${{ inputs.package != '' && format('--package={0}', inputs.package) || '' }}' '${{ inputs.file-prefix != '' && format('--file-prefix={0}', inputs.file-prefix) || '' }}' '${{ inputs.commit-message != '' && format('--commit-message={0}', inputs.commit-message) || '' }}' '${{ inputs.commit-push != '' && '--commit-push' || '' }}' '${{ inputs.commit-author != '' && format('--commit-author={0}', inputs.commit-author) || '' }}' '${{ inputs.stat != '' && '--stat' || '' }}' '${{ inputs.debug != '' && '--debug' || '' }}' '${{ inputs.import != '' && '--import' || '' }}'"
