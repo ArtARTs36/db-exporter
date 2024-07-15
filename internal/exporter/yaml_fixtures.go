@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v3"
 
@@ -24,7 +25,7 @@ type YamlFixturesExporter struct {
 }
 
 type yamlFixture struct {
-	Tables orderedmap.OrderedMap[string, yamlFixtureTable] `yaml:"tables"`
+	Tables *orderedmap.OrderedMap[string, *yamlFixtureTable] `yaml:"tables"`
 }
 
 type yamlFixtureTable struct {
@@ -61,10 +62,10 @@ func (e *YamlFixturesExporter) ExportPerFile(
 		}
 
 		fixture := yamlFixture{
-			Tables: *orderedmap.New[string, yamlFixtureTable](),
+			Tables: orderedmap.New[string, *yamlFixtureTable](),
 		}
 
-		fixture.Tables.Set(table.Name.Val, yamlFixtureTable{Rows: data})
+		fixture.Tables.Set(table.Name.Val, &yamlFixtureTable{Rows: data})
 
 		content, err := yaml.Marshal(fixture)
 
@@ -89,7 +90,7 @@ func (e *YamlFixturesExporter) Export(
 	_ *ExportParams,
 ) ([]*ExportedPage, error) {
 	fixture := &yamlFixture{
-		Tables: *orderedmap.New[string, yamlFixtureTable](),
+		Tables: orderedmap.New[string, *yamlFixtureTable](),
 	}
 
 	for _, table := range sch.Tables.List() {
@@ -102,7 +103,7 @@ func (e *YamlFixturesExporter) Export(
 			continue
 		}
 
-		fixture.Tables.Set(table.Name.Val, yamlFixtureTable{
+		fixture.Tables.Set(table.Name.Val, &yamlFixtureTable{
 			Rows: data,
 		})
 	}
