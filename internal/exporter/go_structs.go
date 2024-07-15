@@ -204,9 +204,9 @@ func (e *GoStructsExporter) makeGoSchema(tables []*schema.Table) *goSchema {
 		propTypeOffset := 0
 		for _, c := range t.Columns {
 			prop := &goProperty{
-				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Val,
+				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
 				Type:       e.mapGoType(c, goSch.Imports),
-				ColumnName: c.Name.Val,
+				ColumnName: c.Name.Value,
 			}
 
 			str.Properties = append(str.Properties, prop)

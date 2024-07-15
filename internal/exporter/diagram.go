@@ -29,7 +29,7 @@ func (e *DiagramExporter) ExportPerFile(
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	err := sch.Tables.EachWithErr(func(table *schema.Table) error {
-		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Val))
+		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
 		if err != nil {
 			return err
 		}

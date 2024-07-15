@@ -45,7 +45,7 @@ func (e *GooseFixturesExporter) ExportPerFile(
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries and rendering migration files")
 
 	for i, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Val)
+		data, err := e.dataLoader.Load(ctx, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +66,7 @@ func (e *GooseFixturesExporter) ExportPerFile(
 			"goose/migration.sql",
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"inserts_into_%s_table",
-				table.Name.Val,
+				table.Name.Value,
 			), i),
 			map[string]stick.Value{
 				"up_queries":   migration.upQueries,
@@ -94,7 +94,7 @@ func (e *GooseFixturesExporter) Export(
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries")
 
 	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Val)
+		data, err := e.dataLoader.Load(ctx, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}

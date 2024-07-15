@@ -166,7 +166,7 @@ func (a *ExportCmd) loadSchema(
 	}
 
 	sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
-		return a.migrationsTblDetector.IsMigrationsTable(table.Name.Val, table.ColumnsNames())
+		return a.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames())
 	})
 
 	return sc, nil

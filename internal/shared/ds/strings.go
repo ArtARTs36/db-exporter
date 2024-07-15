@@ -25,7 +25,7 @@ func (s *Strings) Items() []string {
 
 func (s *Strings) Join(sep string) *String {
 	return &String{
-		Val: strings.Join(s.items, sep),
+		Value: strings.Join(s.items, sep),
 	}
 }
 

@@ -51,7 +51,7 @@ func (e *GoSQLMigrateExporter) ExportPerFile(
 			"go-sql-migrate/migration.sql",
 			gosqlmigrate.CreateMigrationFilename(fmt.Sprintf(
 				"create_%s_table",
-				table.Name.Val,
+				table.Name.Value,
 			), i),
 			map[string]stick.Value{
 				"up_queries":   migration.upQueries,
@@ -109,7 +109,7 @@ func (e *GoSQLMigrateExporter) makeMigration(table *schema.Table) *goSQLMigrateM
 	return &goSQLMigrateMigration{
 		upQueries: e.ddlBuilder.BuildDDL(table),
 		downQueries: []string{
-			sqlquery.BuildDropTable(table.Name.Val),
+			sqlquery.BuildDropTable(table.Name.Value),
 		},
 	}
 }

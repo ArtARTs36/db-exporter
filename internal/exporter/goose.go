@@ -51,7 +51,7 @@ func (e *GooseExporter) ExportPerFile(
 			"goose/migration.sql",
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"create_%s_table",
-				table.Name.Val,
+				table.Name.Value,
 			), i),
 			map[string]stick.Value{
 				"up_queries":   migration.upQueries,
@@ -105,7 +105,7 @@ func (e *GooseExporter) makeMigration(table *schema.Table) *gooseMigration {
 	return &gooseMigration{
 		upQueries: e.ddlBuilder.BuildDDL(table),
 		downQueries: []string{
-			sqlquery.BuildDropTable(table.Name.Val),
+			sqlquery.BuildDropTable(table.Name.Value),
 		},
 	}
 }

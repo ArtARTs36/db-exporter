@@ -57,10 +57,10 @@ func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []ma
 	}
 
 	q, _, err := goqu.
-		Insert(table.Name.Val).
+		Insert(table.Name.Value).
 		Rows(rows...).
 		OnConflict(goqu.DoUpdate(
-			table.PrimaryKey.ColumnsNames.Join(",").Val,
+			table.PrimaryKey.ColumnsNames.Join(",").Value,
 			updateRecord,
 		)).
 		ToSQL()

@@ -54,7 +54,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 		migration := &laravelMigration{
 			Name: fmt.Sprintf(
 				"Create%sTable",
-				table.Name.Pascal().Val,
+				table.Name.Pascal().Value,
 			),
 			Queries: &laravelMigrationQueries{
 				Up:   queries.Up,
@@ -65,7 +65,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 		page, err := render(
 			e.renderer,
 			"laravel/migration-raw.php",
-			laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Val), i),
+			laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Value), i),
 			map[string]stick.Value{
 				"migration": migration,
 			},
@@ -122,7 +122,7 @@ func (e *LaravelMigrationsRawExporter) makeMigrationQueries(table *schema.Table)
 	return &laravelMigrationQueries{
 		Up: e.ddlBuilder.BuildDDL(table),
 		Down: []string{
-			sqlquery.BuildDropTable(table.Name.Val),
+			sqlquery.BuildDropTable(table.Name.Value),
 		},
 	}
 }

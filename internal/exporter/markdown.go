@@ -51,7 +51,7 @@ func (e *MarkdownExporter) ExportPerFile(
 	preparedTables := make([]*markdownPreparedTable, 0, sc.Tables.Len())
 
 	for _, table := range sc.Tables.List() {
-		fileName := fmt.Sprintf("%s.md", table.Name.Val)
+		fileName := fmt.Sprintf("%s.md", table.Name.Value)
 
 		page, err := render(e.renderer, "md/per-table.md", fileName, map[string]stick.Value{
 			"table": table,
@@ -127,7 +127,7 @@ func (e *MarkdownExporter) Export(
 }
 
 func (e *MarkdownExporter) createIndexPageName(sch *schema.Schema) string {
-	if sch.Tables.Has(ds.String{Val: "INDEX"}) {
+	if sch.Tables.Has(ds.String{Value: "INDEX"}) {
 		return "index.md"
 	}
 

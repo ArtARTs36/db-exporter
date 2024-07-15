@@ -208,7 +208,7 @@ func TestStringFixAbbreviations(t *testing.T) {
 				abbrSet[abbreviation] = true
 			}
 
-			assert.Equal(t, tCase.Expected, str.FixAbbreviations(abbrSet).Val)
+			assert.Equal(t, tCase.Expected, str.FixAbbreviations(abbrSet).Value)
 		})
 	}
 }

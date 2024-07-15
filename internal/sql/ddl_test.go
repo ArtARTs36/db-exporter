@@ -19,7 +19,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "empty table",
 			Table: &schema.Table{
-				Name:    ds.String{Val: "cars"},
+				Name:    ds.String{Value: "cars"},
 				Columns: []*schema.Column{},
 			},
 			ExpectedQueries: []string{
@@ -29,7 +29,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with 1 column",
 			Table: &schema.Table{
-				Name: ds.String{Val: "cars"},
+				Name: ds.String{Value: "cars"},
 				Columns: []*schema.Column{
 					{
 						Name: *ds.NewString("id"),
@@ -47,7 +47,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with 1 column and primary key",
 			Table: &schema.Table{
-				Name: ds.String{Val: "cars"},
+				Name: ds.String{Value: "cars"},
 				Columns: []*schema.Column{
 					{
 						Name: *ds.NewString("id"),
@@ -71,7 +71,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with deferrable foreign keys",
 			Table: &schema.Table{
-				Name: ds.String{Val: "users"},
+				Name: ds.String{Value: "users"},
 				Columns: []*schema.Column{
 					{
 						Name: *ds.NewString("id"),

@@ -1,7 +1,6 @@
 package ds
 
 import (
-	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
@@ -12,7 +11,7 @@ import (
 )
 
 type String struct {
-	Val string
+	Value string
 }
 
 type SplitWord struct {
@@ -22,22 +21,22 @@ type SplitWord struct {
 
 func NewString(val string) *String {
 	return &String{
-		Val: val,
+		Value: val,
 	}
 }
 
 func (s *String) Scan(val any) error {
 	switch v := val.(type) {
 	case string:
-		s.Val = v
+		s.Value = v
 
 		return nil
 	case []byte:
-		s.Val = string(v)
+		s.Value = string(v)
 
 		return nil
 	case nil:
-		s.Val = ""
+		s.Value = ""
 
 		return nil
 	default:
@@ -45,24 +44,20 @@ func (s *String) Scan(val any) error {
 	}
 }
 
-func (s String) Value() (driver.Value, error) {
-	return s.Val, nil
-}
-
 func (s *String) String() string {
-	return s.Val
+	return s.Value
 }
 
 func (s *String) Replace(old, new string) string {
-	return strings.ReplaceAll(s.Val, old, new)
+	return strings.ReplaceAll(s.Value, old, new)
 }
 
 func (s *String) Pascal() *String {
-	return NewString(strcase.ToCamel(s.Val))
+	return NewString(strcase.ToCamel(s.Value))
 }
 
 func (s *String) Len() int {
-	return len(s.Val)
+	return len(s.Value)
 }
 
 func (s *String) IsNotEmpty() bool {
@@ -70,23 +65,23 @@ func (s *String) IsNotEmpty() bool {
 }
 
 func (s *String) Singular() *String {
-	return NewString(inflection.Singular(s.Val))
+	return NewString(inflection.Singular(s.Value))
 }
 
 func (s *String) Ends(suffix string) bool {
-	return strings.HasSuffix(s.Val, suffix)
+	return strings.HasSuffix(s.Value, suffix)
 }
 
 func (s *String) SplitCamel() []string {
-	return camelcase.Split(s.Val)
+	return camelcase.Split(s.Value)
 }
 
 func (s *String) SplitWords() []*SplitWord {
-	if len(s.Val) == 0 {
+	if len(s.Value) == 0 {
 		return []*SplitWord{}
 	}
 
-	srcBytes := []byte(s.Val)
+	srcBytes := []byte(s.Value)
 
 	var words []*SplitWord
 	currWordBytes := []byte{}
@@ -150,9 +145,9 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 }
 
 func (s *String) Lower() *String {
-	return NewString(strings.ToLower(s.Val))
+	return NewString(strings.ToLower(s.Value))
 }
 
 func (s *String) Equal(str string) bool {
-	return s.Val == str
+	return s.Value == str
 }

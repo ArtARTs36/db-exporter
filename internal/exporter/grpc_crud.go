@@ -120,7 +120,7 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 	}
 
 	tableMsg := &proto.Message{
-		Name:   table.Name.Pascal().Singular().Val,
+		Name:   table.Name.Pascal().Singular().Value,
 		Fields: make([]*proto.Field, 0, len(table.Columns)),
 	}
 
@@ -130,7 +130,7 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 
 	for _, column := range table.Columns {
 		tableMsg.Fields = append(tableMsg.Fields, &proto.Field{
-			Name: column.Name.Lower().Val,
+			Name: column.Name.Lower().Value,
 			Type: e.mapType(column, prfile.Imports),
 			ID:   id,
 		})
@@ -161,7 +161,7 @@ func (e *GrpcCrudExporter) buildGetProcedure(
 	}
 
 	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Get%sRequest", table.Name.Pascal().Singular().Val),
+		Name:   fmt.Sprintf("Get%sRequest", table.Name.Pascal().Singular().Value),
 		Fields: make([]*proto.Field, 0),
 	}
 
@@ -173,7 +173,7 @@ func (e *GrpcCrudExporter) buildGetProcedure(
 		}
 
 		getReqMsg.Fields = append(getReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Val,
+			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, prfile.Imports),
 			ID:   id,
 		})
@@ -198,12 +198,12 @@ func (e *GrpcCrudExporter) buildGetListProcedure(
 	}
 
 	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Get%sListRequest", table.Name.Pascal().Singular().Val),
+		Name:   fmt.Sprintf("Get%sListRequest", table.Name.Pascal().Singular().Value),
 		Fields: make([]*proto.Field, 0),
 	}
 
 	respMsg := &proto.Message{
-		Name: fmt.Sprintf("Get%sResponse", table.Name.Pascal().Singular().Val),
+		Name: fmt.Sprintf("Get%sResponse", table.Name.Pascal().Singular().Value),
 		Fields: []*proto.Field{
 			{
 				Repeated: true,
@@ -231,7 +231,7 @@ func (e *GrpcCrudExporter) buildDeleteProcedure(
 	}
 
 	deleteReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Delete%sRequest", table.Name.Pascal().Singular().Val),
+		Name:   fmt.Sprintf("Delete%sRequest", table.Name.Pascal().Singular().Value),
 		Fields: make([]*proto.Field, 0),
 	}
 
@@ -247,7 +247,7 @@ func (e *GrpcCrudExporter) buildDeleteProcedure(
 		}
 
 		deleteReqMsg.Fields = append(deleteReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Val,
+			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, prfile.Imports),
 			ID:   id,
 		})
@@ -272,7 +272,7 @@ func (e *GrpcCrudExporter) buildCreateProcedure(
 	}
 
 	createReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Create%sRequest", table.Name.Pascal().Singular().Val),
+		Name:   fmt.Sprintf("Create%sRequest", table.Name.Pascal().Singular().Value),
 		Fields: make([]*proto.Field, 0, len(table.Columns)),
 	}
 
@@ -284,7 +284,7 @@ func (e *GrpcCrudExporter) buildCreateProcedure(
 		}
 
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Val,
+			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, prfile.Imports),
 			ID:   id,
 		})
@@ -309,7 +309,7 @@ func (e *GrpcCrudExporter) buildPatchProcedure(
 	}
 
 	patchReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Patch%sRequest", table.Name.Pascal().Singular().Val),
+		Name:   fmt.Sprintf("Patch%sRequest", table.Name.Pascal().Singular().Value),
 		Fields: make([]*proto.Field, 0, len(table.Columns)),
 	}
 
@@ -317,7 +317,7 @@ func (e *GrpcCrudExporter) buildPatchProcedure(
 
 	for _, col := range table.Columns {
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Val,
+			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, prfile.Imports),
 			ID:   id,
 		})

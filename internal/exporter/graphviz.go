@@ -72,9 +72,9 @@ func (b *graphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) 
 	tablesNodes := map[string]*cgraph.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
-		node, graphErr := graph.CreateNode(table.Name.Val)
+		node, graphErr := graph.CreateNode(table.Name.Value)
 		if graphErr != nil {
-			return fmt.Errorf("failed to create node for table %q: %w", table.Name.Val, graphErr)
+			return fmt.Errorf("failed to create node for table %q: %w", table.Name.Value, graphErr)
 		}
 
 		node.SetShape(cgraph.PlainTextShape)
@@ -89,7 +89,7 @@ func (b *graphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) 
 
 		node.SetLabel(graph.StrdupHTML(string(ht)))
 
-		tablesNodes[table.Name.Val] = node
+		tablesNodes[table.Name.Value] = node
 
 		return nil
 	})
@@ -109,7 +109,7 @@ func (b *graphBuilder) buildEdges(
 	edges := 0
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
-		tableNode, tnExists := tablesNodes[table.Name.Val]
+		tableNode, tnExists := tablesNodes[table.Name.Value]
 		if !tnExists {
 			return nil
 		}
@@ -119,17 +119,17 @@ func (b *graphBuilder) buildEdges(
 				continue
 			}
 
-			foreignTableNode, ftnExists := tablesNodes[col.ForeignKey.ForeignTable.Val]
+			foreignTableNode, ftnExists := tablesNodes[col.ForeignKey.ForeignTable.Value]
 			if !ftnExists {
 				continue
 			}
 
-			edge, edgeErr := graph.CreateEdge(col.ForeignKey.Name.Val, tableNode, foreignTableNode)
+			edge, edgeErr := graph.CreateEdge(col.ForeignKey.Name.Value, tableNode, foreignTableNode)
 			if edgeErr != nil {
 				return fmt.Errorf(
 					"failed to create edge from %s.%s to %s.%s: %w",
-					table.Name.Val,
-					col.Name.Val,
+					table.Name.Value,
+					col.Name.Value,
 					col.ForeignKey.ForeignTable,
 					col.ForeignKey.ForeignColumn,
 					edgeErr,
@@ -140,8 +140,8 @@ func (b *graphBuilder) buildEdges(
 
 			edge.SetLabel(fmt.Sprintf(
 				"  %s:%s",
-				col.Name.Val,
-				col.ForeignKey.ForeignColumn.Val,
+				col.Name.Value,
+				col.ForeignKey.ForeignColumn.Value,
 			))
 		}
 

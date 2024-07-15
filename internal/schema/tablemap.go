@@ -83,7 +83,7 @@ func (m *TableMap) Without(tableNames []string) *TableMap {
 	}
 
 	return m.Reject(func(table *Table) bool {
-		return !tableFilter[table.Name.Val]
+		return !tableFilter[table.Name.Value]
 	})
 }
 

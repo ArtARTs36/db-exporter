@@ -56,7 +56,7 @@ func (e *YamlFixturesExporter) ExportPerFile(
 	pages := make([]*ExportedPage, 0, sch.Tables.Len())
 
 	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Val)
+		data, err := e.dataLoader.Load(ctx, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func (e *YamlFixturesExporter) ExportPerFile(
 			Tables: orderedmap.New[string, *yamlFixtureTable](),
 		}
 
-		fixture.Tables.Set(table.Name.Val, &yamlFixtureTable{Rows: data})
+		fixture.Tables.Set(table.Name.Value, &yamlFixtureTable{Rows: data})
 
 		content, err := yaml.Marshal(fixture)
 
@@ -98,7 +98,7 @@ func (e *YamlFixturesExporter) Export(
 	}
 
 	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Val)
+		data, err := e.dataLoader.Load(ctx, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +107,7 @@ func (e *YamlFixturesExporter) Export(
 			continue
 		}
 
-		fixture.Tables.Set(table.Name.Val, &yamlFixtureTable{
+		fixture.Tables.Set(table.Name.Value, &yamlFixtureTable{
 			Rows: data,
 		})
 	}

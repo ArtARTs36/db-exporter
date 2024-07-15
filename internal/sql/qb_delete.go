@@ -12,7 +12,7 @@ func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string
 		queries := make([]string, 0, len(rows))
 
 		for _, row := range rows {
-			queries = append(queries, b.BuildDeleteQuery(table.Name.Val, row))
+			queries = append(queries, b.BuildDeleteQuery(table.Name.Value, row))
 		}
 
 		return queries
@@ -26,7 +26,7 @@ func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string
 			values = append(values, row[col])
 		}
 
-		return []string{b.BuildDeleteInQuery(table.Name.Val, col, values)}
+		return []string{b.BuildDeleteInQuery(table.Name.Value, col, values)}
 	}
 
 	queries := make([]string, 0, len(rows))
@@ -38,7 +38,7 @@ func (b *QueryBuilder) BuildDeleteQueries(table *schema.Table, rows []map[string
 			pk[col] = row[col]
 		}
 
-		queries = append(queries, b.BuildDeleteQuery(table.Name.Val, pk))
+		queries = append(queries, b.BuildDeleteQuery(table.Name.Value, pk))
 	}
 
 	return queries

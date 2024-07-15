@@ -23,12 +23,12 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 	if len(table.Columns) == 0 {
 		return []string{
-			fmt.Sprintf("CREATE TABLE %s()", table.Name.Val),
+			fmt.Sprintf("CREATE TABLE %s()", table.Name.Value),
 		}
 	}
 
 	createTableQuery := []string{
-		fmt.Sprintf("CREATE TABLE %s", table.Name.Val),
+		fmt.Sprintf("CREATE TABLE %s", table.Name.Value),
 		"(",
 	}
 
@@ -68,9 +68,9 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 		line := fmt.Sprintf(
 			"    %s%s%s%s%s",
-			column.Name.Val,
+			column.Name.Value,
 			strings.Repeat(" ", spacesAfterColumnName),
-			column.Type.Val,
+			column.Type.Value,
 			notNull,
 			comma,
 		)
@@ -79,9 +79,9 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 		if column.Comment.IsNotEmpty() {
 			upQueries = append(upQueries, sqlquery.BuildCommentOnColumn(
-				column.TableName.Val,
-				column.Name.Val,
-				column.Comment.Val,
+				column.TableName.Value,
+				column.Name.Value,
+				column.Comment.Value,
 			))
 		}
 	}
@@ -119,7 +119,7 @@ func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) str
 
 	return fmt.Sprintf(
 		"    %s%s",
-		sqlquery.BuildPK(table.PrimaryKey.Name.Val, table.PrimaryKey.ColumnsNames),
+		sqlquery.BuildPK(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
 		comma,
 	)
 }
@@ -133,7 +133,7 @@ func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []
 	}
 
 	slices.SortFunc(fks, func(a, b *schema.ForeignKey) int {
-		return strings.Compare(a.Name.Val, b.Name.Val)
+		return strings.Compare(a.Name.Value, b.Name.Value)
 	})
 
 	for _, fk := range fks {
@@ -153,10 +153,10 @@ func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []
 
 		q := fmt.Sprintf(
 			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s%s",
-			fk.Name.Val,
-			fk.ColumnsNames.Join(", ").Val,
-			fk.ForeignTable.Val,
-			fk.ForeignColumn.Val,
+			fk.Name.Value,
+			fk.ColumnsNames.Join(", ").Value,
+			fk.ForeignTable.Value,
+			fk.ForeignColumn.Value,
 			deferrableString,
 			comma,
 		)
@@ -176,7 +176,7 @@ func (b *DDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine) []s
 			comma = ""
 		}
 
-		q := fmt.Sprintf("%s%s", sqlquery.BuildUK(uk.Name.Val, uk.ColumnsNames), comma)
+		q := fmt.Sprintf("%s%s", sqlquery.BuildUK(uk.Name.Value, uk.ColumnsNames), comma)
 
 		queries = append(queries, q)
 	}
