@@ -11,6 +11,7 @@ import (
 const DiagramExporterName = "diagram"
 
 type DiagramExporter struct {
+	unimplementedImporter
 	graphBuilder *graphBuilder
 }
 

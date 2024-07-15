@@ -14,6 +14,7 @@ import (
 const GrpcCrudExporterName = "grpc-crud"
 
 type GrpcCrudExporter struct {
+	unimplementedImporter
 	renderer *template.Renderer
 }
 

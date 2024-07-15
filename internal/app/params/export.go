@@ -16,4 +16,5 @@ type ExportParams struct {
 	CommitAuthor           string
 	CommitPush             bool
 	Stat                   bool
+	Import                 bool
 }

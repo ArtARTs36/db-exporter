@@ -17,6 +17,7 @@ import (
 const GooseFixturesExporterName = "goose-fixtures"
 
 type GooseFixturesExporter struct {
+	unimplementedImporter
 	dataLoader   *db.DataLoader
 	renderer     *template.Renderer
 	queryBuilder *sql.QueryBuilder

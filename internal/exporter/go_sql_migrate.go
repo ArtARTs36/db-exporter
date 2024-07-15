@@ -17,6 +17,7 @@ import (
 const GoSQLMigrateExporterName = "go-sql-migrate"
 
 type GoSQLMigrateExporter struct {
+	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }

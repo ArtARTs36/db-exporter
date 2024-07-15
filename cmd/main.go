@@ -58,15 +58,15 @@ func main() {
 		Opts: []*cli.OptDefinition{
 			{
 				Name:        "table-per-file",
-				Description: "Export one table to one file",
+				Description: "Run one table to one file",
 			},
 			{
 				Name:        "with-diagram",
-				Description: "Export with diagram (only md)",
+				Description: "Run with diagram (only md)",
 			},
 			{
 				Name:        "without-migrations-table",
-				Description: "Export without migrations table",
+				Description: "Run without migrations table",
 			},
 			{
 				Name:        "tables",
@@ -105,11 +105,15 @@ func main() {
 				Name:        "debug",
 				Description: "Show debug logs",
 			},
+			{
+				Name:        "import",
+				Description: "import data from exported files",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
 				Command:     "db-exporter pg \"host=postgres user=root password=root dbname=cars\" md ./docs",
-				Description: "Export from postgres to md",
+				Description: "Run from postgres to md",
 			},
 		},
 	}
@@ -120,10 +124,16 @@ func main() {
 func run(ctx *cli.Context) error {
 	fsystem := fs.NewLocal()
 
-	command := cmd.NewExportCmd(fsystem, map[string]actions.Action{
-		"commit generated files": actions.NewCommit(git.NewGit("git")),
-		"print stat":             actions.NewStat(ctx.Output.PrintMarkdownTable),
-	})
+	var command cmd.Command
+
+	if ctx.HasOpt("import") {
+		command = cmd.NewImportCmd(fsystem, ctx.Output.PrintMarkdownTable)
+	} else {
+		command = cmd.NewExportCmd(fsystem, map[string]actions.Action{
+			"commit generated files": actions.NewCommit(git.NewGit("git")),
+			"print stat":             actions.NewStat(ctx.Output.PrintMarkdownTable),
+		})
+	}
 
 	var tables []string
 
@@ -145,7 +155,7 @@ func run(ctx *cli.Context) error {
 		slog.SetDefault(l)
 	}
 
-	return command.Export(ctx.Context, &params.ExportParams{
+	return command.Run(ctx.Context, &params.ExportParams{
 		DriverName:             ctx.GetArg("driver-name"),
 		DSN:                    ctx.GetArg("dsn"),
 		Format:                 ctx.GetArg("format"),
@@ -160,5 +170,6 @@ func run(ctx *cli.Context) error {
 		CommitAuthor:           commitAuthor,
 		CommitPush:             ctx.HasOpt("commit-push"),
 		Stat:                   ctx.HasOpt("stat"),
+		Import:                 ctx.HasOpt("import"),
 	})
 }

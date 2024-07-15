@@ -38,7 +38,7 @@ func NewExportCmd(fs fs.Driver, actions map[string]actions.Action) *ExportCmd {
 	}
 }
 
-func (a *ExportCmd) Export(ctx context.Context, expParams *params.ExportParams) error {
+func (a *ExportCmd) Run(ctx context.Context, expParams *params.ExportParams) error {
 	startedAt := time.Now()
 
 	driverName, err := db.CreateDriverName(expParams.DriverName)
@@ -135,7 +135,7 @@ func (a *ExportCmd) export(
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to export: %w", err)
+		return nil, fmt.Errorf("failed to doImport: %w", err)
 	}
 
 	return pages, nil

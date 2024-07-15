@@ -17,6 +17,10 @@ func (*Local) Exists(path string) bool {
 	return err == nil
 }
 
+func (*Local) ReadFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
+}
+
 func (*Local) Mkdir(path string) error {
 	return os.Mkdir(path, 0755)
 }

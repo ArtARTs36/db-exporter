@@ -17,6 +17,7 @@ import (
 const GooseExporterName = "goose"
 
 type GooseExporter struct {
+	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }

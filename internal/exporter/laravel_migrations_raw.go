@@ -15,6 +15,7 @@ import (
 const LaravelMigrationsRawExporterName = "laravel-migrations-raw"
 
 type LaravelMigrationsRawExporter struct {
+	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }

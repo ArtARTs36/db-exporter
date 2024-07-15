@@ -8,14 +8,14 @@ import (
 )
 
 type Stat struct {
-	tblPrinter tablePrinter
+	tablePrinter tablePrinter
 }
 
 type tablePrinter func(headers []string, rows [][]string)
 
 func NewStat(tblPrinter tablePrinter) *Stat {
 	return &Stat{
-		tblPrinter: tblPrinter,
+		tablePrinter: tblPrinter,
 	}
 }
 
@@ -33,7 +33,7 @@ func (c *Stat) Run(_ context.Context, params *params.ActionParams) error {
 		})
 	}
 
-	c.tblPrinter([]string{"file", "size"}, rows)
+	c.tablePrinter([]string{"file", "size"}, rows)
 
 	return nil
 }
