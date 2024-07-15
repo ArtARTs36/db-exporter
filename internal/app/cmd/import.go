@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"log/slog"
 	"slices"
+	"strings"
 
 	"github.com/tyler-sommer/stick"
 
@@ -79,9 +80,19 @@ func (a *ImportCmd) Run(ctx context.Context, expParams *params.ExportParams) err
 	if len(files) == 0 {
 		slog.InfoContext(ctx, "[importcmd] no files to import")
 	} else {
+		filesPaths := strings.Builder{}
+
+		for _, file := range files {
+			if filesPaths.Len() > 0 {
+				filesPaths.WriteRune(',')
+			}
+
+			filesPaths.WriteString(file.Name)
+		}
+
 		slog.InfoContext(
 			ctx,
-			fmt.Sprintf("[importcmd] successfully imported from %d files: %q", len(files), files),
+			fmt.Sprintf("[importcmd] successfully imported from %d files: %s", len(files), filesPaths.String()),
 		)
 	}
 
