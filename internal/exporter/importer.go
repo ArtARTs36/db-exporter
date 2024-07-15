@@ -19,7 +19,8 @@ type ImportParams struct {
 }
 
 type ImportedFile struct {
-	Name string
+	AffectedRows map[string]int64
+	Name         string
 }
 
 type unimplementedImporter struct{}

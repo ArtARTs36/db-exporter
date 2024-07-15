@@ -15,35 +15,34 @@ func NewInserter(db *Connection) *Inserter {
 	return &Inserter{db: db}
 }
 
-func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[string]interface{}) error {
+func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[string]interface{}) (int64, error) {
 	db, err := i.db.Connect(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	rows := make([]interface{}, 0, len(dataset))
 	for _, row := range dataset {
-		fmt.Println(row)
 		rows = append(rows, row)
 	}
 
 	q, _, err := goqu.Insert(table).Rows(rows...).ToSQL()
 	if err != nil {
-		return fmt.Errorf("failed to build insert query: %w", err)
+		return 0, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	_, err = db.ExecContext(ctx, q)
+	res, err := db.ExecContext(ctx, q)
 	if err != nil {
-		return fmt.Errorf("failed to insert dataset into database: %w", err)
+		return 0, fmt.Errorf("failed to insert dataset into database: %w", err)
 	}
 
-	return nil
+	return res.RowsAffected()
 }
 
-func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []map[string]interface{}) error {
+func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []map[string]interface{}) (int64, error) {
 	db, err := i.db.Connect(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	rows := make([]interface{}, 0, len(dataset))
@@ -65,13 +64,13 @@ func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []ma
 		)).
 		ToSQL()
 	if err != nil {
-		return fmt.Errorf("failed to build insert query: %w", err)
+		return 0, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	_, err = db.ExecContext(ctx, q)
+	res, err := db.ExecContext(ctx, q)
 	if err != nil {
-		return fmt.Errorf("failed to insert dataset into database: %w", err)
+		return 0, fmt.Errorf("failed to insert dataset into database: %w", err)
 	}
 
-	return nil
+	return res.RowsAffected()
 }

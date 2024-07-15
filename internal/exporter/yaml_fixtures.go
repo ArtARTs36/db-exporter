@@ -142,28 +142,35 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 		return nil, fmt.Errorf("failed to unmarshal %s: %w", yamlFixturesFilename, err)
 	}
 
+	affectedRows := map[string]int64{}
+
 	for table := fixture.Tables.Oldest(); table != nil; table = table.Next() {
 		if !params.TableFilter(table.Key) {
 			continue
 		}
 
+		var ar int64
+
 		if table.Value.Options.Upsert && sch.Tables.Has(*ds.NewString(table.Key)) {
 			tbl, _ := sch.Tables.Get(*ds.NewString(table.Key))
-			err = e.inserter.Upsert(ctx, tbl, table.Value.Rows)
+			ar, err = e.inserter.Upsert(ctx, tbl, table.Value.Rows)
 			if err != nil {
 				return nil, fmt.Errorf("failed to insert: %w", err)
 			}
 		} else {
-			err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
+			ar, err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
 			if err != nil {
 				return nil, fmt.Errorf("failed to insert: %w", err)
 			}
 		}
+
+		affectedRows[table.Key] = ar
 	}
 
 	return []ImportedFile{
 		{
-			Name: yamlFixturesFilename,
+			AffectedRows: affectedRows,
+			Name:         yamlFixturesFilename,
 		},
 	}, nil
 }

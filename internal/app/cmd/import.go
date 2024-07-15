@@ -23,12 +23,16 @@ import (
 type ImportCmd struct {
 	migrationsTblDetector *migrations.TableDetector
 	fs                    fs.Driver
+	tablePrinter          tablePrinter
 }
 
-func NewImportCmd(fs fs.Driver) *ImportCmd {
+type tablePrinter func(headers []string, rows [][]string)
+
+func NewImportCmd(fs fs.Driver, tablePrinter tablePrinter) *ImportCmd {
 	return &ImportCmd{
 		migrationsTblDetector: migrations.NewTableDetector(),
 		fs:                    fs,
+		tablePrinter:          tablePrinter,
 	}
 }
 
@@ -81,6 +85,7 @@ func (a *ImportCmd) Run(ctx context.Context, expParams *params.ExportParams) err
 		slog.InfoContext(ctx, "[importcmd] no files to import")
 	} else {
 		filesPaths := strings.Builder{}
+		countsMap := map[string]int64{}
 
 		for _, file := range files {
 			if filesPaths.Len() > 0 {
@@ -88,11 +93,28 @@ func (a *ImportCmd) Run(ctx context.Context, expParams *params.ExportParams) err
 			}
 
 			filesPaths.WriteString(file.Name)
+
+			for table, ar := range file.AffectedRows {
+				countsMap[table] += ar
+			}
 		}
 
 		slog.InfoContext(
 			ctx,
 			fmt.Sprintf("[importcmd] successfully imported from %d files: %s", len(files), filesPaths.String()),
+		)
+
+		countsList := make([][]string, 0, len(countsMap))
+		for table, count := range countsMap {
+			countsList = append(countsList, []string{
+				table,
+				fmt.Sprintf("%d", count),
+			})
+		}
+
+		a.tablePrinter(
+			[]string{"Table", "Affected Rows"},
+			countsList,
 		)
 	}
 

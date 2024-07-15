@@ -127,7 +127,7 @@ func run(ctx *cli.Context) error {
 	var command cmd.Command
 
 	if ctx.HasOpt("import") {
-		command = cmd.NewImportCmd(fsystem)
+		command = cmd.NewImportCmd(fsystem, ctx.Output.PrintMarkdownTable)
 	} else {
 		command = cmd.NewExportCmd(fsystem, map[string]actions.Action{
 			"commit generated files": actions.NewCommit(git.NewGit("git")),
