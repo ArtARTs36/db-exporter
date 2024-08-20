@@ -18,6 +18,13 @@ type GrpcCrudExporter struct {
 	renderer *template.Renderer
 }
 
+type buildProcedureContext struct {
+	prfile            *proto.File
+	table             *schema.Table
+	tableMsg          *proto.Message
+	tableSingularName string
+}
+
 func NewGrpcCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
 	return &GrpcCrudExporter{
 		renderer: renderer,
@@ -102,11 +109,11 @@ func (e *GrpcCrudExporter) Export(
 }
 
 func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table) (*proto.Service, []*proto.Message) {
-	procedureBuilders := []func(prfile *proto.File, table *schema.Table, tableMsg *proto.Message) (
+	procedureBuilders := []func(buildCtx *buildProcedureContext) (
 		*proto.ServiceProcedure,
 		[]*proto.Message,
 	){
-		e.buildGetListProcedure,
+		e.buildListProcedure,
 		e.buildGetProcedure,
 		e.buildDeleteProcedure,
 		e.buildCreateProcedure,
@@ -119,17 +126,22 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 		Name: fmt.Sprintf("%sService", table.Name.Pascal()),
 	}
 
-	tableMsg := &proto.Message{
-		Name:   table.Name.Pascal().Singular().Value,
-		Fields: make([]*proto.Field, 0, len(table.Columns)),
+	buildCtx := &buildProcedureContext{
+		prfile: prfile,
+		table:  table,
+		tableMsg: &proto.Message{
+			Name:   table.Name.Pascal().Singular().Value,
+			Fields: make([]*proto.Field, 0, len(table.Columns)),
+		},
 	}
+	buildCtx.tableSingularName = buildCtx.tableMsg.Name
 
-	messages = append(messages, tableMsg)
+	messages = append(messages, buildCtx.tableMsg)
 
 	id := 1
 
 	for _, column := range table.Columns {
-		tableMsg.Fields = append(tableMsg.Fields, &proto.Field{
+		buildCtx.tableMsg.Fields = append(buildCtx.tableMsg.Fields, &proto.Field{
 			Name: column.Name.Lower().Value,
 			Type: e.mapType(column, prfile.Imports),
 			ID:   id,
@@ -139,7 +151,7 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 	}
 
 	for _, builder := range procedureBuilders {
-		procedure, msgs := builder(prfile, table, tableMsg)
+		procedure, msgs := builder(buildCtx)
 		if procedure == nil {
 			continue
 		}
@@ -152,62 +164,69 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 }
 
 func (e *GrpcCrudExporter) buildGetProcedure(
-	prfile *proto.File,
-	table *schema.Table,
-	tableMsg *proto.Message,
+	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
-	if table.PrimaryKey == nil {
+	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
 
 	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Get%sRequest", table.Name.Pascal().Singular().Value),
+		Name:   fmt.Sprintf("Get%sRequest", buildCtx.tableSingularName),
 		Fields: make([]*proto.Field, 0),
 	}
 
 	id := 1
 
-	for _, col := range table.Columns {
+	for _, col := range buildCtx.table.Columns {
 		if !col.IsPrimaryKey() {
 			continue
 		}
 
 		getReqMsg.Fields = append(getReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports),
 			ID:   id,
 		})
 
 		id++
 	}
 
+	getRespMsg := &proto.Message{
+		Name: fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName),
+		Fields: []*proto.Field{
+			{
+				Name: buildCtx.table.Name.Pascal().Singular().Value,
+				Type: buildCtx.tableMsg.Name,
+				ID:   1,
+			},
+		},
+	}
+
 	return &proto.ServiceProcedure{
-		Name:    fmt.Sprintf("Get%s", table.Name.Pascal().Singular()),
+		Name:    "Get",
 		Param:   getReqMsg.Name,
-		Returns: tableMsg.Name,
-	}, []*proto.Message{getReqMsg}
+		Returns: getRespMsg.Name,
+	}, []*proto.Message{getReqMsg, getRespMsg}
 }
 
-func (e *GrpcCrudExporter) buildGetListProcedure(
-	_ *proto.File,
-	table *schema.Table,
-	tableMsg *proto.Message,
+func (e *GrpcCrudExporter) buildListProcedure(
+	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
-	if table.PrimaryKey == nil {
+	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
 
 	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Get%sListRequest", table.Name.Pascal().Singular().Value),
+		Name:   fmt.Sprintf("List%sRequest", buildCtx.tableSingularName),
 		Fields: make([]*proto.Field, 0),
 	}
 
 	respMsg := &proto.Message{
-		Name: fmt.Sprintf("Get%sResponse", table.Name.Pascal().Singular().Value),
+		Name: fmt.Sprintf("List%sResponse", buildCtx.tableSingularName),
 		Fields: []*proto.Field{
 			{
 				Repeated: true,
-				Type:     tableMsg.Name,
+				Type:     buildCtx.tableMsg.Name,
 				Name:     "items",
 				ID:       1,
 			},
@@ -215,40 +234,38 @@ func (e *GrpcCrudExporter) buildGetListProcedure(
 	}
 
 	return &proto.ServiceProcedure{
-		Name:    fmt.Sprintf("Get%sList", table.Name.Pascal().Singular()),
+		Name:    "List",
 		Param:   getReqMsg.Name,
-		Returns: tableMsg.Name,
+		Returns: respMsg.Name,
 	}, []*proto.Message{getReqMsg, respMsg}
 }
 
 func (e *GrpcCrudExporter) buildDeleteProcedure(
-	prfile *proto.File,
-	table *schema.Table,
-	_ *proto.Message,
+	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
-	if table.PrimaryKey == nil {
+	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
 
 	deleteReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Delete%sRequest", table.Name.Pascal().Singular().Value),
+		Name:   fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName),
 		Fields: make([]*proto.Field, 0),
 	}
 
 	deleteRespMsg := &proto.Message{
-		Name: fmt.Sprintf("Delete%sResponse", table.Name.Pascal().Singular()),
+		Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
 	}
 
 	id := 1
 
-	for _, col := range table.Columns {
+	for _, col := range buildCtx.table.Columns {
 		if !col.IsPrimaryKey() {
 			continue
 		}
 
 		deleteReqMsg.Fields = append(deleteReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports),
 			ID:   id,
 		})
 
@@ -256,36 +273,45 @@ func (e *GrpcCrudExporter) buildDeleteProcedure(
 	}
 
 	return &proto.ServiceProcedure{
-		Name:    fmt.Sprintf("Delete%s", table.Name.Pascal().Singular()),
+		Name:    "Delete",
 		Param:   deleteReqMsg.Name,
 		Returns: deleteRespMsg.Name,
 	}, []*proto.Message{deleteReqMsg, deleteRespMsg}
 }
 
 func (e *GrpcCrudExporter) buildCreateProcedure(
-	prfile *proto.File,
-	table *schema.Table,
-	tableMsg *proto.Message,
+	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
-	if table.PrimaryKey == nil {
+	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
 
 	createReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Create%sRequest", table.Name.Pascal().Singular().Value),
-		Fields: make([]*proto.Field, 0, len(table.Columns)),
+		Name:   fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName),
+		Fields: make([]*proto.Field, 0, len(buildCtx.table.Columns)),
+	}
+
+	createRespMsg := &proto.Message{
+		Name: fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName),
+		Fields: []*proto.Field{
+			{
+				Name: buildCtx.table.Name.Pascal().Singular().Value,
+				Type: buildCtx.tableMsg.Name,
+				ID:   1,
+			},
+		},
 	}
 
 	id := 1
 
-	for _, col := range table.Columns {
+	for _, col := range buildCtx.table.Columns {
 		if col.IsPrimaryKey() {
 			continue
 		}
 
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports),
 			ID:   id,
 		})
 
@@ -293,32 +319,41 @@ func (e *GrpcCrudExporter) buildCreateProcedure(
 	}
 
 	return &proto.ServiceProcedure{
-		Name:    fmt.Sprintf("Create%s", table.Name.Pascal().Singular()),
+		Name:    "Create",
 		Param:   createReqMsg.Name,
-		Returns: tableMsg.Name,
-	}, []*proto.Message{createReqMsg}
+		Returns: createRespMsg.Name,
+	}, []*proto.Message{createReqMsg, createRespMsg}
 }
 
 func (e *GrpcCrudExporter) buildPatchProcedure(
-	prfile *proto.File,
-	table *schema.Table,
-	tableMsg *proto.Message,
+	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
-	if table.PrimaryKey == nil {
+	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
 
 	patchReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Patch%sRequest", table.Name.Pascal().Singular().Value),
-		Fields: make([]*proto.Field, 0, len(table.Columns)),
+		Name:   fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName),
+		Fields: make([]*proto.Field, 0, len(buildCtx.tableSingularName)),
+	}
+
+	patchRespMsg := &proto.Message{
+		Name: fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName),
+		Fields: []*proto.Field{
+			{
+				Name: buildCtx.table.Name.Pascal().Singular().Value,
+				Type: buildCtx.tableMsg.Name,
+				ID:   1,
+			},
+		},
 	}
 
 	id := 1
 
-	for _, col := range table.Columns {
+	for _, col := range buildCtx.table.Columns {
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports),
 			ID:   id,
 		})
 
@@ -326,10 +361,10 @@ func (e *GrpcCrudExporter) buildPatchProcedure(
 	}
 
 	return &proto.ServiceProcedure{
-		Name:    fmt.Sprintf("Patch%s", table.Name.Pascal().Singular()),
+		Name:    "Patch",
 		Param:   patchReqMsg.Name,
-		Returns: tableMsg.Name,
-	}, []*proto.Message{patchReqMsg}
+		Returns: patchRespMsg.Name,
+	}, []*proto.Message{patchReqMsg, patchRespMsg}
 }
 
 func (e *GrpcCrudExporter) mapType(column *schema.Column, imports *ds.Set) string {
