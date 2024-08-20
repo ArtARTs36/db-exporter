@@ -311,10 +311,6 @@ func (e *GrpcCrudExporter) buildCreateProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
-		if col.IsPrimaryKey() {
-			continue
-		}
-
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, buildCtx.prfile.Imports),
