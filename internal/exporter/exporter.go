@@ -15,6 +15,7 @@ type ExportParams struct {
 	WithDiagram            bool
 	WithoutMigrationsTable bool
 	Package                string
+	ProtoGoPackage         string
 }
 
 type ExportedPage struct {

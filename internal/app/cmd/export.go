@@ -126,6 +126,7 @@ func (a *ExportCmd) export(
 		WithDiagram:            params.WithDiagram,
 		WithoutMigrationsTable: params.WithoutMigrationsTable,
 		Package:                params.Package,
+		ProtoGoPackage:         params.ProtoGoPackage,
 	}
 
 	if params.TablePerFile {

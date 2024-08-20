@@ -41,9 +41,12 @@ func (e *GrpcCrudExporter) ExportPerFile(
 	for _, table := range sc.Tables.List() {
 		prfile := &proto.File{
 			Package:  params.Package,
-			Services: make([]*proto.Service, 0, sc.Tables.Len()),
+			Services: make([]*proto.Service, 0, 1),
 			Messages: make([]*proto.Message, 0, sc.Tables.Len()),
 			Imports:  ds.NewSet(),
+			Options: map[string]string{
+				"go_package": params.ProtoGoPackage,
+			},
 		}
 
 		srv, messages := e.buildService(prfile, table)
@@ -83,6 +86,9 @@ func (e *GrpcCrudExporter) Export(
 		Services: make([]*proto.Service, 0, sc.Tables.Len()),
 		Messages: make([]*proto.Message, 0, sc.Tables.Len()),
 		Imports:  ds.NewSet(),
+		Options: map[string]string{
+			"go_package": params.ProtoGoPackage,
+		},
 	}
 
 	for _, table := range sc.Tables.List() {

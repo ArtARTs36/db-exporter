@@ -7,4 +7,5 @@ type File struct {
 	Services []*Service
 	Messages []*Message
 	Imports  *ds.Set
+	Options  map[string]string
 }

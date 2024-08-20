@@ -21,7 +21,7 @@ var (
 	BuildDate = "2024-03-09 03:09:15"
 )
 
-func main() {
+func main() { //nolint:funlen // not need
 	application := cli.App{
 		BuildInfo: &cli.BuildInfo{
 			Name:      "db-exporter",
@@ -109,6 +109,10 @@ func main() {
 				Name:        "import",
 				Description: "import data from exported files",
 			},
+			{
+				Name:        "proto-go-package",
+				Description: "Go package for protobuf",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -143,6 +147,7 @@ func run(ctx *cli.Context) error {
 	}
 
 	pkg, _ := ctx.GetOpt("package")
+	protoGoPkg, _ := ctx.GetOpt("proto-go-package")
 	filePrefix, _ := ctx.GetOpt("file-prefix")
 	commitMessage, _ := ctx.GetOpt("commit-message")
 	commitAuthor, _ := ctx.GetOpt("commit-author")
@@ -165,6 +170,7 @@ func run(ctx *cli.Context) error {
 		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
 		Tables:                 tables,
 		Package:                pkg,
+		ProtoGoPackage:         protoGoPkg,
 		FilePrefix:             filePrefix,
 		CommitMessage:          commitMessage,
 		CommitAuthor:           commitAuthor,

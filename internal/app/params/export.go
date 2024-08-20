@@ -17,4 +17,5 @@ type ExportParams struct {
 	CommitPush             bool
 	Stat                   bool
 	Import                 bool
+	ProtoGoPackage         string
 }

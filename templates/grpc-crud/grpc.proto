@@ -4,6 +4,9 @@ package {{ file.Package }};{% endif %}
 {% for im in file.Imports.List %}
 import "{{ im }}";{% if loop.last == false %}
 {% endif %}{% endfor %}
+{% for optName, optValue in file.Options %}
+option {{ optName }} = "{{ optValue }}";{% if loop.last == false %}
+{% endif %}{% endfor %}
 
 {% for service in file.Services %}service {{ service.Name }} {
 {% for procedure in service.Procedures %}    rpc {{ procedure.Name }}({{ procedure.Param }}) returns ({{ procedure.Returns }}) {}{% if loop.last == false %}
@@ -12,7 +15,7 @@ import "{{ im }}";{% if loop.last == false %}
 {% if loop.last == false %}
 {% endif %}{% endfor %}
 {% for message in file.Messages %}message {{ message.Name }} { {% for field in message.Fields %}
-    {% if field.Repeated %}repeated {%endif%}{{ field.Type }} {{ field.Name }} = {{ field.ID }};{% if loop.last == false %}{% endif %}{% endfor %}
+  {% if field.Repeated %}repeated {%endif%}{{ field.Type }} {{ field.Name }} = {{ field.ID }};{% if loop.last == false %}{% endif %}{% endfor %}
 }
 
 {% endfor %}
