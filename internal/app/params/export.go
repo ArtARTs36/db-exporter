@@ -1,6 +1,6 @@
 package params
 
-type ExportParams struct {
+type Config struct {
 	DriverName string
 	DSN        string
 	Format     string

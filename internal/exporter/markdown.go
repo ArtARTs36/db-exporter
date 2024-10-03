@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 
 	"github.com/tyler-sommer/stick"
 
@@ -10,8 +11,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/template"
 )
-
-const MarkdownExporterName = "md"
 
 type MarkdownExporter struct {
 	unimplementedImporter
@@ -33,24 +32,25 @@ func NewMarkdownExporter(renderer *template.Renderer) Exporter {
 
 func (e *MarkdownExporter) ExportPerFile(
 	_ context.Context,
-	sc *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
+	spec := params.Spec.(*config.MarkdownExportSpec)
+
 	var diagram *ExportedPage
-	pagesCap := sc.Tables.Len() + 1
-	if params.WithDiagram {
+	pagesCap := params.Schema.Tables.Len() + 1
+	if spec.WithDiagram {
 		pagesCap++
 		var err error
-		diagram, err = buildDiagramPage(e.graphBuilder, sc.Tables, "diagram.svg")
+		diagram, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diagram: %w", err)
 		}
 	}
 
 	pages := make([]*ExportedPage, 0, pagesCap)
-	preparedTables := make([]*markdownPreparedTable, 0, sc.Tables.Len())
+	preparedTables := make([]*markdownPreparedTable, 0, params.Schema.Tables.Len())
 
-	for _, table := range sc.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		fileName := fmt.Sprintf("%s.md", table.Name.Value)
 
 		page, err := render(e.renderer, "md/per-table.md", fileName, map[string]stick.Value{
@@ -87,15 +87,16 @@ func (e *MarkdownExporter) ExportPerFile(
 
 func (e *MarkdownExporter) Export(
 	_ context.Context,
-	schema *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
 
-	if params.WithDiagram {
+	spec := params.Spec.(*config.MarkdownExportSpec)
+
+	if spec.WithDiagram {
 		var err error
 
-		diagram, err = buildDiagramPage(e.graphBuilder, schema.Tables, "diagram.svg")
+		diagram, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diagram: %w", err)
 		}
@@ -104,9 +105,9 @@ func (e *MarkdownExporter) Export(
 	page, err := render(
 		e.renderer,
 		"md/single-tables.md",
-		e.createIndexPageName(schema),
+		e.createIndexPageName(params.Schema),
 		map[string]stick.Value{
-			"schema":        schema,
+			"schema":        params.Schema,
 			"diagram":       diagram,
 			"diagramExists": diagram != nil,
 		},

@@ -29,6 +29,12 @@ type UniqueKey struct {
 	ColumnsNames *ds.Strings
 }
 
+func (s *Schema) Clone() *Schema {
+	return &Schema{
+		Tables: s.Tables.Clone(),
+	}
+}
+
 func (s *Schema) TablesNames() []string {
 	names := make([]string, 0, s.Tables.Len())
 

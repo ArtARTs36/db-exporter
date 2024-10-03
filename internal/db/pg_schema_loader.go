@@ -13,9 +13,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
-type PGLoader struct {
-	conn *Connection
-}
+type PGLoader struct{}
 
 var pgTypeMap = map[string]schema.ColumnType{
 	pg.TypeText:             schema.ColumnTypeString,
@@ -76,12 +74,12 @@ type squashedConstraint struct {
 	IsInitiallyDeferred bool
 }
 
-func NewPGLoader(conn *Connection) *PGLoader {
-	return &PGLoader{conn: conn}
+func NewPGLoader() *PGLoader {
+	return &PGLoader{}
 }
 
-func (l *PGLoader) Load(ctx context.Context) (*schema.Schema, error) {
-	db, err := l.conn.Connect(ctx)
+func (l *PGLoader) Load(ctx context.Context, conn *Connection) (*schema.Schema, error) {
+	db, err := conn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
 	}

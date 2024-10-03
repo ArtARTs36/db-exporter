@@ -14,8 +14,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const GooseExporterName = "goose"
-
 type GooseExporter struct {
 	unimplementedImporter
 	renderer   *template.Renderer
@@ -36,14 +34,13 @@ func NewGooseExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *
 
 func (e *GooseExporter) ExportPerFile(
 	ctx context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-exporter] building queries and rendering migration files")
 
-	for i, table := range sch.Tables.List() {
+	for i, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
 
 		p, err := render(
@@ -68,13 +65,13 @@ func (e *GooseExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GooseExporter) Export(ctx context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	upQueries := make([]string, 0, sch.Tables.Len())
-	downQueries := make([]string, 0, sch.Tables.Len())
+func (e *GooseExporter) Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error) {
+	upQueries := make([]string, 0, params.Schema.Tables.Len())
+	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, "[gooseexporter] building queries")
 
-	for _, table := range sch.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
 
 		upQueries = append(upQueries, migration.upQueries...)

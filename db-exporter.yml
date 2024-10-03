@@ -1,0 +1,15 @@
+databases:
+  default:
+    driver: postgres
+    dsn: "port=5419 user=test password=test dbname=users sslmode=disable"
+
+tasks:
+  gen_md:
+    - export: md
+      spec:
+        with_diagram: true
+      out:
+        dir: ./out
+
+options:
+  print_stat: true

@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/tyler-sommer/stick"
 
@@ -10,8 +11,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/db-exporter/internal/template"
 )
-
-const GrpcCrudExporterName = "grpc-crud"
 
 type GrpcCrudExporter struct {
 	unimplementedImporter
@@ -33,19 +32,23 @@ func NewGrpcCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
 
 func (e *GrpcCrudExporter) ExportPerFile(
 	_ context.Context,
-	sc *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sc.Tables.Len())
+	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
+	if !ok {
+		return nil, fmt.Errorf("invalid spec")
+	}
 
-	for _, table := range sc.Tables.List() {
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+
+	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
-			Package:  params.Package,
+			Package:  spec.GoPackage,
 			Services: make([]*proto.Service, 0, 1),
-			Messages: make([]*proto.Message, 0, sc.Tables.Len()),
+			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
 			Imports:  ds.NewSet(),
 			Options: map[string]string{
-				"go_package": params.ProtoGoPackage,
+				"go_package": spec.ProtoGoPackage,
 			},
 		}
 
@@ -78,20 +81,24 @@ func (e *GrpcCrudExporter) ExportPerFile(
 
 func (e *GrpcCrudExporter) Export(
 	_ context.Context,
-	sc *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
+	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
+	if !ok {
+		return nil, fmt.Errorf("invalid spec")
+	}
+
 	prfile := &proto.File{
-		Package:  params.Package,
-		Services: make([]*proto.Service, 0, sc.Tables.Len()),
-		Messages: make([]*proto.Message, 0, sc.Tables.Len()),
+		Package:  spec.GoPackage,
+		Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
+		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
 		Imports:  ds.NewSet(),
 		Options: map[string]string{
-			"go_package": params.ProtoGoPackage,
+			"go_package": spec.ProtoGoPackage,
 		},
 	}
 
-	for _, table := range sc.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		srv, messages := e.buildService(prfile, table)
 
 		if len(srv.Procedures) == 0 {

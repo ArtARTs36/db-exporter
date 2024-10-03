@@ -14,8 +14,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const GoSQLMigrateExporterName = "go-sql-migrate"
-
 type GoSQLMigrateExporter struct {
 	unimplementedImporter
 	renderer   *template.Renderer
@@ -36,14 +34,13 @@ func NewSQLMigrateExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuild
 
 func (e *GoSQLMigrateExporter) ExportPerFile(
 	_ context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 
 	log.Printf("[go-sql-migrate-exporter] building queries and rendering migration files")
 
-	for i, table := range sch.Tables.List() {
+	for i, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
 
 		p, err := render(
@@ -70,15 +67,14 @@ func (e *GoSQLMigrateExporter) ExportPerFile(
 
 func (e *GoSQLMigrateExporter) Export(
 	_ context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	upQueries := make([]string, 0, sch.Tables.Len())
-	downQueries := make([]string, 0, sch.Tables.Len())
+	upQueries := make([]string, 0, params.Schema.Tables.Len())
+	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
 	log.Printf("[go-sql-migrate-exporter] building queries")
 
-	for _, table := range sch.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
 
 		upQueries = append(upQueries, migration.upQueries...)
