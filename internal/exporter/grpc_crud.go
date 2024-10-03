@@ -13,7 +13,6 @@ import (
 )
 
 type GrpcCrudExporter struct {
-	unimplementedImporter
 	renderer *template.Renderer
 }
 

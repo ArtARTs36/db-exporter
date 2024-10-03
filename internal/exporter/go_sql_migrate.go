@@ -15,7 +15,6 @@ import (
 )
 
 type GoSQLMigrateExporter struct {
-	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }

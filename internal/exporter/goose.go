@@ -15,7 +15,6 @@ import (
 )
 
 type GooseExporter struct {
-	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }

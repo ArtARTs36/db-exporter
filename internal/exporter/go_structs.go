@@ -22,7 +22,6 @@ var goAbbreviationsSet = map[string]bool{
 }
 
 type GoStructsExporter struct {
-	unimplementedImporter
 	renderer *template.Renderer
 }
 

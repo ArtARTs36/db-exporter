@@ -8,10 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const DiagramExporterName = "diagram"
-
 type DiagramExporter struct {
-	unimplementedImporter
 	graphBuilder *graphBuilder
 }
 

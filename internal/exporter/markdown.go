@@ -13,7 +13,6 @@ import (
 )
 
 type MarkdownExporter struct {
-	unimplementedImporter
 	renderer     *template.Renderer
 	graphBuilder *graphBuilder
 }

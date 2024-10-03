@@ -13,7 +13,6 @@ import (
 )
 
 type LaravelMigrationsRawExporter struct {
-	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }
