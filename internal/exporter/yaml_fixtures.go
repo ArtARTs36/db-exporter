@@ -9,7 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
 const yamlFixturesFilename = "fixtures.yaml"
@@ -17,7 +16,6 @@ const yamlFixturesFilename = "fixtures.yaml"
 type YamlFixturesExporter struct {
 	unimplementedImporter
 	dataLoader *db.DataLoader
-	renderer   *template.Renderer
 	inserter   *db.Inserter
 }
 
@@ -37,12 +35,10 @@ type yamlFixtureTable struct {
 
 func NewYamlFixturesExporter(
 	dataLoader *db.DataLoader,
-	renderer *template.Renderer,
 	inserter *db.Inserter,
 ) *YamlFixturesExporter {
 	return &YamlFixturesExporter{
 		dataLoader: dataLoader,
-		renderer:   renderer,
 		inserter:   inserter,
 	}
 }

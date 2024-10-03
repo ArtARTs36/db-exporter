@@ -8,13 +8,14 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
+	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
 )
 
 type Command struct {
 	migrationsTblDetector *migrations.TableDetector
 
-	exportRunner *ExportRunner
+	activityRunner task.ActivityRunner
 
 	tablePrinter tablePrinter
 	committer    *Committer
@@ -24,32 +25,32 @@ type tablePrinter func(headers []string, rows [][]string)
 
 func NewCommand(
 	migrationsTblDetector *migrations.TableDetector,
-	exportRunner *ExportRunner,
+	activityRunner task.ActivityRunner,
 	tblPrinter tablePrinter,
 	committer *Committer,
 ) *Command {
 	return &Command{
 		migrationsTblDetector: migrationsTblDetector,
-		exportRunner:          exportRunner,
+		activityRunner:        activityRunner,
 		tablePrinter:          tblPrinter,
 		committer:             committer,
 	}
 }
 
 func (c *Command) Run(ctx context.Context, cfg *config.Config) error {
-	generatedFiles, err := c.run(ctx, cfg)
+	result, err := c.run(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
 	if cfg.Options.PrintStat {
-		c.printStat(generatedFiles)
+		c.printStat(result)
 	}
 
 	return nil
 }
 
-func (c *Command) run(ctx context.Context, cfg *config.Config) ([]fs.FileInfo, error) {
+func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityResult, error) {
 	connections := db.NewConnectionPool()
 
 	err := connections.Setup(cfg.Databases)
@@ -84,13 +85,13 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) ([]fs.FileInfo, e
 		}
 	}
 
-	generatedFiles := make([]fs.FileInfo, 0)
+	result := task.NewActivityResult()
 
-	for _, task := range cfg.Tasks {
-		taskGenFiles := make([]fs.FileInfo, 0)
+	for _, ttask := range cfg.Tasks {
+		exportGenFiles := make([]fs.FileInfo, 0)
 
-		for _, activity := range task.Activities {
-			genFiles, genErr := c.exportRunner.Run(ctx, &RunExportParams{
+		for _, activity := range ttask.Activities {
+			activityResult, genErr := c.activityRunner.Run(ctx, &task.ActivityRunParams{
 				Activity: activity,
 				Schema:   schemas[activity.Database],
 			})
@@ -98,34 +99,52 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) ([]fs.FileInfo, e
 				return nil, genErr
 			}
 
-			taskGenFiles = append(taskGenFiles, genFiles...)
+			result.Merge(activityResult)
 		}
 
-		if task.Commit.Valid() {
+		if ttask.Commit.Valid() {
 			err = c.committer.Commit(ctx, commitParams{
-				Commit:         task.Commit,
-				GeneratedFiles: taskGenFiles,
+				Commit:         ttask.Commit,
+				GeneratedFiles: exportGenFiles,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to commit: %w", err)
 			}
 		}
-
-		generatedFiles = append(generatedFiles, taskGenFiles...)
 	}
 
-	return generatedFiles, nil
+	return result, nil
 }
 
-func (c *Command) printStat(generatedFiles []fs.FileInfo) {
-	rows := make([][]string, 0, len(generatedFiles))
+func (c *Command) printStat(result *task.ActivityResult) {
+	printExport := func() {
+		rows := make([][]string, 0, len(result.Export.GetFiles()))
 
-	for _, file := range generatedFiles {
-		rows = append(rows, []string{
-			file.Path,
-			fmt.Sprintf("%d", file.Size),
-		})
+		for _, file := range result.Export.GetFiles() {
+			rows = append(rows, []string{
+				file.Path,
+				fmt.Sprintf("%d", file.Size),
+			})
+		}
+
+		c.tablePrinter([]string{"file", "size"}, rows)
 	}
 
-	c.tablePrinter([]string{"file", "size"}, rows)
+	printImport := func() {
+		countsList := make([][]string, 0, len(result.Import.GetTableRowCountMap()))
+		for table, count := range result.Import.GetTableRowCountMap() {
+			countsList = append(countsList, []string{
+				table,
+				fmt.Sprintf("%d", count),
+			})
+		}
+
+		c.tablePrinter(
+			[]string{"Table", "Affected Rows"},
+			countsList,
+		)
+	}
+
+	printExport()
+	printImport()
 }

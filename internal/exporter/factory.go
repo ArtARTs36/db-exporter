@@ -18,6 +18,12 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 		config.ExporterNameLaravelMigrationsRaw: NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameGrpcCrud:             NewGrpcCrudExporter(renderer),
 		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(db.NewDataLoader(), renderer, sql.NewInsertBuilder()),
-		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(db.NewDataLoader(), renderer, db.NewInserter()),
+		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(db.NewDataLoader(), db.NewInserter()),
+	}
+}
+
+func CreateImporters() map[config.ImporterName]Importer {
+	return map[config.ImporterName]Importer{
+		config.ImporterNameYamlFixtures: NewYamlFixturesExporter(db.NewDataLoader(), db.NewInserter()),
 	}
 }

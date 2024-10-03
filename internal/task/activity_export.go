@@ -1,33 +1,31 @@
-package cmd
+package task
 
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"log/slog"
 
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter"
-	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type ExportRunner struct {
+type ExportActivityRunner struct {
 	migrationsTblDetector *migrations.TableDetector
 	pageStorage           *pageStorage
 	fs                    fs.Driver
-	committer             *Committer
 	renderer              *template.Renderer
 	exporters             map[config.ExporterName]exporter.Exporter
 }
 
-func NewExportRunner(
+func NewExportActivityRunner(
 	fs fs.Driver,
 	renderer *template.Renderer,
 	exporters map[config.ExporterName]exporter.Exporter,
-) *ExportRunner {
-	return &ExportRunner{
+) *ExportActivityRunner {
+	return &ExportActivityRunner{
 		migrationsTblDetector: migrations.NewTableDetector(),
 		pageStorage:           &pageStorage{fs},
 		fs:                    fs,
@@ -36,12 +34,7 @@ func NewExportRunner(
 	}
 }
 
-type RunExportParams struct {
-	Activity config.Activity
-	Schema   *schema.Schema
-}
-
-func (r *ExportRunner) Run(ctx context.Context, expParams *RunExportParams) ([]fs.FileInfo, error) {
+func (r *ExportActivityRunner) Run(ctx context.Context, expParams *ActivityRunParams) (*ActivityResult, error) {
 	pages, err := r.export(ctx, expParams)
 	if err != nil {
 		return nil, err
@@ -57,12 +50,16 @@ func (r *ExportRunner) Run(ctx context.Context, expParams *RunExportParams) ([]f
 
 	slog.InfoContext(ctx, fmt.Sprintf("[exportcmd] successful generated %d files", len(pages)))
 
-	return generatedFiles, nil
+	return &ActivityResult{
+		Export: &ExportActivityResult{
+			files: generatedFiles,
+		},
+	}, nil
 }
 
-func (r *ExportRunner) export(
+func (r *ExportActivityRunner) export(
 	ctx context.Context,
-	params *RunExportParams,
+	params *ActivityRunParams,
 ) ([]*exporter.ExportedPage, error) {
 	var pages []*exporter.ExportedPage
 	var err error

@@ -6,8 +6,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Activities []Activity
-
 type Activity struct {
 	Export       ExporterName `yaml:"export"` // fill export or import
 	Import       ImporterName `yaml:"import"`
