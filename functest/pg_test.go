@@ -118,6 +118,27 @@ func TestPG(t *testing.T) {
 			ConfigPath: "config.yml",
 			TaskName:   "pg_go-structs",
 		},
+		{
+			Title: "test pg with yaml-fixtures",
+			InitQueries: []string{
+				`CREATE TABLE users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);`,
+				`INSERT INTO users (id, name) VALUES
+(1, 'a'),
+(2, 'b')
+`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_yaml-fixtures_export",
+		},
 	}
 
 	for _, tCase := range cases {

@@ -16,6 +16,12 @@ tasks:
         out:
           dir: ./out
 
+  pg_yaml_fixtures_export:
+    activities:
+      - export: yaml-fixtures
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

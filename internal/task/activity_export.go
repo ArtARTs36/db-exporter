@@ -78,6 +78,7 @@ func (r *ExportActivityRunner) export(
 	exporterParams := &exporter.ExportParams{
 		Schema: sc,
 		Spec:   params.Activity.Spec,
+		Conn:   params.Conn,
 	}
 
 	if params.Activity.TablePerFile {
