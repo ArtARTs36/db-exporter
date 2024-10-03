@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/app/actions"
+
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/shared/git"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
 	"github.com/artarts36/db-exporter/templates"
@@ -70,8 +71,9 @@ func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
 
 	return cmd.NewCommand(
 		migrations.NewTableDetector(),
-		cmd.NewExportRunner(fs, map[string]actions.Action{}, renderer, exporter.CreateExporters(renderer)),
+		cmd.NewExportRunner(fs, renderer, exporter.CreateExporters(renderer)),
 		ctx.Output.PrintMarkdownTable,
+		cmd.NewCommit(git.NewGit("git")),
 	)
 }
 
