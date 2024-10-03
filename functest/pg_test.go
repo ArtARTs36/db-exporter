@@ -1,9 +1,10 @@
 package functest
 
 import (
+	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/jmoiron/sqlx"
@@ -50,7 +51,8 @@ func TestPG(t *testing.T) {
 		InitQueries []string
 		DownQueries []string
 
-		BinArgs []string
+		ConfigPath string
+		TaskName   string
 	}{
 		{
 			Name: "test pg with go-structs",
@@ -81,12 +83,8 @@ func TestPG(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			BinArgs: []string{
-				"pg",
-				env.DSN,
-				"go-structs",
-				"out",
-			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_go_structs",
 		},
 		{
 			Name: "test pg with diagram",
@@ -117,12 +115,8 @@ func TestPG(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			BinArgs: []string{
-				"pg",
-				env.DSN,
-				"diagram",
-				"out",
-			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_diagram",
 		},
 	}
 
@@ -136,9 +130,13 @@ func TestPG(t *testing.T) {
 				mustExecQueries(env.db, tCase.DownQueries)
 			}()
 
-			cmdErr := exec.Command(env.BinaryPath, tCase.BinArgs...).Run()
+			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
+				context.Background(),
+				fmt.Sprintf("--config=%s", tCase.ConfigPath),
+				fmt.Sprintf("--tasks=%s", tCase.TaskName),
+			)
 			if cmdErr != nil {
-				t.Fatalf("failed to exec command: %s", cmdErr)
+				t.Fatalf("failed to exec command: %s: %s: %s", cmdErr, res.Stdout, res.Stderr)
 			}
 
 			assert.NoError(t, cmdErr)

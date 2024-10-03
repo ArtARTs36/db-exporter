@@ -18,6 +18,8 @@ func LoadSchemasForPool(ctx context.Context, pool *ConnectionPool) (map[string]*
 		if err != nil {
 			return nil, fmt.Errorf("failed to load schema for database %q: %w", db, err)
 		}
+
+		schemas[db].SortByRelations()
 	}
 
 	return schemas, nil

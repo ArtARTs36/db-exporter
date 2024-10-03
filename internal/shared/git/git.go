@@ -1,26 +1,20 @@
 package git
 
 import (
-	"bytes"
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"log/slog"
-	"os/exec"
 	"strings"
 )
 
 type Git struct {
-	bin string
-}
-
-type cmdResult struct {
-	stdout string
-	stderr string
+	bin *cmd.Command
 }
 
 func NewGit(binary string) *Git {
 	return &Git{
-		bin: binary,
+		bin: cmd.NewCommand(binary),
 	}
 }
 
@@ -45,9 +39,8 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 	args = append(args, "-m")
 	args = append(args, commit.Message)
 
-	cmd := exec.CommandContext(ctx, g.bin, args...)
-	if res, err := g.run(cmd); err != nil {
-		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
+	if res, err := g.bin.Run(ctx, args...); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 
 	slog.InfoContext(ctx, "[git] changes committed")
@@ -58,9 +51,8 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 func (g *Git) AddFile(ctx context.Context, filename string) error {
 	slog.InfoContext(ctx, fmt.Sprintf("[git] adding file %q", filename))
 
-	cmd := exec.CommandContext(ctx, g.bin, "add", filename)
-	if res, err := g.run(cmd); err != nil {
-		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
+	if res, err := g.bin.Run(ctx, "add", filename); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 
 	slog.InfoContext(ctx, fmt.Sprintf("[git] added file %q", filename))
@@ -71,10 +63,8 @@ func (g *Git) AddFile(ctx context.Context, filename string) error {
 func (g *Git) Push(ctx context.Context) error {
 	slog.InfoContext(ctx, "[git] pushing")
 
-	cmd := exec.CommandContext(ctx, g.bin, "push")
-
-	if res, err := g.run(cmd); err != nil {
-		return fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
+	if res, err := g.bin.Run(ctx, "push"); err != nil {
+		return fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 
 	slog.InfoContext(ctx, "[git] pushed")
@@ -83,38 +73,21 @@ func (g *Git) Push(ctx context.Context) error {
 }
 
 func (g *Git) GetAddedAndModifiedFiles(ctx context.Context) ([]string, error) {
-	cmd := exec.CommandContext(
-		ctx,
-		g.bin,
+	args := []string{
 		"diff",
 		"--diff-filter=A",
 		"--diff-filter=M",
 		"--name-only",
 		"HEAD",
-	)
-	res, err := g.run(cmd)
+	}
+	res, err := g.bin.Run(ctx, args...)
 	if err != nil {
-		return []string{}, fmt.Errorf("failed to execute %q: %w: %s", cmd.String(), err, res.stderr)
+		return []string{}, fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 
-	if res.stdout == "" {
+	if res.Stdout == "" {
 		return []string{}, nil
 	}
 
-	return strings.Split(strings.Trim(res.stdout, "\n "), "\n"), nil
-}
-
-func (g *Git) run(cmd *exec.Cmd) (*cmdResult, error) {
-	var outBuffer bytes.Buffer
-	var errBuffer bytes.Buffer
-
-	cmd.Stdout = &outBuffer
-	cmd.Stderr = &errBuffer
-
-	err := cmd.Run()
-
-	return &cmdResult{
-		stdout: outBuffer.String(),
-		stderr: errBuffer.String(),
-	}, err
+	return strings.Split(strings.Trim(res.Stdout, "\n "), "\n"), nil
 }

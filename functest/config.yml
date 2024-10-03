@@ -1,0 +1,21 @@
+databases:
+  default:
+    driver: postgres
+    dsn: $PG_DSN
+
+tasks:
+  pg_go_structs:
+    activities:
+      - export: go-structs
+        out:
+          dir: ./out
+
+  pg_diagram:
+    activities:
+      - export: diagram
+        out:
+          dir: ./out
+
+options:
+  print_stat: true
+  debug: true

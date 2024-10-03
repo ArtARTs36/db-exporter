@@ -27,11 +27,52 @@ func (l *Loader) Load(path string) (*Config, error) {
 		return nil, err
 	}
 
+	err = l.injectEnvVars(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	if err = l.validate(&cfg); err != nil {
 		return nil, err
 	}
 
 	return &cfg, nil
+}
+
+func (l *Loader) injectEnvVars(cfg *Config) error {
+	parseVarName := func(expression string) (string, bool) {
+		if len(expression) < 2 {
+			return "", false
+		}
+
+		if expression[0] != '$' {
+			return "", false
+		}
+
+		if expression[1] == '{' && expression[len(expression)-1] == '}' {
+			return expression[1:], true
+		}
+
+		return expression[1:], true
+	}
+
+	for dbName, database := range cfg.Databases {
+		varName, ok := parseVarName(database.DSN)
+		if !ok {
+			continue
+		}
+
+		varVal, ok := os.LookupEnv(varName)
+		if !ok {
+			return fmt.Errorf("database[%s]: failed to get environment variable %q", dbName, varName)
+		}
+
+		database.DSN = varVal
+
+		cfg.Databases[dbName] = database
+	}
+
+	return nil
 }
 
 func (l *Loader) validate(cfg *Config) error {
