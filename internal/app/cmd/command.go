@@ -91,9 +91,15 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityRe
 		exportGenFiles := make([]fs.FileInfo, 0)
 
 		for _, activity := range ttask.Activities {
+			conn, ok := connections.Get(activity.Database)
+			if !ok {
+				return nil, fmt.Errorf("failed to get connection for database %q", activity.Database)
+			}
+
 			activityResult, genErr := c.activityRunner.Run(ctx, &task.ActivityRunParams{
 				Activity: activity,
 				Schema:   schemas[activity.Database],
+				Conn:     conn,
 			})
 			if err != nil {
 				return nil, genErr
