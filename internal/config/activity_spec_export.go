@@ -8,7 +8,7 @@ const (
 	ExporterNameGoStructs            ExporterName = "go-structs"
 	ExporterNameGoose                ExporterName = "goose"
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
-	ExporterNameGoSqlMigrate         ExporterName = "go-sql-migrate"
+	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
 	ExporterNameLaravelMigrationsRaw ExporterName = "laravel-migrations-raw"
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"

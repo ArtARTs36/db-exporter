@@ -9,16 +9,18 @@ import (
 )
 
 func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Exporter {
+	dataLoader := db.NewDataLoader()
+
 	return map[config.ExporterName]Exporter{
 		config.ExporterNameMd:                   NewMarkdownExporter(renderer),
 		config.ExporterNameDiagram:              NewDiagramExporter(renderer),
 		config.ExporterNameGoStructs:            NewGoStructsExporter(renderer),
 		config.ExporterNameGoose:                NewGooseExporter(renderer, sql.NewDDLBuilder()),
-		config.ExporterNameGoSqlMigrate:         NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()),
+		config.ExporterNameGoSQLMigrate:         NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelMigrationsRaw: NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameGrpcCrud:             NewGrpcCrudExporter(renderer),
-		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(db.NewDataLoader(), renderer, sql.NewInsertBuilder()),
-		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(db.NewDataLoader(), db.NewInserter()),
+		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(dataLoader, renderer, sql.NewInsertBuilder()),
+		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(dataLoader, db.NewInserter()),
 	}
 }
 

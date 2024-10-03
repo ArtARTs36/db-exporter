@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 
@@ -33,7 +34,10 @@ func (e *MarkdownExporter) ExportPerFile(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	spec := params.Spec.(*config.MarkdownExportSpec)
+	spec, ok := params.Spec.(*config.MarkdownExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
 
 	var diagram *ExportedPage
 	pagesCap := params.Schema.Tables.Len() + 1
@@ -90,7 +94,10 @@ func (e *MarkdownExporter) Export(
 ) ([]*ExportedPage, error) {
 	var diagram *ExportedPage
 
-	spec := params.Spec.(*config.MarkdownExportSpec)
+	spec, ok := params.Spec.(*config.MarkdownExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
 
 	if spec.WithDiagram {
 		var err error

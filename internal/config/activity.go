@@ -37,7 +37,7 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 
 	if s.Export != "" {
 		switch s.Export {
-		case ExporterNameDiagram, ExporterNameGoose, ExporterNameGooseFixtures, ExporterNameGoSqlMigrate,
+		case ExporterNameDiagram, ExporterNameGoose, ExporterNameGooseFixtures, ExporterNameGoSQLMigrate,
 			ExporterNameLaravelMigrationsRaw, ExporterNameYamlFixtures:
 			return nil
 		case ExporterNameGoStructs:

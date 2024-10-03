@@ -16,7 +16,12 @@ func NewInserter() *Inserter {
 	return &Inserter{}
 }
 
-func (i *Inserter) Insert(ctx context.Context, conn *Connection, table string, dataset []map[string]interface{}) (int64, error) {
+func (i *Inserter) Insert(
+	ctx context.Context,
+	conn *Connection,
+	table string,
+	dataset []map[string]interface{},
+) (int64, error) {
 	db, err := conn.extContext(ctx)
 	if err != nil {
 		return 0, err
@@ -40,7 +45,12 @@ func (i *Inserter) Insert(ctx context.Context, conn *Connection, table string, d
 	return res.RowsAffected()
 }
 
-func (i *Inserter) Upsert(ctx context.Context, conn *Connection, table *schema.Table, dataset []map[string]interface{}) (int64, error) {
+func (i *Inserter) Upsert(
+	ctx context.Context,
+	conn *Connection,
+	table *schema.Table,
+	dataset []map[string]interface{},
+) (int64, error) {
 	db, err := conn.extContext(ctx)
 	if err != nil {
 		return 0, err

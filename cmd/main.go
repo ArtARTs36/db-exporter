@@ -24,7 +24,7 @@ var (
 	BuildDate = "2024-03-09 03:09:15"
 )
 
-func main() { //nolint:funlen // not need
+func main() {
 	application := cli.App{
 		BuildInfo: &cli.BuildInfo{
 			Name:      "db-exporter",

@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"strings"
@@ -56,7 +57,10 @@ func (e *GoStructsExporter) ExportPerFile(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	spec := params.Spec.(*config.GoStructsExportSpec)
+	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
 
 	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 	pkg := e.selectPackage(spec)
@@ -89,7 +93,10 @@ func (e *GoStructsExporter) Export(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	spec := params.Spec.(*config.GoStructsExportSpec)
+	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
 
 	goSch := e.makeGoSchema(params.Schema.Tables.List())
 	pkg := e.selectPackage(spec)
