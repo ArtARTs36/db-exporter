@@ -6,8 +6,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"log/slog"
 
-	"github.com/artarts36/db-exporter/internal/app/actions"
-	"github.com/artarts36/db-exporter/internal/app/params"
 	"github.com/artarts36/db-exporter/internal/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
@@ -19,14 +17,13 @@ type ExportRunner struct {
 	migrationsTblDetector *migrations.TableDetector
 	pageStorage           *pageStorage
 	fs                    fs.Driver
-	actions               map[string]actions.Action
+	committer             *Committer
 	renderer              *template.Renderer
 	exporters             map[config.ExporterName]exporter.Exporter
 }
 
 func NewExportRunner(
 	fs fs.Driver,
-	actions map[string]actions.Action,
 	renderer *template.Renderer,
 	exporters map[config.ExporterName]exporter.Exporter,
 ) *ExportRunner {
@@ -34,7 +31,6 @@ func NewExportRunner(
 		migrationsTblDetector: migrations.NewTableDetector(),
 		pageStorage:           &pageStorage{fs},
 		fs:                    fs,
-		actions:               actions,
 		renderer:              renderer,
 		exporters:             exporters,
 	}
@@ -98,19 +94,4 @@ func (r *ExportRunner) export(
 	}
 
 	return pages, nil
-}
-
-func (r *ExportRunner) runActions(ctx context.Context, p *params.ActionParams) error {
-	for actionName, action := range r.actions {
-		if action.Supports(p) {
-			slog.DebugContext(ctx, fmt.Sprintf("[exportcmd] running action %q", actionName))
-
-			err := action.Run(ctx, p)
-			if err != nil {
-				return fmt.Errorf("failed to run action %q: %w", actionName, err)
-			}
-		}
-	}
-
-	return nil
 }

@@ -5,11 +5,12 @@ databases:
 
 tasks:
   gen_md:
-    - export: md
-      spec:
-        with_diagram: true
-      out:
-        dir: ./out
+    activities:
+      - export: md
+        spec:
+          with_diagram: true
+        out:
+          dir: ./out
 
 options:
   print_stat: true

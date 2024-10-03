@@ -36,7 +36,7 @@ func (l *Loader) Load(path string) (*Config, error) {
 
 func (l *Loader) validate(cfg *Config) error {
 	for tid, task := range cfg.Tasks {
-		for aid, activity := range task {
+		for aid, activity := range task.Activities {
 			if _, ok := cfg.Databases[activity.Database]; !ok {
 				return fmt.Errorf("task[%s][%d] have invalid database name %q", tid, aid, activity.Database)
 			}
@@ -53,9 +53,9 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 	}
 
 	for tid, task := range cfg.Tasks {
-		for aid, activity := range task {
+		for aid, activity := range task.Activities {
 			if activity.Database == "" {
-				cfg.Tasks[tid][aid].Database = defaultDB
+				cfg.Tasks[tid].Activities[aid].Database = defaultDB
 			}
 		}
 	}

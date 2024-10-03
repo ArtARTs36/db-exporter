@@ -17,6 +17,7 @@ type Command struct {
 	exportRunner *ExportRunner
 
 	tablePrinter tablePrinter
+	committer    *Committer
 }
 
 type tablePrinter func(headers []string, rows [][]string)
@@ -25,11 +26,13 @@ func NewCommand(
 	migrationsTblDetector *migrations.TableDetector,
 	exportRunner *ExportRunner,
 	tblPrinter tablePrinter,
+	committer *Committer,
 ) *Command {
 	return &Command{
 		migrationsTblDetector: migrationsTblDetector,
 		exportRunner:          exportRunner,
 		tablePrinter:          tblPrinter,
+		committer:             committer,
 	}
 }
 
@@ -84,7 +87,9 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) ([]fs.FileInfo, e
 	generatedFiles := make([]fs.FileInfo, 0)
 
 	for _, task := range cfg.Tasks {
-		for _, activity := range task {
+		taskGenFiles := make([]fs.FileInfo, 0)
+
+		for _, activity := range task.Activities {
 			genFiles, genErr := c.exportRunner.Run(ctx, &RunExportParams{
 				Activity: activity,
 				Schema:   schemas[activity.Database],
@@ -93,8 +98,20 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) ([]fs.FileInfo, e
 				return nil, genErr
 			}
 
-			generatedFiles = append(generatedFiles, genFiles...)
+			taskGenFiles = append(taskGenFiles, genFiles...)
 		}
+
+		if task.Commit.Valid() {
+			err = c.committer.Commit(ctx, commitParams{
+				Commit:         task.Commit,
+				GeneratedFiles: taskGenFiles,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("failed to commit: %w", err)
+			}
+		}
+
+		generatedFiles = append(generatedFiles, taskGenFiles...)
 	}
 
 	return generatedFiles, nil

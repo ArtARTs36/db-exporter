@@ -37,7 +37,7 @@ package cmd
 // 	}
 // }
 //
-// func (a *ImportCmd) Run(ctx context.Context, expParams *params.Config) error {
+// func (a *ImportCmd) Commit(ctx context.Context, expParams *params.Config) error {
 // 	driverName, err := db.CreateDriverName(expParams.DriverName)
 // 	if err != nil {
 // 		return err
