@@ -15,8 +15,8 @@ func skipIfRunningShortTests(t *testing.T) {
 	}
 }
 
-func loadExpectedFiles(testName string, i int) map[string]string {
-	dir := fmt.Sprintf("expected_files/%s/%d", testName, i)
+func loadExpectedFiles(taskName string) map[string]string {
+	dir := fmt.Sprintf("data/%s", taskName)
 
 	return loadFiles(dir)
 }

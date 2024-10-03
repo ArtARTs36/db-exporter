@@ -47,7 +47,7 @@ func TestPG(t *testing.T) {
 	env := initPgTestEnvironment()
 
 	cases := []struct {
-		Name        string
+		Title       string
 		InitQueries []string
 		DownQueries []string
 
@@ -55,39 +55,7 @@ func TestPG(t *testing.T) {
 		TaskName   string
 	}{
 		{
-			Name: "test pg with go-structs",
-			InitQueries: []string{
-				`CREATE TABLE users
-(
-    id   integer NOT NULL,
-    name character varying NOT NULL,
-    country_id integer,
-    balance real NOT NULL,
-    prev_balance real,
-    phone character varying,
-    created_at timestamp NOT NULL,
-    updated_at timestamp,
-
-    CONSTRAINT users_pk PRIMARY KEY (id)
-);`,
-				`CREATE TABLE countries
-(
-    id integer NOT NULL,
-    name character varying NOT NULL,
-    
-    CONSTRAINT countries_pk PRIMARY KEY (id)
-)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_go_structs",
-		},
-		{
-			Name: "test pg with diagram",
+			Title: "test pg with diagram",
 			InitQueries: []string{
 				`CREATE TABLE users
 (
@@ -118,11 +86,43 @@ func TestPG(t *testing.T) {
 			ConfigPath: "config.yml",
 			TaskName:   "pg_diagram",
 		},
+		{
+			Title: "test pg with go-structs",
+			InitQueries: []string{
+				`CREATE TABLE users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL,
+    country_id integer,
+    balance real NOT NULL,
+    prev_balance real,
+    phone character varying,
+    created_at timestamp NOT NULL,
+    updated_at timestamp,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);`,
+				`CREATE TABLE countries
+(
+    id integer NOT NULL,
+    name character varying NOT NULL,
+    
+    CONSTRAINT countries_pk PRIMARY KEY (id)
+)`,
+				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+				"DROP TABLE countries",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_go-structs",
+		},
 	}
 
-	for i, tCase := range cases {
-		t.Run(tCase.Name, func(t *testing.T) {
-			expectedFiles := loadExpectedFiles("pg_test", i)
+	for _, tCase := range cases {
+		t.Run(tCase.Title, func(t *testing.T) {
+			expectedFiles := loadExpectedFiles(tCase.TaskName)
 
 			mustExecQueries(env.db, tCase.InitQueries)
 

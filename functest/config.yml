@@ -4,7 +4,7 @@ databases:
     dsn: $PG_DSN
 
 tasks:
-  pg_go_structs:
+  pg_go-structs:
     activities:
       - export: go-structs
         out:
