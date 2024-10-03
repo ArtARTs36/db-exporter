@@ -9,7 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
@@ -125,7 +124,7 @@ func (e *YamlFixturesExporter) Export(
 	}, nil
 }
 
-func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, params *ImportParams) (
+func (e *YamlFixturesExporter) Import(ctx context.Context, params *ImportParams) (
 	[]ImportedFile,
 	error,
 ) {
@@ -142,14 +141,14 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 
 	doImport := e.doImport
 	if fixture.Options.Transaction {
-		doImport = func(ctx context.Context, sch *schema.Schema, fixture *yamlFixture, params *ImportParams) (
+		doImport = func(ctx context.Context, fixture *yamlFixture, params *ImportParams) (
 			ImportedFile,
 			error,
 		) {
 			var importedFile ImportedFile
 
 			trErr := params.Conn.Transact(ctx, func(ctx context.Context) error {
-				importedFile, err = e.doImport(ctx, sch, fixture, params)
+				importedFile, err = e.doImport(ctx, fixture, params)
 				if err != nil {
 					return fmt.Errorf("transaction canceled: %w", err)
 				}
@@ -161,7 +160,7 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 		}
 	}
 
-	importedFile, err := doImport(ctx, sch, &fixture, params)
+	importedFile, err := doImport(ctx, &fixture, params)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +170,6 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 
 func (e *YamlFixturesExporter) doImport(
 	ctx context.Context,
-	sch *schema.Schema,
 	fixture *yamlFixture,
 	params *ImportParams,
 ) (ImportedFile, error) {
@@ -185,8 +183,8 @@ func (e *YamlFixturesExporter) doImport(
 		var ar int64
 		var err error
 
-		if table.Value.Options.Upsert && sch.Tables.Has(*ds.NewString(table.Key)) {
-			tbl, _ := sch.Tables.Get(*ds.NewString(table.Key))
+		if table.Value.Options.Upsert && params.Schema.Tables.Has(*ds.NewString(table.Key)) {
+			tbl, _ := params.Schema.Tables.Get(*ds.NewString(table.Key))
 			ar, err = e.inserter.Upsert(ctx, params.Conn, tbl, table.Value.Rows)
 			if err != nil {
 				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
