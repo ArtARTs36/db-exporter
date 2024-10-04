@@ -22,6 +22,16 @@ tasks:
         out:
           dir: ./out
 
+  pg_grpc-crud:
+    activities:
+      - export: grpc-crud
+        spec:
+          package: "org.service"
+          options:
+            optimize_for: SPEED
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

@@ -1,5 +1,7 @@
 package config
 
+import orderedmap "github.com/wk8/go-ordered-map/v2"
+
 type ExporterName string
 
 const (
@@ -19,8 +21,8 @@ type GoStructsExportSpec struct {
 }
 
 type GRPCCrudExportSpec struct {
-	GoPackage      string `yaml:"go_package"`
-	ProtoGoPackage string `yaml:"proto_go_package"`
+	Package string                                     `yaml:"package"`
+	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options"`
 }
 
 type MarkdownExportSpec struct {

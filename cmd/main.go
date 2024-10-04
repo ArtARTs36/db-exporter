@@ -37,7 +37,7 @@ func main() {
 		Opts: []*cli.OptDefinition{
 			{
 				Name:        "config",
-				Description: "Path to config file (yaml)",
+				Description: "Path to config file (yaml), default: ./db-exporter.yaml",
 			},
 			{
 				Name:        "tasks",

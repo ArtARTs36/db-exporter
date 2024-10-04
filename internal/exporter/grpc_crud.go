@@ -39,16 +39,15 @@ func (e *GrpcCrudExporter) ExportPerFile(
 	}
 
 	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	options := proto.PrepareOptions(spec.Options)
 
 	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
-			Package:  spec.GoPackage,
+			Package:  spec.Package,
 			Services: make([]*proto.Service, 0, 1),
 			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
 			Imports:  ds.NewSet(),
-			Options: map[string]string{
-				"go_package": spec.ProtoGoPackage,
-			},
+			Options:  options,
 		}
 
 		srv, messages := e.buildService(prfile, table)
@@ -87,14 +86,14 @@ func (e *GrpcCrudExporter) Export(
 		return nil, fmt.Errorf("invalid spec")
 	}
 
+	options := proto.PrepareOptions(spec.Options)
+
 	prfile := &proto.File{
-		Package:  spec.GoPackage,
+		Package:  spec.Package,
 		Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
 		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
 		Imports:  ds.NewSet(),
-		Options: map[string]string{
-			"go_package": spec.ProtoGoPackage,
-		},
+		Options:  options,
 	}
 
 	for _, table := range params.Schema.Tables.List() {

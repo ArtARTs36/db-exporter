@@ -4,9 +4,8 @@ package {{ file.Package }};{% endif %}
 {% for im in file.Imports.List %}
 import "{{ im }}";{% if loop.last == false %}
 {% endif %}{% endfor %}
-{% for optName, optValue in file.Options %}
-option {{ optName }} = "{{ optValue }}";{% if loop.last == false %}
-{% endif %}{% endfor %}
+{% for optName, opt in file.Options %}
+option {{ optName }} = {% if opt.Quotes %}"{{ opt.Value }}"{% else %}{{ opt.Value }}{% endif %};{% if loop.last == false %}{% endif %}{% endfor %}
 
 {% for service in file.Services %}service {{ service.Name }} {
 {% for procedure in service.Procedures %}    rpc {{ procedure.Name }}({{ procedure.Param }}) returns ({{ procedure.Returns }}) {}{% if loop.last == false %}

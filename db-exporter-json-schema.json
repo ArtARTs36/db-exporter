@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "databases": {
+      "description": "Map of databases",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/database"
+      }
+    },
+    "tasks": {
+      "description": "Map of tasks",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/task"
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "print_stat": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  "definitions": {
+    "database": {
+      "type": "object",
+      "properties": {
+        "driver": {
+          "type": "string",
+          "enum": ["postgres"]
+        },
+        "dsn": {
+          "type": "string",
+          "title": "Data Source Name in GO syntax, allow env vars"
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/task_activity"
+          }
+        }
+      }
+    },
+    "task_activity": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/task_activity_export"
+        },
+        {
+          "$ref": "#/definitions/task_activity_import"
+        }
+      ]
+    },
+    "task_activity_export": {
+      "properties": {
+        "export": {
+          "type": "string",
+          "enum": [
+            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate", "laravel-migrations-raw",
+            "grpc-crud", "yaml-fixtures"
+          ]
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name as shown on the database map"
+        },
+        "tables": {
+          "type": "array",
+          "description": "Tables for export"
+        },
+        "out": {
+          "type": "object",
+          "properties": {
+            "dir": {
+              "type": "string"
+            },
+            "file_prefix": {
+              "type": "string"
+            }
+          },
+          "required": ["dir"]
+        },
+        "spec": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/spec_md_export"
+            },
+            {
+              "$ref": "#/definitions/spec_go_structs_export"
+            },
+            {
+              "$ref": "#/definitions/spec_grpc_crud_export"
+            }
+          ]
+        }
+      },
+      "required": ["export", "out"],
+      "additionalProperties": false
+    },
+    "task_activity_import": {
+      "properties": {
+        "import": {
+          "type": "string",
+          "enum": [
+            "yaml-fixtures"
+          ]
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name as shown on the database map"
+        },
+        "tables": {
+          "type": "array",
+          "description": "Tables for import"
+        }
+      },
+      "required": ["import"],
+      "additionalProperties": false
+    },
+    "spec_md_export": {
+      "type": "object",
+      "properties": {
+        "with_diagram": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_go_structs_export": {
+      "type": "object",
+      "properties": {
+        "package": {
+          "type": "string",
+          "default": "models"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_grpc_crud_export": {
+      "type": "object",
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "go_package": {
+              "type": "string"
+            },
+            "java_package": {
+              "type": "string"
+            },
+            "java_outer_classname": {
+              "type": "string"
+            },
+            "java_multiple_files": {
+              "type": "boolean"
+            },
+            "optimize_for": {
+              "type": "string",
+              "enum": [
+                "SPEED",
+                "CODE_SIZE",
+                "LITE_RUNTIME"
+              ]
+            }
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
