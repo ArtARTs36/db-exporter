@@ -57,7 +57,7 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 
 	var decodingSpec interface{}
 
-	if exportOrImportObj.Export != "" {
+	if exportOrImportObj.Export != "" { //nolint:gocritic // no need
 		if err := n.Decode(&exportActivity); err != nil {
 			return err
 		}

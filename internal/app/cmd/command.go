@@ -99,7 +99,9 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityRe
 
 	result := task.NewActivityResult()
 
-	for _, ttask := range cfg.Tasks {
+	for taskName, ttask := range cfg.Tasks {
+		slog.InfoContext(ctx, "[command] running task", slog.String("task", taskName))
+
 		exportGenFiles := make([]fs.FileInfo, 0)
 
 		for _, activity := range ttask.Activities {

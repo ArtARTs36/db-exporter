@@ -46,7 +46,7 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 			float32, float64:
 			opt.Value = fmt.Sprintf("%d", v)
 		default:
-			slog.Warn("[proto][prepare-options] unable prepare option %s", key)
+			slog.Warn("[proto][prepare-options] unable prepare option", slog.String("key", key))
 		}
 
 		opts[key] = opt

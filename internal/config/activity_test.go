@@ -24,11 +24,13 @@ spec:
     package: model
 `,
 			Expected: Activity{
-				Export:   "go-structs",
-				Database: "db1",
-				Spec: &GoStructsExportSpec{
-					Package: "model",
+				Export: ExportActivity{
+					Format: "go-structs",
+					Spec: &GoStructsExportSpec{
+						Package: "model",
+					},
 				},
+				Database: "db1",
 			},
 		},
 	}

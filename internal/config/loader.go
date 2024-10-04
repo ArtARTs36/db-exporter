@@ -40,8 +40,10 @@ func (l *Loader) Load(path string) (*Config, error) {
 }
 
 func (l *Loader) injectEnvVars(cfg *Config) error {
+	const minExpressionLen = 2
+
 	parseVarName := func(expression string) (string, bool) {
-		if len(expression) < 2 {
+		if len(expression) < minExpressionLen {
 			return "", false
 		}
 
