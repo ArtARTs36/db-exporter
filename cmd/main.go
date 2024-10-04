@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/task"
+	"strings"
 
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter"
@@ -62,9 +63,17 @@ func run(ctx *cli.Context) error {
 		return err
 	}
 
+	tasks := make([]string, 0)
+	if taskNames, ok := ctx.GetOpt("tasks"); !ok {
+		tasks = strings.Split(taskNames, ",")
+	}
+
 	command := newCommand(ctx, fsystem)
 
-	return command.Run(ctx.Context, cfg)
+	return command.Run(ctx.Context, &cmd.CommandRunParams{
+		Config: cfg,
+		Tasks:  tasks,
+	})
 }
 
 func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {

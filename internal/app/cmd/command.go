@@ -37,13 +37,25 @@ func NewCommand(
 	}
 }
 
-func (c *Command) Run(ctx context.Context, cfg *config.Config) error {
-	result, err := c.run(ctx, cfg)
+type CommandRunParams struct {
+	Config *config.Config
+	Tasks  []string
+}
+
+func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
+	if len(params.Tasks) > 0 {
+		err := params.Config.OnlyTasks(params.Tasks)
+		if err != nil {
+			return err
+		}
+	}
+
+	result, err := c.run(ctx, params.Config)
 	if err != nil {
 		return err
 	}
 
-	if cfg.Options.PrintStat {
+	if params.Config.Options.PrintStat {
 		c.printStat(result)
 	}
 

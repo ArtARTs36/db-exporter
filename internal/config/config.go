@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 type Config struct {
 	Databases map[string]Database `yaml:"databases"`
 	Tasks     map[string]Task     `yaml:"tasks"`
@@ -24,6 +26,22 @@ type Commit struct {
 	Message string `yaml:"message"`
 	Author  string `yaml:"author"`
 	Push    bool   `yaml:"push"`
+}
+
+func (c *Config) OnlyTasks(taskNames []string) error {
+	tasks := map[string]Task{}
+	for _, name := range taskNames {
+		task, ok := c.Tasks[name]
+		if !ok {
+			return fmt.Errorf("task %q not found", name)
+		}
+
+		tasks[name] = task
+	}
+
+	c.Tasks = tasks
+
+	return nil
 }
 
 func (c *Commit) Valid() bool {
