@@ -27,9 +27,9 @@ func NewImportActivityRunner(fs fs.Driver, importers map[config.ImporterName]exp
 }
 
 func (a *ImportActivityRunner) Run(ctx context.Context, params *ActivityRunParams) (*ActivityResult, error) {
-	importer, exists := a.importers[params.Activity.Import]
+	importer, exists := a.importers[params.Activity.Import.Format]
 	if !exists {
-		return nil, fmt.Errorf("importer for format %q not found", params.Activity.Import)
+		return nil, fmt.Errorf("importer for format %q not found", params.Activity.Import.Format)
 	}
 
 	files, err := a.doImport(ctx, importer, params)
@@ -84,7 +84,7 @@ func (a *ImportActivityRunner) doImport(
 	var pages []exporter.ImportedFile
 	var err error
 	importerParams := &exporter.ImportParams{
-		Directory: fs.NewDirectory(a.fs, params.Activity.Out.Dir),
+		Directory: fs.NewDirectory(a.fs, params.Activity.Import.From),
 		TableFilter: func(tableName string) bool {
 			if len(params.Activity.Tables) > 0 && !slices.Contains(params.Activity.Tables, tableName) {
 				return false
@@ -94,12 +94,7 @@ func (a *ImportActivityRunner) doImport(
 		},
 	}
 
-	if params.Activity.TablePerFile {
-		pages, err = exp.ImportPerFile(ctx, importerParams)
-	} else {
-		pages, err = exp.Import(ctx, importerParams)
-	}
-
+	pages, err = exp.Import(ctx, importerParams)
 	if err != nil {
 		return nil, fmt.Errorf("failed to import: %w", err)
 	}

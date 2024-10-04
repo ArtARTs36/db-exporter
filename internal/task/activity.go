@@ -69,8 +69,13 @@ func (r *CompositeActivityRunner) Run(ctx context.Context, expParams *ActivityRu
 }
 
 func (r *ActivityResult) Merge(that *ActivityResult) {
-	r.Export.merge(that.Export)
-	r.Import.merge(that.Import)
+	if that.Export != nil {
+		r.Export.merge(that.Export)
+	}
+
+	if that.Import != nil {
+		r.Import.merge(that.Import)
+	}
 }
 
 func (r *ExportActivityResult) GetFiles() []fs.FileInfo {

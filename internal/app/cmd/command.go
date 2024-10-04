@@ -101,8 +101,11 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityRe
 				Schema:   schemas[activity.Database],
 				Conn:     conn,
 			})
-			if err != nil {
+			if genErr != nil {
 				return nil, genErr
+			}
+			if activityResult == nil {
+				return nil, fmt.Errorf("activity runner returns nil result")
 			}
 
 			result.Merge(activityResult)
