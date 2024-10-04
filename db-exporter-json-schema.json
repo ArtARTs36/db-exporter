@@ -46,8 +46,30 @@
         "activities": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/task_activity"
+            "$ref": "#/definitions/task_activity",
+            "minLength": 1
           }
+        },
+        "commit": {
+          "$ref": "#/definitions/task_commit"
+        }
+      },
+      "required": [
+        "activities"
+      ]
+    },
+    "task_commit": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "push": {
+          "type": "boolean",
+          "default": false
         }
       }
     },
@@ -180,7 +202,17 @@
             }
           },
           "additionalProperties": {
-            "type": "string"
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              }
+            ]
           }
         }
       },
