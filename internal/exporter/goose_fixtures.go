@@ -44,7 +44,6 @@ func (e *GooseFixturesExporter) ExportPerFile(
 		if err != nil {
 			return nil, err
 		}
-
 		if len(data) == 0 {
 			continue
 		}

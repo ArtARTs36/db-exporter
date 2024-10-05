@@ -90,7 +90,7 @@
           "type": "string",
           "enum": [
             "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate", "laravel-migrations-raw",
-            "grpc-crud", "yaml-fixtures"
+            "grpc-crud", "yaml-fixtures", "csv"
           ]
         },
         "database": {

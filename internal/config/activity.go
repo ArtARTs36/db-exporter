@@ -74,6 +74,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(MarkdownExportSpec)
 		case ExporterNameGrpcCrud:
 			exportActivity.Spec = new(GRPCCrudExportSpec)
+		case ExporterNameCSV:
+			exportActivity.Spec = new(CSVExportSpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

@@ -66,3 +66,19 @@ func (l *DataLoader) Load(ctx context.Context, conn *Connection, table string) (
 
 	return data, nil
 }
+
+func (d *TableData) FilterColumns(filter func(col string) bool) TableData {
+	newData := make(TableData, 0, len(*d))
+	for _, row := range *d {
+		newRow := map[string]interface{}{}
+
+		for col, val := range row {
+			if filter(col) {
+				newRow[col] = val
+			}
+		}
+
+		newData = append(newData, newRow)
+	}
+	return newData
+}

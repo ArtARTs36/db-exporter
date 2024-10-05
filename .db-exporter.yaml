@@ -11,6 +11,9 @@ tasks:
           with_diagram: true
         out:
           dir: ./out
+      - export: csv
+        out:
+          dir: ./out
 
 options:
   print_stat: true

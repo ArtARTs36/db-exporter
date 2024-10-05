@@ -14,6 +14,7 @@ const (
 	ExporterNameLaravelMigrationsRaw ExporterName = "laravel-migrations-raw"
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
+	ExporterNameCSV                  ExporterName = "csv"
 )
 
 type GoStructsExportSpec struct {
@@ -27,4 +28,14 @@ type GRPCCrudExportSpec struct {
 
 type MarkdownExportSpec struct {
 	WithDiagram bool `yaml:"with_diagram"`
+}
+
+type CSVExportSpec struct {
+	Delimiter   string                               `yaml:"delimiter"`
+	TableColumn map[string]CSVExportSpecColumnFilter `yaml:"columns"`
+}
+
+type CSVExportSpecColumnFilter struct {
+	Only []string `yaml:"only"`
+	Skip []string `yaml:"skip"`
 }

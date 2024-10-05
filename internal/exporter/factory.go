@@ -21,6 +21,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 		config.ExporterNameGrpcCrud:             NewGrpcCrudExporter(renderer),
 		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(dataLoader, renderer, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(dataLoader, db.NewInserter()),
+		config.ExporterNameCSV:                  NewCSVExporter(dataLoader, renderer),
 	}
 }
 

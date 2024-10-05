@@ -7,7 +7,7 @@ import (
 )
 
 type Exporter interface {
-	ExportPerFile(_ context.Context, params *ExportParams) ([]*ExportedPage, error)
+	ExportPerFile(ctx context.Context, params *ExportParams) ([]*ExportedPage, error)
 	Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error)
 }
 
