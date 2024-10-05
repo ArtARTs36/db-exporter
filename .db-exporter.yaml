@@ -12,6 +12,11 @@ tasks:
         out:
           dir: ./out
       - export: csv
+        spec:
+          table_column:
+            entity_types:
+              skip:
+                - id
         out:
           dir: ./out
 

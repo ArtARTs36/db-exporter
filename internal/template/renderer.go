@@ -2,7 +2,9 @@ package template
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/tyler-sommer/stick"
 )
@@ -20,6 +22,19 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 		}
 
 		return strings.Repeat(" ", count)
+	}
+	eng.Functions["quote_string"] = func(_ stick.Context, args ...stick.Value) stick.Value {
+		switch val := args[0].(type) {
+		case string:
+			return fmt.Sprintf("%q", val)
+		case time.Time:
+			if val.IsZero() {
+				return ""
+			}
+
+			return fmt.Sprintf("%q", val.Format(time.RFC3339))
+		}
+		return args[0]
 	}
 
 	return &Renderer{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/config"
@@ -58,6 +59,7 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 					newCols = append(newCols, col)
 				}
 			}
+			cols = newCols
 
 			data = data.FilterColumns(colFilter)
 		}

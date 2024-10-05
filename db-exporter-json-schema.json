@@ -133,6 +133,9 @@
             },
             {
               "$ref": "#/definitions/spec_grpc_crud_export"
+            },
+            {
+              "$ref": "#/definitions/spec_csv_export"
             }
           ]
         }
@@ -220,6 +223,47 @@
               },
               {
                 "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_csv_export": {
+      "type": "object",
+      "properties": {
+        "delimiter": {
+          "type": "string",
+          "default": ","
+        },
+        "table_column": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "only": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "skip": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
               }
             ]
           }

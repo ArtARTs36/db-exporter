@@ -32,7 +32,7 @@ type MarkdownExportSpec struct {
 
 type CSVExportSpec struct {
 	Delimiter   string                               `yaml:"delimiter"`
-	TableColumn map[string]CSVExportSpecColumnFilter `yaml:"columns"`
+	TableColumn map[string]CSVExportSpecColumnFilter `yaml:"table_column"`
 }
 
 type CSVExportSpecColumnFilter struct {
