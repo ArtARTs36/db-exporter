@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/task"
 	"strings"
 
@@ -96,7 +97,7 @@ func loadConfig(ctx *cli.Context) (*config.Config, error) {
 		configPath = "./.db-exporter.yaml"
 	}
 
-	loader := &config.Loader{}
+	loader := config.NewLoader(env.NewInjector())
 
 	return loader.Load(configPath)
 }

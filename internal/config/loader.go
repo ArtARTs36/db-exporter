@@ -2,12 +2,20 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/env"
 	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Loader struct {
+	envInjector *env.Injector
+}
+
+func NewLoader(envInjector *env.Injector) *Loader {
+	return &Loader{
+		envInjector: envInjector,
+	}
 }
 
 func (l *Loader) Load(path string) (*Config, error) {

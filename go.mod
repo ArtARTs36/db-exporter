@@ -1,11 +1,14 @@
 module github.com/artarts36/db-exporter
 
-go 1.21.0
+go 1.22
+
+toolchain go1.22.8
 
 require (
 	github.com/artarts36/singlecli v0.0.0-20240320230751-41d6b8f4d72e
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
+	github.com/buildkite/interpolate v0.1.4
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/goccy/go-graphviz v0.1.2
