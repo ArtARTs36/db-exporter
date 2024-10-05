@@ -32,6 +32,14 @@ tasks:
         out:
           dir: ./out
 
+  pg_csv_export:
+    activities:
+      - export: csv
+        spec:
+          delimiter: ','
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

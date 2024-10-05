@@ -55,6 +55,27 @@ func TestPG(t *testing.T) {
 		TaskName   string
 	}{
 		{
+			Title: "test pg with csv",
+			InitQueries: []string{
+				`CREATE TABLE users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);`,
+				`INSERT INTO users (id, name) VALUES
+				(1, 'a'),
+				(2, 'b')
+				`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_csv_export",
+		},
+		{
 			Title: "test pg with diagram",
 			InitQueries: []string{
 				`CREATE TABLE users

@@ -18,7 +18,12 @@ func skipIfRunningShortTests(t *testing.T) {
 func loadExpectedFiles(taskName string) map[string]string {
 	dir := fmt.Sprintf("data/%s", taskName)
 
-	return loadFiles(dir)
+	files := loadFiles(dir)
+	if len(files) == 0 {
+		panic("expected files for test with task name %q not found")
+	}
+
+	return files
 }
 
 func loadFiles(dir string) map[string]string {
