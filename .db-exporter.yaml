@@ -1,7 +1,7 @@
 databases:
   default:
     driver: postgres
-    dsn: "port=5419 user=test password=test dbname=users sslmode=disable"
+    dsn: "port=5459 user=db password=db dbname=db sslmode=disable"
 
 tasks:
   gen_md:

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -15,13 +16,18 @@ type pageStorage struct {
 type savePageParams struct {
 	Dir        string
 	FilePrefix string
+	SkipExists bool
 }
 
-func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParams) ([]fs.FileInfo, error) {
+func (s *pageStorage) Save(
+	ctx context.Context,
+	pages []*exporter.ExportedPage,
+	params *savePageParams,
+) ([]fs.FileInfo, error) {
 	writtenFiles := make([]fs.FileInfo, 0, len(pages))
 
 	if !s.fs.Exists(params.Dir) {
-		slog.Info(fmt.Sprintf("[pagestorage] creating directory %q", params.Dir))
+		slog.InfoContext(ctx, fmt.Sprintf("[pagestorage] creating directory %q", params.Dir))
 
 		err := s.fs.Mkdir(params.Dir)
 		if err != nil {
@@ -29,12 +35,16 @@ func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParam
 		}
 	}
 
-	slog.Debug(fmt.Sprintf("[pagestorage] saving %d files", len(pages)))
+	slog.DebugContext(ctx, fmt.Sprintf("[pagestorage] saving %d files", len(pages)))
 
 	for _, page := range pages {
 		path := s.createPath(page, params)
 
-		slog.Debug(fmt.Sprintf("[pagestorage] saving %q", path))
+		slog.DebugContext(ctx, fmt.Sprintf("[pagestorage] saving %q", path))
+
+		if params.SkipExists && s.fs.Exists(path) {
+			continue
+		}
 
 		wrFile, err := s.fs.Write(path, page.Content)
 		if err != nil {
@@ -44,7 +54,7 @@ func (s *pageStorage) Save(pages []*exporter.ExportedPage, params *savePageParam
 		writtenFiles = append(writtenFiles, wrFile)
 	}
 
-	slog.Info(fmt.Sprintf("[pagestorage] saved %d files", len(pages)))
+	slog.InfoContext(ctx, fmt.Sprintf("[pagestorage] saved %d files", len(pages)))
 
 	return writtenFiles, nil
 }

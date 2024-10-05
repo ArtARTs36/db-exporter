@@ -40,9 +40,10 @@ func (r *ExportActivityRunner) Run(ctx context.Context, expParams *ActivityRunPa
 		return nil, err
 	}
 
-	generatedFiles, err := r.pageStorage.Save(pages, &savePageParams{
+	generatedFiles, err := r.pageStorage.Save(ctx, pages, &savePageParams{
 		Dir:        expParams.Activity.Export.Out.Dir,
 		FilePrefix: expParams.Activity.Export.Out.FilePrefix,
+		SkipExists: expParams.Activity.Export.SkipExists,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to save generated pages: %w", err)

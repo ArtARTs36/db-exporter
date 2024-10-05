@@ -17,6 +17,7 @@ type Activity struct {
 type ExportActivity struct {
 	Format       ExporterName
 	TablePerFile bool `yaml:"table_per_file"`
+	SkipExists   bool `yaml:"skip_exists"` // Skip generate already exists files
 	Out          struct {
 		Dir        string `yaml:"dir"`
 		FilePrefix string `yaml:"file_prefix"`

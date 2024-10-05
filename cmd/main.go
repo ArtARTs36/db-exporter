@@ -37,7 +37,7 @@ func main() {
 		Opts: []*cli.OptDefinition{
 			{
 				Name:        "config",
-				Description: "Path to config file (yaml), default: ./db-exporter.yaml",
+				Description: "Path to config file (yaml), default: ./.db-exporter.yaml",
 			},
 			{
 				Name:        "tasks",
@@ -93,7 +93,7 @@ func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
 func loadConfig(ctx *cli.Context) (*config.Config, error) {
 	configPath, ok := ctx.GetOpt("config")
 	if !ok {
-		configPath = "./db-exporter.yaml"
+		configPath = "./.db-exporter.yaml"
 	}
 
 	loader := &config.Loader{}

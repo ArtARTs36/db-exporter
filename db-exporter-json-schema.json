@@ -97,6 +97,15 @@
           "type": "string",
           "description": "Database name as shown on the database map"
         },
+        "table_per_file": {
+          "type": "boolean",
+          "default": false
+        },
+        "skip_exists": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip generate already exists files"
+        },
         "tables": {
           "type": "array",
           "description": "Tables for export"
