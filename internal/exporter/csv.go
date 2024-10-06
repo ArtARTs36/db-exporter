@@ -88,32 +88,6 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 	return pages, nil
 }
 
-func (c *CSVExporter) columnFilter(cfg config.ExportSpecTransform) func(col string) bool {
-	if len(cfg.OnlyColumns) > 0 {
-		onlyMap := map[string]bool{}
-		for _, col := range cfg.OnlyColumns {
-			onlyMap[col] = true
-		}
-
-		return func(col string) bool {
-			return onlyMap[col]
-		}
-	}
-
-	if len(cfg.OnlyColumns) > 0 {
-		skipMap := map[string]bool{}
-		for _, col := range cfg.OnlyColumns {
-			skipMap[col] = true
-		}
-
-		return func(col string) bool {
-			return !skipMap[col]
-		}
-	}
-
-	return nil
-}
-
 func (c *CSVExporter) Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error) {
 	return c.ExportPerFile(ctx, params)
 }
