@@ -92,7 +92,7 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 }
 
 func (c *Command) setupLogger(debug bool) {
-	lvl := slog.LevelInfo
+	lvl := slog.LevelWarn
 	if debug {
 		lvl = slog.LevelDebug
 	}
