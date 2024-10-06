@@ -173,7 +173,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 			result.Merge(activityResult)
 		}
 
-		if ttask.Commit.Valid() {
+		if len(result.Export.GetFiles()) > 0 && ttask.Commit.Valid() {
 			err = c.committer.Commit(ctx, commitParams{
 				Commit:         ttask.Commit,
 				GeneratedFiles: result.Export.GetFiles(),
