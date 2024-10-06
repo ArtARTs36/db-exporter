@@ -87,7 +87,7 @@ func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
 			task.NewImportActivityRunner(fs, exporter.CreateImporters()),
 		),
 		ctx.Output.PrintMarkdownTable,
-		cmd.NewCommit(git.NewGit("git")),
+		cmd.NewCommit(git.NewGit("git", git.GithubActionsAuthorFinder())),
 	)
 }
 

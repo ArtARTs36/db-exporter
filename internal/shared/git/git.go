@@ -3,18 +3,21 @@ package git
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"log/slog"
 	"strings"
+
+	"github.com/artarts36/db-exporter/internal/shared/cmd"
 )
 
 type Git struct {
-	bin *cmd.Command
+	bin          *cmd.Command
+	authorFinder AuthorFinder
 }
 
-func NewGit(binary string) *Git {
+func NewGit(binary string, authorFinder AuthorFinder) *Git {
 	return &Git{
-		bin: cmd.NewCommand(binary),
+		bin:          cmd.NewCommand(binary),
+		authorFinder: authorFinder,
 	}
 }
 
@@ -24,15 +27,26 @@ type Commit struct {
 }
 
 func (g *Git) Commit(ctx context.Context, commit *Commit) error {
-	slog.InfoContext(ctx, "[git] committing changes")
+	author := commit.Author
+	if author == nil {
+		var err error
+		author, err = g.authorFinder()
+		if err != nil {
+			return fmt.Errorf("failed to find author: %w", err)
+		}
+	}
+
+	slog.
+		With(slog.Any("commit", commit)).
+		InfoContext(ctx, "[git] committing changes")
 
 	args := make([]string, 0)
 
 	if commit.Author != nil {
 		args = append(args, "-c")
-		args = append(args, fmt.Sprintf("user.name=%s", commit.Author.Name))
+		args = append(args, fmt.Sprintf("user.name=%s", author.Name))
 		args = append(args, "-c")
-		args = append(args, fmt.Sprintf("user.email=%s", commit.Author.Email))
+		args = append(args, fmt.Sprintf("user.email=%s", author.Email))
 	}
 
 	args = append(args, "commit")
@@ -43,7 +57,9 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 		return fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 
-	slog.InfoContext(ctx, "[git] changes committed")
+	slog.
+		With(slog.Any("commit", commit)).
+		InfoContext(ctx, "[git] changes committed")
 
 	return nil
 }
