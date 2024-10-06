@@ -11,6 +11,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
+	"os"
 )
 
 type Command struct {
@@ -48,23 +49,29 @@ type CommandRunParams struct {
 
 func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	tasks := make(map[string]config.Task, 0)
-	dbKeysSet := make(map[string]bool, 0)
 	dbs := make(map[string]config.Database, 0)
-	for _, name := range params.TaskNames {
-		t, ok := params.Config.Tasks[name]
-		if !ok {
-			return fmt.Errorf("task %q not found", name)
-		}
-		tasks[name] = t
 
-		for _, act := range t.Activities {
-			exists := dbKeysSet[act.Database]
-			if !exists {
-				dbKeysSet[act.Database] = true
-				dbs[act.Database] = params.Config.Databases[act.Database]
+	if len(params.TaskNames) == 0 {
+		tasks = params.Config.Tasks
+		dbs = params.Config.Databases
+	} else {
+		for _, name := range params.TaskNames {
+			t, ok := params.Config.Tasks[name]
+			if !ok {
+				return fmt.Errorf("task %q not found", name)
+			}
+			tasks[name] = t
+
+			for _, act := range t.Activities {
+				if _, exists := dbs[act.Database]; !exists {
+					dbs[act.Database] = params.Config.Databases[act.Database]
+				}
 			}
 		}
 	}
+
+	c.setupLogger(params.Config.Options.Debug)
+
 	if len(tasks) == 0 {
 		return errors.New("tasks not found")
 	}
@@ -82,6 +89,28 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	}
 
 	return nil
+}
+
+func (c *Command) setupLogger(debug bool) {
+	lvl := slog.LevelInfo
+	if debug {
+		lvl = slog.LevelDebug
+	}
+
+	slog.SetDefault(
+		slog.New(
+			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+				Level: lvl,
+				ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
+					if a.Key != "time" {
+						return a
+					}
+
+					return slog.String(a.Key, a.Value.Time().Format("2006-01-02 15:04"))
+				},
+			}),
+		),
+	)
 }
 
 func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.ActivityResult, error) {

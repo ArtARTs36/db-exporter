@@ -11,14 +11,6 @@ tasks:
           with_diagram: true
         out:
           dir: ./out
-      - export: csv
-        spec:
-          table_column:
-            entity_types:
-              skip:
-                - id
-        out:
-          dir: ./out
 
 options:
   print_stat: true
