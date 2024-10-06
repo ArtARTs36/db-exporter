@@ -7,7 +7,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
@@ -153,8 +152,6 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 	for taskName, ttask := range params.tasks {
 		slog.InfoContext(ctx, "[command] running task", slog.String("task", taskName))
 
-		exportGenFiles := make([]fs.FileInfo, 0)
-
 		for _, activity := range ttask.Activities {
 			conn, ok := connections.Get(activity.Database)
 			if !ok {
@@ -179,7 +176,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 		if ttask.Commit.Valid() {
 			err = c.committer.Commit(ctx, commitParams{
 				Commit:         ttask.Commit,
-				GeneratedFiles: exportGenFiles,
+				GeneratedFiles: result.Export.GetFiles(),
 			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to commit: %w", err)
