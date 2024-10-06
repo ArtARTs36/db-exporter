@@ -45,7 +45,7 @@ func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 	}
 
 	if len(modifiedFiles) == 0 {
-		slog.DebugContext(ctx, "[commitaction] modified files not found, skip action")
+		slog.DebugContext(ctx, "[committer] modified files not found, skip action")
 
 		return nil
 	}
