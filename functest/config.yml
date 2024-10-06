@@ -16,7 +16,7 @@ tasks:
         out:
           dir: ./out
 
-  pg_yaml_fixtures_export:
+  pg_yaml-fixtures_export:
     activities:
       - export: yaml-fixtures
         out:
@@ -39,6 +39,11 @@ tasks:
           delimiter: ','
         out:
           dir: ./out
+
+  pg_yaml-fixtures_import:
+    activities:
+      - import: yaml-fixtures
+        from: ./data/pg_yaml-fixtures_import
 
 options:
   print_stat: true

@@ -65,15 +65,15 @@ func run(ctx *cli.Context) error {
 	}
 
 	tasks := make([]string, 0)
-	if taskNames, ok := ctx.GetOpt("tasks"); !ok {
+	if taskNames, ok := ctx.GetOpt("tasks"); ok {
 		tasks = strings.Split(taskNames, ",")
 	}
 
 	command := newCommand(ctx, fsystem)
 
 	return command.Run(ctx.Context, &cmd.CommandRunParams{
-		Config: cfg,
-		Tasks:  tasks,
+		Config:    cfg,
+		TaskNames: tasks,
 	})
 }
 

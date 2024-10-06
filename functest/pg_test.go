@@ -3,7 +3,9 @@ package functest
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/shared/cmd"
+	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
 
@@ -29,7 +31,7 @@ func initPgTestEnvironment() *pgTestEnvironment {
 		panic("DB_EXPORTER_BIN not found")
 	}
 
-	db, err := sqlx.Connect("postgres", dsn)
+	conn, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic(fmt.Sprintf("failed connect to db: %s", err))
 	}
@@ -37,11 +39,11 @@ func initPgTestEnvironment() *pgTestEnvironment {
 	return &pgTestEnvironment{
 		DSN:        dsn,
 		BinaryPath: binaryPath,
-		db:         db,
+		db:         conn,
 	}
 }
 
-func TestPG(t *testing.T) {
+func TestPGExport(t *testing.T) {
 	skipIfRunningShortTests(t)
 
 	env := initPgTestEnvironment()
@@ -214,6 +216,83 @@ func TestPG(t *testing.T) {
 			}
 
 			removeDir("./out")
+		})
+	}
+}
+
+func TestPGImport(t *testing.T) {
+	skipIfRunningShortTests(t)
+
+	env := initPgTestEnvironment()
+
+	cases := []struct {
+		Title       string
+		InitQueries []string
+		DownQueries []string
+
+		ConfigPath   string
+		TaskName     string
+		ExpectedRows map[string][]map[string]interface{}
+	}{
+		{
+			Title: "test pg import with yaml-fixtures",
+			InitQueries: []string{
+				`CREATE TABLE yaml_fixtures_import_users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL
+);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE yaml_fixtures_import_users",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_yaml-fixtures_import",
+			ExpectedRows: map[string][]map[string]interface{}{
+				"yaml_fixtures_import_users": {
+					{"id": int64(1), "name": "a"},
+					{"id": int64(2), "name": "b"},
+				},
+			},
+		},
+	}
+
+	for _, tCase := range cases {
+		t.Run(tCase.Title, func(t *testing.T) {
+			mustExecQueries(env.db, tCase.InitQueries)
+
+			defer func() {
+				mustExecQueries(env.db, tCase.DownQueries)
+			}()
+
+			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
+				context.Background(),
+				fmt.Sprintf("--config=%s", tCase.ConfigPath),
+				fmt.Sprintf("--tasks=%s", tCase.TaskName),
+			)
+			if cmdErr != nil {
+				t.Fatalf("failed to exec command: %s: %s: %s", cmdErr, res.Stdout, res.Stderr)
+			}
+
+			assert.NoError(t, cmdErr)
+
+			dl := db.NewDataLoader()
+
+			got := map[string][]map[string]interface{}{}
+
+			conn, err := db.NewOpenedConnection(env.db)
+			require.NoError(t, err)
+
+			for table := range tCase.ExpectedRows {
+				gotTableRows, err := dl.Load(context.Background(), conn, table)
+				if err != nil {
+					panic(err)
+				}
+
+				got[table] = gotTableRows
+			}
+
+			assert.Equal(t, tCase.ExpectedRows, got)
 		})
 	}
 }

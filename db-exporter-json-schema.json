@@ -151,6 +151,9 @@
             "yaml-fixtures"
           ]
         },
+        "from": {
+          "type": "string"
+        },
         "database": {
           "type": "string",
           "description": "Database name as shown on the database map"
@@ -160,7 +163,7 @@
           "description": "Tables for import"
         }
       },
-      "required": ["import"],
+      "required": ["import", "from"],
       "additionalProperties": false
     },
     "spec_md_export": {

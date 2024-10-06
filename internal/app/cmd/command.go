@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/db"
@@ -38,19 +39,40 @@ func NewCommand(
 }
 
 type CommandRunParams struct {
-	Config *config.Config
-	Tasks  []string
+	Config    *config.Config
+	TaskNames []string
+
+	dbs   map[string]config.Database
+	tasks map[string]config.Task
 }
 
 func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
-	if len(params.Tasks) > 0 {
-		err := params.Config.OnlyTasks(params.Tasks)
-		if err != nil {
-			return err
+	tasks := make(map[string]config.Task, 0)
+	dbKeysSet := make(map[string]bool, 0)
+	dbs := make(map[string]config.Database, 0)
+	for _, name := range params.TaskNames {
+		t, ok := params.Config.Tasks[name]
+		if !ok {
+			return fmt.Errorf("task %q not found", name)
+		}
+		tasks[name] = t
+
+		for _, act := range t.Activities {
+			exists := dbKeysSet[act.Database]
+			if !exists {
+				dbKeysSet[act.Database] = true
+				dbs[act.Database] = params.Config.Databases[act.Database]
+			}
 		}
 	}
+	if len(tasks) == 0 {
+		return errors.New("tasks not found")
+	}
 
-	result, err := c.run(ctx, params.Config)
+	params.tasks = tasks
+	params.dbs = dbs
+
+	result, err := c.run(ctx, params)
 	if err != nil {
 		return err
 	}
@@ -62,10 +84,10 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	return nil
 }
 
-func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityResult, error) {
+func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.ActivityResult, error) {
 	connections := db.NewConnectionPool()
 
-	err := connections.Setup(cfg.Databases)
+	err := connections.Setup(params.dbs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to setup database connection pool: %w", err)
 	}
@@ -89,7 +111,7 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityRe
 		return nil, err
 	}
 
-	if !cfg.Options.WithMigrationsTable {
+	if !params.Config.Options.WithMigrationsTable {
 		for _, sc := range schemas {
 			sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
 				return c.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames())
@@ -99,7 +121,7 @@ func (c *Command) run(ctx context.Context, cfg *config.Config) (*task.ActivityRe
 
 	result := task.NewActivityResult()
 
-	for taskName, ttask := range cfg.Tasks {
+	for taskName, ttask := range params.tasks {
 		slog.InfoContext(ctx, "[command] running task", slog.String("task", taskName))
 
 		exportGenFiles := make([]fs.FileInfo, 0)
