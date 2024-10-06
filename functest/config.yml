@@ -37,6 +37,12 @@ tasks:
       - export: csv
         spec:
           delimiter: ','
+          transform:
+            countries:
+              - skip_columns:
+                  - id
+              - rename_columns:
+                  name: country_name
         out:
           dir: ./out
 

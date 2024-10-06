@@ -13,17 +13,20 @@ import (
 )
 
 type CSVExporter struct {
-	dataLoader *db.DataLoader
-	renderer   *template.Renderer
+	dataLoader       *db.DataLoader
+	renderer         *template.Renderer
+	dataTransformers []DataTransformer
 }
 
 func NewCSVExporter(
 	dataLoader *db.DataLoader,
 	renderer *template.Renderer,
+	dataTransformers []DataTransformer,
 ) *CSVExporter {
 	return &CSVExporter{
-		dataLoader: dataLoader,
-		renderer:   renderer,
+		dataLoader:       dataLoader,
+		renderer:         renderer,
+		dataTransformers: dataTransformers,
 	}
 }
 
@@ -49,19 +52,20 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 			continue
 		}
 
-		cols := table.ColumnsNames()
+		trData := &transformingData{
+			cols: table.ColumnsNames(),
+			rows: data,
+		}
 
-		colFilter := c.columnFilter(spec.TableColumn[table.Name.String()])
-		if colFilter != nil {
-			newCols := make([]string, 0)
-			for _, col := range table.ColumnsNames() {
-				if colFilter(col) {
-					newCols = append(newCols, col)
+		if len(spec.Transform) > 0 {
+			for _, transformer := range c.dataTransformers {
+				for _, transformSpec := range spec.Transform[table.Name.Value] {
+					trData, err = transformer(trData, transformSpec)
+					if err != nil {
+						return nil, fmt.Errorf("failed to transform data: %w", err)
+					}
 				}
 			}
-			cols = newCols
-
-			data = data.FilterColumns(colFilter)
 		}
 
 		p, err := render(
@@ -69,8 +73,8 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 			"csv/export_single.csv",
 			fmt.Sprintf("%s.csv", table.Name.String()),
 			map[string]stick.Value{
-				"rows":          data,
-				"columns":       cols,
+				"rows":          trData.rows,
+				"columns":       trData.cols,
 				"col_delimiter": delimiter,
 			},
 		)
@@ -84,10 +88,10 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 	return pages, nil
 }
 
-func (c *CSVExporter) columnFilter(cfg config.CSVExportSpecColumnFilter) func(col string) bool {
-	if len(cfg.Only) > 0 {
+func (c *CSVExporter) columnFilter(cfg config.ExportSpecTransform) func(col string) bool {
+	if len(cfg.OnlyColumns) > 0 {
 		onlyMap := map[string]bool{}
-		for _, col := range cfg.Only {
+		for _, col := range cfg.OnlyColumns {
 			onlyMap[col] = true
 		}
 
@@ -96,9 +100,9 @@ func (c *CSVExporter) columnFilter(cfg config.CSVExportSpecColumnFilter) func(co
 		}
 	}
 
-	if len(cfg.Skip) > 0 {
+	if len(cfg.OnlyColumns) > 0 {
 		skipMap := map[string]bool{}
-		for _, col := range cfg.Skip {
+		for _, col := range cfg.OnlyColumns {
 			skipMap[col] = true
 		}
 

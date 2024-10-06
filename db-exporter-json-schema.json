@@ -240,35 +240,52 @@
           "type": "string",
           "default": ","
         },
-        "table_column": {
+        "transform": {
           "type": "object",
+          "description": "transform per table",
           "additionalProperties": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "only": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
+            "type": "array",
+            "items": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "only_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 },
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "skip": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
+                {
+                  "type": "object",
+                  "properties": {
+                    "skip_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
-                  }
+                  },
+                  "additionalProperties": false
                 },
-                "additionalProperties": false
-              }
-            ]
+                {
+                  "type": "object",
+                  "properties": {
+                    "rename_columns": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
           }
         }
       },

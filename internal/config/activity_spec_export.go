@@ -31,11 +31,12 @@ type MarkdownExportSpec struct {
 }
 
 type CSVExportSpec struct {
-	Delimiter   string                               `yaml:"delimiter"`
-	TableColumn map[string]CSVExportSpecColumnFilter `yaml:"table_column"`
+	Delimiter string                           `yaml:"delimiter"`
+	Transform map[string][]ExportSpecTransform `yaml:"transform"`
 }
 
-type CSVExportSpecColumnFilter struct {
-	Only []string `yaml:"only"`
-	Skip []string `yaml:"skip"`
+type ExportSpecTransform struct {
+	OnlyColumns   []string          `yaml:"only_columns"`
+	SkipColumns   []string          `yaml:"skip_columns"`
+	RenameColumns map[string]string `yaml:"rename_columns"`
 }

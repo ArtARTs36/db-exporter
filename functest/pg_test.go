@@ -66,13 +66,23 @@ func TestPGExport(t *testing.T) {
 
     CONSTRAINT users_pk PRIMARY KEY (id)
 );`,
+				`CREATE TABLE countries
+(
+    id   integer NOT NULL,
+    code character varying NOT NULL,
+    name character varying NOT NULL
+);`,
 				`INSERT INTO users (id, name) VALUES
 				(1, 'a'),
 				(2, 'b')
 				`,
+				`INSERT INTO countries (id, code, name) VALUES
+				(1, 'RU', 'Russia')
+				`,
 			},
 			DownQueries: []string{
 				"DROP TABLE users",
+				"DROP TABLE countries",
 			},
 			ConfigPath: "config.yml",
 			TaskName:   "pg_csv_export",
@@ -211,8 +221,8 @@ func TestPGExport(t *testing.T) {
 			for expFileName, expFileContent := range expectedFiles {
 				outFileContent, outFileExists := outFiles[expFileName]
 
-				assert.True(t, outFileExists)
-				assert.Equal(t, expFileContent, outFileContent)
+				require.True(t, outFileExists, "file %q: not exists", expFileName)
+				assert.Equal(t, expFileContent, outFileContent, "file %q: not equal expected content", expFileName)
 			}
 
 			removeDir("./out")

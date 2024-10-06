@@ -10,6 +10,11 @@ import (
 
 func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Exporter {
 	dataLoader := db.NewDataLoader()
+	dataTransformers := []DataTransformer{
+		OnlyColumnsDataTransformer(),
+		SkipColumnsDataTransformer(),
+		RenameColumnsDataTransformer(),
+	}
 
 	return map[config.ExporterName]Exporter{
 		config.ExporterNameMd:                   NewMarkdownExporter(renderer),
@@ -21,7 +26,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 		config.ExporterNameGrpcCrud:             NewGrpcCrudExporter(renderer),
 		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(dataLoader, renderer, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(dataLoader, db.NewInserter()),
-		config.ExporterNameCSV:                  NewCSVExporter(dataLoader, renderer),
+		config.ExporterNameCSV:                  NewCSVExporter(dataLoader, renderer, dataTransformers),
 	}
 }
 
