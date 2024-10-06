@@ -19,11 +19,20 @@
     "options": {
       "type": "object",
       "properties": {
+        "with_migrations_table": {
+          "type": "boolean",
+          "default": false
+        },
         "print_stat": {
           "type": "boolean",
           "default": false
+        },
+        "debug": {
+          "type": "boolean",
+          "default": false
         }
-      }
+      },
+      "additionalProperties": false
     }
   },
   "definitions": {
@@ -32,13 +41,20 @@
       "properties": {
         "driver": {
           "type": "string",
-          "enum": ["postgres"]
+          "enum": ["postgres"],
+          "title": "Database driver",
+          "description": "Golang format: 'port=5459 user=db password=db dbname=db sslmode=disable'"
         },
         "dsn": {
           "type": "string",
           "title": "Data Source Name in GO syntax, allow env vars"
         }
-      }
+      },
+      "required": [
+        "driver",
+        "dsn"
+      ],
+      "additionalProperties": false
     },
     "task": {
       "type": "object",
@@ -56,7 +72,8 @@
       },
       "required": [
         "activities"
-      ]
+      ],
+      "additionalProperties": false
     },
     "task_commit": {
       "type": "object",
@@ -71,7 +88,8 @@
           "type": "boolean",
           "default": false
         }
-      }
+      },
+      "additionalProperties": false
     },
     "task_activity": {
       "type": "object",
@@ -108,7 +126,10 @@
         },
         "tables": {
           "type": "array",
-          "description": "Tables for export"
+          "description": "Tables for export",
+          "items": {
+            "type": "string"
+          }
         },
         "out": {
           "type": "object",
@@ -117,10 +138,12 @@
               "type": "string"
             },
             "file_prefix": {
-              "type": "string"
+              "type": "string",
+              "default": ""
             }
           },
-          "required": ["dir"]
+          "required": ["dir"],
+          "additionalProperties": false
         },
         "spec": {
           "type": "object",
@@ -152,7 +175,8 @@
           ]
         },
         "from": {
-          "type": "string"
+          "type": "string",
+          "title": "Directory"
         },
         "database": {
           "type": "string",
@@ -160,7 +184,10 @@
         },
         "tables": {
           "type": "array",
-          "description": "Tables for import"
+          "description": "Tables for import",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": ["import", "from"],
