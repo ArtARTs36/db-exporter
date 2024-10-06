@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.8
 
 require (
-	github.com/artarts36/singlecli v0.0.0-20240320230751-41d6b8f4d72e
+	github.com/artarts36/singlecli v0.0.0-20241005122145-2cd4f318881c
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
 	github.com/buildkite/interpolate v0.1.4
