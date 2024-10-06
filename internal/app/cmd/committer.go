@@ -78,6 +78,8 @@ func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 
 func (c *Committer) addFilesToGIt(ctx context.Context, params commitParams) error {
 	for _, f := range params.GeneratedFiles {
+		slog.DebugContext(ctx, "[committer] adding file to git", slog.String("file", f.Path))
+
 		err := c.git.AddFile(ctx, f.Path)
 		if err != nil {
 			return fmt.Errorf("failed to add file %q to git: %w", f, err)
