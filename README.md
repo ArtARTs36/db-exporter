@@ -54,6 +54,32 @@ options:
 
 Run ```db-exporter```
 
+**Export/import with YAML**
+
+Add config file as `.db-exporter.yaml`
+```yaml
+databases:
+  default:
+    driver: postgres
+    dsn: $PG_DSN
+
+tasks:
+  export:
+    activities:
+      - export: yaml-fixtures
+        out:
+          dir: ./data
+
+  import:
+    activities:
+      - import: yaml-fixtures
+        from: ./data
+```
+
+Run export as `db-exporter --tasks=export`
+
+Run import as `db-exporter --tasks=import`
+
 ## Using custom templates
 
 [Twig syntax](https://twig.symfony.com) is used to compile templates. The Twig port is a [Stick](https://github.com/tyler-sommer/stick).

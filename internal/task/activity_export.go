@@ -79,15 +79,15 @@ func (r *ExportActivityRunner) export(
 		Conn:   params.Conn,
 	}
 
-	var pages []*exporter.ExportedPage
-	var err error
+	export := func() ([]*exporter.ExportedPage, error) {
+		if params.Activity.Export.TablePerFile {
+			return exp.ExportPerFile(ctx, exporterParams)
+		}
 
-	if params.Activity.Export.TablePerFile {
-		pages, err = exp.ExportPerFile(ctx, exporterParams)
-	} else {
-		pages, err = exp.Export(ctx, exporterParams)
+		return exp.Export(ctx, exporterParams)
 	}
 
+	pages, err := export()
 	if err != nil {
 		return nil, fmt.Errorf("exporter %q unable to export: %w", params.Activity.Export.Format, err)
 	}
