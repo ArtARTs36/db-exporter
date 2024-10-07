@@ -20,7 +20,7 @@ func loadExpectedFiles(taskName string) map[string]string {
 
 	files := loadFiles(dir)
 	if len(files) == 0 {
-		panic("expected files for test with task name %q not found")
+		panic(fmt.Sprintf("expected files for test with task name %q not found", taskName))
 	}
 
 	return files

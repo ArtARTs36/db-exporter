@@ -4,9 +4,17 @@ databases:
     dsn: $PG_DSN
 
 tasks:
-  pg_go-structs:
+  pg_csv_export:
     activities:
-      - export: go-structs
+      - export: csv
+        spec:
+          delimiter: ','
+          transform:
+            countries:
+              - skip_columns:
+                  - id
+              - rename_columns:
+                  name: country_name
         out:
           dir: ./out
 
@@ -16,9 +24,9 @@ tasks:
         out:
           dir: ./out
 
-  pg_yaml-fixtures_export:
+  pg_go-structs:
     activities:
-      - export: yaml-fixtures
+      - export: go-structs
         out:
           dir: ./out
 
@@ -32,17 +40,16 @@ tasks:
         out:
           dir: ./out
 
-  pg_csv_export:
+  pg_laravel-models_export:
     activities:
-      - export: csv
-        spec:
-          delimiter: ','
-          transform:
-            countries:
-              - skip_columns:
-                  - id
-              - rename_columns:
-                  name: country_name
+      - export: laravel-models
+        table_per_file: true
+        out:
+          dir: ./out
+
+  pg_yaml-fixtures_export:
+    activities:
+      - export: yaml-fixtures
         out:
           dir: ./out
 

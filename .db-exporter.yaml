@@ -1,7 +1,7 @@
 databases:
   default:
     driver: postgres
-    dsn: "port=5459 user=db password=db dbname=db sslmode=disable"
+    dsn: ${PG_DSN}
 
 tasks:
   gen_md:
@@ -14,3 +14,4 @@ tasks:
 
 options:
   print_stat: true
+  debug: true

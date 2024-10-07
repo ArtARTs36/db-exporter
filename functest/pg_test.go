@@ -152,6 +152,32 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg_go-structs",
 		},
 		{
+			Title: "test pg with laravel-models",
+			InitQueries: []string{
+				`CREATE TABLE users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);`,
+				`CREATE TABLE entities
+(
+    entity_type character varying NOT NULL,
+    entity_id character varying NOT NULL,
+    name character varying NOT NULL,
+    
+    CONSTRAINT entities_pk PRIMARY KEY (entity_type, entity_id)
+);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+				"DROP TABLE entities",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_laravel-models_export",
+		},
+		{
 			Title: "test pg with yaml-fixtures",
 			InitQueries: []string{
 				`CREATE TABLE users
@@ -197,8 +223,6 @@ func TestPGExport(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
-			expectedFiles := loadExpectedFiles(tCase.TaskName)
-
 			mustExecQueries(env.db, tCase.InitQueries)
 
 			defer func() {
@@ -213,8 +237,9 @@ func TestPGExport(t *testing.T) {
 			if cmdErr != nil {
 				t.Fatalf("failed to exec command: %s: %s: %s", cmdErr, res.Stdout, res.Stderr)
 			}
-
 			assert.NoError(t, cmdErr)
+
+			expectedFiles := loadExpectedFiles(tCase.TaskName)
 
 			outFiles := loadFiles("./out")
 
