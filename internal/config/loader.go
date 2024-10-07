@@ -65,7 +65,7 @@ func (l *Loader) injectEnvVars(cfg *Config) error {
 
 		val, err := l.envInjector.Inject(task.Commit.Author)
 		if err != nil {
-			return fmt.Errorf("tasks[%s]: failed to inject environment variable: %w", taskName, err)
+			return fmt.Errorf("tasks[%s]: failed to inject environment variable into author: %w", taskName, err)
 		}
 
 		task.Commit.Author = val

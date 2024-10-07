@@ -1,6 +1,9 @@
 package env
 
-import "github.com/buildkite/interpolate"
+import (
+	"fmt"
+	"github.com/buildkite/interpolate"
+)
 
 type Injector struct {
 	env interpolate.Env
@@ -13,5 +16,16 @@ func NewInjector() *Injector {
 }
 
 func (i *Injector) Inject(expression string) (string, error) {
+	val, err := i.inject(expression)
+	if err != nil {
+		return "", err
+	}
+	if val == "" {
+		return "", fmt.Errorf("failed to interpolate expression %q", expression)
+	}
+	return val, nil
+}
+
+func (i *Injector) inject(expression string) (string, error) {
 	return interpolate.Interpolate(i.env, expression)
 }

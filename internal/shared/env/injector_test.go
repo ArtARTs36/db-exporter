@@ -34,4 +34,15 @@ func TestInjector_Inject(t *testing.T) {
 
 		assert.Equal(t, "random string", got)
 	})
+
+	t.Run("failed, env not found", func(t *testing.T) {
+		injector := &Injector{
+			env: interpolate.NewMapEnv(map[string]string{
+				"DSN": "dbname=test",
+			}),
+		}
+
+		_, err := injector.Inject("${VAR}")
+		require.Error(t, err)
+	})
 }
