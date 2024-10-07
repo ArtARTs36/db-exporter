@@ -52,7 +52,7 @@ options:
   debug: true
 ```
 
-Run ```db-exporter```
+Run: `db-exporter`
 
 **Export/import with YAML**
 
@@ -76,9 +76,9 @@ tasks:
         from: ./data
 ```
 
-Run export as `db-exporter --tasks=export`
+Run export: `db-exporter --tasks=export`
 
-Run import as `db-exporter --tasks=import`
+Run import: `db-exporter --tasks=import`
 
 ## Using custom templates
 
