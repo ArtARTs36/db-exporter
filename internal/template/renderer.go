@@ -17,7 +17,7 @@ type Renderer struct {
 func NewRenderer(templateLoader stick.Loader) *Renderer {
 	eng := stick.New(templateLoader)
 	eng.Functions["bool_string"] = func(_ stick.Context, args ...stick.Value) stick.Value {
-		val := args[0].(bool)
+		val, _ := args[0].(bool)
 		if val {
 			return "true"
 		}

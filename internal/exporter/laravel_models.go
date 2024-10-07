@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/php"
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/template"
@@ -172,17 +173,17 @@ func (*LaravelModelsExporter) createModelPrimaryKey(table *schema.Table) laravel
 		}
 	}
 
-	mapType := func(col *schema.Column) (string, bool) {
-		switch col.PreparedType {
+	mapType := func(col *schema.Column) php.Type {
+		switch col.PreparedType { //nolint:exhaustive // not need
 		case schema.ColumnTypeInteger, schema.ColumnTypeInteger16, schema.ColumnTypeInteger64:
-			return "int", true
+			return php.TypeInt
 		case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
-			return "float", true
+			return php.TypeFloat
 		case schema.ColumnTypeString, schema.ColumnTypeBytes:
-			return "string", true
+			return php.TypeString
 		}
 
-		return "", false
+		return php.TypeUndefined
 	}
 
 	pkColumnName := pk.ColumnsNames.First()
@@ -200,8 +201,8 @@ func (*LaravelModelsExporter) createModelPrimaryKey(table *schema.Table) laravel
 		return laravelModelPrimaryKey{Exists: false}
 	}
 
-	pkColType, ok := mapType(pkColumn)
-	if !ok {
+	pkColType := mapType(pkColumn)
+	if pkColType == php.TypeUndefined {
 		return laravelModelPrimaryKey{Exists: false}
 	}
 
@@ -210,8 +211,8 @@ func (*LaravelModelsExporter) createModelPrimaryKey(table *schema.Table) laravel
 		Name:         pk.Name.Value,
 		IsMultiple:   false,
 		Column:       pkColumnName,
-		Type:         pkColType,
-		Incrementing: pkColType == "int", // @todo need another way
+		Type:         pkColType.String(),
+		Incrementing: pkColType == php.TypeInt, // @todo need another way
 	}
 
 	return lpk
@@ -224,13 +225,13 @@ func (*LaravelModelsExporter) mapPhpType(
 ) string {
 	switch col.PreparedType {
 	case schema.ColumnTypeInteger, schema.ColumnTypeInteger16, schema.ColumnTypeInteger64:
-		return "int"
+		return php.TypeInt.String()
 	case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
-		return "float"
+		return php.TypeFloat.String()
 	case schema.ColumnTypeString, schema.ColumnTypeBytes:
-		return "string"
+		return php.TypeString.String()
 	case schema.ColumnTypeBoolean:
-		return "bool"
+		return php.TypeBool.String()
 	case schema.ColumnTypeTimestamp:
 		if !col.Name.Equal("created_at") && !col.Name.Equal("updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)
