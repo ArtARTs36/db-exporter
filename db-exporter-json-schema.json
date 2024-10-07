@@ -1,0 +1,382 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "databases": {
+      "description": "Map of databases",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/database"
+      }
+    },
+    "tasks": {
+      "description": "Map of tasks",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/task"
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "with_migrations_table": {
+          "type": "boolean",
+          "default": false
+        },
+        "print_stat": {
+          "type": "boolean",
+          "default": false
+        },
+        "debug": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "database": {
+      "type": "object",
+      "properties": {
+        "driver": {
+          "type": "string",
+          "enum": ["postgres"],
+          "title": "Database driver"
+        },
+        "dsn": {
+          "type": "string",
+          "title": "Data Source Name in GO syntax, allow env vars. Golang format: 'port=5459 user=db password=db dbname=db sslmode=disable'"
+        }
+      },
+      "required": [
+        "driver",
+        "dsn"
+      ],
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/task_activity",
+            "minLength": 1
+          }
+        },
+        "commit": {
+          "$ref": "#/definitions/task_commit"
+        }
+      },
+      "required": [
+        "activities"
+      ],
+      "additionalProperties": false
+    },
+    "task_commit": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "push": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "task_activity": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/task_activity_export"
+        },
+        {
+          "$ref": "#/definitions/task_activity_import"
+        }
+      ]
+    },
+    "task_activity_export": {
+      "properties": {
+        "export": {
+          "type": "string",
+          "enum": [
+            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate",
+            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv"
+          ]
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name as shown on the database map"
+        },
+        "table_per_file": {
+          "type": "boolean",
+          "default": false
+        },
+        "skip_exists": {
+          "type": "boolean",
+          "default": false,
+          "description": "Skip generate already exists files"
+        },
+        "tables": {
+          "type": "array",
+          "description": "Tables for export",
+          "items": {
+            "type": "string"
+          }
+        },
+        "out": {
+          "type": "object",
+          "properties": {
+            "dir": {
+              "type": "string"
+            },
+            "file_prefix": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "required": ["dir"],
+          "additionalProperties": false
+        },
+        "spec": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/spec_md_export"
+            },
+            {
+              "$ref": "#/definitions/spec_go_structs_export"
+            },
+            {
+              "$ref": "#/definitions/spec_grpc_crud_export"
+            },
+            {
+              "$ref": "#/definitions/spec_csv_export"
+            },
+            {
+              "$ref": "#/definitions/spec_laravel_models_export"
+            }
+          ]
+        }
+      },
+      "required": ["export", "out"],
+      "additionalProperties": false
+    },
+    "task_activity_import": {
+      "properties": {
+        "import": {
+          "type": "string",
+          "enum": [
+            "yaml-fixtures"
+          ]
+        },
+        "from": {
+          "type": "string",
+          "title": "Directory"
+        },
+        "database": {
+          "type": "string",
+          "description": "Database name as shown on the database map",
+          "default": "default"
+        },
+        "tables": {
+          "type": "array",
+          "description": "Tables for import",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["import", "from"],
+      "additionalProperties": false
+    },
+    "spec_md_export": {
+      "type": "object",
+      "properties": {
+        "with_diagram": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_go_structs_export": {
+      "type": "object",
+      "properties": {
+        "package": {
+          "type": "string",
+          "default": "models"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_grpc_crud_export": {
+      "type": "object",
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "java_package": {
+              "type": "string"
+            },
+            "java_outer_classname": {
+              "type": "string"
+            },
+            "java_multiple_files": {
+              "type": "boolean"
+            },
+            "java_string_check_utf8": {
+              "type": "boolean"
+            },
+            "optimize_for": {
+              "type": "string",
+              "enum": [
+                "SPEED",
+                "CODE_SIZE",
+                "LITE_RUNTIME"
+              ]
+            },
+            "go_package": {
+              "type": "string"
+            },
+            "cc_generic_services": {
+              "type": "boolean"
+            },
+            "java_generic_services": {
+              "type": "boolean"
+            },
+            "py_generic_services": {
+              "type": "boolean"
+            },
+            "php_generic_services": {
+              "type": "boolean"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "cc_enable_arenas": {
+              "type": "boolean"
+            },
+            "objc_class_prefix": {
+              "type": "boolean"
+            },
+            "csharp_namespace": {
+              "type": "boolean"
+            },
+            "swift_prefix": {
+              "type": "boolean"
+            },
+            "php_class_prefix": {
+              "type": "boolean"
+            },
+            "php_namespace": {
+              "type": "boolean"
+            },
+            "php_metadata_namespace": {
+              "type": "boolean"
+            },
+            "ruby_package": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_csv_export": {
+      "type": "object",
+      "properties": {
+        "delimiter": {
+          "type": "string",
+          "default": ","
+        },
+        "transform": {
+          "type": "object",
+          "description": "transform per table",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "only_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "skip_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "rename_columns": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_laravel_models_export": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "default": "App\\Models"
+        },
+        "time_as": {
+          "type": "string",
+          "enum": ["carbon","datetime"],
+          "default": "carbon"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

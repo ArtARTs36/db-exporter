@@ -1,34 +1,34 @@
-package actions
+package cmd
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"log/slog"
 	"path"
 
 	"strings"
 
-	"github.com/artarts36/db-exporter/internal/app/params"
 	"github.com/artarts36/db-exporter/internal/shared/git"
 )
 
-type Commit struct {
+type Committer struct {
 	git *git.Git
 }
 
-func NewCommit(git *git.Git) *Commit {
-	return &Commit{
+func NewCommit(git *git.Git) *Committer {
+	return &Committer{
 		git: git,
 	}
 }
 
-func (c *Commit) Supports(params *params.ActionParams) bool {
-	return params.ExportParams.CommitMessage != "" ||
-		params.ExportParams.CommitAuthor != "" ||
-		params.ExportParams.CommitPush
+type commitParams struct {
+	Commit         config.Commit
+	GeneratedFiles []fs.FileInfo
 }
 
-func (c *Commit) Run(ctx context.Context, params *params.ActionParams) error {
+func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 	err := c.checkUnexpectedFiles(ctx, params)
 	if err != nil {
 		return err
@@ -45,14 +45,14 @@ func (c *Commit) Run(ctx context.Context, params *params.ActionParams) error {
 	}
 
 	if len(modifiedFiles) == 0 {
-		slog.DebugContext(ctx, "[commitaction] modified files not found, skip action")
+		slog.DebugContext(ctx, "[committer] modified files not found, skip action")
 
 		return nil
 	}
 
 	var gitAuthor *git.Author
-	if params.ExportParams.CommitAuthor != "" {
-		gitAuthor, err = git.NewAuthor(params.ExportParams.CommitAuthor)
+	if params.Commit.Author != "" {
+		gitAuthor, err = git.NewAuthor(params.Commit.Author)
 		if err != nil {
 			return fmt.Errorf("failed to create git author: %w", err)
 		}
@@ -63,10 +63,10 @@ func (c *Commit) Run(ctx context.Context, params *params.ActionParams) error {
 		Author:  gitAuthor,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to commit: %w", err)
+		return fmt.Errorf("failed to commitParams: %w", err)
 	}
 
-	if params.ExportParams.CommitPush {
+	if params.Commit.Push {
 		err = c.git.Push(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to push: %w", err)
@@ -76,8 +76,10 @@ func (c *Commit) Run(ctx context.Context, params *params.ActionParams) error {
 	return nil
 }
 
-func (c *Commit) addFilesToGIt(ctx context.Context, params *params.ActionParams) error {
+func (c *Committer) addFilesToGIt(ctx context.Context, params commitParams) error {
 	for _, f := range params.GeneratedFiles {
+		slog.DebugContext(ctx, "[committer] adding file to git", slog.String("file", f.Path))
+
 		err := c.git.AddFile(ctx, f.Path)
 		if err != nil {
 			return fmt.Errorf("failed to add file %q to git: %w", f, err)
@@ -87,8 +89,8 @@ func (c *Commit) addFilesToGIt(ctx context.Context, params *params.ActionParams)
 	return nil
 }
 
-func (c *Commit) createCommitMessage(params *params.ActionParams) string {
-	msg := params.ExportParams.CommitMessage
+func (c *Committer) createCommitMessage(params commitParams) string {
+	msg := params.Commit.Message
 
 	if msg == "" {
 		msg = "add documentation for database schema"
@@ -97,7 +99,7 @@ func (c *Commit) createCommitMessage(params *params.ActionParams) string {
 	return msg
 }
 
-func (c *Commit) checkUnexpectedFiles(ctx context.Context, params *params.ActionParams) error {
+func (c *Committer) checkUnexpectedFiles(ctx context.Context, params commitParams) error {
 	modifiedFiles, err := c.git.GetAddedAndModifiedFiles(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to check modified files: %w", err)

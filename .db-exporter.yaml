@@ -1,0 +1,17 @@
+databases:
+  default:
+    driver: postgres
+    dsn: ${PG_DSN}
+
+tasks:
+  gen_md:
+    activities:
+      - export: md
+        spec:
+          with_diagram: true
+        out:
+          dir: ./out
+
+options:
+  print_stat: true
+  debug: true

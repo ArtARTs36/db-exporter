@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:12
     ports:
-      - 5499:5432
+      - 5419:5432
     environment:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test

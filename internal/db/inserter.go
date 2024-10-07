@@ -3,20 +3,26 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/schema"
+
 	"github.com/doug-martin/goqu/v9"
+
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Inserter struct {
-	db *Connection
 }
 
-func NewInserter(db *Connection) *Inserter {
-	return &Inserter{db: db}
+func NewInserter() *Inserter {
+	return &Inserter{}
 }
 
-func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[string]interface{}) (int64, error) {
-	db, err := i.db.extContext(ctx)
+func (i *Inserter) Insert(
+	ctx context.Context,
+	conn *Connection,
+	table string,
+	dataset []map[string]interface{},
+) (int64, error) {
+	db, err := conn.extContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -39,8 +45,13 @@ func (i *Inserter) Insert(ctx context.Context, table string, dataset []map[strin
 	return res.RowsAffected()
 }
 
-func (i *Inserter) Upsert(ctx context.Context, table *schema.Table, dataset []map[string]interface{}) (int64, error) {
-	db, err := i.db.extContext(ctx)
+func (i *Inserter) Upsert(
+	ctx context.Context,
+	conn *Connection,
+	table *schema.Table,
+	dataset []map[string]interface{},
+) (int64, error) {
+	db, err := conn.extContext(ctx)
 	if err != nil {
 		return 0, err
 	}

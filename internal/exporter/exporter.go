@@ -2,20 +2,19 @@ package exporter
 
 import (
 	"context"
+	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Exporter interface {
-	Importer
-	ExportPerFile(_ context.Context, sc *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
-	Export(ctx context.Context, schema *schema.Schema, params *ExportParams) ([]*ExportedPage, error)
+	ExportPerFile(ctx context.Context, params *ExportParams) ([]*ExportedPage, error)
+	Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error)
 }
 
 type ExportParams struct {
-	WithDiagram            bool
-	WithoutMigrationsTable bool
-	Package                string
-	ProtoGoPackage         string
+	Schema *schema.Schema
+	Conn   *db.Connection
+	Spec   interface{}
 }
 
 type ExportedPage struct {

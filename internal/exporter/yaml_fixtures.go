@@ -9,21 +9,14 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const (
-	YamlFixturesExporterName = "yaml-fixtures"
-	yamlFixturesFilename     = "fixtures.yaml"
-)
+const yamlFixturesFilename = "fixtures.yaml"
 
 type YamlFixturesExporter struct {
 	unimplementedImporter
 	dataLoader *db.DataLoader
-	renderer   *template.Renderer
 	inserter   *db.Inserter
-	conn       *db.Connection
 }
 
 type yamlFixture struct {
@@ -42,27 +35,22 @@ type yamlFixtureTable struct {
 
 func NewYamlFixturesExporter(
 	dataLoader *db.DataLoader,
-	renderer *template.Renderer,
 	inserter *db.Inserter,
-	conn *db.Connection,
 ) *YamlFixturesExporter {
 	return &YamlFixturesExporter{
 		dataLoader: dataLoader,
-		renderer:   renderer,
 		inserter:   inserter,
-		conn:       conn,
 	}
 }
 
 func (e *YamlFixturesExporter) ExportPerFile(
 	ctx context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 
-	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Value)
+	for _, table := range params.Schema.Tables.List() {
+		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -96,15 +84,14 @@ func (e *YamlFixturesExporter) ExportPerFile(
 
 func (e *YamlFixturesExporter) Export(
 	ctx context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
 	fixture := &yamlFixture{
 		Tables: orderedmap.New[string, *yamlFixtureTable](),
 	}
 
-	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Value)
+	for _, table := range params.Schema.Tables.List() {
+		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
@@ -133,7 +120,7 @@ func (e *YamlFixturesExporter) Export(
 	}, nil
 }
 
-func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, params *ImportParams) (
+func (e *YamlFixturesExporter) Import(ctx context.Context, params *ImportParams) (
 	[]ImportedFile,
 	error,
 ) {
@@ -150,14 +137,14 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 
 	doImport := e.doImport
 	if fixture.Options.Transaction {
-		doImport = func(ctx context.Context, sch *schema.Schema, fixture *yamlFixture, params *ImportParams) (
+		doImport = func(ctx context.Context, fixture *yamlFixture, params *ImportParams) (
 			ImportedFile,
 			error,
 		) {
 			var importedFile ImportedFile
 
-			trErr := e.conn.Transact(ctx, func(ctx context.Context) error {
-				importedFile, err = e.doImport(ctx, sch, fixture, params)
+			trErr := params.Conn.Transact(ctx, func(ctx context.Context) error {
+				importedFile, err = e.doImport(ctx, fixture, params)
 				if err != nil {
 					return fmt.Errorf("transaction canceled: %w", err)
 				}
@@ -169,7 +156,7 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 		}
 	}
 
-	importedFile, err := doImport(ctx, sch, &fixture, params)
+	importedFile, err := doImport(ctx, &fixture, params)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +166,6 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, sch *schema.Schema, p
 
 func (e *YamlFixturesExporter) doImport(
 	ctx context.Context,
-	sch *schema.Schema,
 	fixture *yamlFixture,
 	params *ImportParams,
 ) (ImportedFile, error) {
@@ -193,14 +179,14 @@ func (e *YamlFixturesExporter) doImport(
 		var ar int64
 		var err error
 
-		if table.Value.Options.Upsert && sch.Tables.Has(*ds.NewString(table.Key)) {
-			tbl, _ := sch.Tables.Get(*ds.NewString(table.Key))
-			ar, err = e.inserter.Upsert(ctx, tbl, table.Value.Rows)
+		if table.Value.Options.Upsert && params.Schema.Tables.Has(*ds.NewString(table.Key)) {
+			tbl, _ := params.Schema.Tables.Get(*ds.NewString(table.Key))
+			ar, err = e.inserter.Upsert(ctx, params.Conn, tbl, table.Value.Rows)
 			if err != nil {
 				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}
 		} else {
-			ar, err = e.inserter.Insert(ctx, table.Key, table.Value.Rows)
+			ar, err = e.inserter.Insert(ctx, params.Conn, table.Key, table.Value.Rows)
 			if err != nil {
 				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}

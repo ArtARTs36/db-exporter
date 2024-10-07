@@ -2,7 +2,9 @@ package exporter
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"strings"
 
 	"github.com/tyler-sommer/stick"
@@ -13,8 +15,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const GoStructsExporterName = "go-structs"
-
 var goAbbreviationsSet = map[string]bool{
 	"id":   true,
 	"uuid": true,
@@ -23,7 +23,6 @@ var goAbbreviationsSet = map[string]bool{
 }
 
 type GoStructsExporter struct {
-	unimplementedImporter
 	renderer *template.Renderer
 }
 
@@ -56,13 +55,17 @@ func NewGoStructsExporter(renderer *template.Renderer) Exporter {
 
 func (e *GoStructsExporter) ExportPerFile(
 	_ context.Context,
-	sch *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
-	pkg := e.selectPackage(params)
+	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
 
-	for _, table := range sch.Tables.List() {
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	pkg := e.selectPackage(spec)
+
+	for _, table := range params.Schema.Tables.List() {
 		goSch := e.makeGoSchema([]*schema.Table{
 			table,
 		})
@@ -88,11 +91,15 @@ func (e *GoStructsExporter) ExportPerFile(
 
 func (e *GoStructsExporter) Export(
 	_ context.Context,
-	schema *schema.Schema,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	goSch := e.makeGoSchema(schema.Tables.List())
-	pkg := e.selectPackage(params)
+	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
+
+	goSch := e.makeGoSchema(params.Schema.Tables.List())
+	pkg := e.selectPackage(spec)
 
 	page, err := render(e.renderer, "go-structs/model.go.tpl", "models.go", map[string]stick.Value{
 		"schema":  goSch,
@@ -107,7 +114,7 @@ func (e *GoStructsExporter) Export(
 	}, nil
 }
 
-func (e *GoStructsExporter) selectPackage(params *ExportParams) string {
+func (e *GoStructsExporter) selectPackage(params *config.GoStructsExportSpec) string {
 	if params.Package != "" {
 		return strings.ToLower(params.Package)
 	}

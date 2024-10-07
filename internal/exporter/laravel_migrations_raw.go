@@ -12,10 +12,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const LaravelMigrationsRawExporterName = "laravel-migrations-raw"
-
 type LaravelMigrationsRawExporter struct {
-	unimplementedImporter
 	renderer   *template.Renderer
 	ddlBuilder *sql.DDLBuilder
 }
@@ -42,13 +39,12 @@ func NewLaravelMigrationsRawExporter(
 
 func (e *LaravelMigrationsRawExporter) ExportPerFile(
 	_ context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 	i := 0
 
-	for _, table := range sch.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		queries := e.makeMigrationQueries(table)
 
 		migration := &laravelMigration{
@@ -83,8 +79,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 
 func (e *LaravelMigrationsRawExporter) Export(
 	_ context.Context,
-	schema *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
 	migration := &laravelMigration{
 		Name: "InitMigration",
@@ -94,7 +89,7 @@ func (e *LaravelMigrationsRawExporter) Export(
 		},
 	}
 
-	for _, table := range schema.Tables.List() {
+	for _, table := range params.Schema.Tables.List() {
 		queries := e.makeMigrationQueries(table)
 
 		migration.Queries.Up = append(migration.Queries.Up, queries.Up...)

@@ -8,5 +8,5 @@ import (
 
 type SchemaLoader interface {
 	// Load database schema
-	Load(ctx context.Context) (*schema.Schema, error)
+	Load(ctx context.Context, conn *Connection) (*schema.Schema, error)
 }

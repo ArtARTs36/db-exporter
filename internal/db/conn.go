@@ -19,6 +19,18 @@ type Connection struct {
 
 type Transactioner func(context.Context, func(ctx context.Context) error) error
 
+func NewOpenedConnection(db *sqlx.DB) (*Connection, error) {
+	transactionManager, err := manager.New(trmsqlx.NewDefaultFactory(db))
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize transaction manager: %w", err)
+	}
+
+	return &Connection{
+		transactionManager: transactionManager,
+		db:                 db,
+	}, nil
+}
+
 func NewConnection(driverName DriverName, dsn string) *Connection {
 	return &Connection{driverName: driverName, dsn: dsn}
 }

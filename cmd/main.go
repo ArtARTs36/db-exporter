@@ -2,18 +2,23 @@ package main
 
 import (
 	"context"
-	"log/slog"
-	"os"
+	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/env"
+	"github.com/artarts36/db-exporter/internal/task"
 	"strings"
 
-	"github.com/artarts36/singlecli"
-
-	"github.com/artarts36/db-exporter/internal/app/actions"
-	"github.com/artarts36/db-exporter/internal/app/cmd"
-	"github.com/artarts36/db-exporter/internal/app/params"
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/git"
+	"github.com/artarts36/db-exporter/internal/shared/migrations"
+	"github.com/artarts36/db-exporter/internal/template"
+	"github.com/artarts36/db-exporter/templates"
+	"github.com/artarts36/singlecli"
+	"github.com/tyler-sommer/stick"
+	"log/slog"
+
+	"github.com/artarts36/db-exporter/internal/app/cmd"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 var (
@@ -21,7 +26,7 @@ var (
 	BuildDate = "2024-03-09 03:09:15"
 )
 
-func main() { //nolint:funlen // not need
+func main() {
 	application := cli.App{
 		BuildInfo: &cli.BuildInfo{
 			Name:      "db-exporter",
@@ -29,95 +34,21 @@ func main() { //nolint:funlen // not need
 			BuildDate: BuildDate,
 		},
 		Action: run,
-		Args: []*cli.ArgDefinition{
-			{
-				Name:        "driver-name",
-				Description: "database driver name",
-				Required:    true,
-				ValuesEnum: []string{
-					"pg",
-				},
-			},
-			{
-				Name:        "dsn",
-				Description: "data source name",
-				Required:    true,
-			},
-			{
-				Name:        "format",
-				Description: "exporting format",
-				Required:    true,
-				ValuesEnum:  exporter.Names,
-			},
-			{
-				Name:        "out-dir",
-				Description: "Output directory",
-				Required:    true,
-			},
-		},
+		Args:   []*cli.ArgDefinition{},
 		Opts: []*cli.OptDefinition{
 			{
-				Name:        "table-per-file",
-				Description: "Run one table to one file",
+				Name:        "config",
+				Description: "Path to config file (yaml), default: ./.db-exporter.yaml",
 			},
 			{
-				Name:        "with-diagram",
-				Description: "Run with diagram (only md)",
-			},
-			{
-				Name:        "without-migrations-table",
-				Description: "Run without migrations table",
-			},
-			{
-				Name:        "tables",
-				Description: "Table list for export, separator: \",\"",
-				WithValue:   true,
-			},
-			{
-				Name:        "package",
-				Description: "Package name for code gen, e.g: models",
-				WithValue:   true,
-			},
-			{
-				Name:        "file-prefix",
-				Description: "Prefix for generated files",
-				WithValue:   true,
-			},
-			{
-				Name:        "commit-message",
-				Description: "Add commit with generated files and your message",
-				WithValue:   true,
-			},
-			{
-				Name:        "commit-push",
-				Description: "Push commit with generated files",
-			},
-			{
-				Name:        "commit-author",
-				Description: "Author for commit, like git syntax: `name <email>`",
-				WithValue:   true,
-			},
-			{
-				Name:        "stat",
-				Description: "Print stat for generated files",
-			},
-			{
-				Name:        "debug",
-				Description: "Show debug logs",
-			},
-			{
-				Name:        "import",
-				Description: "import data from exported files",
-			},
-			{
-				Name:        "proto-go-package",
-				Description: "Go package for protobuf",
+				Name:        "tasks",
+				Description: "task names of config file",
 			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
-				Command:     "db-exporter pg \"host=postgres user=root password=root dbname=cars\" md ./docs",
-				Description: "Run from postgres to md",
+				Command:     "db-exporter --config db.yaml",
+				Description: "Commit db-exporter with custom config path",
 			},
 		},
 	}
@@ -128,54 +59,63 @@ func main() { //nolint:funlen // not need
 func run(ctx *cli.Context) error {
 	fsystem := fs.NewLocal()
 
-	var command cmd.Command
-
-	if ctx.HasOpt("import") {
-		command = cmd.NewImportCmd(fsystem, ctx.Output.PrintMarkdownTable)
-	} else {
-		command = cmd.NewExportCmd(fsystem, map[string]actions.Action{
-			"commit generated files": actions.NewCommit(git.NewGit("git")),
-			"print stat":             actions.NewStat(ctx.Output.PrintMarkdownTable),
-		})
+	cfg, err := loadConfig(ctx)
+	if err != nil {
+		return err
 	}
 
-	var tables []string
-
-	tablesOpt, hasTablesOpt := ctx.GetOpt("tables")
-	if hasTablesOpt {
-		tables = strings.Split(tablesOpt, ",")
+	tasks := make([]string, 0)
+	if taskNames, ok := ctx.GetOpt("tasks"); ok {
+		tasks = strings.Split(taskNames, ",")
 	}
 
-	pkg, _ := ctx.GetOpt("package")
-	protoGoPkg, _ := ctx.GetOpt("proto-go-package")
-	filePrefix, _ := ctx.GetOpt("file-prefix")
-	commitMessage, _ := ctx.GetOpt("commit-message")
-	commitAuthor, _ := ctx.GetOpt("commit-author")
+	command := newCommand(ctx, fsystem)
 
-	if ctx.HasOpt("debug") {
-		l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug,
-		}))
-
-		slog.SetDefault(l)
-	}
-
-	return command.Run(ctx.Context, &params.ExportParams{
-		DriverName:             ctx.GetArg("driver-name"),
-		DSN:                    ctx.GetArg("dsn"),
-		Format:                 ctx.GetArg("format"),
-		OutDir:                 ctx.GetArg("out-dir"),
-		TablePerFile:           ctx.HasOpt("table-per-file"),
-		WithDiagram:            ctx.HasOpt("with-diagram"),
-		WithoutMigrationsTable: ctx.HasOpt("without-migrations-table"),
-		Tables:                 tables,
-		Package:                pkg,
-		ProtoGoPackage:         protoGoPkg,
-		FilePrefix:             filePrefix,
-		CommitMessage:          commitMessage,
-		CommitAuthor:           commitAuthor,
-		CommitPush:             ctx.HasOpt("commit-push"),
-		Stat:                   ctx.HasOpt("stat"),
-		Import:                 ctx.HasOpt("import"),
+	return command.Run(ctx.Context, &cmd.CommandRunParams{
+		Config:    cfg,
+		TaskNames: tasks,
 	})
+}
+
+func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
+	renderer := createRenderer(fs)
+
+	return cmd.NewCommand(
+		migrations.NewTableDetector(),
+		task.NewCompositeActivityRunner(
+			task.NewExportActivityRunner(fs, renderer, exporter.CreateExporters(renderer)),
+			task.NewImportActivityRunner(fs, exporter.CreateImporters()),
+		),
+		ctx.Output.PrintMarkdownTable,
+		cmd.NewCommit(git.NewGit("git", git.GithubActionsAuthorFinder())),
+	)
+}
+
+func loadConfig(ctx *cli.Context) (*config.Config, error) {
+	configPath, ok := ctx.GetOpt("config")
+	if !ok {
+		configPath = "./.db-exporter.yaml"
+	}
+
+	loader := config.NewLoader(env.NewInjector())
+
+	return loader.Load(configPath)
+}
+
+func createRenderer(fs fs.Driver) *template.Renderer {
+	const localTemplatesFolder = "./db-exporter-templates"
+
+	var templateLoader stick.Loader
+
+	if fs.Exists(localTemplatesFolder) {
+		slog.Debug(fmt.Sprintf("[main] loading templates from folder %q", localTemplatesFolder))
+
+		templateLoader = stick.NewFilesystemLoader(localTemplatesFolder)
+	} else {
+		slog.Debug("[main] loading templates from embedded files")
+
+		templateLoader = template.NewEmbedLoader(templates.FS)
+	}
+
+	return template.NewRenderer(templateLoader)
 }

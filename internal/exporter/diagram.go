@@ -8,10 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const DiagramExporterName = "diagram"
-
 type DiagramExporter struct {
-	unimplementedImporter
 	graphBuilder *graphBuilder
 }
 
@@ -23,12 +20,11 @@ func NewDiagramExporter(renderer *template.Renderer) Exporter {
 
 func (e *DiagramExporter) ExportPerFile(
 	_ context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 
-	err := sch.Tables.EachWithErr(func(table *schema.Table) error {
+	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
 		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
 		if err != nil {
 			return err
@@ -42,8 +38,8 @@ func (e *DiagramExporter) ExportPerFile(
 	return pages, err
 }
 
-func (e *DiagramExporter) Export(_ context.Context, sch *schema.Schema, _ *ExportParams) ([]*ExportedPage, error) {
-	diagram, err := buildDiagramPage(e.graphBuilder, sch.Tables, "diagram.svg")
+func (e *DiagramExporter) Export(_ context.Context, params *ExportParams) ([]*ExportedPage, error) {
+	diagram, err := buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 	if err != nil {
 		return nil, err
 	}

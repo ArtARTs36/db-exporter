@@ -1,0 +1,3 @@
+{% for col in columns %}{{ col }}{% if loop.last == false %}{{ col_delimiter }}{% endif %}{% endfor %}
+{% for row in rows %}{% for col in columns %}{{ quote_string(row[col]) }}{% if loop.last == false %}{{ col_delimiter }}{% endif %}{% endfor %}{% if loop.last == false %}
+{% endif %}{% endfor %}

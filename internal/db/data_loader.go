@@ -8,20 +8,18 @@ import (
 
 type TableData []map[string]interface{}
 
-type DataLoader struct {
-	db *Connection
+type DataLoader struct{}
+
+func NewDataLoader() *DataLoader {
+	return &DataLoader{}
 }
 
-func NewDataLoader(conn *Connection) *DataLoader {
-	return &DataLoader{db: conn}
-}
-
-func (l *DataLoader) Load(ctx context.Context, table string) (TableData, error) {
+func (l *DataLoader) Load(ctx context.Context, conn *Connection, table string) (TableData, error) {
 	data := make(TableData, 0)
 
 	q := fmt.Sprintf("select * from %s", table)
 
-	db, err := l.db.Connect(ctx)
+	db, err := conn.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -67,4 +65,20 @@ func (l *DataLoader) Load(ctx context.Context, table string) (TableData, error) 
 	}
 
 	return data, nil
+}
+
+func (d *TableData) FilterColumns(filter func(col string) bool) TableData {
+	newData := make(TableData, 0, len(*d))
+	for _, row := range *d {
+		newRow := map[string]interface{}{}
+
+		for col, val := range row {
+			if filter(col) {
+				newRow[col] = val
+			}
+		}
+
+		newData = append(newData, newRow)
+	}
+	return newData
 }

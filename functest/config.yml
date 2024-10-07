@@ -1,0 +1,63 @@
+databases:
+  default:
+    driver: postgres
+    dsn: $PG_DSN
+
+tasks:
+  pg_csv_export:
+    activities:
+      - export: csv
+        spec:
+          delimiter: ','
+          transform:
+            countries:
+              - skip_columns:
+                  - id
+              - rename_columns:
+                  name: country_name
+        out:
+          dir: ./out
+
+  pg_diagram:
+    activities:
+      - export: diagram
+        out:
+          dir: ./out
+
+  pg_go-structs:
+    activities:
+      - export: go-structs
+        out:
+          dir: ./out
+
+  pg_grpc-crud:
+    activities:
+      - export: grpc-crud
+        spec:
+          package: "org.service"
+          options:
+            optimize_for: SPEED
+        out:
+          dir: ./out
+
+  pg_laravel-models_export:
+    activities:
+      - export: laravel-models
+        table_per_file: true
+        out:
+          dir: ./out
+
+  pg_yaml-fixtures_export:
+    activities:
+      - export: yaml-fixtures
+        out:
+          dir: ./out
+
+  pg_yaml-fixtures_import:
+    activities:
+      - import: yaml-fixtures
+        from: ./data/pg_yaml-fixtures_import
+
+options:
+  print_stat: true
+  debug: true

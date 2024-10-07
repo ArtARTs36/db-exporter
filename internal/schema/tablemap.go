@@ -1,9 +1,8 @@
 package schema
 
 import (
-	orderedmap "github.com/wk8/go-ordered-map/v2"
-
 	"github.com/artarts36/db-exporter/internal/shared/ds"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type TableMap struct {
@@ -76,7 +75,7 @@ func (m *TableMap) Reject(callback func(table *Table) bool) *TableMap {
 	return tm
 }
 
-func (m *TableMap) Without(tableNames []string) *TableMap {
+func (m *TableMap) Only(tableNames []string) *TableMap {
 	tableFilter := map[string]bool{}
 	for _, table := range tableNames {
 		tableFilter[table] = true
@@ -89,4 +88,8 @@ func (m *TableMap) Without(tableNames []string) *TableMap {
 
 func (m *TableMap) List() []*Table {
 	return m.list
+}
+
+func (m *TableMap) Clone() *TableMap {
+	return NewTableMap(m.list...)
 }

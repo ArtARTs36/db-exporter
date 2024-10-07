@@ -8,16 +8,12 @@ import (
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
 	"github.com/artarts36/db-exporter/internal/sql"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-const GooseFixturesExporterName = "goose-fixtures"
-
 type GooseFixturesExporter struct {
-	unimplementedImporter
 	dataLoader   *db.DataLoader
 	renderer     *template.Renderer
 	queryBuilder *sql.QueryBuilder
@@ -37,19 +33,17 @@ func NewGooseFixturesExporter(
 
 func (e *GooseFixturesExporter) ExportPerFile(
 	ctx context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, sch.Tables.Len())
+	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries and rendering migration files")
 
-	for i, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Value)
+	for i, table := range params.Schema.Tables.List() {
+		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
-
 		if len(data) == 0 {
 			continue
 		}
@@ -85,16 +79,15 @@ func (e *GooseFixturesExporter) ExportPerFile(
 
 func (e *GooseFixturesExporter) Export(
 	ctx context.Context,
-	sch *schema.Schema,
-	_ *ExportParams,
+	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	upQueries := make([]string, 0, sch.Tables.Len())
-	downQueries := make([]string, 0, sch.Tables.Len())
+	upQueries := make([]string, 0, params.Schema.Tables.Len())
+	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries")
 
-	for _, table := range sch.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, table.Name.Value)
+	for _, table := range params.Schema.Tables.List() {
+		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
 		if err != nil {
 			return nil, err
 		}
