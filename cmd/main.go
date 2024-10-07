@@ -48,7 +48,7 @@ func main() {
 		UsageExamples: []*cli.UsageExample{
 			{
 				Command:     "db-exporter --config db.yaml",
-				Description: "Commit db-exporter with custom config path",
+				Description: "Run db-exporter with custom config path",
 			},
 		},
 	}
