@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tyler-sommer/stick"
+	"github.com/tyler-sommer/stick/twig/filter"
 )
 
 type Renderer struct {
@@ -15,6 +16,13 @@ type Renderer struct {
 
 func NewRenderer(templateLoader stick.Loader) *Renderer {
 	eng := stick.New(templateLoader)
+	eng.Functions["bool_string"] = func(_ stick.Context, args ...stick.Value) stick.Value {
+		val := args[0].(bool)
+		if val {
+			return "true"
+		}
+		return "false"
+	}
 	eng.Functions["spaces"] = func(_ stick.Context, args ...stick.Value) stick.Value {
 		count, valid := args[0].(int)
 		if !valid || count < 0 {
@@ -36,6 +44,8 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 		}
 		return args[0]
 	}
+
+	eng.Filters = filter.TwigFilters()
 
 	return &Renderer{
 		engine: eng,

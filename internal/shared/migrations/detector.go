@@ -1,7 +1,6 @@
 package migrations
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/artarts36/db-exporter/internal/shared/goose"
@@ -66,8 +65,6 @@ func (d *TableDetector) IsMigrationsTable(tableName string, columnsNames []strin
 			return true
 		}
 	}
-
-	fmt.Println("---")
 
 	return false
 }

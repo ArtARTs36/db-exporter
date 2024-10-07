@@ -23,6 +23,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 		config.ExporterNameGoose:                NewGooseExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate:         NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelMigrationsRaw: NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()),
+		config.ExporterNameLaravelModels:        NewLaravelModelsExporter(renderer),
 		config.ExporterNameGrpcCrud:             NewGrpcCrudExporter(renderer),
 		config.ExporterNameGooseFixtures:        NewGooseFixturesExporter(dataLoader, renderer, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         NewYamlFixturesExporter(dataLoader, db.NewInserter()),

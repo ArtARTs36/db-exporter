@@ -48,38 +48,27 @@ func (l *Loader) Load(path string) (*Config, error) {
 }
 
 func (l *Loader) injectEnvVars(cfg *Config) error {
-	const minExpressionLen = 2
-
-	parseVarName := func(expression string) (string, bool) {
-		if len(expression) < minExpressionLen {
-			return "", false
+	for dbName, database := range cfg.Databases {
+		val, err := l.envInjector.Inject(database.DSN)
+		if err != nil {
+			return fmt.Errorf("database[%s]: failed to inject environment variable: %w", dbName, err)
 		}
 
-		if expression[0] != '$' {
-			return "", false
-		}
-
-		if expression[1] == '{' && expression[len(expression)-1] == '}' {
-			return expression[1:], true
-		}
-
-		return expression[1:], true
+		database.DSN = val
+		cfg.Databases[dbName] = database
 	}
 
-	for dbName, database := range cfg.Databases {
-		varName, ok := parseVarName(database.DSN)
-		if !ok {
+	for taskName, task := range cfg.Tasks {
+		if task.Commit.Author == "" {
 			continue
 		}
 
-		varVal, ok := os.LookupEnv(varName)
-		if !ok {
-			return fmt.Errorf("database[%s]: failed to get environment variable %q", dbName, varName)
+		val, err := l.envInjector.Inject(task.Commit.Author)
+		if err != nil {
+			return fmt.Errorf("tasks[%s]: failed to inject environment variable: %w", taskName, err)
 		}
 
-		database.DSN = varVal
-
-		cfg.Databases[dbName] = database
+		task.Commit.Author = val
 	}
 
 	return nil

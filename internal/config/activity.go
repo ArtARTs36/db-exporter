@@ -76,6 +76,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(GRPCCrudExportSpec)
 		case ExporterNameCSV:
 			exportActivity.Spec = new(CSVExportSpec)
+		case ExporterNameLaravelModels:
+			exportActivity.Spec = new(LaravelModelsExportSpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

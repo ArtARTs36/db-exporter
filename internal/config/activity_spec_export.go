@@ -12,6 +12,7 @@ const (
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
 	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
 	ExporterNameLaravelMigrationsRaw ExporterName = "laravel-migrations-raw"
+	ExporterNameLaravelModels        ExporterName = "laravel-models"
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
 	ExporterNameCSV                  ExporterName = "csv"
@@ -39,4 +40,9 @@ type ExportSpecTransform struct {
 	OnlyColumns   []string          `yaml:"only_columns"`
 	SkipColumns   []string          `yaml:"skip_columns"`
 	RenameColumns map[string]string `yaml:"rename_columns"`
+}
+
+type LaravelModelsExportSpec struct {
+	Namespace string `yaml:"namespace"`
+	TimeAs    string `yaml:"time_as"` // datetime, carbon
 }

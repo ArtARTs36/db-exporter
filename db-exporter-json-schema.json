@@ -42,12 +42,11 @@
         "driver": {
           "type": "string",
           "enum": ["postgres"],
-          "title": "Database driver",
-          "description": "Golang format: 'port=5459 user=db password=db dbname=db sslmode=disable'"
+          "title": "Database driver"
         },
         "dsn": {
           "type": "string",
-          "title": "Data Source Name in GO syntax, allow env vars"
+          "title": "Data Source Name in GO syntax, allow env vars. Golang format: 'port=5459 user=db password=db dbname=db sslmode=disable'"
         }
       },
       "required": [
@@ -107,8 +106,8 @@
         "export": {
           "type": "string",
           "enum": [
-            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate", "laravel-migrations-raw",
-            "grpc-crud", "yaml-fixtures", "csv"
+            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate",
+            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv"
           ]
         },
         "database": {
@@ -159,6 +158,9 @@
             },
             {
               "$ref": "#/definitions/spec_csv_export"
+            },
+            {
+              "$ref": "#/definitions/spec_laravel_models_export"
             }
           ]
         }
@@ -180,7 +182,8 @@
         },
         "database": {
           "type": "string",
-          "description": "Database name as shown on the database map"
+          "description": "Database name as shown on the database map",
+          "default": "default"
         },
         "tables": {
           "type": "array",
@@ -222,9 +225,6 @@
         "options": {
           "type": "object",
           "properties": {
-            "go_package": {
-              "type": "string"
-            },
             "java_package": {
               "type": "string"
             },
@@ -234,6 +234,9 @@
             "java_multiple_files": {
               "type": "boolean"
             },
+            "java_string_check_utf8": {
+              "type": "boolean"
+            },
             "optimize_for": {
               "type": "string",
               "enum": [
@@ -241,6 +244,48 @@
                 "CODE_SIZE",
                 "LITE_RUNTIME"
               ]
+            },
+            "go_package": {
+              "type": "string"
+            },
+            "cc_generic_services": {
+              "type": "boolean"
+            },
+            "java_generic_services": {
+              "type": "boolean"
+            },
+            "py_generic_services": {
+              "type": "boolean"
+            },
+            "php_generic_services": {
+              "type": "boolean"
+            },
+            "deprecated": {
+              "type": "boolean"
+            },
+            "cc_enable_arenas": {
+              "type": "boolean"
+            },
+            "objc_class_prefix": {
+              "type": "boolean"
+            },
+            "csharp_namespace": {
+              "type": "boolean"
+            },
+            "swift_prefix": {
+              "type": "boolean"
+            },
+            "php_class_prefix": {
+              "type": "boolean"
+            },
+            "php_namespace": {
+              "type": "boolean"
+            },
+            "php_metadata_namespace": {
+              "type": "boolean"
+            },
+            "ruby_package": {
+              "type": "boolean"
             }
           },
           "additionalProperties": {
@@ -314,6 +359,21 @@
               ]
             }
           }
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_laravel_models_export": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "default": "App\\Models"
+        },
+        "time_as": {
+          "type": "string",
+          "enum": ["carbon","datetime"],
+          "default": "carbon"
         }
       },
       "additionalProperties": false
