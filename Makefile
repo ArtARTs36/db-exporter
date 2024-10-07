@@ -5,6 +5,10 @@ PG_DSN := "port=5459 user=db password=db dbname=db sslmode=disable"
 build:
 	go build ${BUILD_FLAGS} -o db-exporter cmd/main.go
 
+install:
+	make build
+	cp ./db-exporter /usr/local/bin/db-exporter
+
 help:
 	go run ./cmd/main.go --help
 
