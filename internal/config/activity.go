@@ -68,7 +68,7 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		switch exportActivity.Format {
 		case ExporterNameDiagram, ExporterNameGoose, ExporterNameGooseFixtures, ExporterNameGoSQLMigrate,
 			ExporterNameLaravelMigrationsRaw, ExporterNameYamlFixtures:
-		case ExporterNameGoStructs:
+		case ExporterNameGoEntities:
 			exportActivity.Spec = new(GoStructsExportSpec)
 		case ExporterNameMd:
 			exportActivity.Spec = new(MarkdownExportSpec)

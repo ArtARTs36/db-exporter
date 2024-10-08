@@ -4,7 +4,7 @@ db-exporter - app for export db schema to formats:
 * CSV: export table data `csv`
 * Markdown: export table structure `md`
 * Class diagram: export table structure `diagram`
-* Go structures with db tags `go-structs`
+* Go structures with db tags `go-entities`
 * Goose migrations `goose`
 * Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
 * Raw SQL Laravel migrations `laravel-migrations-raw`
@@ -89,7 +89,7 @@ Run import: `db-exporter --tasks=import`
 | csv                    | csv/export_single.csv        | Template for generate single csv file                        |
 | diagram                | diagram/table.html           | Template for generate table                                  |
 | go-sql-migrate         | go-sql-migrate/migration.sql | Template for generate migration                              |
-| go-structs             | go-structs/model.go.tpl      | Template for generate table                                  |
+| go-entities            | go-entities/model.go.tpl     | Template for generate table                                  |
 | goose                  | goose/migration.sql          | Template for generate migration                              |
 | goose-fixtures         | goose/migration.sql          | Template for generate migration with fixtures                |
 | grpc-crud              | grpc-crud/gprc.proto         | Template for generate protobuf                               |

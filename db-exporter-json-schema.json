@@ -106,7 +106,7 @@
         "export": {
           "type": "string",
           "enum": [
-            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate",
+            "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv"
           ]
         },

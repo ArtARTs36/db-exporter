@@ -22,7 +22,7 @@ var goAbbreviationsSet = map[string]bool{
 	"db":   true,
 }
 
-type GoStructsExporter struct {
+type GoEntitiesExporter struct {
 	renderer *template.Renderer
 }
 
@@ -48,12 +48,12 @@ type goProperty struct {
 }
 
 func NewGoStructsExporter(renderer *template.Renderer) Exporter {
-	return &GoStructsExporter{
+	return &GoEntitiesExporter{
 		renderer: renderer,
 	}
 }
 
-func (e *GoStructsExporter) ExportPerFile(
+func (e *GoEntitiesExporter) ExportPerFile(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
@@ -72,7 +72,7 @@ func (e *GoStructsExporter) ExportPerFile(
 
 		page, err := render(
 			e.renderer,
-			"go-structs/model.go.tpl",
+			"go-entities/model.go.tpl",
 			fmt.Sprintf("%s.go", table.Name.Singular().Lower()),
 			map[string]stick.Value{
 				"schema":  goSch,
@@ -89,7 +89,7 @@ func (e *GoStructsExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GoStructsExporter) Export(
+func (e *GoEntitiesExporter) Export(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
@@ -101,7 +101,7 @@ func (e *GoStructsExporter) Export(
 	goSch := e.makeGoSchema(params.Schema.Tables.List())
 	pkg := e.selectPackage(spec)
 
-	page, err := render(e.renderer, "go-structs/model.go.tpl", "models.go", map[string]stick.Value{
+	page, err := render(e.renderer, "go-entities/model.go.tpl", "models.go", map[string]stick.Value{
 		"schema":  goSch,
 		"package": pkg,
 	})
@@ -114,7 +114,7 @@ func (e *GoStructsExporter) Export(
 	}, nil
 }
 
-func (e *GoStructsExporter) selectPackage(params *config.GoStructsExportSpec) string {
+func (e *GoEntitiesExporter) selectPackage(params *config.GoStructsExportSpec) string {
 	if params.Package != "" {
 		return strings.ToLower(params.Package)
 	}
@@ -122,7 +122,7 @@ func (e *GoStructsExporter) selectPackage(params *config.GoStructsExportSpec) st
 	return "models"
 }
 
-func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
+func (e *GoEntitiesExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
 	switch col.PreparedType {
 	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
 		if col.Nullable {
@@ -193,7 +193,7 @@ func (e *GoStructsExporter) mapGoType(col *schema.Column, imports *ds.Set) strin
 	return golang.TypeString
 }
 
-func (e *GoStructsExporter) makeGoSchema(tables []*schema.Table) *goSchema {
+func (e *GoEntitiesExporter) makeGoSchema(tables []*schema.Table) *goSchema {
 	goSch := &goSchema{
 		Tables:  make([]*goStruct, 0, len(tables)),
 		Imports: ds.NewSet(),

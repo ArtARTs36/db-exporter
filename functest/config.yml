@@ -24,9 +24,9 @@ tasks:
         out:
           dir: ./out
 
-  pg_go-structs:
+  pg_go-entities:
     activities:
-      - export: go-structs
+      - export: go-entities
         out:
           dir: ./out
 

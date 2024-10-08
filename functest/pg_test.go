@@ -120,7 +120,7 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg_diagram",
 		},
 		{
-			Title: "test pg with go-structs",
+			Title: "test pg with go-entities",
 			InitQueries: []string{
 				`CREATE TABLE users
 (
@@ -149,7 +149,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE countries",
 			},
 			ConfigPath: "config.yml",
-			TaskName:   "pg_go-structs",
+			TaskName:   "pg_go-entities",
 		},
 		{
 			Title: "test pg with laravel-models",

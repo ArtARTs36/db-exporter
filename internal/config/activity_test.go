@@ -16,16 +16,16 @@ func TestExportActivity_UnmarshalYAML(t *testing.T) {
 		Expected Activity
 	}{
 		{
-			Title: "Parse go-structs spec",
+			Title: "Parse go-entities spec",
 			Content: `
-export: go-structs
+export: go-entities
 database: db1
 spec:
     package: model
 `,
 			Expected: Activity{
 				Export: ExportActivity{
-					Format: "go-structs",
+					Format: "go-entities",
 					Spec: &GoStructsExportSpec{
 						Package: "model",
 					},

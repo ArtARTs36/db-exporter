@@ -7,7 +7,7 @@ type ExporterName string
 const (
 	ExporterNameMd                   ExporterName = "md"
 	ExporterNameDiagram              ExporterName = "diagram"
-	ExporterNameGoStructs            ExporterName = "go-structs"
+	ExporterNameGoEntities           ExporterName = "go-entities"
 	ExporterNameGoose                ExporterName = "goose"
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
 	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
