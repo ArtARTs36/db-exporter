@@ -18,7 +18,7 @@ const (
 	ExporterNameCSV                  ExporterName = "csv"
 )
 
-type GoStructsExportSpec struct {
+type GoEntitiesExportSpec struct {
 	Package string `yaml:"package"`
 }
 

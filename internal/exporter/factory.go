@@ -19,7 +19,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 	return map[config.ExporterName]Exporter{
 		config.ExporterNameMd:                   NewMarkdownExporter(renderer),
 		config.ExporterNameDiagram:              NewDiagramExporter(renderer),
-		config.ExporterNameGoEntities:           NewGoStructsExporter(renderer),
+		config.ExporterNameGoEntities:           NewGoEntitiesExporter(renderer),
 		config.ExporterNameGoose:                NewGooseExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate:         NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelMigrationsRaw: NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()),

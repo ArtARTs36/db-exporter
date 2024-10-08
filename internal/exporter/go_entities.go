@@ -47,7 +47,7 @@ type goProperty struct {
 	Column *schema.Column
 }
 
-func NewGoStructsExporter(renderer *template.Renderer) Exporter {
+func NewGoEntitiesExporter(renderer *template.Renderer) Exporter {
 	return &GoEntitiesExporter{
 		renderer: renderer,
 	}
@@ -57,7 +57,7 @@ func (e *GoEntitiesExporter) ExportPerFile(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	spec, ok := params.Spec.(*config.GoEntitiesExportSpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -93,7 +93,7 @@ func (e *GoEntitiesExporter) Export(
 	_ context.Context,
 	params *ExportParams,
 ) ([]*ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GoStructsExportSpec)
+	spec, ok := params.Spec.(*config.GoEntitiesExportSpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -114,7 +114,7 @@ func (e *GoEntitiesExporter) Export(
 	}, nil
 }
 
-func (e *GoEntitiesExporter) selectPackage(params *config.GoStructsExportSpec) string {
+func (e *GoEntitiesExporter) selectPackage(params *config.GoEntitiesExportSpec) string {
 	if params.Package != "" {
 		return strings.ToLower(params.Package)
 	}

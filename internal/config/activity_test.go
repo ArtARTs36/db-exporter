@@ -26,7 +26,7 @@ spec:
 			Expected: Activity{
 				Export: ExportActivity{
 					Format: "go-entities",
-					Spec: &GoStructsExportSpec{
+					Spec: &GoEntitiesExportSpec{
 						Package: "model",
 					},
 				},
