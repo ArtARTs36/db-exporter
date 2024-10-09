@@ -15,11 +15,12 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]Export
 		SkipColumnsDataTransformer(),
 		RenameColumnsDataTransformer(),
 	}
+	goEntityMapper := &GoEntityMapper{}
 
 	return map[config.ExporterName]Exporter{
 		config.ExporterNameMd:                   NewMarkdownExporter(renderer),
 		config.ExporterNameDiagram:              NewDiagramExporter(renderer),
-		config.ExporterNameGoEntities:           NewGoEntitiesExporter(renderer),
+		config.ExporterNameGoEntities:           NewGoEntitiesExporter(renderer, goEntityMapper),
 		config.ExporterNameGoose:                NewGooseExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate:         NewSQLMigrateExporter(renderer, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelMigrationsRaw: NewLaravelMigrationsRawExporter(renderer, sql.NewDDLBuilder()),

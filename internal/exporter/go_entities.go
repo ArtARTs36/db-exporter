@@ -4,52 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"strings"
 
 	"github.com/tyler-sommer/stick"
 
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
-	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-var goAbbreviationsSet = map[string]bool{
-	"id":   true,
-	"uuid": true,
-	"json": true,
-	"db":   true,
-}
-
 type GoEntitiesExporter struct {
-	renderer *template.Renderer
+	renderer     *template.Renderer
+	entityMapper *GoEntityMapper
 }
 
-type goSchema struct {
-	Tables  []*goStruct
-	Imports *ds.Set
-}
-
-type goStruct struct {
-	Name       ds.String
-	Properties []*goProperty
-}
-
-type goProperty struct {
-	Name       string
-	NameOffset int
-	ColumnName string
-	Type       string
-	TypeOffset int
-	Pointer    bool
-
-	Column *schema.Column
-}
-
-func NewGoEntitiesExporter(renderer *template.Renderer) Exporter {
+func NewGoEntitiesExporter(renderer *template.Renderer, entityMapper *GoEntityMapper) Exporter {
 	return &GoEntitiesExporter{
-		renderer: renderer,
+		renderer:     renderer,
+		entityMapper: entityMapper,
 	}
 }
 
@@ -66,7 +38,7 @@ func (e *GoEntitiesExporter) ExportPerFile(
 	pkg := e.selectPackage(spec)
 
 	for _, table := range params.Schema.Tables.List() {
-		goSch := e.makeGoSchema([]*schema.Table{
+		goSch := e.entityMapper.MapEntities([]*schema.Table{
 			table,
 		})
 
@@ -98,10 +70,10 @@ func (e *GoEntitiesExporter) Export(
 		return nil, errors.New("got invalid spec")
 	}
 
-	goSch := e.makeGoSchema(params.Schema.Tables.List())
+	goSch := e.entityMapper.MapEntities(params.Schema.Tables.List())
 	pkg := e.selectPackage(spec)
 
-	page, err := render(e.renderer, "go-entities/model.go.tpl", "models.go", map[string]stick.Value{
+	page, err := render(e.renderer, "go-entities/entity.go.tpl", "entities.go", map[string]stick.Value{
 		"schema":  goSch,
 		"package": pkg,
 	})
@@ -119,119 +91,5 @@ func (e *GoEntitiesExporter) selectPackage(params *config.GoEntitiesExportSpec) 
 		return strings.ToLower(params.Package)
 	}
 
-	return "models"
-}
-
-func (e *GoEntitiesExporter) mapGoType(col *schema.Column, imports *ds.Set) string {
-	switch col.PreparedType {
-	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullInt64"
-		}
-
-		return golang.TypeInt64
-	case schema.ColumnTypeInteger16:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullInt16"
-		}
-
-		return golang.TypeInt16
-	case schema.ColumnTypeString:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullString"
-		}
-
-		return golang.TypeString
-	case schema.ColumnTypeTimestamp:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullTime"
-		}
-
-		imports.Add("time")
-
-		return "time.Time"
-	case schema.ColumnTypeBoolean:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullBool"
-		}
-
-		return golang.TypeBool
-	case schema.ColumnTypeFloat64:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return "sql.NullFloat64"
-		}
-
-		return golang.TypeFloat64
-	case schema.ColumnTypeFloat32:
-		if col.Nullable {
-			imports.Add("database/sql")
-
-			return golang.Ptr(golang.TypeFloat32)
-		}
-
-		return golang.TypeFloat32
-	case schema.ColumnTypeBytes:
-		if col.Nullable {
-			return golang.Ptr(golang.TypeByteSlice)
-		}
-
-		return golang.TypeByteSlice
-	}
-
-	return golang.TypeString
-}
-
-func (e *GoEntitiesExporter) makeGoSchema(tables []*schema.Table) *goSchema {
-	goSch := &goSchema{
-		Tables:  make([]*goStruct, 0, len(tables)),
-		Imports: ds.NewSet(),
-	}
-
-	for _, t := range tables {
-		str := &goStruct{
-			Name:       *t.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
-			Properties: make([]*goProperty, 0, len(t.Columns)),
-		}
-
-		goSch.Tables = append(goSch.Tables, str)
-
-		propNameOffset := 0
-		propTypeOffset := 0
-		for _, c := range t.Columns {
-			prop := &goProperty{
-				Name:       c.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
-				Type:       e.mapGoType(c, goSch.Imports),
-				ColumnName: c.Name.Value,
-			}
-
-			str.Properties = append(str.Properties, prop)
-
-			if len(prop.Name) > propNameOffset {
-				propNameOffset = c.Name.Pascal().Len()
-			}
-
-			if len(prop.Type) > propTypeOffset {
-				propTypeOffset = len(prop.Type)
-			}
-		}
-
-		for _, prop := range str.Properties {
-			prop.NameOffset = propNameOffset - len(prop.Name)
-			prop.TypeOffset = propTypeOffset - len(prop.Type)
-		}
-	}
-
-	return goSch
+	return "entities"
 }

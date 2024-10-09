@@ -151,7 +151,7 @@
               "$ref": "#/definitions/spec_md_export"
             },
             {
-              "$ref": "#/definitions/spec_go_structs_export"
+              "$ref": "#/definitions/spec_go_entities_export"
             },
             {
               "$ref": "#/definitions/spec_grpc_crud_export"
@@ -206,12 +206,12 @@
       },
       "additionalProperties": false
     },
-    "spec_go_structs_export": {
+    "spec_go_entities_export": {
       "type": "object",
       "properties": {
         "package": {
           "type": "string",
-          "default": "models"
+          "default": "entities"
         }
       },
       "additionalProperties": false
