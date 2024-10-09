@@ -78,6 +78,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(CSVExportSpec)
 		case ExporterNameLaravelModels:
 			exportActivity.Spec = new(LaravelModelsExportSpec)
+		case ExporterNameGoEntityRepository:
+			exportActivity.Spec = new(GoEntityRepositorySpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

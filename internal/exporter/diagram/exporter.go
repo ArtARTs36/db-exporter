@@ -1,28 +1,29 @@
-package exporter
+package diagram
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type DiagramExporter struct {
-	graphBuilder *graphBuilder
+type Exporter struct {
+	graphBuilder *GraphBuilder
 }
 
-func NewDiagramExporter(renderer *template.Renderer) Exporter {
-	return &DiagramExporter{
-		graphBuilder: &graphBuilder{renderer: renderer},
+func NewDiagramExporter(renderer *template.Renderer) exporter.Exporter {
+	return &Exporter{
+		graphBuilder: &GraphBuilder{renderer: renderer},
 	}
 }
 
-func (e *DiagramExporter) ExportPerFile(
+func (e *Exporter) ExportPerFile(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
 		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
@@ -38,26 +39,26 @@ func (e *DiagramExporter) ExportPerFile(
 	return pages, err
 }
 
-func (e *DiagramExporter) Export(_ context.Context, params *ExportParams) ([]*ExportedPage, error) {
+func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
 	diagram, err := buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 	if err != nil {
 		return nil, err
 	}
 
-	return []*ExportedPage{diagram}, nil
+	return []*exporter.ExportedPage{diagram}, nil
 }
 
 func buildDiagramPage(
-	builder *graphBuilder,
+	builder *GraphBuilder,
 	tables *schema.TableMap,
 	filename string,
-) (*ExportedPage, error) {
+) (*exporter.ExportedPage, error) {
 	c, err := builder.BuildSVG(tables)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ExportedPage{
+	return &exporter.ExportedPage{
 		FileName: filename,
 		Content:  c,
 	}, nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 type Exporter interface {
@@ -12,9 +13,10 @@ type Exporter interface {
 }
 
 type ExportParams struct {
-	Schema *schema.Schema
-	Conn   *db.Connection
-	Spec   interface{}
+	Schema    *schema.Schema
+	Conn      *db.Connection
+	Spec      interface{}
+	Directory *fs.Directory
 }
 
 type ExportedPage struct {

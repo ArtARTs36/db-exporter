@@ -1,4 +1,4 @@
-package exporter
+package diagram
 
 import (
 	"bytes"
@@ -13,11 +13,15 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type graphBuilder struct {
+type GraphBuilder struct {
 	renderer *template.Renderer
 }
 
-func (b *graphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
+func NewGraphBuilder(renderer *template.Renderer) *GraphBuilder {
+	return &GraphBuilder{renderer: renderer}
+}
+
+func (b *GraphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
 	g, graph, err := b.buildGraph(tables)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build graph: %w", err)
@@ -42,7 +46,7 @@ func (b *graphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (b *graphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, *cgraph.Graph, error) {
+func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, *cgraph.Graph, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()
 	if err != nil {
@@ -68,7 +72,7 @@ func (b *graphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, 
 	return g, graph, nil
 }
 
-func (b *graphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) (map[string]*cgraph.Node, error) {
+func (b *GraphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) (map[string]*cgraph.Node, error) {
 	tablesNodes := map[string]*cgraph.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
@@ -101,7 +105,7 @@ func (b *graphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) 
 	return tablesNodes, nil
 }
 
-func (b *graphBuilder) buildEdges(
+func (b *GraphBuilder) buildEdges(
 	graph *cgraph.Graph,
 	tables *schema.TableMap,
 	tablesNodes map[string]*cgraph.Node,

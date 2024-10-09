@@ -1,8 +1,10 @@
-package exporter
+package yaml
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -13,8 +15,7 @@ import (
 
 const yamlFixturesFilename = "fixtures.yaml"
 
-type YamlFixturesExporter struct {
-	unimplementedImporter
+type FixturesExporter struct {
 	dataLoader *db.DataLoader
 	inserter   *db.Inserter
 }
@@ -33,21 +34,21 @@ type yamlFixtureTable struct {
 	Rows []map[string]interface{} `yaml:"rows"`
 }
 
-func NewYamlFixturesExporter(
+func NewFixturesExporter(
 	dataLoader *db.DataLoader,
 	inserter *db.Inserter,
-) *YamlFixturesExporter {
-	return &YamlFixturesExporter{
+) *FixturesExporter {
+	return &FixturesExporter{
 		dataLoader: dataLoader,
 		inserter:   inserter,
 	}
 }
 
-func (e *YamlFixturesExporter) ExportPerFile(
+func (e *FixturesExporter) ExportPerFile(
 	ctx context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	for _, table := range params.Schema.Tables.List() {
 		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
@@ -71,7 +72,7 @@ func (e *YamlFixturesExporter) ExportPerFile(
 			return nil, fmt.Errorf("failed to build yaml content: %w", err)
 		}
 
-		p := &ExportedPage{
+		p := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.yaml", table.Name.String()),
 			Content:  content,
 		}
@@ -82,10 +83,10 @@ func (e *YamlFixturesExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *YamlFixturesExporter) Export(
+func (e *FixturesExporter) Export(
 	ctx context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	fixture := &yamlFixture{
 		Tables: orderedmap.New[string, *yamlFixtureTable](),
 	}
@@ -110,18 +111,18 @@ func (e *YamlFixturesExporter) Export(
 		return nil, fmt.Errorf("failed to build yaml content: %w", err)
 	}
 
-	p := &ExportedPage{
+	p := &exporter.ExportedPage{
 		FileName: yamlFixturesFilename,
 		Content:  content,
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		p,
 	}, nil
 }
 
-func (e *YamlFixturesExporter) Import(ctx context.Context, params *ImportParams) (
-	[]ImportedFile,
+func (e *FixturesExporter) Import(ctx context.Context, params *exporter.ImportParams) (
+	[]exporter.ImportedFile,
 	error,
 ) {
 	file, err := params.Directory.ReadFile(yamlFixturesFilename)
@@ -137,11 +138,11 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, params *ImportParams)
 
 	doImport := e.doImport
 	if fixture.Options.Transaction {
-		doImport = func(ctx context.Context, fixture *yamlFixture, params *ImportParams) (
-			ImportedFile,
+		doImport = func(ctx context.Context, fixture *yamlFixture, params *exporter.ImportParams) (
+			exporter.ImportedFile,
 			error,
 		) {
-			var importedFile ImportedFile
+			var importedFile exporter.ImportedFile
 
 			trErr := params.Conn.Transact(ctx, func(ctx context.Context) error {
 				importedFile, err = e.doImport(ctx, fixture, params)
@@ -161,14 +162,14 @@ func (e *YamlFixturesExporter) Import(ctx context.Context, params *ImportParams)
 		return nil, err
 	}
 
-	return []ImportedFile{importedFile}, nil
+	return []exporter.ImportedFile{importedFile}, nil
 }
 
-func (e *YamlFixturesExporter) doImport(
+func (e *FixturesExporter) doImport(
 	ctx context.Context,
 	fixture *yamlFixture,
-	params *ImportParams,
-) (ImportedFile, error) {
+	params *exporter.ImportParams,
+) (exporter.ImportedFile, error) {
 	affectedRows := map[string]int64{}
 
 	for table := fixture.Tables.Oldest(); table != nil; table = table.Next() {
@@ -183,19 +184,19 @@ func (e *YamlFixturesExporter) doImport(
 			tbl, _ := params.Schema.Tables.Get(*ds.NewString(table.Key))
 			ar, err = e.inserter.Upsert(ctx, params.Conn, tbl, table.Value.Rows)
 			if err != nil {
-				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
+				return exporter.ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}
 		} else {
 			ar, err = e.inserter.Insert(ctx, params.Conn, table.Key, table.Value.Rows)
 			if err != nil {
-				return ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
+				return exporter.ImportedFile{}, fmt.Errorf("failed to insert: %w", err)
 			}
 		}
 
 		affectedRows[table.Key] = ar
 	}
 
-	return ImportedFile{
+	return exporter.ImportedFile{
 		AffectedRows: affectedRows,
 		Name:         yamlFixturesFilename,
 	}, nil

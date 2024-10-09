@@ -1,9 +1,11 @@
-package exporter
+package grpc_crud
 
 import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/tyler-sommer/stick"
 
@@ -13,6 +15,7 @@ import (
 )
 
 type GrpcCrudExporter struct {
+	pager    *common.Pager
 	renderer *template.Renderer
 }
 
@@ -23,7 +26,7 @@ type buildProcedureContext struct {
 	tableSingularName string
 }
 
-func NewGrpcCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
+func NewCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
 	return &GrpcCrudExporter{
 		renderer: renderer,
 	}
@@ -31,15 +34,17 @@ func NewGrpcCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
 
 func (e *GrpcCrudExporter) ExportPerFile(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
 	if !ok {
 		return nil, fmt.Errorf("invalid spec")
 	}
 
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 	options := proto.PrepareOptions(spec.Options)
+
+	grpcPage := e.pager.Of("grpc-crud/grpc.proto")
 
 	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
@@ -59,9 +64,7 @@ func (e *GrpcCrudExporter) ExportPerFile(
 		prfile.Services = append(prfile.Services, srv)
 		prfile.Messages = append(prfile.Messages, messages...)
 
-		expPage, err := render(
-			e.renderer,
-			"grpc-crud/grpc.proto",
+		expPage, err := grpcPage.Export(
 			fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
 			map[string]stick.Value{
 				"file": prfile,
@@ -79,8 +82,8 @@ func (e *GrpcCrudExporter) ExportPerFile(
 
 func (e *GrpcCrudExporter) Export(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
 	if !ok {
 		return nil, fmt.Errorf("invalid spec")
@@ -107,14 +110,14 @@ func (e *GrpcCrudExporter) Export(
 		prfile.Messages = append(prfile.Messages, messages...)
 	}
 
-	expPage, err := render(e.renderer, "grpc-crud/grpc.proto", "services.proto", map[string]stick.Value{
+	expPage, err := e.pager.Of("grpc-crud/grpc.proto").Export("services.proto", map[string]stick.Value{
 		"file": prfile,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		expPage,
 	}, nil
 }

@@ -56,8 +56,16 @@ func (s *String) Pascal() *String {
 	return NewString(strcase.ToCamel(s.Value))
 }
 
+func (s *String) Camel() *String {
+	return NewString(strcase.ToLowerCamel(s.Value))
+}
+
 func (s *String) Len() int {
 	return len(s.Value)
+}
+
+func (s *String) IsEmpty() bool {
+	return s.Len() == 0
 }
 
 func (s *String) IsNotEmpty() bool {
@@ -93,7 +101,7 @@ func (s *String) SplitWords() []*SplitWord {
 		currChar := string(b)
 		currCharIsLower := strings.ToLower(currChar) == currChar
 
-		if b == '_' || b == '-' || b == ' ' { //nolint:gocritic // not required
+		if b == '_' || b == '-' || b == ' ' || b == '.' || b == '/' { //nolint:gocritic // not required
 			words = append(words, &SplitWord{
 				Word:           string(currWordBytes),
 				SeparatorAfter: currChar,
@@ -150,4 +158,23 @@ func (s *String) Lower() *String {
 
 func (s *String) Equal(str string) bool {
 	return s.Value == str
+}
+
+func (s *String) FirstLine() *String {
+	lines := strings.Split(s.Value, "\n")
+	if len(lines) == 0 {
+		return &String{Value: ""}
+	}
+
+	return &String{Value: lines[0]}
+}
+
+func (s *String) TrimPrefix(cutset string) *String {
+	return &String{Value: strings.TrimPrefix(s.Value, cutset)}
+}
+
+func (s *String) TrimSpaces() *String {
+	return &String{
+		Value: strings.Trim(s.Value, " "),
+	}
 }

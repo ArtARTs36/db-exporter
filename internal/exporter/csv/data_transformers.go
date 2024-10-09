@@ -1,4 +1,4 @@
-package exporter
+package csv
 
 import (
 	"fmt"

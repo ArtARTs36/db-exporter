@@ -1,47 +1,50 @@
-package exporter
+package csv
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type CSVExporter struct {
+type Exporter struct {
 	dataLoader       *db.DataLoader
-	renderer         *template.Renderer
+	pager            *common.Pager
 	dataTransformers []DataTransformer
 }
 
-func NewCSVExporter(
+func NewExporter(
 	dataLoader *db.DataLoader,
-	renderer *template.Renderer,
+	pager *common.Pager,
 	dataTransformers []DataTransformer,
-) *CSVExporter {
-	return &CSVExporter{
+) *Exporter {
+	return &Exporter{
 		dataLoader:       dataLoader,
-		renderer:         renderer,
+		pager:            pager,
 		dataTransformers: dataTransformers,
 	}
 }
 
-func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) ([]*ExportedPage, error) {
+func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.CSVExportSpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
 
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	delimiter := spec.Delimiter
 	if delimiter == "" {
 		delimiter = ","
 	}
+
+	csvPage := c.pager.Of("csv/export_single.csv")
 
 	for _, table := range params.Schema.Tables.List() {
 		data, err := c.dataLoader.Load(ctx, params.Conn, table.Name.Value)
@@ -68,16 +71,11 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 			}
 		}
 
-		p, err := render(
-			c.renderer,
-			"csv/export_single.csv",
-			fmt.Sprintf("%s.csv", table.Name.String()),
-			map[string]stick.Value{
-				"rows":          trData.rows,
-				"columns":       trData.cols,
-				"col_delimiter": delimiter,
-			},
-		)
+		p, err := csvPage.Export(fmt.Sprintf("%s.csv", table.Name.String()), map[string]stick.Value{
+			"rows":          trData.rows,
+			"columns":       trData.cols,
+			"col_delimiter": delimiter,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -88,6 +86,6 @@ func (c *CSVExporter) ExportPerFile(ctx context.Context, params *ExportParams) (
 	return pages, nil
 }
 
-func (c *CSVExporter) Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error) {
+func (c *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
 	return c.ExportPerFile(ctx, params)
 }

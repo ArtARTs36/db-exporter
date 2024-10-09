@@ -1,19 +1,19 @@
-package exporter
+package laravel
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/php"
 	"github.com/tyler-sommer/stick"
-
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
 type LaravelModelsExporter struct {
-	renderer *template.Renderer
+	pager *common.Pager
 }
 
 type laravelModel struct {
@@ -45,32 +45,32 @@ type laravelModelSchema struct {
 	Models []*laravelModel
 }
 
-func NewLaravelModelsExporter(renderer *template.Renderer) *LaravelModelsExporter {
+func NewLaravelModelsExporter(pager *common.Pager) *LaravelModelsExporter {
 	return &LaravelModelsExporter{
-		renderer: renderer,
+		pager: pager,
 	}
 }
 
 func (e *LaravelModelsExporter) ExportPerFile(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.LaravelModelsExportSpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
 
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 	namespace := e.selectNamespace(spec)
+
+	modelPage := e.pager.Of("laravel/model.php")
 
 	for _, table := range params.Schema.Tables.List() {
 		laravelSch := e.makeLaravelModelSchema([]*schema.Table{
 			table,
 		}, spec)
 
-		page, err := render(
-			e.renderer,
-			"laravel/model.php",
+		page, err := modelPage.Export(
 			fmt.Sprintf("%s.php", table.Name.Singular().Pascal()),
 			map[string]stick.Value{
 				"schema":    laravelSch,
@@ -89,8 +89,8 @@ func (e *LaravelModelsExporter) ExportPerFile(
 
 func (e *LaravelModelsExporter) Export(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.LaravelModelsExportSpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
@@ -100,9 +100,7 @@ func (e *LaravelModelsExporter) Export(
 
 	laravelSch := e.makeLaravelModelSchema(params.Schema.Tables.List(), spec)
 
-	page, err := render(
-		e.renderer,
-		"laravel/model.php",
+	page, err := e.pager.Of("laravel/model.php").Export(
 		"models.php",
 		map[string]stick.Value{
 			"schema":    laravelSch,
@@ -113,7 +111,7 @@ func (e *LaravelModelsExporter) Export(
 		return nil, fmt.Errorf("failed to render: %w", err)
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		page,
 	}, nil
 }

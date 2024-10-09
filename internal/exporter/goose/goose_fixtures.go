@@ -1,8 +1,10 @@
-package exporter
+package goose
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
@@ -10,32 +12,31 @@ import (
 	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
 	"github.com/artarts36/db-exporter/internal/sql"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type GooseFixturesExporter struct {
+type FixturesExporter struct {
+	pager        *common.Pager
 	dataLoader   *db.DataLoader
-	renderer     *template.Renderer
 	queryBuilder *sql.QueryBuilder
 }
 
-func NewGooseFixturesExporter(
+func NewFixturesExporter(
+	pager *common.Pager,
 	dataLoader *db.DataLoader,
-	renderer *template.Renderer,
 	insertBuilder *sql.QueryBuilder,
-) *GooseFixturesExporter {
-	return &GooseFixturesExporter{
+) *FixturesExporter {
+	return &FixturesExporter{
+		pager:        pager,
 		dataLoader:   dataLoader,
-		renderer:     renderer,
 		queryBuilder: insertBuilder,
 	}
 }
 
-func (e *GooseFixturesExporter) ExportPerFile(
+func (e *FixturesExporter) ExportPerFile(
 	ctx context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries and rendering migration files")
 
@@ -55,9 +56,7 @@ func (e *GooseFixturesExporter) ExportPerFile(
 
 		migration := e.makeMigration([]string{upQuery}, e.queryBuilder.BuildDeleteQueries(table, data))
 
-		p, err := render(
-			e.renderer,
-			"goose/migration.sql",
+		p, err := e.pager.Of("goose/migration.sql").Export(
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"inserts_into_%s_table",
 				table.Name.Value,
@@ -77,10 +76,10 @@ func (e *GooseFixturesExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GooseFixturesExporter) Export(
+func (e *FixturesExporter) Export(
 	ctx context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	upQueries := make([]string, 0, params.Schema.Tables.Len())
 	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
@@ -107,9 +106,7 @@ func (e *GooseFixturesExporter) Export(
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] rendering migration file")
 
-	p, err := render(
-		e.renderer,
-		"goose/migration.sql",
+	p, err := e.pager.Of("goose/migration.sql").Export(
 		goose.CreateMigrationFilename("inserts", 1),
 		map[string]stick.Value{
 			"up_queries":   upQueries,
@@ -120,12 +117,12 @@ func (e *GooseFixturesExporter) Export(
 		return nil, err
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		p,
 	}, nil
 }
 
-func (e *GooseFixturesExporter) makeMigration(upQueries []string, downQueries []string) *gooseMigration {
+func (e *FixturesExporter) makeMigration(upQueries []string, downQueries []string) *gooseMigration {
 	return &gooseMigration{
 		upQueries:   upQueries,
 		downQueries: downQueries,

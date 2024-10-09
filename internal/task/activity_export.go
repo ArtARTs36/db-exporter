@@ -6,7 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -74,9 +74,10 @@ func (r *ExportActivityRunner) export(
 	}
 
 	exporterParams := &exporter.ExportParams{
-		Schema: sc,
-		Spec:   params.Activity.Export.Spec,
-		Conn:   params.Conn,
+		Schema:    sc,
+		Spec:      params.Activity.Export.Spec,
+		Conn:      params.Conn,
+		Directory: fs.NewDirectory(r.fs, params.Activity.Export.Out.Dir),
 	}
 
 	export := func() ([]*exporter.ExportedPage, error) {

@@ -107,7 +107,8 @@
           "type": "string",
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
-            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv"
+            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
+            "go-entity-repository"
           ]
         },
         "database": {
@@ -161,6 +162,9 @@
             },
             {
               "$ref": "#/definitions/spec_laravel_models_export"
+            },
+            {
+              "$ref": "#/definitions/spec_go_entity_repository_export"
             }
           ]
         }
@@ -374,6 +378,68 @@
           "type": "string",
           "enum": ["carbon","datetime"],
           "default": "carbon"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_go_entity_repository_export": {
+      "type": "object",
+      "properties": {
+        "go_module": {
+          "type": "string"
+        },
+        "entities": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "default": "entities",
+              "description": "Package for entities. Example: domain.entities"
+            }
+          },
+          "additionalProperties": false
+        },
+        "repositories": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "default": "repositories",
+              "description": "Package for entities. Example: infrastructure.repositories"
+            },
+            "interfaces": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": ["entities", "repositories"]
+                }
+              },
+              "additionalProperties": false
+            },
+            "container": {
+              "type": "object",
+              "properties": {
+                "struct_name": {
+                  "type": "string",
+                  "default": null,
+                  "description": "Name of go structure"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "place": {
+              "type": "string",
+              "enum": ["entities", "repositories"]
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

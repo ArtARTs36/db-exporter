@@ -1,4 +1,4 @@
-package exporter
+package goentity
 
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -13,17 +13,17 @@ var goAbbreviationsSet = map[string]bool{
 	"db":   true,
 }
 
-type GoEntityMapper struct {
+type EntityMapper struct {
 }
 
-type GoEntities struct {
-	Entities []*GoEntity
+type Entities struct {
+	Entities []*Entity
 	Imports  *ds.Set
 }
 
-type GoEntity struct {
+type Entity struct {
 	Name       *ds.String
-	Table      string
+	Table      *schema.Table
 	Properties []*GoProperty
 	Imports    *ds.Set
 }
@@ -38,9 +38,13 @@ type GoProperty struct {
 	Column *schema.Column
 }
 
-func (m *GoEntityMapper) MapEntities(tables []*schema.Table) *GoEntities {
-	ents := &GoEntities{
-		Entities: make([]*GoEntity, len(tables)),
+func NewEntityMapper() *EntityMapper {
+	return &EntityMapper{}
+}
+
+func (m *EntityMapper) MapEntities(tables []*schema.Table) *Entities {
+	ents := &Entities{
+		Entities: make([]*Entity, len(tables)),
 		Imports:  ds.NewSet(),
 	}
 	addImportCallback := func(pkg string) {
@@ -54,22 +58,21 @@ func (m *GoEntityMapper) MapEntities(tables []*schema.Table) *GoEntities {
 	return ents
 }
 
-func (m *GoEntityMapper) MapEntity(table *schema.Table) *GoEntity {
+func (m *EntityMapper) MapEntity(table *schema.Table) *Entity {
 	return m.mapEntity(table, func(pkg string) {})
 }
 
-func (m *GoEntityMapper) mapEntity(table *schema.Table, addImportCallback func(pkg string)) *GoEntity {
-	entity := &GoEntity{
-		Imports: ds.NewSet(),
+func (m *EntityMapper) mapEntity(table *schema.Table, addImportCallback func(pkg string)) *Entity {
+	entity := &Entity{
+		Name:       table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
+		Table:      table,
+		Properties: make([]*GoProperty, 0, len(table.Columns)),
+		Imports:    ds.NewSet(),
 	}
 	addImport := func(pkg string) {
 		entity.Imports.Add(pkg)
 		addImportCallback(pkg)
 	}
-
-	entity.Properties = make([]*GoProperty, 0, len(table.Columns))
-
-	entity.Name = table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet)
 
 	propNameOffset := 0
 	propTypeOffset := 0
@@ -99,7 +102,7 @@ func (m *GoEntityMapper) mapEntity(table *schema.Table, addImportCallback func(p
 	return entity
 }
 
-func (m *GoEntityMapper) mapGoType(col *schema.Column, addImport func(pkg string)) string {
+func (m *EntityMapper) mapGoType(col *schema.Column, addImport func(pkg string)) string {
 	switch col.PreparedType {
 	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
 		if col.Nullable {

@@ -6,9 +6,14 @@ databases:
 tasks:
   gen_md:
     activities:
-      - export: md
+      - export: go-entity-repository
         spec:
-          with_diagram: true
+          entities:
+            package: domain
+          repositories:
+            package: infrastructure/repositories
+            container:
+              struct_name: group
         out:
           dir: ./out
 

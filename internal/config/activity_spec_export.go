@@ -8,6 +8,7 @@ const (
 	ExporterNameMd                   ExporterName = "md"
 	ExporterNameDiagram              ExporterName = "diagram"
 	ExporterNameGoEntities           ExporterName = "go-entities"
+	ExporterNameGoEntityRepository   ExporterName = "go-entity-repository"
 	ExporterNameGoose                ExporterName = "goose"
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
 	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
@@ -19,7 +20,7 @@ const (
 )
 
 type GoEntitiesExportSpec struct {
-	Package string `yaml:"package"`
+	Package string `yaml:"package"` // default: entities
 }
 
 type GRPCCrudExportSpec struct {
@@ -45,4 +46,30 @@ type ExportSpecTransform struct {
 type LaravelModelsExportSpec struct {
 	Namespace string `yaml:"namespace"`
 	TimeAs    string `yaml:"time_as"` // datetime, carbon
+}
+
+type GoEntityRepositorySpecRepoInterfacesPlace string
+
+const (
+	GoEntityRepositorySpecRepoInterfacesPlaceUnspecified  GoEntityRepositorySpecRepoInterfacesPlace = ""
+	GoEntityRepositorySpecRepoInterfacesPlaceEntities     GoEntityRepositorySpecRepoInterfacesPlace = "entities"
+	GoEntityRepositorySpecRepoInterfacesPlaceRepositories GoEntityRepositorySpecRepoInterfacesPlace = "repositories"
+	GoEntityRepositorySpecRepoInterfacesPlaceWithEntity   GoEntityRepositorySpecRepoInterfacesPlace = "with_entity"
+)
+
+type GoEntityRepositorySpec struct {
+	GoModule     string               `yaml:"go_module"`
+	Entities     GoEntitiesExportSpec `yaml:"entities"`
+	Repositories struct {
+		Package    string `yaml:"package"`
+		Interfaces struct {
+			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
+		}
+		Container struct {
+			StructName string `yaml:"struct_name"`
+		} `yaml:"container"`
+	} `yaml:"repositories"`
+	Filters struct {
+		Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
+	} `yaml:"filters"`
 }

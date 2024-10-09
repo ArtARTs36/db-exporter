@@ -1,8 +1,10 @@
-package exporter
+package goose
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
@@ -11,11 +13,10 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/goose"
 	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
 	"github.com/artarts36/db-exporter/internal/sql"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type GooseExporter struct {
-	renderer   *template.Renderer
+type MigrationsExporter struct {
+	pager      *common.Pager
 	ddlBuilder *sql.DDLBuilder
 }
 
@@ -24,31 +25,31 @@ type gooseMigration struct {
 	downQueries []string
 }
 
-func NewGooseExporter(renderer *template.Renderer, ddlBuilder *sql.DDLBuilder) *GooseExporter {
-	return &GooseExporter{
-		renderer:   renderer,
+func NewMigrationsExporter(
+	pager *common.Pager,
+	ddlBuilder *sql.DDLBuilder,
+) *MigrationsExporter {
+	return &MigrationsExporter{
+		pager:      pager,
 		ddlBuilder: ddlBuilder,
 	}
 }
 
-func (e *GooseExporter) ExportPerFile(
+func (e *MigrationsExporter) ExportPerFile(
 	ctx context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
-	slog.DebugContext(ctx, "[goose-exporter] building queries and rendering migration files")
+	slog.DebugContext(ctx, "[goose-migrations-exporter] building queries and rendering migration files")
+
+	migrationPage := e.pager.Of("goose/migration.sql")
 
 	for i, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
 
-		p, err := render(
-			e.renderer,
-			"goose/migration.sql",
-			goose.CreateMigrationFilename(fmt.Sprintf(
-				"create_%s_table",
-				table.Name.Value,
-			), i),
+		p, err := migrationPage.Export(
+			goose.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Value), i),
 			map[string]stick.Value{
 				"up_queries":   migration.upQueries,
 				"down_queries": migration.downQueries,
@@ -64,11 +65,11 @@ func (e *GooseExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GooseExporter) Export(ctx context.Context, params *ExportParams) ([]*ExportedPage, error) {
+func (e *MigrationsExporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
 	upQueries := make([]string, 0, params.Schema.Tables.Len())
 	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
-	slog.DebugContext(ctx, "[gooseexporter] building queries")
+	slog.DebugContext(ctx, "[goose-migrations-exporter] building queries")
 
 	for _, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
@@ -77,11 +78,9 @@ func (e *GooseExporter) Export(ctx context.Context, params *ExportParams) ([]*Ex
 		downQueries = append(downQueries, migration.downQueries...)
 	}
 
-	slog.DebugContext(ctx, "[goose-exporter] rendering migration file")
+	slog.DebugContext(ctx, "[goose-migrations-exporter] rendering migration file")
 
-	p, err := render(
-		e.renderer,
-		"goose/migration.sql",
+	p, err := e.pager.Of("goose/migration.sql").Export(
 		goose.CreateMigrationFilename("init", 1),
 		map[string]stick.Value{
 			"up_queries":   upQueries,
@@ -92,12 +91,12 @@ func (e *GooseExporter) Export(ctx context.Context, params *ExportParams) ([]*Ex
 		return nil, err
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		p,
 	}, nil
 }
 
-func (e *GooseExporter) makeMigration(table *schema.Table) *gooseMigration {
+func (e *MigrationsExporter) makeMigration(table *schema.Table) *gooseMigration {
 	return &gooseMigration{
 		upQueries: e.ddlBuilder.BuildDDL(table),
 		downQueries: []string{

@@ -1,19 +1,20 @@
-package exporter
+package laravel
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/common"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/laravel"
 	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
 	"github.com/artarts36/db-exporter/internal/sql"
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type LaravelMigrationsRawExporter struct {
-	renderer   *template.Renderer
+type MigrationsRawExporter struct {
+	pager      *common.Pager
 	ddlBuilder *sql.DDLBuilder
 }
 
@@ -28,21 +29,23 @@ type laravelMigrationQueries struct {
 }
 
 func NewLaravelMigrationsRawExporter(
-	renderer *template.Renderer,
+	pager *common.Pager,
 	ddlBuilder *sql.DDLBuilder,
-) *LaravelMigrationsRawExporter {
-	return &LaravelMigrationsRawExporter{
-		renderer:   renderer,
+) *MigrationsRawExporter {
+	return &MigrationsRawExporter{
+		pager:      pager,
 		ddlBuilder: ddlBuilder,
 	}
 }
 
-func (e *LaravelMigrationsRawExporter) ExportPerFile(
+func (e *MigrationsRawExporter) ExportPerFile(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
-	pages := make([]*ExportedPage, 0, params.Schema.Tables.Len())
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 	i := 0
+
+	migrationPage := e.pager.Of("laravel/migration-raw.php")
 
 	for _, table := range params.Schema.Tables.List() {
 		queries := e.makeMigrationQueries(table)
@@ -58,9 +61,7 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 			},
 		}
 
-		page, err := render(
-			e.renderer,
-			"laravel/migration-raw.php",
+		page, err := migrationPage.Export(
 			laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", table.Name.Value), i),
 			map[string]stick.Value{
 				"migration": migration,
@@ -77,10 +78,10 @@ func (e *LaravelMigrationsRawExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *LaravelMigrationsRawExporter) Export(
+func (e *MigrationsRawExporter) Export(
 	_ context.Context,
-	params *ExportParams,
-) ([]*ExportedPage, error) {
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	migration := &laravelMigration{
 		Name: "InitMigration",
 		Queries: &laravelMigrationQueries{
@@ -96,9 +97,7 @@ func (e *LaravelMigrationsRawExporter) Export(
 		migration.Queries.Down = append(migration.Queries.Down, queries.Down...)
 	}
 
-	page, err := render(
-		e.renderer,
-		"laravel/migration-raw.php",
+	page, err := e.pager.Of("laravel/migration-raw.php").Export(
 		laravel.CreateMigrationFilename("init", 0),
 		map[string]stick.Value{
 			"migration": migration,
@@ -108,12 +107,12 @@ func (e *LaravelMigrationsRawExporter) Export(
 		return nil, fmt.Errorf("failed to render: %w", err)
 	}
 
-	return []*ExportedPage{
+	return []*exporter.ExportedPage{
 		page,
 	}, nil
 }
 
-func (e *LaravelMigrationsRawExporter) makeMigrationQueries(table *schema.Table) *laravelMigrationQueries {
+func (e *MigrationsRawExporter) makeMigrationQueries(table *schema.Table) *laravelMigrationQueries {
 	return &laravelMigrationQueries{
 		Up: e.ddlBuilder.BuildDDL(table),
 		Down: []string{
