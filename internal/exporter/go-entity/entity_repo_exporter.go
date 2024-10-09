@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-type GoEntityRepositoryExporter struct {
+type RepositoryExporter struct {
 	pager              *common.Pager
 	goModFinder        *golang.ModFinder
 	entityMapper       *EntityMapper
@@ -26,8 +26,8 @@ func NewRepositoryExporter(
 	goModFinder *golang.ModFinder,
 	entityMapper *EntityMapper,
 	exporter *EntitiesExporter,
-) *GoEntityRepositoryExporter {
-	return &GoEntityRepositoryExporter{
+) *RepositoryExporter {
+	return &RepositoryExporter{
 		pager:              pager,
 		goModFinder:        goModFinder,
 		entityMapper:       entityMapper,
@@ -35,16 +35,18 @@ func NewRepositoryExporter(
 	}
 }
 
-type GoEntityRepository struct {
+type Repository struct {
 	Name       string
 	Entity     *Entity
 	EntityCall string
 }
 
-func (e *GoEntityRepositoryExporter) ExportPerFile(
+func (e *RepositoryExporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
+	const pageTypes = 2
+
 	spec, ok := params.Spec.(*config.GoEntityRepositorySpec)
 	if !ok {
 		return nil, errors.New("got invalid spec")
@@ -72,20 +74,20 @@ func (e *GoEntityRepositoryExporter) ExportPerFile(
 		return nil, fmt.Errorf("failed to build entity package: %w", err)
 	}
 
-	pagesLen := params.Schema.Tables.Len() * 2
+	pagesLen := params.Schema.Tables.Len() * pageTypes
 	if spec.Repositories.Container.StructName != "" {
 		pagesLen++
 	}
 
 	pages := make([]*exporter.ExportedPage, 0, pagesLen)
-	repositories := make([]*GoEntityRepository, 0, params.Schema.Tables.Len())
+	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
 	repoPage := e.pager.Of("go-entities/repository.go.tpl")
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table)
 
-		repository := &GoEntityRepository{
+		repository := &Repository{
 			Name:       fmt.Sprintf("PG%sRepository", entity.Name),
 			Entity:     entity,
 			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
@@ -104,7 +106,7 @@ func (e *GoEntityRepositoryExporter) ExportPerFile(
 			map[string]stick.Value{
 				"package": pkg,
 				"schema": map[string]interface{}{
-					"Repositories": []*GoEntityRepository{repository},
+					"Repositories": []*Repository{repository},
 				},
 			},
 		)
@@ -133,14 +135,14 @@ func (e *GoEntityRepositoryExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GoEntityRepositoryExporter) Export(
+func (e *RepositoryExporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	return e.ExportPerFile(ctx, params)
 }
 
-func (e *GoEntityRepositoryExporter) buildRepositoryPackage(
+func (e *RepositoryExporter) buildRepositoryPackage(
 	spec *config.GoEntityRepositorySpec,
 	goModule string,
 ) (golang.Package, error) {
@@ -152,7 +154,7 @@ func (e *GoEntityRepositoryExporter) buildRepositoryPackage(
 	return golang.BuildPackage(pkgName, goModule)
 }
 
-func (e *GoEntityRepositoryExporter) buildEntityPackage(
+func (e *RepositoryExporter) buildEntityPackage(
 	spec *config.GoEntityRepositorySpec,
 	goModule string,
 ) (golang.Package, error) {

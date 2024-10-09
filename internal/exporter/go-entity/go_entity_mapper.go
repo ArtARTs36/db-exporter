@@ -59,7 +59,7 @@ func (m *EntityMapper) MapEntities(tables []*schema.Table) *Entities {
 }
 
 func (m *EntityMapper) MapEntity(table *schema.Table) *Entity {
-	return m.mapEntity(table, func(pkg string) {})
+	return m.mapEntity(table, func(_ string) {})
 }
 
 func (m *EntityMapper) mapEntity(table *schema.Table, addImportCallback func(pkg string)) *Entity {

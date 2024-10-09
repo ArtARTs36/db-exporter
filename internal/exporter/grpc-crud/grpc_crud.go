@@ -1,4 +1,4 @@
-package grpc_crud
+package grpccrud
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/template"
 )
 
-type GrpcCrudExporter struct {
+type Exporter struct {
 	pager    *common.Pager
 	renderer *template.Renderer
 }
@@ -26,13 +26,13 @@ type buildProcedureContext struct {
 	tableSingularName string
 }
 
-func NewCrudExporter(renderer *template.Renderer) *GrpcCrudExporter {
-	return &GrpcCrudExporter{
+func NewCrudExporter(renderer *template.Renderer) *Exporter {
+	return &Exporter{
 		renderer: renderer,
 	}
 }
 
-func (e *GrpcCrudExporter) ExportPerFile(
+func (e *Exporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -80,7 +80,7 @@ func (e *GrpcCrudExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *GrpcCrudExporter) Export(
+func (e *Exporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -122,7 +122,7 @@ func (e *GrpcCrudExporter) Export(
 	}, nil
 }
 
-func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table) (*proto.Service, []*proto.Message) {
+func (e *Exporter) buildService(prfile *proto.File, table *schema.Table) (*proto.Service, []*proto.Message) {
 	procedureBuilders := []func(buildCtx *buildProcedureContext) (
 		*proto.ServiceProcedure,
 		[]*proto.Message,
@@ -177,7 +177,7 @@ func (e *GrpcCrudExporter) buildService(prfile *proto.File, table *schema.Table)
 	return srv, messages
 }
 
-func (e *GrpcCrudExporter) buildGetProcedure(
+func (e *Exporter) buildGetProcedure(
 	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
 	if buildCtx.table.PrimaryKey == nil {
@@ -223,7 +223,7 @@ func (e *GrpcCrudExporter) buildGetProcedure(
 	}, []*proto.Message{getReqMsg, getRespMsg}
 }
 
-func (e *GrpcCrudExporter) buildListProcedure(
+func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
 	if buildCtx.table.PrimaryKey == nil {
@@ -254,7 +254,7 @@ func (e *GrpcCrudExporter) buildListProcedure(
 	}, []*proto.Message{getReqMsg, respMsg}
 }
 
-func (e *GrpcCrudExporter) buildDeleteProcedure(
+func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
 	if buildCtx.table.PrimaryKey == nil {
@@ -293,7 +293,7 @@ func (e *GrpcCrudExporter) buildDeleteProcedure(
 	}, []*proto.Message{deleteReqMsg, deleteRespMsg}
 }
 
-func (e *GrpcCrudExporter) buildCreateProcedure(
+func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
 	if buildCtx.table.PrimaryKey == nil {
@@ -335,7 +335,7 @@ func (e *GrpcCrudExporter) buildCreateProcedure(
 	}, []*proto.Message{createReqMsg, createRespMsg}
 }
 
-func (e *GrpcCrudExporter) buildPatchProcedure(
+func (e *Exporter) buildPatchProcedure(
 	buildCtx *buildProcedureContext,
 ) (*proto.ServiceProcedure, []*proto.Message) {
 	if buildCtx.table.PrimaryKey == nil {
@@ -377,7 +377,7 @@ func (e *GrpcCrudExporter) buildPatchProcedure(
 	}, []*proto.Message{patchReqMsg, patchRespMsg}
 }
 
-func (e *GrpcCrudExporter) mapType(column *schema.Column, imports *ds.Set) string {
+func (e *Exporter) mapType(column *schema.Column, imports *ds.Set) string {
 	switch column.PreparedType { //nolint: exhaustive // not need
 	case schema.ColumnTypeInteger:
 		return "int64"

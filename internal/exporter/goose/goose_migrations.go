@@ -65,7 +65,10 @@ func (e *MigrationsExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *MigrationsExporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
+func (e *MigrationsExporter) Export(
+	ctx context.Context,
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
 	upQueries := make([]string, 0, params.Schema.Tables.Len())
 	downQueries := make([]string, 0, params.Schema.Tables.Len())
 

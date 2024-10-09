@@ -10,7 +10,7 @@ import (
 	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
 	gosqlmigrate "github.com/artarts36/db-exporter/internal/exporter/go-sql-migrate"
 	"github.com/artarts36/db-exporter/internal/exporter/goose"
-	grpc_crud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
+	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 	"github.com/artarts36/db-exporter/internal/exporter/yaml"
@@ -43,7 +43,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		),
 		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
-		config.ExporterNameGrpcCrud:             grpc_crud.NewCrudExporter(renderer),
+		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(renderer),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, db.NewInserter()),
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),

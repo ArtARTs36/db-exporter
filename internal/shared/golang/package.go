@@ -34,7 +34,7 @@ func BuildPackage(pkgName string, module string) (Package, error) {
 
 func (p *Package) CallToStruct(currentPackage Package, structName string) string {
 	if p.FullName == currentPackage.FullName {
-		return fmt.Sprintf("%s", structName)
+		return structName
 	}
 
 	return fmt.Sprintf("%s.%s", p.Name, structName)

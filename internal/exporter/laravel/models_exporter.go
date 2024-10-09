@@ -12,7 +12,7 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
-type LaravelModelsExporter struct {
+type ModelsExporter struct {
 	pager *common.Pager
 }
 
@@ -45,13 +45,13 @@ type laravelModelSchema struct {
 	Models []*laravelModel
 }
 
-func NewLaravelModelsExporter(pager *common.Pager) *LaravelModelsExporter {
-	return &LaravelModelsExporter{
+func NewLaravelModelsExporter(pager *common.Pager) *ModelsExporter {
+	return &ModelsExporter{
 		pager: pager,
 	}
 }
 
-func (e *LaravelModelsExporter) ExportPerFile(
+func (e *ModelsExporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -87,7 +87,7 @@ func (e *LaravelModelsExporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *LaravelModelsExporter) Export(
+func (e *ModelsExporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -116,7 +116,7 @@ func (e *LaravelModelsExporter) Export(
 	}, nil
 }
 
-func (e *LaravelModelsExporter) selectNamespace(spec *config.LaravelModelsExportSpec) string {
+func (e *ModelsExporter) selectNamespace(spec *config.LaravelModelsExportSpec) string {
 	if spec.Namespace != "" {
 		return spec.Namespace
 	}
@@ -124,7 +124,7 @@ func (e *LaravelModelsExporter) selectNamespace(spec *config.LaravelModelsExport
 	return "App\\Models"
 }
 
-func (e *LaravelModelsExporter) makeLaravelModelSchema(
+func (e *ModelsExporter) makeLaravelModelSchema(
 	tables []*schema.Table,
 	spec *config.LaravelModelsExportSpec,
 ) *laravelModelSchema {
@@ -154,7 +154,7 @@ func (e *LaravelModelsExporter) makeLaravelModelSchema(
 	return modelSchema
 }
 
-func (*LaravelModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPrimaryKey {
+func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPrimaryKey {
 	pk := table.PrimaryKey
 
 	if pk == nil {
@@ -216,7 +216,7 @@ func (*LaravelModelsExporter) createModelPrimaryKey(table *schema.Table) laravel
 	return lpk
 }
 
-func (*LaravelModelsExporter) mapPhpType(
+func (*ModelsExporter) mapPhpType(
 	col *schema.Column,
 	model *laravelModel,
 	spec *config.LaravelModelsExportSpec,
