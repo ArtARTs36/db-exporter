@@ -1,4 +1,4 @@
-package {{ package }}
+package {{ package.Name }}
 
 {% if schema.Imports.Valid() %}import (
 {% for im in schema.Imports.List() %}	"{{ im }}"{% if loop.last == false %}

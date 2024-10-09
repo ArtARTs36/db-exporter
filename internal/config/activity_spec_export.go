@@ -20,7 +20,8 @@ const (
 )
 
 type GoEntitiesExportSpec struct {
-	Package string `yaml:"package"` // default: entities
+	GoModule string `yaml:"go_module"`
+	Package  string `yaml:"package"` // default: entities
 }
 
 type GRPCCrudExportSpec struct {
@@ -58,8 +59,10 @@ const (
 )
 
 type GoEntityRepositorySpec struct {
-	GoModule     string               `yaml:"go_module"`
-	Entities     GoEntitiesExportSpec `yaml:"entities"`
+	GoModule string `yaml:"go_module"`
+	Entities struct {
+		Package string `yaml:"package"`
+	} `yaml:"entities"`
 	Repositories struct {
 		Package    string `yaml:"package"`
 		Interfaces struct {

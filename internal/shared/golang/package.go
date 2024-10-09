@@ -32,8 +32,12 @@ func BuildPackage(pkgName string, module string) (Package, error) {
 	return pkg, nil
 }
 
+func (p *Package) IsCurrent(currentPackage Package) bool {
+	return p.FullName == currentPackage.FullName
+}
+
 func (p *Package) CallToStruct(currentPackage Package, structName string) string {
-	if p.FullName == currentPackage.FullName {
+	if p.IsCurrent(currentPackage) {
 		return structName
 	}
 

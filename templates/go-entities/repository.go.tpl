@@ -6,6 +6,8 @@ import (
 
     "github.com/doug-martin/goqu/v9"
     "github.com/jmoiron/sqlx"
+{% if not entityPackage.IsCurrent(package) %}
+    "{{ entityPackage.FullName }}"{% endif %}
 )
 
 const (

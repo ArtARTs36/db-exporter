@@ -29,13 +29,20 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		csv.RenameColumnsDataTransformer(),
 	}
 	goEntityMapper := goentity.NewEntityMapper()
+	goEntityGenerator := goentity.NewEntityGenerator(pager)
+	goModFinder := golang.NewModFinder()
 	graphBuilder := diagram.NewGraphBuilder(renderer)
 
 	return map[config.ExporterName]exporter.Exporter{
-		config.ExporterNameMd:         markdown.NewMarkdownExporter(pager, graphBuilder),
-		config.ExporterNameDiagram:    diagram.NewDiagramExporter(renderer),
-		config.ExporterNameGoEntities: goentity.NewEntitiesExporter(pager, goEntityMapper),
-		config.ExporterNameGoose:      goose.NewMigrationsExporter(pager, sql.NewDDLBuilder()),
+		config.ExporterNameMd:      markdown.NewMarkdownExporter(pager, graphBuilder),
+		config.ExporterNameDiagram: diagram.NewDiagramExporter(renderer),
+		config.ExporterNameGoEntities: goentity.NewEntitiesExporter(
+			pager,
+			goEntityMapper,
+			goEntityGenerator,
+			goModFinder,
+		),
+		config.ExporterNameGoose: goose.NewMigrationsExporter(pager, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate: gosqlmigrate.NewSQLMigrateExporter(
 			pager,
 			renderer,
@@ -49,9 +56,9 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(
 			pager,
-			golang.NewModFinder(),
+			goModFinder,
 			goEntityMapper,
-			goentity.NewEntitiesExporter(pager, goEntityMapper),
+			goEntityGenerator,
 		),
 	}
 }

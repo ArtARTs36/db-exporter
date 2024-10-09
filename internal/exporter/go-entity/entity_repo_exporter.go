@@ -10,28 +10,27 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/tyler-sommer/stick"
-	"log/slog"
 	"strings"
 )
 
 type RepositoryExporter struct {
-	pager              *common.Pager
-	goModFinder        *golang.ModFinder
-	entityMapper       *EntityMapper
-	goEntitiesExporter *EntitiesExporter
+	pager           *common.Pager
+	goModFinder     *golang.ModFinder
+	entityMapper    *EntityMapper
+	entityGenerator *EntityGenerator
 }
 
 func NewRepositoryExporter(
 	pager *common.Pager,
 	goModFinder *golang.ModFinder,
 	entityMapper *EntityMapper,
-	exporter *EntitiesExporter,
+	entityGenerator *EntityGenerator,
 ) *RepositoryExporter {
 	return &RepositoryExporter{
-		pager:              pager,
-		goModFinder:        goModFinder,
-		entityMapper:       entityMapper,
-		goEntitiesExporter: exporter,
+		pager:           pager,
+		goModFinder:     goModFinder,
+		entityMapper:    entityMapper,
+		entityGenerator: entityGenerator,
 	}
 }
 
@@ -52,24 +51,14 @@ func (e *RepositoryExporter) ExportPerFile(
 		return nil, errors.New("got invalid spec")
 	}
 
-	goModule := spec.GoModule
-	if goModule == "" {
-		goMod, err := e.goModFinder.FindIn(params.Directory)
-		if err != nil {
-			slog.
-				With(slog.Any("err", err)).
-				WarnContext(ctx, "[go-entity-repository-exporter] failed to get go module")
-		} else {
-			goModule = goMod.Module
-		}
-	}
+	goModule := buildGoModule(ctx, e.goModFinder, spec.GoModule, params.Directory)
 
 	pkg, err := e.buildRepositoryPackage(spec, goModule)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build repository package: %w", err)
 	}
 
-	entityPkg, err := e.buildEntityPackage(spec, goModule)
+	entityPkg, err := buildEntityPackage(spec.Entities.Package, goModule)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build entity package: %w", err)
 	}
@@ -94,7 +83,7 @@ func (e *RepositoryExporter) ExportPerFile(
 		}
 		repositories = append(repositories, repository)
 
-		page, eerr := e.goEntitiesExporter.generateEntity(entity, entityPkg.Name)
+		page, eerr := e.entityGenerator.Generate(entity, entityPkg)
 		if eerr != nil {
 			return nil, fmt.Errorf("failed to generate entity %q: %w", entity.Name, eerr)
 		}
@@ -104,7 +93,8 @@ func (e *RepositoryExporter) ExportPerFile(
 		page, rerr := repoPage.Export(
 			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, table.Name.Singular().Lower().Value),
 			map[string]stick.Value{
-				"package": pkg,
+				"entityPackage": entityPkg,
+				"package":       pkg,
 				"schema": map[string]interface{}{
 					"Repositories": []*Repository{repository},
 				},
@@ -149,18 +139,6 @@ func (e *RepositoryExporter) buildRepositoryPackage(
 	pkgName := "repositories"
 	if spec.Repositories.Package != "" {
 		pkgName = spec.Repositories.Package
-	}
-
-	return golang.BuildPackage(pkgName, goModule)
-}
-
-func (e *RepositoryExporter) buildEntityPackage(
-	spec *config.GoEntityRepositorySpec,
-	goModule string,
-) (golang.Package, error) {
-	pkgName := "entities"
-	if spec.Entities.Package != "" {
-		pkgName = spec.Entities.Package
 	}
 
 	return golang.BuildPackage(pkgName, goModule)
