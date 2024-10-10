@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"log/slog"
 
 	"github.com/artarts36/db-exporter/internal/config"
@@ -67,11 +68,7 @@ func (r *ExportActivityRunner) export(
 		return nil, fmt.Errorf("exporter for format %q not found", params.Activity.Export.Format)
 	}
 
-	sc := params.Schema
-	if len(params.Activity.Tables) > 0 {
-		sc = sc.Clone()
-		sc.Tables = sc.Tables.Only(params.Activity.Tables)
-	}
+	sc := r.filterTables(params.Schema, params)
 
 	exporterParams := &exporter.ExportParams{
 		Schema:    sc,
@@ -94,4 +91,18 @@ func (r *ExportActivityRunner) export(
 	}
 
 	return pages, nil
+}
+
+func (r *ExportActivityRunner) filterTables(sc *schema.Schema, params *ActivityRunParams) *schema.Schema {
+	if len(params.Activity.Tables.List) > 0 {
+		sc = sc.Clone()
+		sc.Tables = sc.Tables.Only(params.Activity.Tables.List)
+	} else if params.Activity.Tables.Prefix != "" {
+		sc = sc.Clone()
+		sc.Tables = sc.Tables.Reject(func(table *schema.Table) bool {
+			return !table.Name.Starts(params.Activity.Tables.Prefix)
+		})
+	}
+
+	return sc
 }

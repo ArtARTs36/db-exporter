@@ -10,8 +10,13 @@ type Activity struct {
 	Export ExportActivity // fill export or import
 	Import ImportActivity
 
-	Database string   `yaml:"database"`
-	Tables   []string `yaml:"tables"`
+	Database string         `yaml:"database"`
+	Tables   ActivityTables `yaml:"tables"`
+}
+
+type ActivityTables struct {
+	List   []string `yaml:"list"`
+	Prefix string   `yaml:"prefix"`
 }
 
 type ExportActivity struct {
@@ -41,8 +46,9 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		Import ImporterName `yaml:"import"`
 		Spec   yaml.Node    `yaml:"spec"`
 
-		Database string   `yaml:"database"`
-		Tables   []string `yaml:"tables"`
+		Database    string         `yaml:"database"`
+		Tables      ActivityTables `yaml:"tables"`
+		TablePrefix string         `yaml:"table_prefix"`
 	}
 
 	exportOrImportObj := &exportOrImport{}

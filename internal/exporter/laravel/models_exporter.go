@@ -22,6 +22,7 @@ type laravelModel struct {
 	Properties []*laravelModelProperty
 	Dates      []string
 	PrimaryKey laravelModelPrimaryKey
+	FullName   string
 }
 
 type laravelModelPrimaryKey struct {
@@ -68,7 +69,7 @@ func (e *ModelsExporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		laravelSch := e.makeLaravelModelSchema([]*schema.Table{
 			table,
-		}, spec)
+		}, spec, namespace)
 
 		page, err := modelPage.Export(
 			fmt.Sprintf("%s.php", table.Name.Singular().Pascal()),
@@ -98,7 +99,7 @@ func (e *ModelsExporter) Export(
 
 	namespace := e.selectNamespace(spec)
 
-	laravelSch := e.makeLaravelModelSchema(params.Schema.Tables.List(), spec)
+	laravelSch := e.makeLaravelModelSchema(params.Schema.Tables.List(), spec, namespace)
 
 	page, err := e.pager.Of("laravel/model.php").Export(
 		"models.php",
@@ -127,6 +128,7 @@ func (e *ModelsExporter) selectNamespace(spec *config.LaravelModelsExportSpec) s
 func (e *ModelsExporter) makeLaravelModelSchema(
 	tables []*schema.Table,
 	spec *config.LaravelModelsExportSpec,
+	namespace string,
 ) *laravelModelSchema {
 	modelSchema := &laravelModelSchema{
 		Models: make([]*laravelModel, len(tables)),
@@ -140,6 +142,8 @@ func (e *ModelsExporter) makeLaravelModelSchema(
 			Dates:      []string{},
 			PrimaryKey: e.createModelPrimaryKey(table),
 		}
+
+		model.FullName = fmt.Sprintf("%s/%s", namespace, model.Name)
 
 		for _, column := range table.Columns {
 			model.Properties = append(model.Properties, &laravelModelProperty{

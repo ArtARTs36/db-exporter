@@ -125,11 +125,39 @@
           "description": "Skip generate already exists files"
         },
         "tables": {
-          "type": "array",
-          "description": "Tables for export",
-          "items": {
-            "type": "string"
-          }
+          "type": "object",
+          "oneOf": [
+            {
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "description": "Tables for export",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "list"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "prefix": {
+                  "type": "array",
+                  "description": "Table prefix for export",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "prefix"
+              ],
+              "additionalProperties": false
+            }
+          ]
         },
         "out": {
           "type": "object",

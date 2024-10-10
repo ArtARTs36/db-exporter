@@ -72,6 +72,7 @@ func (e *RepositoryExporter) ExportPerFile(
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
 	repoPage := e.pager.Of("go-entities/repository.go.tpl")
+	repoNameMaxLength := 0
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table)
@@ -81,6 +82,11 @@ func (e *RepositoryExporter) ExportPerFile(
 			Entity:     entity,
 			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
 		}
+
+		if len(repository.Name) > repoNameMaxLength {
+			repoNameMaxLength = len(repository.Name)
+		}
+
 		repositories = append(repositories, repository)
 
 		page, eerr := e.entityGenerator.GenerateEntity(entity, entityPkg)
@@ -96,7 +102,8 @@ func (e *RepositoryExporter) ExportPerFile(
 				"entityPackage": entityPkg,
 				"package":       pkg,
 				"schema": map[string]interface{}{
-					"Repositories": []*Repository{repository},
+					"Repositories":      []*Repository{repository},
+					"RepoNameMaxLength": repoNameMaxLength,
 				},
 			},
 		)
@@ -113,7 +120,8 @@ func (e *RepositoryExporter) ExportPerFile(
 				"package":       pkg,
 				"containerName": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 				"schema": map[string]interface{}{
-					"Repositories": repositories,
+					"Repositories":      repositories,
+					"RepoNameMaxLength": repoNameMaxLength,
 				},
 			})
 		if rerr != nil {

@@ -45,6 +45,30 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 		return args[0]
 	}
 
+	const spacesAfterArgsCount = 2
+	eng.Functions["spaces_after"] = func(_ stick.Context, args ...stick.Value) stick.Value {
+		if len(args) != spacesAfterArgsCount {
+			return ""
+		}
+
+		currentString, valid := args[0].(string)
+		if !valid {
+			return ""
+		}
+
+		needLength, valid := args[1].(int)
+		if !valid {
+			return ""
+		}
+
+		repeats := needLength - len(currentString)
+		if repeats == 0 {
+			return ""
+		}
+
+		return strings.Repeat(" ", repeats)
+	}
+
 	eng.Filters = filter.TwigFilters()
 
 	return &Renderer{
