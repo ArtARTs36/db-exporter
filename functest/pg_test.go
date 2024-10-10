@@ -241,7 +241,8 @@ func TestPGExport(t *testing.T) {
 
 			expectedFiles := loadExpectedFiles(tCase.TaskName)
 
-			outFiles := loadFiles("./out")
+			outFiles := loadFiles("./out", "")
+			require.NotEmpty(t, outFiles)
 
 			for expFileName, expFileContent := range expectedFiles {
 				outFileContent, outFileExists := outFiles[expFileName]

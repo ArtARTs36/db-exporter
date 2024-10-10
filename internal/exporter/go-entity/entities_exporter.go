@@ -4,14 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
-	"strings"
-
-	"github.com/tyler-sommer/stick"
-
-	"github.com/artarts36/db-exporter/internal/config"
 )
 
 type EntitiesExporter struct {
@@ -53,7 +49,7 @@ func (e *EntitiesExporter) ExportPerFile(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		page, genErr := e.entityGenerator.Generate(e.entityMapper.MapEntity(table), pkg)
+		page, genErr := e.entityGenerator.GenerateEntity(e.entityMapper.MapEntity(table), pkg)
 		if genErr != nil {
 			return nil, genErr
 		}
@@ -73,18 +69,15 @@ func (e *EntitiesExporter) Export(
 		return nil, errors.New("got invalid spec")
 	}
 
-	goSch := e.entityMapper.MapEntities(params.Schema.Tables.List())
-
 	goModule := buildGoModule(ctx, e.goModFinder, spec.GoModule, params.Directory)
-	pkg, err := golang.BuildPackage(spec.Package, goModule)
+	pkg, err := buildEntityPackage(spec.Package, goModule)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build go package: %w", err)
 	}
 
-	page, err := e.pager.Of("go-entities/entity.go.tpl").Export("entities.go", map[string]stick.Value{
-		"schema":  goSch,
-		"package": pkg,
-	})
+	entities := e.entityMapper.MapEntities(params.Schema.Tables.List())
+
+	page, err := e.entityGenerator.GenerateEntities(entities, pkg)
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +85,4 @@ func (e *EntitiesExporter) Export(
 	return []*exporter.ExportedPage{
 		page,
 	}, nil
-}
-
-func (e *EntitiesExporter) selectPackage(params *config.GoEntitiesExportSpec) string {
-	if params.Package != "" {
-		return strings.ToLower(params.Package)
-	}
-
-	return "entities"
 }

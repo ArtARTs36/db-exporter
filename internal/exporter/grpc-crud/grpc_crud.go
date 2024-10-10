@@ -11,12 +11,10 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
 type Exporter struct {
-	pager    *common.Pager
-	renderer *template.Renderer
+	pager *common.Pager
 }
 
 type buildProcedureContext struct {
@@ -26,9 +24,9 @@ type buildProcedureContext struct {
 	tableSingularName string
 }
 
-func NewCrudExporter(renderer *template.Renderer) *Exporter {
+func NewCrudExporter(pager *common.Pager) *Exporter {
 	return &Exporter{
-		renderer: renderer,
+		pager: pager,
 	}
 }
 

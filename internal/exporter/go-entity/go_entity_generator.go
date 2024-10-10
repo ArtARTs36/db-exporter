@@ -16,7 +16,7 @@ func NewEntityGenerator(pager *common.Pager) *EntityGenerator {
 	return &EntityGenerator{pager: pager}
 }
 
-func (g *EntityGenerator) Generate(entity *Entity, pkg golang.Package) (*exporter.ExportedPage, error) {
+func (g *EntityGenerator) GenerateEntity(entity *Entity, pkg golang.Package) (*exporter.ExportedPage, error) {
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, entity.Table.Name.Singular().Lower()),
 		map[string]stick.Value{
@@ -24,6 +24,16 @@ func (g *EntityGenerator) Generate(entity *Entity, pkg golang.Package) (*exporte
 				Entities: []*Entity{entity},
 				Imports:  entity.Imports,
 			},
+			"package": pkg,
+		},
+	)
+}
+
+func (g *EntityGenerator) GenerateEntities(entities *Entities, pkg golang.Package) (*exporter.ExportedPage, error) {
+	return g.pager.Of("go-entities/entity.go.tpl").Export(
+		fmt.Sprintf("%s/entities.go", pkg.ProjectRelativePath),
+		map[string]stick.Value{
+			"schema":  entities,
 			"package": pkg,
 		},
 	)

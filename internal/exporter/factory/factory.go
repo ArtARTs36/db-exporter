@@ -50,7 +50,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		),
 		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, sql.NewDDLBuilder()),
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
-		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(renderer),
+		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, db.NewInserter()),
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),

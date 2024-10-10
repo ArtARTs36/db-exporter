@@ -83,7 +83,7 @@ func (e *RepositoryExporter) ExportPerFile(
 		}
 		repositories = append(repositories, repository)
 
-		page, eerr := e.entityGenerator.Generate(entity, entityPkg)
+		page, eerr := e.entityGenerator.GenerateEntity(entity, entityPkg)
 		if eerr != nil {
 			return nil, fmt.Errorf("failed to generate entity %q: %w", entity.Name, eerr)
 		}
