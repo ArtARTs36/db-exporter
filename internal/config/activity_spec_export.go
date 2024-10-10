@@ -64,10 +64,7 @@ type GoEntityRepositorySpec struct {
 		Package string `yaml:"package"`
 	} `yaml:"entities"`
 	Repositories struct {
-		Package    string `yaml:"package"`
-		Interfaces struct {
-			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
-		}
+		Package   string `yaml:"package"`
 		Container struct {
 			StructName string `yaml:"struct_name"`
 		} `yaml:"container"`

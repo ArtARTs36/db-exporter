@@ -407,16 +407,6 @@
               "default": "repositories",
               "description": "Package for entities. Example: infrastructure.repositories"
             },
-            "interfaces": {
-              "type": "object",
-              "properties": {
-                "place": {
-                  "type": "string",
-                  "enum": ["entities", "repositories"]
-                }
-              },
-              "additionalProperties": false
-            },
             "container": {
               "type": "object",
               "properties": {
