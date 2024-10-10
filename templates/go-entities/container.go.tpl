@@ -4,13 +4,13 @@ import (
     "github.com/jmoiron/sqlx"
 )
 
-type {{ container_name }} struct {
+type {{ containerName }} struct {
 {% for repo in schema.Repositories %}    {{ repo.Name }} *{{ repo.Name }}{% if loop.last == false %}
 {% endif %}{% endfor %}
 }
 
-func New{{ container_name }}(db *sqlx.DB) *Group {
-    return &Group{
+func New{{ containerName }}(db *sqlx.DB) *{{ containerName }} {
+    return &{{ containerName }}{
 {% for repo in schema.Repositories %}        {{ repo.Name }}: New{{ repo.Name }}(db),{% if loop.last == false %}
 {% endif %}{% endfor %}
     }

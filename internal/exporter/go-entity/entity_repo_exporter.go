@@ -110,8 +110,8 @@ func (e *RepositoryExporter) ExportPerFile(
 		page, rerr := e.pager.Of("go-entities/container.go.tpl").Export(
 			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, strings.ToLower(spec.Repositories.Container.StructName)),
 			map[string]stick.Value{
-				"package":        pkg,
-				"container_name": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
+				"package":       pkg,
+				"containerName": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 				"schema": map[string]interface{}{
 					"Repositories": repositories,
 				},

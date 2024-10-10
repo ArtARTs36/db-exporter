@@ -16,7 +16,7 @@ func skipIfRunningShortTests(t *testing.T) {
 }
 
 func loadExpectedFiles(taskName string) map[string]string {
-	dir := fmt.Sprintf("data/%s", taskName)
+	dir := fmt.Sprintf("testdata/%s", taskName)
 
 	files := loadFiles(dir, "")
 	if len(files) == 0 {
@@ -37,11 +37,9 @@ func loadFiles(dir, keyPrefix string) map[string]string {
 	for _, entry := range entries {
 		path := fmt.Sprintf("%s/%s", dir, entry.Name())
 
-		if entry.IsDir() {
-			kp := ""
-			if keyPrefix == "" {
-				kp = entry.Name()
-			} else {
+		if entry.IsDir() { //nolint: nestif // not need
+			kp := entry.Name()
+			if keyPrefix != "" {
 				kp = keyPrefix + "/" + entry.Name()
 			}
 
