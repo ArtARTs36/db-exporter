@@ -1,0 +1,130 @@
+package goentity
+
+import (
+	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
+)
+
+type addImportCallback func(pkg string)
+
+type GoPropertyMapper struct {
+}
+
+type GoProperty struct {
+	Name string
+	Type string
+
+	Column *schema.Column
+}
+
+type goProperties struct {
+	List              []*GoProperty
+	MaxPropNameLength int
+	MaxTypeNameLength int
+}
+
+func NewGoPropertyMapper() *GoPropertyMapper {
+	return &GoPropertyMapper{}
+}
+
+func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallback addImportCallback) *goProperties {
+	props := &goProperties{
+		List: make([]*GoProperty, len(columns)),
+	}
+
+	maxNameLength := 0
+	maxTypeLength := 0
+	for i, column := range columns {
+		prop := &GoProperty{
+			Name:   column.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
+			Type:   m.mapGoType(column, addImportCallback),
+			Column: column,
+		}
+
+		props.List[i] = prop
+
+		if len(prop.Name) > maxNameLength {
+			maxNameLength = column.Name.Pascal().Len()
+		}
+
+		if len(prop.Type) > maxTypeLength {
+			maxTypeLength = len(prop.Type)
+		}
+	}
+
+	props.MaxPropNameLength = maxNameLength
+	props.MaxTypeNameLength = maxTypeLength
+
+	return props
+}
+
+func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg string)) string {
+	switch col.PreparedType {
+	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullInt64"
+		}
+
+		return golang.TypeInt64
+	case schema.ColumnTypeInteger16:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullInt16"
+		}
+
+		return golang.TypeInt16
+	case schema.ColumnTypeString:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullString"
+		}
+
+		return golang.TypeString
+	case schema.ColumnTypeTimestamp:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullTime"
+		}
+
+		addImport("time")
+
+		return "time.Time"
+	case schema.ColumnTypeBoolean:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullBool"
+		}
+
+		return golang.TypeBool
+	case schema.ColumnTypeFloat64:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return "sql.NullFloat64"
+		}
+
+		return golang.TypeFloat64
+	case schema.ColumnTypeFloat32:
+		if col.Nullable {
+			addImport("database/sql")
+
+			return golang.Ptr(golang.TypeFloat32)
+		}
+
+		return golang.TypeFloat32
+	case schema.ColumnTypeBytes:
+		if col.Nullable {
+			return golang.Ptr(golang.TypeByteSlice)
+		}
+
+		return golang.TypeByteSlice
+	}
+
+	return golang.TypeString
+}

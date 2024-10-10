@@ -1,4 +1,4 @@
 type {{ entity.Name.Value }} struct {
-{% for prop in entity.Properties %}	{{ prop.Name }} {{ spaces(prop.NameOffset) }}{{ prop.Type }} {{ spaces(prop.TypeOffset) }}`db:"{{ prop.ColumnName }}"`{% if loop.last == false %}
+{% for prop in entity.Properties.List %}	{{ prop.Name }} {{ spaces_after(prop.Name, entity.Properties.MaxPropNameLength) }}{{ prop.Type }} {{ spaces_after(prop.Type, entity.Properties.MaxTypeNameLength) }}`db:"{{ prop.Column.Name.Value }}"`{% if loop.last == false %}
 {% endif %}{% endfor %}
 }

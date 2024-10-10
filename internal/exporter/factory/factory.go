@@ -28,7 +28,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		csv.SkipColumnsDataTransformer(),
 		csv.RenameColumnsDataTransformer(),
 	}
-	goEntityMapper := goentity.NewEntityMapper()
+	goEntityMapper := goentity.NewEntityMapper(goentity.NewGoPropertyMapper())
 	goEntityGenerator := goentity.NewEntityGenerator(pager)
 	goModFinder := golang.NewModFinder()
 	graphBuilder := diagram.NewGraphBuilder(renderer)
