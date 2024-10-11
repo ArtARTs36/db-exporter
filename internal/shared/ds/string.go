@@ -76,6 +76,10 @@ func (s *String) Singular() *String {
 	return NewString(inflection.Singular(s.Value))
 }
 
+func (s *String) Plural() *String {
+	return NewString(inflection.Plural(s.Value))
+}
+
 func (s *String) Starts(prefix string) bool {
 	return strings.HasPrefix(s.Value, prefix)
 }

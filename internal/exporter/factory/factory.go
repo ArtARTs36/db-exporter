@@ -31,6 +31,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 	goEntityMapper := goentity.NewEntityMapper(goentity.NewGoPropertyMapper())
 	goEntityGenerator := goentity.NewEntityGenerator(pager)
 	goModFinder := golang.NewModFinder()
+	goPropertyMapper := goentity.NewGoPropertyMapper()
 	graphBuilder := diagram.NewGraphBuilder(renderer)
 
 	return map[config.ExporterName]exporter.Exporter{
@@ -59,6 +60,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 			goModFinder,
 			goEntityMapper,
 			goEntityGenerator,
+			goPropertyMapper,
 		),
 	}
 }

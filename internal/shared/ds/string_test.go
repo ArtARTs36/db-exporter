@@ -197,6 +197,13 @@ func TestStringFixAbbreviations(t *testing.T) {
 			},
 			Expected: "GooseDBVersion",
 		},
+		{
+			String: "Id",
+			Abbreviations: []string{
+				"id",
+			},
+			Expected: "ID",
+		},
 	}
 
 	for i, tCase := range cases {

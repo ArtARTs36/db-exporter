@@ -18,6 +18,7 @@ type RepositoryExporter struct {
 	goModFinder     *golang.ModFinder
 	entityMapper    *EntityMapper
 	entityGenerator *EntityGenerator
+	propertyMapper  *GoPropertyMapper
 }
 
 func NewRepositoryExporter(
@@ -25,12 +26,14 @@ func NewRepositoryExporter(
 	goModFinder *golang.ModFinder,
 	entityMapper *EntityMapper,
 	entityGenerator *EntityGenerator,
+	propertyMapper *GoPropertyMapper,
 ) *RepositoryExporter {
 	return &RepositoryExporter{
 		pager:           pager,
 		goModFinder:     goModFinder,
 		entityMapper:    entityMapper,
 		entityGenerator: entityGenerator,
+		propertyMapper:  propertyMapper,
 	}
 }
 
@@ -38,6 +41,15 @@ type Repository struct {
 	Name       string
 	Entity     *Entity
 	EntityCall string
+
+	Filters struct {
+		List repositoryEntityFilter
+	}
+}
+
+type repositoryEntityFilter struct {
+	Name       string
+	Properties *goProperties
 }
 
 func (e *RepositoryExporter) ExportPerFile(
@@ -81,6 +93,11 @@ func (e *RepositoryExporter) ExportPerFile(
 			Name:       fmt.Sprintf("PG%sRepository", entity.Name),
 			Entity:     entity,
 			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
+		}
+
+		repository.Filters.List = repositoryEntityFilter{
+			Name:       fmt.Sprintf("List%sFilter", entity.Name),
+			Properties: e.propertyMapper.mapColumns(table.GetPKColumns(), nil),
 		}
 
 		if len(repository.Name) > repoNameMaxLength {

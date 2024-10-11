@@ -2,6 +2,7 @@ package goentity
 
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
 
@@ -11,8 +12,9 @@ type GoPropertyMapper struct {
 }
 
 type GoProperty struct {
-	Name string
-	Type string
+	Name       *ds.String
+	PluralName string
+	Type       string
 
 	Column *schema.Column
 }
@@ -32,18 +34,23 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 		List: make([]*GoProperty, len(columns)),
 	}
 
+	if addImportCallback == nil {
+		addImportCallback = func(_ string) {}
+	}
+
 	maxNameLength := 0
 	maxTypeLength := 0
 	for i, column := range columns {
 		prop := &GoProperty{
-			Name:   column.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Value,
-			Type:   m.mapGoType(column, addImportCallback),
-			Column: column,
+			Name:       column.Name.Pascal().FixAbbreviations(goAbbreviationsSet),
+			PluralName: column.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Plural().Value,
+			Type:       m.mapGoType(column, addImportCallback),
+			Column:     column,
 		}
 
 		props.List[i] = prop
 
-		if len(prop.Name) > maxNameLength {
+		if prop.Name.Len() > maxNameLength {
 			maxNameLength = column.Name.Pascal().Len()
 		}
 
