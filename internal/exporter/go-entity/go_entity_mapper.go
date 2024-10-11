@@ -12,6 +12,13 @@ var goAbbreviationsSet = map[string]bool{
 	"db":   true,
 }
 
+var goAbbreviationsPluralsSet = map[string]string{
+	"id":   "IDs",
+	"uuid": "UUIDs",
+	"json": "JSONs",
+	"db":   "DBs",
+}
+
 type EntityMapper struct {
 	propertyMapper *GoPropertyMapper
 }

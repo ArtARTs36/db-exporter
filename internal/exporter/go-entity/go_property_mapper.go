@@ -43,7 +43,7 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 	for i, column := range columns {
 		prop := &GoProperty{
 			Name:       column.Name.Pascal().FixAbbreviations(goAbbreviationsSet),
-			PluralName: column.Name.Pascal().FixAbbreviations(goAbbreviationsSet).Plural().Value,
+			PluralName: column.Name.Pascal().PluralFixAbbreviations(goAbbreviationsPluralsSet).Value,
 			Type:       m.mapGoType(column, addImportCallback),
 			Column:     column,
 		}

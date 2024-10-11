@@ -3,6 +3,7 @@ package template
 import (
 	"bytes"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"strings"
 	"time"
 
@@ -51,8 +52,14 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 			return ""
 		}
 
-		currentString, valid := args[0].(string)
-		if !valid {
+		var currentStringLen int
+
+		switch v := args[0].(type) {
+		case string:
+			currentStringLen = len(v)
+		case *ds.String:
+			currentStringLen = v.Len()
+		default:
 			return ""
 		}
 
@@ -61,7 +68,7 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 			return ""
 		}
 
-		repeats := needLength - len(currentString)
+		repeats := needLength - currentStringLen
 		if repeats == 0 {
 			return ""
 		}

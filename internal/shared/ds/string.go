@@ -160,6 +160,31 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 	return NewString(strings.Join(words, ""))
 }
 
+func (s *String) PluralFixAbbreviations(abbrSet map[string]string) *String {
+	split := s.SplitWords()
+	words := make([]string, 0, len(split))
+
+	for i, word := range split {
+		w := strings.ToLower(word.Word)
+		newWord, exists := abbrSet[w]
+		if exists {
+			if i < len(split)-1 {
+				newWord = strings.ToUpper(w)
+			}
+		} else {
+			if i == len(split)-1 {
+				newWord = inflection.Plural(word.Word)
+			} else {
+				newWord = word.Word
+			}
+		}
+
+		words = append(words, newWord, word.SeparatorAfter)
+	}
+
+	return NewString(strings.Join(words, ""))
+}
+
 func (s *String) Lower() *String {
 	return NewString(strings.ToLower(s.Value))
 }
