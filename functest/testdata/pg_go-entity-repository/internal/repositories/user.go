@@ -24,8 +24,43 @@ type ListUserFilter struct {
 	IDs []int64
 }
 
+type GetUserFilter struct {
+	ID int64
+}
+
+type DeleteUserFilter struct {
+	IDs []int64
+}
+
 func NewPGUserRepository(db *sqlx.DB) *PGUserRepository {
 	return &PGUserRepository{db: db}
+}
+
+func (repo *PGUserRepository) Get(
+	ctx context.Context,
+	filter *GetUserFilter,
+) (*entities.User, error) {
+	var ent entities.User
+
+	query := goqu.From(tableUsers).Select().Limit(1)
+
+	if filter != nil {
+		if len(filter.ID) > 0 {
+			query = query.Where(goqu.C("id").Eq(filter.ID))
+		}
+	}
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	err = repo.db.GetContext(ctx, &ent, q, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	return &ent, nil
 }
 
 func (repo *PGUserRepository) List(
@@ -97,4 +132,33 @@ func (repo *PGUserRepository) Update(
 	}
 
 	return &updated, nil
+}
+
+func (repo *PGUserRepository) Delete(
+	ctx context.Context,
+	filter *DeleteUserFilter,
+) (int64, error) {
+	query := goqu.From(tableUsers).Delete()
+
+	if filter != nil {
+		if len(filter.IDs) > 0 {
+			query = query.Where(goqu.C("id").In(filter.IDs))
+		}
+	}
+
+	q, args, err := query.ToSQL()
+	if err != nil {
+		return 0, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	res, err := repo.db.ExecContext(ctx, q, args...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute query: %w", err)
+	}
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get affected rows: %w", err)
+	}
+
+	return affectedRows, nil
 }

@@ -43,7 +43,9 @@ type Repository struct {
 	EntityCall string
 
 	Filters struct {
-		List repositoryEntityFilter
+		List   repositoryEntityFilter
+		Get    repositoryEntityFilter
+		Delete repositoryEntityFilter
 	}
 }
 
@@ -95,9 +97,19 @@ func (e *RepositoryExporter) ExportPerFile(
 			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
 		}
 
+		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), nil)
+
 		repository.Filters.List = repositoryEntityFilter{
 			Name:       fmt.Sprintf("List%sFilter", entity.Name),
-			Properties: e.propertyMapper.mapColumns(table.GetPKColumns(), nil),
+			Properties: pkProps,
+		}
+		repository.Filters.Get = repositoryEntityFilter{
+			Name:       fmt.Sprintf("Get%sFilter", entity.Name),
+			Properties: pkProps,
+		}
+		repository.Filters.Delete = repositoryEntityFilter{
+			Name:       fmt.Sprintf("Delete%sFilter", entity.Name),
+			Properties: pkProps,
 		}
 
 		if len(repository.Name) > repoNameMaxLength {
@@ -113,11 +125,14 @@ func (e *RepositoryExporter) ExportPerFile(
 
 		pages = append(pages, page)
 
+		repoFileName := table.Name.Singular().Lower().Value
+
 		page, rerr := repoPage.Export(
-			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, table.Name.Singular().Lower().Value),
+			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, repoFileName),
 			map[string]stick.Value{
 				"entityPackage": entityPkg,
 				"package":       pkg,
+				"fileName":      repoFileName,
 				"schema": map[string]interface{}{
 					"Repositories":      []*Repository{repository},
 					"RepoNameMaxLength": repoNameMaxLength,
