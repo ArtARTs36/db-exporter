@@ -51,13 +51,6 @@ type LaravelModelsExportSpec struct {
 
 type GoEntityRepositorySpecRepoInterfacesPlace string
 
-const (
-	GoEntityRepositorySpecRepoInterfacesPlaceUnspecified  GoEntityRepositorySpecRepoInterfacesPlace = ""
-	GoEntityRepositorySpecRepoInterfacesPlaceEntities     GoEntityRepositorySpecRepoInterfacesPlace = "entities"
-	GoEntityRepositorySpecRepoInterfacesPlaceRepositories GoEntityRepositorySpecRepoInterfacesPlace = "repositories"
-	GoEntityRepositorySpecRepoInterfacesPlaceWithEntity   GoEntityRepositorySpecRepoInterfacesPlace = "with_entity"
-)
-
 type GoEntityRepositorySpec struct {
 	GoModule string `yaml:"go_module"`
 	Entities struct {
@@ -69,7 +62,4 @@ type GoEntityRepositorySpec struct {
 			StructName string `yaml:"struct_name"`
 		} `yaml:"container"`
 	} `yaml:"repositories"`
-	Filters struct {
-		Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
-	} `yaml:"filters"`
 }
