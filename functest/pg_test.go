@@ -259,7 +259,7 @@ func TestPGExport(t *testing.T) {
 
 			defer func() {
 				mustExecQueries(env.db, tCase.DownQueries)
-				removeDir("./out")
+				// removeDir("./out")
 			}()
 
 			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(

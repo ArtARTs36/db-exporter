@@ -49,7 +49,7 @@ func (repo *{{ repo.Name }}) Get(
     query := goqu.From(table{{ repo.Entity.Table.Name.Pascal().Value }}).Select().Limit(1)
 
 {% if repo.Filters.Get.Properties.List | length > 0 %}    if filter != nil {
-{% for prop in repo.Filters.Get.Properties.List %}        if len(filter.{{ prop.Name }}) > 0 {
+{% for prop in repo.Filters.Get.Properties.List %}        {% if prop.IsString() %} if len(filter.{{ prop.Name }}) > 0 { {% else %} if filter.{{ prop.Name }} > 0 { {% endif %}
             query = query.Where(goqu.C("{{ prop.Column.Name.Value }}").Eq(filter.{{ prop.Name }}))
         }{% if loop.last == false %}
 {% endif %}{% endfor %}

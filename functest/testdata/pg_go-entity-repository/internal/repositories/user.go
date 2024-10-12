@@ -45,7 +45,7 @@ func (repo *PGUserRepository) Get(
 	query := goqu.From(tableUsers).Select().Limit(1)
 
 	if filter != nil {
-		if len(filter.ID) > 0 {
+		if filter.ID > 0 {
 			query = query.Where(goqu.C("id").Eq(filter.ID))
 		}
 	}
