@@ -20,9 +20,10 @@ type GoProperty struct {
 }
 
 type goProperties struct {
-	List              []*GoProperty
-	MaxPropNameLength int
-	MaxTypeNameLength int
+	List                    []*GoProperty
+	MaxPropNameLength       int
+	MaxPropPluralNameLength int
+	MaxTypeNameLength       int
 }
 
 func NewGoPropertyMapper() *GoPropertyMapper {
@@ -39,6 +40,7 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 	}
 
 	maxNameLength := 0
+	maxPluralNameLength := 0
 	maxTypeLength := 0
 	for i, column := range columns {
 		prop := &GoProperty{
@@ -54,12 +56,17 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 			maxNameLength = column.Name.Pascal().Len()
 		}
 
+		if len(prop.PluralName) > maxPluralNameLength {
+			maxPluralNameLength = len(prop.PluralName)
+		}
+
 		if len(prop.Type) > maxTypeLength {
 			maxTypeLength = len(prop.Type)
 		}
 	}
 
 	props.MaxPropNameLength = maxNameLength
+	props.MaxPropPluralNameLength = maxPluralNameLength
 	props.MaxTypeNameLength = maxTypeLength
 
 	return props

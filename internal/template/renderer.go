@@ -86,10 +86,16 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 func (r *Renderer) Render(name string, params map[string]stick.Value) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
+	r.extendParams(params)
+
 	err := r.engine.Execute(name, buf, params)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	return buf.Bytes(), err
+}
+
+func (r *Renderer) extendParams(params map[string]stick.Value) {
+	params["figure_brace_opened"] = "{"
 }
