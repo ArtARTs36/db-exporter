@@ -13,12 +13,12 @@ type Package struct {
 	FullName            string
 }
 
-func BuildPackage(pkgName string, module string) (Package, error) {
+func BuildPackage(pkgName string, module string) (*Package, error) {
 	if len(pkgName) == 0 {
-		return Package{}, errors.New("package is empty")
+		return nil, errors.New("package is empty")
 	}
 
-	pkg := Package{
+	pkg := &Package{
 		Name:                pkgName,
 		ProjectRelativePath: pkgName,
 		FullName:            module + "/" + pkgName,
@@ -32,11 +32,15 @@ func BuildPackage(pkgName string, module string) (Package, error) {
 	return pkg, nil
 }
 
-func (p *Package) IsCurrent(currentPackage Package) bool {
+func (p *Package) IsCurrent(currentPackage *Package) bool {
+	if currentPackage == nil {
+		return false
+	}
+
 	return p.FullName == currentPackage.FullName
 }
 
-func (p *Package) CallToStruct(currentPackage Package, structName string) string {
+func (p *Package) CallToStruct(currentPackage *Package, structName string) string {
 	if p.IsCurrent(currentPackage) {
 		return structName
 	}

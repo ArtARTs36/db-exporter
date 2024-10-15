@@ -16,20 +16,27 @@ func NewEntityGenerator(pager *common.Pager) *EntityGenerator {
 	return &EntityGenerator{pager: pager}
 }
 
-func (g *EntityGenerator) GenerateEntity(entity *Entity, pkg golang.Package) (*exporter.ExportedPage, error) {
+type GenerateEntityParams struct {
+	Entity       *Entity
+	Package      *golang.Package
+	Repositories []*Repository
+}
+
+func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporter.ExportedPage, error) {
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
-		fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, entity.Table.Name.Singular().Lower()),
+		fmt.Sprintf("%s/%s.go", params.Package.ProjectRelativePath, params.Entity.Table.Name.Singular().Lower()),
 		map[string]stick.Value{
-			"schema": &Entities{
-				Entities: []*Entity{entity},
-				Imports:  entity.Imports,
+			"schema": map[string]stick.Value{
+				"Entities":     []*Entity{params.Entity},
+				"Repositories": params.Repositories,
+				"Imports":      params.Entity.Imports,
 			},
-			"package": pkg,
+			"package": params.Package,
 		},
 	)
 }
 
-func (g *EntityGenerator) GenerateEntities(entities *Entities, pkg golang.Package) (*exporter.ExportedPage, error) {
+func (g *EntityGenerator) GenerateEntities(entities *Entities, pkg *golang.Package) (*exporter.ExportedPage, error) {
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/entities.go", pkg.ProjectRelativePath),
 		map[string]stick.Value{

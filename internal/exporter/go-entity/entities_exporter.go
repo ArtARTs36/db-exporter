@@ -49,7 +49,10 @@ func (e *EntitiesExporter) ExportPerFile(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		page, genErr := e.entityGenerator.GenerateEntity(e.entityMapper.MapEntity(table), pkg)
+		page, genErr := e.entityGenerator.GenerateEntity(&GenerateEntityParams{
+			Entity:  e.entityMapper.MapEntity(table),
+			Package: pkg,
+		})
 		if genErr != nil {
 			return nil, genErr
 		}

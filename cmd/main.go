@@ -59,7 +59,7 @@ func main() {
 func run(ctx *cli.Context) error {
 	fsystem := fs.NewLocal()
 
-	cfg, err := loadConfig(ctx)
+	cfg, err := loadConfig(ctx, fsystem)
 	if err != nil {
 		return err
 	}
@@ -91,13 +91,17 @@ func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
 	)
 }
 
-func loadConfig(ctx *cli.Context) (*config.Config, error) {
+func loadConfig(ctx *cli.Context, fs fs.Driver) (*config.Config, error) {
 	configPath, ok := ctx.GetOpt("config")
 	if !ok {
 		configPath = "./.db-exporter.yaml"
 	}
 
-	loader := config.NewLoader(env.NewInjector())
+	loader := config.NewLoader(fs, env.NewInjector(), map[string]config.Parser{
+		".yaml": config.YAMLParser(),
+		".yml":  config.YAMLParser(),
+		".json": config.JSONParser(),
+	})
 
 	return loader.Load(configPath)
 }

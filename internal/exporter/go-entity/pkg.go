@@ -22,7 +22,7 @@ func buildGoModule(ctx context.Context, finder *golang.ModFinder, mod string, di
 	return mod
 }
 
-func buildEntityPackage(pkg, goModule string) (golang.Package, error) {
+func buildEntityPackage(pkg, goModule string) (*golang.Package, error) {
 	if pkg == "" {
 		pkg = "entities"
 	}

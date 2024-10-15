@@ -78,7 +78,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullInt64
+			return golang.TypeSQLNullInt64
 		}
 
 		return golang.TypeInt64
@@ -86,7 +86,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullInt16
+			return golang.TypeSQLNullInt16
 		}
 
 		return golang.TypeInt16
@@ -94,7 +94,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullString
+			return golang.TypeSQLNullString
 		}
 
 		return golang.TypeString
@@ -102,7 +102,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullTime
+			return golang.TypeSQLNullTime
 		}
 
 		addImport("time")
@@ -112,7 +112,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullBool
+			return golang.TypeSQLNullBool
 		}
 
 		return golang.TypeBool
@@ -120,7 +120,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		if col.Nullable {
 			addImport("database/sql")
 
-			return golang.TypeSqlNullFloat64
+			return golang.TypeSQLNullFloat64
 		}
 
 		return golang.TypeFloat64

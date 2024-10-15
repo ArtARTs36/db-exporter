@@ -16,7 +16,8 @@ const (
 {% for repo in schema.Repositories %}	table{{ repo.Entity.Table.Name.Pascal().Value }} = "{{ repo.Entity.Table.Name.Value }}"{% if loop.last == false %}
 {% endif %}{% endfor %}
 )
-
+{% if schema.GenInterfaces %}
+{% include 'go-entities/repository_interfaces.go.tpl' with {'repositories': schema.Repositories} only %}{% endif %}
 {% for repo in schema.Repositories %}type {{ repo.Name }} struct {
 	db *sqlx.DB
 }{% endfor %}

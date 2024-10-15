@@ -38,7 +38,11 @@ func NewRepositoryExporter(
 }
 
 type Repository struct {
-	Name       string
+	Name      string
+	Interface struct {
+		Name    string
+		Package *golang.Package
+	}
 	Entity     *Entity
 	EntityCall string
 
@@ -47,14 +51,35 @@ type Repository struct {
 		Get    repositoryEntityFilter
 		Delete repositoryEntityFilter
 	}
+	Package *golang.Package
 }
 
 type repositoryEntityFilter struct {
 	Name       string
+	NameCall   string
 	Properties *goProperties
 }
 
-func (e *RepositoryExporter) ExportPerFile(
+func createRepositoryEntityFilter(
+	entity *Entity,
+	action string,
+	pkg *golang.Package,
+	properties *goProperties,
+) repositoryEntityFilter {
+	name := fmt.Sprintf("%s%sFilter", action, entity.Name)
+	nameCall := name
+	if pkg != nil {
+		nameCall = fmt.Sprintf("%s.%s", pkg.Name, nameCall)
+	}
+
+	return repositoryEntityFilter{
+		Name:       name,
+		NameCall:   nameCall,
+		Properties: properties,
+	}
+}
+
+func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -88,6 +113,11 @@ func (e *RepositoryExporter) ExportPerFile(
 	repoPage := e.pager.Of("go-entities/repository.go.tpl")
 	repoNameMaxLength := 0
 
+	var filtersPkg *golang.Package
+	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
+		filtersPkg = entityPkg
+	}
+
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table)
 
@@ -95,22 +125,13 @@ func (e *RepositoryExporter) ExportPerFile(
 			Name:       fmt.Sprintf("PG%sRepository", entity.Name),
 			Entity:     entity,
 			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
+			Package:    pkg,
 		}
+		repository.Interface.Name = fmt.Sprintf("%sRepository", entity.Name)
+		repository.Interface.Package = pkg
 
 		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), nil)
-
-		repository.Filters.List = repositoryEntityFilter{
-			Name:       fmt.Sprintf("List%sFilter", entity.Name),
-			Properties: pkProps,
-		}
-		repository.Filters.Get = repositoryEntityFilter{
-			Name:       fmt.Sprintf("Get%sFilter", entity.Name),
-			Properties: pkProps,
-		}
-		repository.Filters.Delete = repositoryEntityFilter{
-			Name:       fmt.Sprintf("Delete%sFilter", entity.Name),
-			Properties: pkProps,
-		}
+		e.allocateRepositoryFilters(entity, repository, filtersPkg, pkProps)
 
 		if len(repository.Name) > repoNameMaxLength {
 			repoNameMaxLength = len(repository.Name)
@@ -118,7 +139,16 @@ func (e *RepositoryExporter) ExportPerFile(
 
 		repositories = append(repositories, repository)
 
-		page, eerr := e.entityGenerator.GenerateEntity(entity, entityPkg)
+		entityRepos := []*Repository{}
+		if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
+			entityRepos = []*Repository{repository}
+		}
+
+		page, eerr := e.entityGenerator.GenerateEntity(&GenerateEntityParams{
+			Entity:       entity,
+			Package:      entityPkg,
+			Repositories: entityRepos,
+		})
 		if eerr != nil {
 			return nil, fmt.Errorf("failed to generate entity %q: %w", entity.Name, eerr)
 		}
@@ -136,6 +166,7 @@ func (e *RepositoryExporter) ExportPerFile(
 				"schema": map[string]interface{}{
 					"Repositories":      []*Repository{repository},
 					"RepoNameMaxLength": repoNameMaxLength,
+					"GenInterfaces":     spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
 			},
 		)
@@ -172,10 +203,21 @@ func (e *RepositoryExporter) Export(
 	return e.ExportPerFile(ctx, params)
 }
 
+func (e *RepositoryExporter) allocateRepositoryFilters(
+	entity *Entity,
+	repo *Repository,
+	filtersPkg *golang.Package,
+	props *goProperties,
+) {
+	repo.Filters.List = createRepositoryEntityFilter(entity, "List", filtersPkg, props)
+	repo.Filters.Get = createRepositoryEntityFilter(entity, "Get", filtersPkg, props)
+	repo.Filters.Delete = createRepositoryEntityFilter(entity, "Delete", filtersPkg, props)
+}
+
 func (e *RepositoryExporter) buildRepositoryPackage(
 	spec *config.GoEntityRepositorySpec,
 	goModule string,
-) (golang.Package, error) {
+) (*golang.Package, error) {
 	pkgName := "repositories"
 	if spec.Repositories.Package != "" {
 		pkgName = spec.Repositories.Package

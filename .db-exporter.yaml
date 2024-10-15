@@ -4,7 +4,7 @@ databases:
     dsn: ${PG_DSN}
 
 tasks:
-  gen_md:
+  gen_repos:
     activities:
       - export: go-entity-repository
         spec:
@@ -14,6 +14,8 @@ tasks:
             package: infrastructure/repositories
             container:
               struct_name: group
+            interfaces:
+              place: with_repository
         out:
           dir: ./out
 

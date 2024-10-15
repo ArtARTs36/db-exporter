@@ -13,12 +13,12 @@ const (
 )
 
 const (
-	TypeSqlNullInt64   = "sql.NullInt64"
-	TypeSqlNullInt16   = "sql.NullInt16"
-	TypeSqlNullFloat64 = "sql.NullFloat64"
-	TypeSqlNullBool    = "sql.NullBool"
-	TypeSqlNullString  = "sql.NullString"
-	TypeSqlNullTime    = "sql.NullTime"
+	TypeSQLNullInt64   = "sql.NullInt64"
+	TypeSQLNullInt16   = "sql.NullInt16"
+	TypeSQLNullFloat64 = "sql.NullFloat64"
+	TypeSQLNullBool    = "sql.NullBool"
+	TypeSQLNullString  = "sql.NullString"
+	TypeSQLNullTime    = "sql.NullTime"
 
 	TypeTimeTime = "time.Time"
 )

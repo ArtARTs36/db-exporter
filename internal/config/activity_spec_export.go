@@ -51,6 +51,12 @@ type LaravelModelsExportSpec struct {
 
 type GoEntityRepositorySpecRepoInterfacesPlace string
 
+const (
+	GoEntityRepositorySpecRepoInterfacesPlaceUnspecified    = ""
+	GoEntityRepositorySpecRepoInterfacesPlaceWithEntity     = "with_entity"
+	GoEntityRepositorySpecRepoInterfacesPlaceWithRepository = "with_repository"
+)
+
 type GoEntityRepositorySpec struct {
 	GoModule string `yaml:"go_module"`
 	Entities struct {
@@ -61,5 +67,8 @@ type GoEntityRepositorySpec struct {
 		Container struct {
 			StructName string `yaml:"struct_name"`
 		} `yaml:"container"`
+		Interfaces struct {
+			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
+		} `yaml:"interfaces"`
 	} `yaml:"repositories"`
 }

@@ -445,6 +445,16 @@
                 }
               },
               "additionalProperties": false
+            },
+            "interfaces": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": ["", "with_entity", "with_repository"],
+                  "default": ""
+                }
+              }
             }
           },
           "additionalProperties": false
