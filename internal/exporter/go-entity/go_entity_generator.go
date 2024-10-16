@@ -31,7 +31,10 @@ func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporte
 				"Repositories": params.Repositories,
 				"Imports":      params.Entity.Imports,
 			},
-			"package": params.Package,
+			"_file": golang.File{
+				Package: params.Package,
+				Imports: params.Entity.Imports,
+			},
 		},
 	)
 }
@@ -40,8 +43,13 @@ func (g *EntityGenerator) GenerateEntities(entities *Entities, pkg *golang.Packa
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/entities.go", pkg.ProjectRelativePath),
 		map[string]stick.Value{
-			"schema":  entities,
-			"package": pkg,
+			"schema": map[string]stick.Value{
+				"Entities": entities.Entities,
+			},
+			"_file": golang.File{
+				Package: pkg,
+				Imports: entities.Imports,
+			},
 		},
 	)
 }

@@ -155,14 +155,17 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 		pages = append(pages, page)
 
-		repoFileName := table.Name.Singular().Lower().Value
+		repoFileName := fmt.Sprintf("%s.go", table.Name.Singular().Lower().Value)
 
 		page, rerr := repoPage.Export(
-			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, repoFileName),
+			fmt.Sprintf("%s/%s", pkg.ProjectRelativePath, repoFileName),
 			map[string]stick.Value{
 				"entityPackage": entityPkg,
 				"package":       pkg,
-				"fileName":      repoFileName,
+				"_file": golang.File{
+					Name:    repoFileName,
+					Package: pkg,
+				},
 				"schema": map[string]interface{}{
 					"Repositories":      []*Repository{repository},
 					"RepoNameMaxLength": repoNameMaxLength,
@@ -177,10 +180,15 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	}
 
 	if spec.Repositories.Container.StructName != "" {
+		contFileName := strings.ToLower(spec.Repositories.Container.StructName)
+
 		page, rerr := e.pager.Of("go-entities/container.go.tpl").Export(
-			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, strings.ToLower(spec.Repositories.Container.StructName)),
+			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, contFileName),
 			map[string]stick.Value{
-				"package":       pkg,
+				"_file": golang.File{
+					Name:    contFileName,
+					Package: pkg,
+				},
 				"containerName": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 				"schema": map[string]interface{}{
 					"Repositories":      repositories,

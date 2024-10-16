@@ -1,4 +1,4 @@
-package {{ package.Name }}
+package {{ _file.Package.Name }}
 
 import (
 	"context"
