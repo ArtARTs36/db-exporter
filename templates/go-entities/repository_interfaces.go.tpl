@@ -3,5 +3,5 @@
 	List(ctx context.Context, filter *{{ repo.Filters.List.Name }}) ([]*{{ repo.EntityCall }}, error)
 	Create(ctx context.Context, {{ repo.Entity.AsVarName }} *{{ repo.EntityCall }}) (*{{ repo.EntityCall }}, error)
 	Update(ctx context.Context, {{ repo.Entity.AsVarName }} *{{ repo.EntityCall }}) (*{{ repo.EntityCall }}, error)
-	Delete(ctx context.Context, filter *{{ repo.Filters.Delete.Name }}) (int64, error)
+	Delete(ctx context.Context, filter *{{ repo.Filters.Delete.Name }}) (count int64, err error)
 }{% endfor %}

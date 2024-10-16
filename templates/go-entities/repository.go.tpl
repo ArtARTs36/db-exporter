@@ -131,7 +131,7 @@ func (repo *{{ repo.Name }}) Update(
 func (repo *{{ repo.Name }}) Delete(
 	ctx context.Context,
 	filter *{{ repo.Filters.Delete.Name }},
-) (int64, error) {
+) (count int64, err error) {
 	query := goqu.From(table{{ repo.Entity.Table.Name.Pascal().Value }}).Delete()
 
 {% if repo.Filters.Get.Properties.List | length > 0 %}	if filter != nil {
@@ -150,10 +150,10 @@ func (repo *{{ repo.Name }}) Delete(
 	if err != nil {
 		return 0, fmt.Errorf("failed to execute query: %w", err)
 	}
-	affectedRows, err := res.RowsAffected()
+	count, err = res.RowsAffected()
 	if err != nil {
 		return 0, fmt.Errorf("failed to get affected rows: %w", err)
 	}
 
-	return affectedRows, nil
+	return
 }{% endfor %}

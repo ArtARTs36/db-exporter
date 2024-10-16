@@ -137,7 +137,7 @@ func (repo *PGUserRepository) Update(
 func (repo *PGUserRepository) Delete(
 	ctx context.Context,
 	filter *DeleteUserFilter,
-) (int64, error) {
+) (count int64, err error) {
 	query := goqu.From(tableUsers).Delete()
 
 	if filter != nil {
@@ -155,10 +155,10 @@ func (repo *PGUserRepository) Delete(
 	if err != nil {
 		return 0, fmt.Errorf("failed to execute query: %w", err)
 	}
-	affectedRows, err := res.RowsAffected()
+	count, err = res.RowsAffected()
 	if err != nil {
 		return 0, fmt.Errorf("failed to get affected rows: %w", err)
 	}
 
-	return affectedRows, nil
+	return
 }
