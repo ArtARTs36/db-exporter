@@ -112,6 +112,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 	repoPage := e.pager.Of("go-entities/repository.go.tpl")
 	repoNameMaxLength := 0
+	repoInterfaceNameMaxLength := 0
 
 	var filtersPkg *golang.Package
 	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
@@ -129,6 +130,10 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		}
 		repository.Interface.Name = fmt.Sprintf("%sRepository", entity.Name)
 		repository.Interface.Package = pkg
+
+		if len(repository.Interface.Name) > repoInterfaceNameMaxLength {
+			repoInterfaceNameMaxLength = len(repository.Interface.Name)
+		}
 
 		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), nil)
 		e.allocateRepositoryFilters(entity, repository, filtersPkg, pkProps)
@@ -167,9 +172,10 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					Package: pkg,
 				},
 				"schema": map[string]interface{}{
-					"Repositories":      []*Repository{repository},
-					"RepoNameMaxLength": repoNameMaxLength,
-					"GenInterfaces":     spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
+					"Repositories":               []*Repository{repository},
+					"RepoNameMaxLength":          repoNameMaxLength,
+					"RepoInterfaceNameMaxLength": repoInterfaceNameMaxLength,
+					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
 			},
 		)
@@ -182,17 +188,26 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	if spec.Repositories.Container.StructName != "" {
 		contFileName := strings.ToLower(spec.Repositories.Container.StructName)
 
-		page, rerr := e.pager.Of("go-entities/container.go.tpl").Export(
+		containerTpl := "go-entities/repository_container.go.tpl"
+		if spec.Repositories.Interfaces.Place != "" {
+			containerTpl = "go-entities/repository_container_interface.go.tpl"
+		}
+
+		page, rerr := e.pager.Of(containerTpl).Export(
 			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, contFileName),
 			map[string]stick.Value{
 				"_file": golang.File{
 					Name:    contFileName,
 					Package: pkg,
 				},
-				"containerName": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 				"schema": map[string]interface{}{
-					"Repositories":      repositories,
-					"RepoNameMaxLength": repoNameMaxLength,
+					"Repositories":               repositories,
+					"RepoNameMaxLength":          repoNameMaxLength,
+					"RepoInterfaceNameMaxLength": repoInterfaceNameMaxLength,
+					"Container": map[string]interface{}{
+						"Name": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
+					},
+					"GenInterfaces": spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
 			})
 		if rerr != nil {
