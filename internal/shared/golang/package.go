@@ -3,6 +3,7 @@ package golang
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
@@ -11,6 +12,16 @@ type Package struct {
 	Name                string
 	ProjectRelativePath string
 	FullName            string
+}
+
+func PackageFromFullName(fullName string) *Package {
+	parts := strings.Split(fullName, "/")
+
+	return &Package{
+		Name:                parts[len(parts)-1],
+		ProjectRelativePath: fullName,
+		FullName:            fullName,
+	}
 }
 
 func BuildPackage(pkgName string, module string) (*Package, error) {

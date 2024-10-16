@@ -25,14 +25,14 @@ type EntityMapper struct {
 
 type Entities struct {
 	Entities []*Entity
-	Imports  *ds.Set
+	Imports  *ds.Set[string]
 }
 
 type Entity struct {
 	Name       *ds.String
 	Table      *schema.Table
 	Properties *goProperties
-	Imports    *ds.Set
+	Imports    *ds.Set[string]
 
 	AsVarName string
 }
@@ -44,7 +44,7 @@ func NewEntityMapper(propertyMapper *GoPropertyMapper) *EntityMapper {
 func (m *EntityMapper) MapEntities(tables []*schema.Table) *Entities {
 	ents := &Entities{
 		Entities: make([]*Entity, len(tables)),
-		Imports:  ds.NewSet(),
+		Imports:  ds.NewSet[string](),
 	}
 	addImportCallback := func(pkg string) {
 		ents.Imports.Add(pkg)
@@ -65,7 +65,7 @@ func (m *EntityMapper) mapEntity(table *schema.Table, addImportCallback func(pkg
 	entity := &Entity{
 		Name:      table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
 		Table:     table,
-		Imports:   ds.NewSet(),
+		Imports:   ds.NewSet[string](),
 		AsVarName: table.Name.Singular().Camel().Value,
 	}
 

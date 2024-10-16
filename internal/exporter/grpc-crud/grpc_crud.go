@@ -49,7 +49,7 @@ func (e *Exporter) ExportPerFile(
 			Package:  spec.Package,
 			Services: make([]*proto.Service, 0, 1),
 			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-			Imports:  ds.NewSet(),
+			Imports:  ds.NewSet[string](),
 			Options:  options,
 		}
 
@@ -93,7 +93,7 @@ func (e *Exporter) Export(
 		Package:  spec.Package,
 		Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
 		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-		Imports:  ds.NewSet(),
+		Imports:  ds.NewSet[string](),
 		Options:  options,
 	}
 
@@ -375,7 +375,7 @@ func (e *Exporter) buildPatchProcedure(
 	}, []*proto.Message{patchReqMsg, patchRespMsg}
 }
 
-func (e *Exporter) mapType(column *schema.Column, imports *ds.Set) string {
+func (e *Exporter) mapType(column *schema.Column, imports *ds.Set[string]) string {
 	switch column.PreparedType { //nolint: exhaustive // not need
 	case schema.ColumnTypeInteger:
 		return "int64"

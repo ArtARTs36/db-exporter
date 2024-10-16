@@ -44,6 +44,22 @@ tasks:
         out:
           dir: ./out
 
+  pg_go-entity-repository_interfaces_external:
+    activities:
+      - export: go-entity-repository
+        spec:
+          go_module: github.com/project
+          entities:
+            package: internal/entitiesa
+          repositories:
+            interfaces:
+              place: with_entity
+            package: internal/repositoriesa
+            container:
+              struct_name: "container"
+        out:
+          dir: ./out
+
   pg_grpc-crud:
     activities:
       - export: grpc-crud

@@ -40,8 +40,9 @@ func NewRepositoryExporter(
 type Repository struct {
 	Name      string
 	Interface struct {
-		Name    string
-		Package *golang.Package
+		Name     string
+		NameCall string
+		Package  *golang.Package
 	}
 	Entity     *Entity
 	EntityCall string
@@ -129,7 +130,11 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 			Package:    pkg,
 		}
 		repository.Interface.Name = fmt.Sprintf("%sRepository", entity.Name)
+		repository.Interface.NameCall = fmt.Sprintf("%sRepository", entity.Name)
 		repository.Interface.Package = pkg
+		if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
+			repository.Interface.NameCall = fmt.Sprintf("%s.%s", entityPkg.Name, repository.Interface.NameCall)
+		}
 
 		if len(repository.Interface.Name) > repoInterfaceNameMaxLength {
 			repoInterfaceNameMaxLength = len(repository.Interface.Name)
@@ -162,15 +167,14 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 		repoFileName := fmt.Sprintf("%s.go", table.Name.Singular().Lower().Value)
 
+		repoFile := golang.NewFile(repoFileName, pkg)
+
 		page, rerr := repoPage.Export(
 			fmt.Sprintf("%s/%s", pkg.ProjectRelativePath, repoFileName),
 			map[string]stick.Value{
 				"entityPackage": entityPkg,
 				"package":       pkg,
-				"_file": golang.File{
-					Name:    repoFileName,
-					Package: pkg,
-				},
+				"_file":         repoFile,
 				"schema": map[string]interface{}{
 					"Repositories":               []*Repository{repository},
 					"RepoNameMaxLength":          repoNameMaxLength,
@@ -193,13 +197,14 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 			containerTpl = "go-entities/repository_container_interface.go.tpl"
 		}
 
+		containerGoFile := golang.NewFile(contFileName, pkg)
+		containerGoFile.Import(golang.PackageFromFullName("github.com/jmoiron/sqlx"))
+		containerGoFile.Import(entityPkg)
+
 		page, rerr := e.pager.Of(containerTpl).Export(
 			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, contFileName),
 			map[string]stick.Value{
-				"_file": golang.File{
-					Name:    contFileName,
-					Package: pkg,
-				},
+				"_file": containerGoFile,
 				"schema": map[string]interface{}{
 					"Repositories":               repositories,
 					"RepoNameMaxLength":          repoNameMaxLength,
