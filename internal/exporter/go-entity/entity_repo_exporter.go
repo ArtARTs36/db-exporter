@@ -55,31 +55,6 @@ type Repository struct {
 	Package *golang.Package
 }
 
-type repositoryEntityFilter struct {
-	Name       string
-	NameCall   string
-	Properties *goProperties
-}
-
-func createRepositoryEntityFilter(
-	entity *Entity,
-	action string,
-	pkg *golang.Package,
-	properties *goProperties,
-) repositoryEntityFilter {
-	name := fmt.Sprintf("%s%sFilter", action, entity.Name)
-	nameCall := name
-	if pkg != nil {
-		nameCall = fmt.Sprintf("%s.%s", pkg.Name, nameCall)
-	}
-
-	return repositoryEntityFilter{
-		Name:       name,
-		NameCall:   nameCall,
-		Properties: properties,
-	}
-}
-
 func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
@@ -115,8 +90,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	repoNameMaxLength := 0
 	repoInterfaceNameMaxLength := 0
 
-	var filtersPkg *golang.Package
-	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
+	filtersPkg := pkg
+	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
 		filtersPkg = entityPkg
 	}
 
@@ -181,7 +156,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					"Repositories":               []*Repository{repository},
 					"RepoNameMaxLength":          repoNameMaxLength,
 					"RepoInterfaceNameMaxLength": repoInterfaceNameMaxLength,
-					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
+					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository,                                             //nolint:lll // not need
+					"GenFilters":                 spec.Repositories.Interfaces.Place == "" || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
 			},
 		)

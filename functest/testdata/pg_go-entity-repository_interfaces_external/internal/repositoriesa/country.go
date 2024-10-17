@@ -20,25 +20,13 @@ type PGCountryRepository struct {
 	db *sqlx.DB
 }
 
-type ListCountryFilter struct {
-	IDs []int64
-}
-
-type GetCountryFilter struct {
-	ID int64
-}
-
-type DeleteCountryFilter struct {
-	IDs []int64
-}
-
 func NewPGCountryRepository(db *sqlx.DB) *PGCountryRepository {
 	return &PGCountryRepository{db: db}
 }
 
 func (repo *PGCountryRepository) Get(
 	ctx context.Context,
-	filter *GetCountryFilter,
+	filter *entitiesa.GetCountryFilter,
 ) (*entitiesa.Country, error) {
 	var ent entitiesa.Country
 
@@ -65,7 +53,7 @@ func (repo *PGCountryRepository) Get(
 
 func (repo *PGCountryRepository) List(
 	ctx context.Context,
-	filter *ListCountryFilter,
+	filter *entitiesa.ListCountryFilter,
 ) ([]*entitiesa.Country, error) {
 	var ents []*entitiesa.Country
 
@@ -136,7 +124,7 @@ func (repo *PGCountryRepository) Update(
 
 func (repo *PGCountryRepository) Delete(
 	ctx context.Context,
-	filter *DeleteCountryFilter,
+	filter *entitiesa.DeleteCountryFilter,
 ) (count int64, err error) {
 	query := goqu.From(tableCountries).Delete()
 

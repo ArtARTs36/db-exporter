@@ -20,25 +20,13 @@ type PGUserRepository struct {
 	db *sqlx.DB
 }
 
-type ListUserFilter struct {
-	IDs []int64
-}
-
-type GetUserFilter struct {
-	ID int64
-}
-
-type DeleteUserFilter struct {
-	IDs []int64
-}
-
 func NewPGUserRepository(db *sqlx.DB) *PGUserRepository {
 	return &PGUserRepository{db: db}
 }
 
 func (repo *PGUserRepository) Get(
 	ctx context.Context,
-	filter *GetUserFilter,
+	filter *entitiesa.GetUserFilter,
 ) (*entitiesa.User, error) {
 	var ent entitiesa.User
 
@@ -65,7 +53,7 @@ func (repo *PGUserRepository) Get(
 
 func (repo *PGUserRepository) List(
 	ctx context.Context,
-	filter *ListUserFilter,
+	filter *entitiesa.ListUserFilter,
 ) ([]*entitiesa.User, error) {
 	var ents []*entitiesa.User
 
@@ -136,7 +124,7 @@ func (repo *PGUserRepository) Update(
 
 func (repo *PGUserRepository) Delete(
 	ctx context.Context,
-	filter *DeleteUserFilter,
+	filter *entitiesa.DeleteUserFilter,
 ) (count int64, err error) {
 	query := goqu.From(tableUsers).Delete()
 

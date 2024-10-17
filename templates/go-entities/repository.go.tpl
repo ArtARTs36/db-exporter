@@ -21,16 +21,16 @@ const (
 {% for repo in schema.Repositories %}type {{ repo.Name }} struct {
 	db *sqlx.DB
 }{% endfor %}
-
+{% if schema.GenFilters %}
 {% for repo in schema.Repositories %}{% include 'go-entities/repository_filters.go.tpl' with {'filters': repo.Filters} only %}{% endfor %}
-
+{% endif %}
 {% for repo in schema.Repositories %}func New{{ repo.Name }}(db *sqlx.DB) *{{ repo.Name }} {
 	return &{{ repo.Name }}{db: db}
 }
 
 func (repo *{{ repo.Name }}) Get(
 	ctx context.Context,
-	filter *{{ repo.Filters.Get.Name }},
+	filter *{{ repo.Filters.Get.Call(_file.Package) }},
 ) (*{{ repo.Entity.Call(_file.Package) }}, error) {
 	var ent {{ repo.Entity.Call(_file.Package) }}
 
@@ -58,7 +58,7 @@ func (repo *{{ repo.Name }}) Get(
 
 func (repo *{{ repo.Name }}) List(
 	ctx context.Context,
-	filter *{{ repo.Filters.List.Name }},
+	filter *{{ repo.Filters.List.Call(_file.Package) }},
 ) ([]*{{ repo.Entity.Call(_file.Package) }}, error) {
 	var ents []*{{ repo.Entity.Call(_file.Package) }}
 
@@ -130,7 +130,7 @@ func (repo *{{ repo.Name }}) Update(
 
 func (repo *{{ repo.Name }}) Delete(
 	ctx context.Context,
-	filter *{{ repo.Filters.Delete.Name }},
+	filter *{{ repo.Filters.Delete.Call(_file.Package) }},
 ) (count int64, err error) {
 	query := goqu.From(table{{ repo.Entity.Table.Name.Pascal().Value }}).Delete()
 
