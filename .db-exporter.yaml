@@ -6,16 +6,9 @@ databases:
 tasks:
   gen_repos:
     activities:
-      - export: go-entity-repository
+      - export: json-schema
         spec:
-          entities:
-            package: domain
-          repositories:
-            package: infrastructure/repositories
-            container:
-              struct_name: group
-            interfaces:
-              place: entity
+          pretty: true
         out:
           dir: ./out
 

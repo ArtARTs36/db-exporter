@@ -1,17 +1,22 @@
 package schema
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import (
+	"database/sql"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+)
 
 type Column struct {
-	Name         ds.String   `db:"name"`
-	TableName    ds.String   `db:"table_name"`
-	Type         ds.String   `db:"type"`
-	Nullable     bool        `db:"nullable"`
-	PrimaryKey   *PrimaryKey `db:"-"`
-	UniqueKey    *UniqueKey  `db:"-"`
-	ForeignKey   *ForeignKey `db:"-"`
-	Comment      ds.String   `db:"comment"`
-	PreparedType ColumnType  `db:"-"`
+	Name         ds.String      `db:"name"`
+	TableName    ds.String      `db:"table_name"`
+	Type         ds.String      `db:"type"`
+	Nullable     bool           `db:"nullable"`
+	PrimaryKey   *PrimaryKey    `db:"-"`
+	UniqueKey    *UniqueKey     `db:"-"`
+	ForeignKey   *ForeignKey    `db:"-"`
+	Comment      ds.String      `db:"comment"`
+	PreparedType ColumnType     `db:"-"`
+	DefaultRaw   sql.NullString `db:"default_value"`
+	Default      *ColumnDefault `db:"-"`
 }
 
 func (c *Column) IsPrimaryKey() bool {

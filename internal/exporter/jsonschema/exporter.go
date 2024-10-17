@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/jsonschema"
 	"github.com/artarts36/db-exporter/internal/shared/pg"
+	"strconv"
 )
 
 type Exporter struct {
@@ -78,6 +78,7 @@ func (e *Exporter) buildJSONSchema(params *exporter.ExportParams, tables []*sche
 			colProp := jsonschema.NewProperty(jsonType)
 			colProp.Description = column.Comment.Value
 			colProp.Format = e.mapFormat(column)
+			colProp.Default = e.prepareDefaultValue(column)
 
 			if !column.Nullable {
 				required = append(required, column.Name.Value)
@@ -105,6 +106,26 @@ func (e *Exporter) buildJSONSchema(params *exporter.ExportParams, tables []*sche
 	}
 
 	return content, nil
+}
+
+func (e *Exporter) prepareDefaultValue(col *schema.Column) interface{} {
+	if col.Default == nil {
+		return nil
+	}
+
+	switch col.Default.Type { //nolint: exhaustive // not need
+	case schema.ColumnDefaultValueTypeInteger:
+		val, err := strconv.Atoi(col.Default.Value)
+		if err != nil {
+			return nil
+		}
+
+		return val
+	case schema.ColumnDefaultValueTypeString:
+		return col.Default.Value
+	}
+
+	return nil
 }
 
 func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {

@@ -24,6 +24,7 @@ type Property struct {
 	AdditionalProperties *bool               `json:"additional_properties,omitempty"`
 	Ref                  string              `json:"$ref,omitempty"`
 	Format               Format              `json:"format,omitempty"`
+	Default              interface{}         `json:"default,omitempty"`
 }
 
 func Draft04() *Schema {

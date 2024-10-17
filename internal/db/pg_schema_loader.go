@@ -3,7 +3,10 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/regex"
 	"log/slog"
+	"regexp"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // for pg driver
@@ -14,6 +17,11 @@ import (
 )
 
 type PGLoader struct{}
+
+var (
+	pgColumnDefaultValueStringRegexp = regexp.MustCompile(`^'(.*)'::character varying$`)
+	pgColumnDefaultValueFuncRegexp   = regexp.MustCompile(`^(.*)\\(\\)$`)
+)
 
 var pgTypeMap = map[string]schema.ColumnType{
 	pg.TypeText:             schema.ColumnTypeString,
@@ -93,7 +101,8 @@ select c.column_name as name,
        case
 			when is_nullable = 'NO' THEN false
 			else true
-	   END as nullable
+	   END as nullable,
+       c.column_default as default_value
 from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`
@@ -133,6 +142,7 @@ order by c.ordinal_position`
 		}
 
 		col.PreparedType = l.prepareColumnType(col)
+		col.Default = l.parseColumnDefault(col)
 
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
@@ -142,6 +152,35 @@ order by c.ordinal_position`
 	return &schema.Schema{
 		Tables: tables,
 	}, nil
+}
+
+func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
+	if !col.DefaultRaw.Valid {
+		return nil
+	}
+
+	if _, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultValueTypeInteger,
+			Value: col.DefaultRaw.String,
+		}
+	}
+
+	if val := regex.ParseSingleValue(pgColumnDefaultValueStringRegexp, col.DefaultRaw.String); val != "" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultValueTypeString,
+			Value: val,
+		}
+	}
+
+	if val := regex.ParseSingleValue(pgColumnDefaultValueFuncRegexp, col.DefaultRaw.String); val != "" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultValueTypeFunc,
+			Value: val,
+		}
+	}
+
+	return nil
 }
 
 func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
