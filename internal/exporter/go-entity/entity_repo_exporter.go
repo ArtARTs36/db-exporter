@@ -120,6 +120,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		filtersPkg = entityPkg
 	}
 
+	entityRepoPage := e.pager.Of("go-entities/entity_repos.go.tpl")
+
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table, entityPkg)
 
@@ -187,6 +189,24 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 			return nil, rerr
 		}
 		pages = append(pages, page)
+
+		if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+			entityRepoPageName := fmt.Sprintf("%s/%s_repo.go", entityPkg.ProjectRelativePath, entity.Table.Name.Singular().Lower())
+
+			entityRepoP, ererr := entityRepoPage.Export(entityRepoPageName, map[string]stick.Value{
+				"schema": map[string]interface{}{
+					"Repositories": []*Repository{
+						repository,
+					},
+				},
+				"_file": golang.NewFile(entityRepoPageName, entityPkg),
+			})
+			if ererr != nil {
+				return nil, ererr
+			}
+
+			pages = append(pages, entityRepoP)
+		}
 	}
 
 	if spec.Repositories.Container.StructName != "" {
@@ -218,6 +238,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		if rerr != nil {
 			return nil, rerr
 		}
+
 		pages = append(pages, page)
 	}
 

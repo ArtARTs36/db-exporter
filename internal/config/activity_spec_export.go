@@ -55,6 +55,7 @@ const (
 	GoEntityRepositorySpecRepoInterfacesPlaceUnspecified    = ""
 	GoEntityRepositorySpecRepoInterfacesPlaceWithEntity     = "with_entity"
 	GoEntityRepositorySpecRepoInterfacesPlaceWithRepository = "with_repository"
+	GoEntityRepositorySpecRepoInterfacesPlaceEntity         = "entity"
 )
 
 type GoEntityRepositorySpec struct {

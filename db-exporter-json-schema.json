@@ -451,7 +451,7 @@
               "properties": {
                 "place": {
                   "type": "string",
-                  "enum": ["", "with_entity", "with_repository"],
+                  "enum": ["", "entity", "with_entity", "with_repository"],
                   "default": ""
                 }
               }

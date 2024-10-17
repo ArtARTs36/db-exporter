@@ -1,4 +1,3 @@
-{% include 'go-entities/repository_interfaces.go.tpl' with {'repositories': repositories, '_file': _file} only %}
+{% include 'go-entities/go_file_header.go.tpl' with {'_file': _file, 'stdImports': ['context']} only %}
 
-{% for repo in repositories %}{% include 'go-entities/repository_filters.go.tpl' with {'filters': repo.Filters, '_file': _file} only %}{% if loop.last == false %}
-{% endif %}{% endfor %}
+{% include 'go-entities/entity_repos_embed.go.tpl' with {'repositories': schema.Repositories, '_file': _file} only %}

@@ -15,7 +15,7 @@ tasks:
             container:
               struct_name: group
             interfaces:
-              place: with_entity
+              place: entity
         out:
           dir: ./out
 
