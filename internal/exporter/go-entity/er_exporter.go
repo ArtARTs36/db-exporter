@@ -156,7 +156,6 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		}
 
 		containerGoFile := golang.NewFile(contFileName, pipeline.packages.repo)
-		containerGoFile.ImportShared(golang.PackageFromFullName("github.com/jmoiron/sqlx"))
 		containerGoFile.ImportLocal(pipeline.packages.entity)
 
 		page, rerr := containerPage.Export(
