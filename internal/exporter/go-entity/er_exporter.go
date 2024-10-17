@@ -66,22 +66,18 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages := make([]*exporter.ExportedPage, 0, e.calculatePages(params, spec))
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
-	repoNameMaxLength := 0
-	repoInterfaceNameMaxLength := 0
-
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table, pipeline.packages.entity)
 		repository := buildRepository(entity, pipeline.packages.repo, pipeline.packages.interfaces)
 
-		if len(repository.Interface.Name) > repoInterfaceNameMaxLength {
-			repoInterfaceNameMaxLength = len(repository.Interface.Name)
-		}
-
 		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), nil)
 		e.allocateRepositoryFilters(entity, repository, pipeline.packages.filters, pkProps)
 
-		if len(repository.Name) > repoNameMaxLength {
-			repoNameMaxLength = len(repository.Name)
+		if len(repository.Name) > pipeline.store.repoNameMaxLength {
+			pipeline.store.repoNameMaxLength = len(repository.Name)
+		}
+		if len(repository.Interface.Name) > pipeline.store.repoInterfaceMaxLength {
+			pipeline.store.repoInterfaceMaxLength = len(repository.Interface.Name)
 		}
 
 		repositories = append(repositories, repository)
@@ -114,8 +110,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 				"_file":         repoFile,
 				"schema": map[string]interface{}{
 					"Repositories":               []*Repository{repository},
-					"RepoNameMaxLength":          repoNameMaxLength,
-					"RepoInterfaceNameMaxLength": repoInterfaceNameMaxLength,
+					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
+					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
 					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository,                                             //nolint:lll // not need
 					"GenFilters":                 spec.Repositories.Interfaces.Place == "" || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
@@ -164,8 +160,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 				"_file": containerGoFile,
 				"schema": map[string]interface{}{
 					"Repositories":               repositories,
-					"RepoNameMaxLength":          repoNameMaxLength,
-					"RepoInterfaceNameMaxLength": repoInterfaceNameMaxLength,
+					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
+					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
 					"Container": map[string]interface{}{
 						"Name": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 					},
