@@ -46,7 +46,8 @@ func (e *RepositoryExporter) buildPipeline(
 
 	pipeline.packages.filters = repoPkg
 	pipeline.packages.interfaces = repoPkg
-	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity ||
+		spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
 		pipeline.packages.filters = entityPkg
 		pipeline.packages.interfaces = entityPkg
 	}
