@@ -22,8 +22,9 @@ func TestBuildPackage(t *testing.T) {
 			Module:  "github.com/artarts36/cars",
 
 			Expected: Package{
-				Name:     "domain",
-				FullName: "github.com/artarts36/cars/domain",
+				Name:                "domain",
+				ProjectRelativePath: "domain",
+				FullName:            "github.com/artarts36/cars/domain",
 			},
 		},
 		{
@@ -33,8 +34,9 @@ func TestBuildPackage(t *testing.T) {
 			Module:  "github.com/artarts36/cars",
 
 			Expected: Package{
-				Name:     "domain",
-				FullName: "github.com/artarts36/cars/internal/domain",
+				Name:                "domain",
+				ProjectRelativePath: "domain",
+				FullName:            "github.com/artarts36/cars/internal/domain",
 			},
 		},
 	}
