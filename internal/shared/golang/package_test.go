@@ -13,7 +13,7 @@ func TestBuildPackage(t *testing.T) {
 		PkgName string
 		Module  string
 
-		Expected Package
+		Expected *Package
 	}{
 		{
 			Title: "test single package",
@@ -21,7 +21,7 @@ func TestBuildPackage(t *testing.T) {
 			PkgName: "domain",
 			Module:  "github.com/artarts36/cars",
 
-			Expected: Package{
+			Expected: &Package{
 				Name:                "domain",
 				ProjectRelativePath: "domain",
 				FullName:            "github.com/artarts36/cars/domain",
@@ -33,9 +33,9 @@ func TestBuildPackage(t *testing.T) {
 			PkgName: "internal/domain",
 			Module:  "github.com/artarts36/cars",
 
-			Expected: Package{
+			Expected: &Package{
 				Name:                "domain",
-				ProjectRelativePath: "domain",
+				ProjectRelativePath: "internal/domain",
 				FullName:            "github.com/artarts36/cars/internal/domain",
 			},
 		},
