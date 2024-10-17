@@ -37,7 +37,7 @@ func loadFiles(dir, keyPrefix string) map[string]string {
 	for _, entry := range entries {
 		path := fmt.Sprintf("%s/%s", dir, entry.Name())
 
-		if entry.IsDir() { //nolint: nestif // not need
+		if entry.IsDir() {
 			kp := entry.Name()
 			if keyPrefix != "" {
 				kp = keyPrefix + "/" + entry.Name()
