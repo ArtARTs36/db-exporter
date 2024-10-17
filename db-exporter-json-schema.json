@@ -108,7 +108,7 @@
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
-            "go-entity-repository"
+            "go-entity-repository", "json-schema"
           ]
         },
         "database": {
@@ -193,6 +193,9 @@
             },
             {
               "$ref": "#/definitions/spec_go_entity_repository_export"
+            },
+            {
+              "$ref": "#/definitions/spec_json_schema_export"
             }
           ]
         }
@@ -465,6 +468,29 @@
             "place": {
               "type": "string",
               "enum": ["entities", "repositories"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_json_schema_export": {
+      "type": "object",
+      "properties": {
+        "pretty": {
+          "type": "boolean",
+          "default": false,
+          "description": "Print JSON Schema in pretty format"
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
             }
           },
           "additionalProperties": false

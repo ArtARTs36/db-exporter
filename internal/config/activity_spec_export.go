@@ -17,6 +17,7 @@ const (
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
 	ExporterNameCSV                  ExporterName = "csv"
+	ExporterNameJSONSchema           ExporterName = "json-schema"
 )
 
 type GoEntitiesExportSpec struct {
@@ -59,17 +60,25 @@ const (
 )
 
 type GoEntityRepositorySpec struct {
-	GoModule string `yaml:"go_module"`
+	GoModule string `yaml:"go_module" json:"go_module"`
 	Entities struct {
-		Package string `yaml:"package"`
-	} `yaml:"entities"`
+		Package string `yaml:"package" json:"package"`
+	} `yaml:"entities" json:"entities"`
 	Repositories struct {
-		Package   string `yaml:"package"`
+		Package   string `yaml:"package" json:"package"`
 		Container struct {
-			StructName string `yaml:"struct_name"`
-		} `yaml:"container"`
+			StructName string `yaml:"struct_name" json:"struct_name"`
+		} `yaml:"container" json:"container"`
 		Interfaces struct {
-			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place"`
-		} `yaml:"interfaces"`
-	} `yaml:"repositories"`
+			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place" json:"place"`
+		} `yaml:"interfaces" json:"interfaces"`
+	} `yaml:"repositories" json:"repositories"`
+}
+
+type JSONSchemaExportSpec struct {
+	Pretty bool `yaml:"pretty" json:"pretty"`
+	Schema struct {
+		Title       string `yaml:"title" json:"title"`
+		Description string `yaml:"description" json:"description"`
+	} `yaml:"schema" json:"schema"`
 }
