@@ -46,7 +46,7 @@ func (e *Exporter) ExportPerFile(
 	if spec.WithDiagram {
 		pagesCap++
 		var err error
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diag.svg")
+		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diag: %w", err)
 		}
@@ -76,8 +76,8 @@ func (e *Exporter) ExportPerFile(
 	}
 
 	indexPage, err := e.pager.Of("md/per-index.md").Export("index.md", map[string]stick.Value{
-		"tables": preparedTables,
-		"diag":   diag,
+		"tables":  preparedTables,
+		"diagram": diag,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to generateEntity index file: %w", err)
@@ -106,7 +106,7 @@ func (e *Exporter) Export(
 	if spec.WithDiagram {
 		var err error
 
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diag.svg")
+		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diag: %w", err)
 		}
@@ -116,7 +116,7 @@ func (e *Exporter) Export(
 		e.createIndexPageName(params.Schema),
 		map[string]stick.Value{
 			"schema":        params.Schema,
-			"diag":          diag,
+			"diagram":       diag,
 			"diagramExists": diag != nil,
 		},
 	)
