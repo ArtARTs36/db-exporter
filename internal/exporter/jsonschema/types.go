@@ -15,6 +15,8 @@ func mapJSONType(col *schema.Column) jsonschema.Type {
 		return jsonschema.TypeBoolean
 	case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
 		return jsonschema.TypeNumber
+	case schema.ColumnTypeBytes:
+		return jsonschema.TypeString
 	default:
 		return jsonschema.TypeString
 	}
