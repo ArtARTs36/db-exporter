@@ -1,21 +1,35 @@
 package golang
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
-
 type File struct {
 	Name    string
 	Package *Package
-	Imports *ds.Set[string]
+	Imports *ImportGroups
 }
 
 func NewFile(name string, pkg *Package) File {
-	return File{Name: name, Package: pkg, Imports: ds.NewSet[string]()}
+	return File{Name: name, Package: pkg, Imports: NewImportGroups()}
 }
 
-func (f *File) Import(pkg *Package) {
+func (f *File) ImportStd(pkg *Package) {
 	if f.Package.FullName == pkg.FullName {
 		return
 	}
 
-	f.Imports.Add(pkg.FullName)
+	f.Imports.AddStd(pkg.FullName)
+}
+
+func (f *File) ImportShared(pkg *Package) {
+	if f.Package.FullName == pkg.FullName {
+		return
+	}
+
+	f.Imports.AddShared(pkg.FullName)
+}
+
+func (f *File) ImportLocal(pkg *Package) {
+	if f.Package.FullName == pkg.FullName {
+		return
+	}
+
+	f.Imports.AddLocal(pkg.FullName)
 }

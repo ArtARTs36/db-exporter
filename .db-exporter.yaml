@@ -15,7 +15,7 @@ tasks:
             container:
               struct_name: group
             interfaces:
-              place: with_repository
+              place: with_entity
         out:
           dir: ./out
 

@@ -121,12 +121,12 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		entity := e.entityMapper.MapEntity(table)
+		entity := e.entityMapper.MapEntity(table, entityPkg)
 
 		repository := &Repository{
 			Name:       fmt.Sprintf("PG%sRepository", entity.Name),
 			Entity:     entity,
-			EntityCall: entityPkg.CallToStruct(pkg, entity.Name.Value),
+			EntityCall: entityPkg.CallToStruct(entityPkg, entity.Name.Value),
 			Package:    pkg,
 		}
 		repository.Interface.Name = fmt.Sprintf("%sRepository", entity.Name)
@@ -198,8 +198,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		}
 
 		containerGoFile := golang.NewFile(contFileName, pkg)
-		containerGoFile.Import(golang.PackageFromFullName("github.com/jmoiron/sqlx"))
-		containerGoFile.Import(entityPkg)
+		containerGoFile.ImportShared(golang.PackageFromFullName("github.com/jmoiron/sqlx"))
+		containerGoFile.ImportLocal(entityPkg)
 
 		page, rerr := e.pager.Of(containerTpl).Export(
 			fmt.Sprintf("%s/%s.go", pkg.ProjectRelativePath, contFileName),

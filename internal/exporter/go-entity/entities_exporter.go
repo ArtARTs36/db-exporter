@@ -50,7 +50,7 @@ func (e *EntitiesExporter) ExportPerFile(
 
 	for _, table := range params.Schema.Tables.List() {
 		page, genErr := e.entityGenerator.GenerateEntity(&GenerateEntityParams{
-			Entity:  e.entityMapper.MapEntity(table),
+			Entity:  e.entityMapper.MapEntity(table, pkg),
 			Package: pkg,
 		})
 		if genErr != nil {
@@ -78,7 +78,7 @@ func (e *EntitiesExporter) Export(
 		return nil, fmt.Errorf("failed to build go package: %w", err)
 	}
 
-	entities := e.entityMapper.MapEntities(params.Schema.Tables.List())
+	entities := e.entityMapper.MapEntities(params.Schema.Tables.List(), pkg)
 
 	page, err := e.entityGenerator.GenerateEntities(entities, pkg)
 	if err != nil {

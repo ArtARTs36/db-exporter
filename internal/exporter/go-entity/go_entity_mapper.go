@@ -3,6 +3,7 @@ package goentity
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
 
 var goAbbreviationsSet = map[string]bool{
@@ -25,14 +26,15 @@ type EntityMapper struct {
 
 type Entities struct {
 	Entities []*Entity
-	Imports  *ds.Set[string]
+	Imports  *golang.ImportGroups
 }
 
 type Entity struct {
 	Name       *ds.String
 	Table      *schema.Table
 	Properties *goProperties
-	Imports    *ds.Set[string]
+	Imports    *golang.ImportGroups
+	Package    *golang.Package
 
 	AsVarName string
 }
@@ -41,36 +43,41 @@ func NewEntityMapper(propertyMapper *GoPropertyMapper) *EntityMapper {
 	return &EntityMapper{propertyMapper: propertyMapper}
 }
 
-func (m *EntityMapper) MapEntities(tables []*schema.Table) *Entities {
+func (e *Entity) Call(pkg *golang.Package) string {
+	return e.Package.CallToStruct(pkg, e.Name.Value)
+}
+
+func (m *EntityMapper) MapEntities(tables []*schema.Table, pkg *golang.Package) *Entities {
 	ents := &Entities{
 		Entities: make([]*Entity, len(tables)),
-		Imports:  ds.NewSet[string](),
+		Imports:  golang.NewImportGroups(),
 	}
 	addImportCallback := func(pkg string) {
-		ents.Imports.Add(pkg)
+		ents.Imports.AddStd(pkg)
 	}
 
 	for i, table := range tables {
-		ents.Entities[i] = m.mapEntity(table, addImportCallback)
+		ents.Entities[i] = m.mapEntity(table, pkg, addImportCallback)
 	}
 
 	return ents
 }
 
-func (m *EntityMapper) MapEntity(table *schema.Table) *Entity {
-	return m.mapEntity(table, func(_ string) {})
+func (m *EntityMapper) MapEntity(table *schema.Table, pkg *golang.Package) *Entity {
+	return m.mapEntity(table, pkg, func(_ string) {})
 }
 
-func (m *EntityMapper) mapEntity(table *schema.Table, addImportCallback func(pkg string)) *Entity {
+func (m *EntityMapper) mapEntity(table *schema.Table, pkg *golang.Package, addImportCallback func(pkg string)) *Entity {
 	entity := &Entity{
 		Name:      table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
 		Table:     table,
-		Imports:   ds.NewSet[string](),
+		Imports:   golang.NewImportGroups(),
 		AsVarName: table.Name.Singular().Camel().Value,
+		Package:   pkg,
 	}
 
 	addImport := func(pkg string) {
-		entity.Imports.Add(pkg)
+		entity.Imports.AddStd(pkg)
 		addImportCallback(pkg)
 	}
 

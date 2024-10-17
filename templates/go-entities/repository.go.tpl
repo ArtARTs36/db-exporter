@@ -31,8 +31,8 @@ const (
 func (repo *{{ repo.Name }}) Get(
 	ctx context.Context,
 	filter *{{ repo.Filters.Get.Name }},
-) (*{{ repo.EntityCall }}, error) {
-	var ent {{ repo.EntityCall }}
+) (*{{ repo.Entity.Call(_file.Package) }}, error) {
+	var ent {{ repo.Entity.Call(_file.Package) }}
 
 	query := goqu.From(table{{ repo.Entity.Table.Name.Pascal().Value }}).Select().Limit(1)
 
@@ -59,8 +59,8 @@ func (repo *{{ repo.Name }}) Get(
 func (repo *{{ repo.Name }}) List(
 	ctx context.Context,
 	filter *{{ repo.Filters.List.Name }},
-) ([]*{{ repo.EntityCall }}, error) {
-	var ents []*{{ repo.EntityCall }}
+) ([]*{{ repo.Entity.Call(_file.Package) }}, error) {
+	var ents []*{{ repo.Entity.Call(_file.Package) }}
 
 	query := goqu.From(table{{ repo.Entity.Table.Name.Pascal().Value }}).Select()
 
@@ -79,7 +79,7 @@ func (repo *{{ repo.Name }}) List(
 	err = repo.db.SelectContext(ctx, &ents, q, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return []*{{ repo.EntityCall }}{}, nil
+			return []*{{ repo.Entity.Call(_file.Package) }}{}, nil
 		}
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -89,14 +89,14 @@ func (repo *{{ repo.Name }}) List(
 
 func (repo *{{ repo.Name }}) Create(
 	ctx context.Context,
-	{{ repo.Entity.AsVarName }} *{{ repo.EntityCall }},
-) (*{{ repo.EntityCall }}, error) {
+	{{ repo.Entity.AsVarName }} *{{ repo.Entity.Call(_file.Package) }},
+) (*{{ repo.Entity.Call(_file.Package) }}, error) {
 	query, _, err := goqu.Insert(table{{ repo.Entity.Table.Name.Pascal().Value }}).Rows({{ repo.Entity.AsVarName }}).Returning("*").ToSQL()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	var created {{ repo.EntityCall }}
+	var created {{ repo.Entity.Call(_file.Package) }}
 
 	err = repo.db.GetContext(ctx, &created, query)
 	if err != nil {
@@ -108,8 +108,8 @@ func (repo *{{ repo.Name }}) Create(
 
 func (repo *{{ repo.Name }}) Update(
 	ctx context.Context,
-	{{ repo.Entity.AsVarName }} *{{ repo.EntityCall }},
-) (*{{ repo.EntityCall }}, error) {
+	{{ repo.Entity.AsVarName }} *{{ repo.Entity.Call(_file.Package) }},
+) (*{{ repo.Entity.Call(_file.Package) }}, error) {
 	query, _, err := goqu.Update(table{{ repo.Entity.Table.Name.Pascal().Value }}).
 		Set({{ repo.Entity.AsVarName }}).
 		Returning("*").
@@ -118,7 +118,7 @@ func (repo *{{ repo.Name }}) Update(
 		return nil, fmt.Errorf("failed to build update query: %w", err)
 	}
 
-	var updated {{ repo.EntityCall }}
+	var updated {{ repo.Entity.Call(_file.Package) }}
 
 	err = repo.db.GetContext(ctx, &updated, query)
 	if err != nil {

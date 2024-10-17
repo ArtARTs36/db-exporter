@@ -1,10 +1,14 @@
 package entitiesa
 
+import (
+	"context"
+)
+
 type CountryRepository interface {
-	Get(ctx context.Context, filter *GetCountryFilter) (*entitiesa.Country, error)
-	List(ctx context.Context, filter *ListCountryFilter) ([]*entitiesa.Country, error)
-	Create(ctx context.Context, country *entitiesa.Country) (*entitiesa.Country, error)
-	Update(ctx context.Context, country *entitiesa.Country) (*entitiesa.Country, error)
+	Get(ctx context.Context, filter *GetCountryFilter) (*Country, error)
+	List(ctx context.Context, filter *ListCountryFilter) ([]*Country, error)
+	Create(ctx context.Context, country *Country) (*Country, error)
+	Update(ctx context.Context, country *Country) (*Country, error)
 	Delete(ctx context.Context, filter *DeleteCountryFilter) (count int64, err error)
 }
 

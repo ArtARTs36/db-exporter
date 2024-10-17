@@ -23,6 +23,11 @@ type GenerateEntityParams struct {
 }
 
 func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporter.ExportedPage, error) {
+	goFile := golang.File{
+		Package: params.Package,
+		Imports: params.Entity.Imports,
+	}
+
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/%s.go", params.Package.ProjectRelativePath, params.Entity.Table.Name.Singular().Lower()),
 		map[string]stick.Value{
@@ -31,10 +36,7 @@ func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporte
 				"Repositories": params.Repositories,
 				"Imports":      params.Entity.Imports,
 			},
-			"_file": golang.File{
-				Package: params.Package,
-				Imports: params.Entity.Imports,
-			},
+			"_file": goFile,
 		},
 	)
 }

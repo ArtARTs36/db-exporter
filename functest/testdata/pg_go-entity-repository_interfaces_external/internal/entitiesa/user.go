@@ -1,15 +1,16 @@
 package entitiesa
 
 import (
+	"context"
 	"database/sql"
 	"time"
 )
 
 type UserRepository interface {
-	Get(ctx context.Context, filter *GetUserFilter) (*entitiesa.User, error)
-	List(ctx context.Context, filter *ListUserFilter) ([]*entitiesa.User, error)
-	Create(ctx context.Context, user *entitiesa.User) (*entitiesa.User, error)
-	Update(ctx context.Context, user *entitiesa.User) (*entitiesa.User, error)
+	Get(ctx context.Context, filter *GetUserFilter) (*User, error)
+	List(ctx context.Context, filter *ListUserFilter) ([]*User, error)
+	Create(ctx context.Context, user *User) (*User, error)
+	Update(ctx context.Context, user *User) (*User, error)
 	Delete(ctx context.Context, filter *DeleteUserFilter) (count int64, err error)
 }
 
