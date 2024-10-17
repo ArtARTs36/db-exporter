@@ -60,12 +60,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		return nil, fmt.Errorf("failed to build entity package: %w", err)
 	}
 
-	pagesLen := params.Schema.Tables.Len() * pageTypes
-	if spec.Repositories.Container.StructName != "" {
-		pagesLen++
-	}
-
-	pages := make([]*exporter.ExportedPage, 0, pagesLen)
+	pages := make([]*exporter.ExportedPage, 0, e.calculatePages(params, spec))
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
 	repoPage := e.pager.Of("go-entities/repository.go.tpl")
@@ -209,6 +204,25 @@ func (e *RepositoryExporter) allocateRepositoryFilters(
 	repo.Filters.List = createRepositoryEntityFilter(entity, "List", filtersPkg, props)
 	repo.Filters.Get = createRepositoryEntityFilter(entity, "Get", filtersPkg, props)
 	repo.Filters.Delete = createRepositoryEntityFilter(entity, "Delete", filtersPkg, props)
+}
+
+func (e *RepositoryExporter) calculatePages(
+	params *exporter.ExportParams,
+	spec *config.GoEntityRepositorySpec,
+) int {
+	const defaultPageTypes = 2
+
+	pageTypes := defaultPageTypes
+	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+		pageTypes++
+	}
+
+	pagesLen := params.Schema.Tables.Len() * pageTypes
+	if spec.Repositories.Container.StructName != "" {
+		pagesLen++
+	}
+
+	return pagesLen
 }
 
 func (e *RepositoryExporter) buildRepositoryPackage(
