@@ -1,7 +1,7 @@
 {% include 'go-entities/go_file_header.go.tpl' with {'_file': _file} only %}
 
 type {{ schema.Container.Name }} struct {
-{% for repo in schema.Repositories %}	{{ repo.Interface.Name }} {{ spaces_after(repo.Interface.Name, schema.RepoInterfaceNameMaxLength) }}{{ repo.Interface.NameCall }}{% if loop.last == false %}
+{% for repo in schema.Repositories %}	{{ repo.Interface.Name }} {{ spaces_after(repo.Interface.Name, schema.RepoInterfaceNameMaxLength) }}{{ repo.Interface.Call(_file.Package) }}{% if loop.last == false %}
 {% endif %}{% endfor %}
 }
 
