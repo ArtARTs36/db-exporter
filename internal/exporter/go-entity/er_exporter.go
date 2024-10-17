@@ -14,11 +14,17 @@ import (
 )
 
 type RepositoryExporter struct {
-	pager           *common.Pager
 	goModFinder     *golang.ModFinder
 	entityMapper    *EntityMapper
 	entityGenerator *EntityGenerator
 	propertyMapper  *GoPropertyMapper
+
+	page struct {
+		repo               *common.Page
+		entityRepo         *common.Page
+		container          *common.Page
+		containerInterface *common.Page
+	}
 }
 
 func NewRepositoryExporter(
@@ -28,13 +34,19 @@ func NewRepositoryExporter(
 	entityGenerator *EntityGenerator,
 	propertyMapper *GoPropertyMapper,
 ) *RepositoryExporter {
-	return &RepositoryExporter{
-		pager:           pager,
+	exp := &RepositoryExporter{
 		goModFinder:     goModFinder,
 		entityMapper:    entityMapper,
 		entityGenerator: entityGenerator,
 		propertyMapper:  propertyMapper,
 	}
+
+	exp.page.repo = pager.Of("go-entities/repository.go.tpl")
+	exp.page.entityRepo = pager.Of("go-entities/entity_repos.go.tpl")
+	exp.page.container = pager.Of("go-entities/repository_container.go.tpl")
+	exp.page.containerInterface = pager.Of("go-entities/repository_container_interface.go.tpl")
+
+	return exp
 }
 
 func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
@@ -54,11 +66,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages := make([]*exporter.ExportedPage, 0, e.calculatePages(params, spec))
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
-	repoPage := e.pager.Of("go-entities/repository.go.tpl")
 	repoNameMaxLength := 0
 	repoInterfaceNameMaxLength := 0
-
-	entityRepoPage := e.pager.Of("go-entities/entity_repos.go.tpl")
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(table, pipeline.packages.entity)
@@ -97,7 +106,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 		repoFile := golang.NewFile(repoFileName, pipeline.packages.repo)
 
-		page, rerr := repoPage.Export(
+		page, rerr := e.page.repo.Export(
 			fmt.Sprintf("%s/%s", pipeline.packages.repo.ProjectRelativePath, repoFileName),
 			map[string]stick.Value{
 				"entityPackage": pipeline.packages.entity,
@@ -124,11 +133,9 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 				entity.Table.Name.Singular().Lower(),
 			)
 
-			entityRepoP, ererr := entityRepoPage.Export(entityRepoPageName, map[string]stick.Value{
+			entityRepoP, ererr := e.page.entityRepo.Export(entityRepoPageName, map[string]stick.Value{
 				"schema": map[string]interface{}{
-					"Repositories": []*Repository{
-						repository,
-					},
+					"Repositories": []*Repository{repository},
 				},
 				"_file": golang.NewFile(entityRepoPageName, pipeline.packages.entity),
 			})
@@ -143,16 +150,16 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	if spec.Repositories.Container.StructName != "" {
 		contFileName := strings.ToLower(spec.Repositories.Container.StructName)
 
-		containerTpl := "go-entities/repository_container.go.tpl"
+		containerPage := e.page.container
 		if spec.Repositories.Interfaces.Place != "" {
-			containerTpl = "go-entities/repository_container_interface.go.tpl"
+			containerPage = e.page.containerInterface
 		}
 
 		containerGoFile := golang.NewFile(contFileName, pipeline.packages.repo)
 		containerGoFile.ImportShared(golang.PackageFromFullName("github.com/jmoiron/sqlx"))
 		containerGoFile.ImportLocal(pipeline.packages.entity)
 
-		page, rerr := e.pager.Of(containerTpl).Export(
+		page, rerr := containerPage.Export(
 			fmt.Sprintf("%s/%s.go", pipeline.packages.repo.ProjectRelativePath, contFileName),
 			map[string]stick.Value{
 				"_file": containerGoFile,
