@@ -1,0 +1,1 @@
+{% if repositories | length == 1 %}//go:generate mockgen -source={{ _file.Name }} -package={{ repositories[0].Package.Name }} -destination={{ repositories[0].File.CallRelativePath(_file, 'mock_') }}{% endif %}

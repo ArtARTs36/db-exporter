@@ -70,7 +70,8 @@ type GoEntityRepositorySpec struct {
 			StructName string `yaml:"struct_name" json:"struct_name"`
 		} `yaml:"container" json:"container"`
 		Interfaces struct {
-			Place GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place" json:"place"`
+			Place     GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place" json:"place"`
+			WithMocks bool                                      `yaml:"with_mocks" json:"with_mocks"`
 		} `yaml:"interfaces" json:"interfaces"`
 	} `yaml:"repositories" json:"repositories"`
 }

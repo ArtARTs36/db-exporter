@@ -54,9 +54,25 @@ tasks:
           repositories:
             interfaces:
               place: with_entity
+              with_mocks: true
             package: internal/repositoriesa
             container:
               struct_name: "container"
+        out:
+          dir: ./out
+
+  pg_go-entity-repository_interfaces_internal:
+    activities:
+      - export: go-entity-repository
+        spec:
+          go_module: github.com/project
+          entities:
+            package: internal/entitiesa
+          repositories:
+            interfaces:
+              place: with_repository
+              with_mocks: true
+            package: internal/repositoriesa
         out:
           dir: ./out
 

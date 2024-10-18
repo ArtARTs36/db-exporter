@@ -456,6 +456,10 @@
                   "type": "string",
                   "enum": ["", "entity", "with_entity", "with_repository"],
                   "default": ""
+                },
+                "with_mocks": {
+                  "type": "boolean",
+                  "default": false
                 }
               }
             }

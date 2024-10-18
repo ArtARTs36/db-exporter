@@ -1,5 +1,11 @@
 package golang
 
+import (
+	"fmt"
+	"log/slog"
+	"path/filepath"
+)
+
 type File struct {
 	Name    string
 	Package *Package
@@ -32,4 +38,26 @@ func (f *File) ImportLocal(pkg *Package) {
 	}
 
 	f.Imports.AddLocal(pkg.FullName)
+}
+
+func (f *File) CallRelativePath(that File, namePrefix string) string {
+	newFileName := fmt.Sprintf("%s%s", namePrefix, f.Name)
+
+	if f.Package.FullName == that.Package.FullName {
+		return newFileName
+	}
+
+	path, err := filepath.Rel(that.Package.ProjectRelativePath, f.Package.ProjectRelativePath)
+	if err != nil {
+		slog.Error(
+			"[go-file] failed to create relative path",
+			slog.String("from", that.Package.ProjectRelativePath),
+			slog.String("to", f.Package.ProjectRelativePath),
+			slog.Any("err", err),
+		)
+
+		return ""
+	}
+
+	return fmt.Sprintf("%s/%s", path, newFileName)
 }

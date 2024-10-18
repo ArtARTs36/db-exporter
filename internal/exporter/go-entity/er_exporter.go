@@ -91,6 +91,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 			Entity:       entity,
 			Package:      pipeline.packages.entity,
 			Repositories: entityRepos,
+			WithMocks:    spec.Repositories.Interfaces.WithMocks,
 		})
 		if eerr != nil {
 			return nil, fmt.Errorf("failed to generate entity %q: %w", entity.Name, eerr)
@@ -98,22 +99,19 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 		pages = append(pages, page)
 
-		repoFileName := fmt.Sprintf("%s.go", table.Name.Singular().Lower().Value)
-
-		repoFile := golang.NewFile(repoFileName, pipeline.packages.repo)
-
 		page, rerr := e.page.repo.Export(
-			fmt.Sprintf("%s/%s", pipeline.packages.repo.ProjectRelativePath, repoFileName),
+			fmt.Sprintf("%s/%s", pipeline.packages.repo.ProjectRelativePath, repository.File.Name),
 			map[string]stick.Value{
 				"entityPackage": pipeline.packages.entity,
 				"package":       pipeline.packages.repo,
-				"_file":         repoFile,
+				"_file":         repository.File,
 				"schema": map[string]interface{}{
 					"Repositories":               []*Repository{repository},
 					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
 					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
 					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository,                                             //nolint:lll // not need
 					"GenFilters":                 spec.Repositories.Interfaces.Place == "" || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
+					"WithMocks":                  spec.Repositories.Interfaces.WithMocks,
 				},
 			},
 		)
