@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log/slog"
@@ -86,7 +86,11 @@ func (a *ImportActivityRunner) doImport(
 	importerParams := &exporter.ImportParams{
 		Directory: fs.NewDirectory(a.fs, params.Activity.Import.From),
 		TableFilter: func(tableName string) bool {
-			if len(params.Activity.Tables) > 0 && !slices.Contains(params.Activity.Tables, tableName) {
+			if len(params.Activity.Tables.List) > 0 && !slices.Contains(params.Activity.Tables.List, tableName) {
+				return false
+			}
+
+			if params.Activity.Tables.Prefix != "" && !strings.HasPrefix(tableName, params.Activity.Tables.Prefix) {
 				return false
 			}
 

@@ -2,19 +2,28 @@ package config
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/env"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"os"
+	"path/filepath"
 
-	"gopkg.in/yaml.v3"
+	"github.com/artarts36/db-exporter/internal/shared/env"
 )
 
 type Loader struct {
+	files       fs.Driver
 	envInjector *env.Injector
+	parsers     map[string]Parser
 }
 
-func NewLoader(envInjector *env.Injector) *Loader {
+func NewLoader(
+	files fs.Driver,
+	envInjector *env.Injector,
+	parsers map[string]Parser,
+) *Loader {
 	return &Loader{
+		files:       files,
 		envInjector: envInjector,
+		parsers:     parsers,
 	}
 }
 
@@ -24,27 +33,32 @@ func (l *Loader) Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to read file %q: %w", path, err)
 	}
 
-	var cfg Config
-	err = yaml.Unmarshal(file, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal yaml: %w", err)
+	pathExt := filepath.Ext(path)
+	parser, ok := l.parsers[pathExt]
+	if !ok {
+		return nil, fmt.Errorf("parser for exension %q not found", pathExt)
 	}
 
-	err = l.fillDefaults(&cfg)
+	cfg, err := parser(file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse %s config: %w", pathExt, err)
+	}
+
+	err = l.fillDefaults(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	err = l.injectEnvVars(&cfg)
+	err = l.injectEnvVars(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = l.validate(&cfg); err != nil {
+	if err = l.validate(cfg); err != nil {
 		return nil, err
 	}
 
-	return &cfg, nil
+	return cfg, nil
 }
 
 func (l *Loader) injectEnvVars(cfg *Config) error {

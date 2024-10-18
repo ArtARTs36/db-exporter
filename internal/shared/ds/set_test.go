@@ -9,7 +9,7 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	set := ds.NewSet()
+	set := ds.NewSet[string]()
 
 	set.Add("1")
 	set.Add("1")

@@ -24,9 +24,55 @@ tasks:
         out:
           dir: ./out
 
-  pg_go-structs:
+  pg_go-entities:
     activities:
-      - export: go-structs
+      - export: go-entities
+        out:
+          dir: ./out
+
+  pg_go-entity-repository:
+    activities:
+      - export: go-entity-repository
+        spec:
+          go_module: github.com/project
+          entities:
+            package: internal/entities
+          repositories:
+            package: internal/repositories
+            container:
+              struct_name: "container"
+        out:
+          dir: ./out
+
+  pg_go-entity-repository_interfaces_external:
+    activities:
+      - export: go-entity-repository
+        spec:
+          go_module: github.com/project
+          entities:
+            package: internal/entitiesa
+          repositories:
+            interfaces:
+              place: with_entity
+              with_mocks: true
+            package: internal/repositoriesa
+            container:
+              struct_name: "container"
+        out:
+          dir: ./out
+
+  pg_go-entity-repository_interfaces_internal:
+    activities:
+      - export: go-entity-repository
+        spec:
+          go_module: github.com/project
+          entities:
+            package: internal/entitiesa
+          repositories:
+            interfaces:
+              place: with_repository
+              with_mocks: true
+            package: internal/repositoriesa
         out:
           dir: ./out
 
@@ -56,7 +102,7 @@ tasks:
   pg_yaml-fixtures_import:
     activities:
       - import: yaml-fixtures
-        from: ./data/pg_yaml-fixtures_import
+        from: ./testdata/pg_yaml-fixtures_import
 
 options:
   print_stat: true

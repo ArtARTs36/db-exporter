@@ -197,6 +197,13 @@ func TestStringFixAbbreviations(t *testing.T) {
 			},
 			Expected: "GooseDBVersion",
 		},
+		{
+			String: "Id",
+			Abbreviations: []string{
+				"id",
+			},
+			Expected: "ID",
+		},
 	}
 
 	for i, tCase := range cases {
@@ -209,6 +216,49 @@ func TestStringFixAbbreviations(t *testing.T) {
 			}
 
 			assert.Equal(t, tCase.Expected, str.FixAbbreviations(abbrSet).Value)
+		})
+	}
+}
+
+func TestPluralStringFixAbbreviations(t *testing.T) {
+	cases := []struct {
+		String        string
+		Abbreviations map[string]string
+		Expected      string
+	}{
+		{
+			String:        "",
+			Abbreviations: map[string]string{},
+			Expected:      "",
+		},
+		{
+			String: "goose_db_version",
+			Abbreviations: map[string]string{
+				"db": "DBs",
+			},
+			Expected: "goose_DB_versions",
+		},
+		{
+			String: "GooseDbVersion",
+			Abbreviations: map[string]string{
+				"db": "DBs",
+			},
+			Expected: "GooseDBVersions",
+		},
+		{
+			String: "Id",
+			Abbreviations: map[string]string{
+				"id": "IDs",
+			},
+			Expected: "IDs",
+		},
+	}
+
+	for i, tCase := range cases {
+		t.Run(fmt.Sprintf("%d: %s", i, tCase.String), func(t *testing.T) {
+			str := ds.NewString(tCase.String)
+
+			assert.Equal(t, tCase.Expected, str.PluralFixAbbreviations(tCase.Abbreviations).Value)
 		})
 	}
 }

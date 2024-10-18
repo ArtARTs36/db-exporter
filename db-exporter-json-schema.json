@@ -106,8 +106,9 @@
         "export": {
           "type": "string",
           "enum": [
-            "md", "diagram", "go-structs", "goose", "goose-fixtures", "go-sql-migrate",
-            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv"
+            "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
+            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
+            "go-entity-repository", "json-schema"
           ]
         },
         "database": {
@@ -124,11 +125,39 @@
           "description": "Skip generate already exists files"
         },
         "tables": {
-          "type": "array",
-          "description": "Tables for export",
-          "items": {
-            "type": "string"
-          }
+          "type": "object",
+          "oneOf": [
+            {
+              "properties": {
+                "list": {
+                  "type": "array",
+                  "description": "Tables for export",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "list"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "properties": {
+                "prefix": {
+                  "type": "array",
+                  "description": "Table prefix for export",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "prefix"
+              ],
+              "additionalProperties": false
+            }
+          ]
         },
         "out": {
           "type": "object",
@@ -151,7 +180,7 @@
               "$ref": "#/definitions/spec_md_export"
             },
             {
-              "$ref": "#/definitions/spec_go_structs_export"
+              "$ref": "#/definitions/spec_go_entities_export"
             },
             {
               "$ref": "#/definitions/spec_grpc_crud_export"
@@ -161,6 +190,12 @@
             },
             {
               "$ref": "#/definitions/spec_laravel_models_export"
+            },
+            {
+              "$ref": "#/definitions/spec_go_entity_repository_export"
+            },
+            {
+              "$ref": "#/definitions/spec_json_schema_export"
             }
           ]
         }
@@ -206,12 +241,12 @@
       },
       "additionalProperties": false
     },
-    "spec_go_structs_export": {
+    "spec_go_entities_export": {
       "type": "object",
       "properties": {
         "package": {
           "type": "string",
-          "default": "models"
+          "default": "entities"
         }
       },
       "additionalProperties": false
@@ -374,6 +409,95 @@
           "type": "string",
           "enum": ["carbon","datetime"],
           "default": "carbon"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_go_entity_repository_export": {
+      "type": "object",
+      "properties": {
+        "go_module": {
+          "type": "string"
+        },
+        "entities": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "default": "entities",
+              "description": "Package for entities. Example: domain.entities"
+            }
+          },
+          "additionalProperties": false
+        },
+        "repositories": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "default": "repositories",
+              "description": "Package for entities. Example: infrastructure.repositories"
+            },
+            "container": {
+              "type": "object",
+              "properties": {
+                "struct_name": {
+                  "type": "string",
+                  "default": null,
+                  "description": "Name of go structure"
+                }
+              },
+              "additionalProperties": false
+            },
+            "interfaces": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": ["", "entity", "with_entity", "with_repository"],
+                  "default": ""
+                },
+                "with_mocks": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "filters": {
+          "type": "object",
+          "properties": {
+            "place": {
+              "type": "string",
+              "enum": ["entities", "repositories"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_json_schema_export": {
+      "type": "object",
+      "properties": {
+        "pretty": {
+          "type": "boolean",
+          "default": false,
+          "description": "Print JSON Schema in pretty format"
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

@@ -16,7 +16,7 @@ test:
 	go test ./...
 
 lint:
-	golangci-lint run --fix
+	golangci-lint run --fix --exclude-dirs functest
 
 .PHONY: functest
 functest:

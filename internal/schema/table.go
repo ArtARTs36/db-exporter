@@ -1,6 +1,8 @@
 package schema
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import (
+	"github.com/artarts36/db-exporter/internal/shared/ds"
+)
 
 type Table struct {
 	Name    ds.String `db:"name"`
@@ -49,4 +51,20 @@ func (t *Table) HasForeignKeyTo(tableName string) bool {
 	}
 
 	return false
+}
+
+func (t *Table) GetPKColumns() []*Column {
+	if t.PrimaryKey == nil {
+		return []*Column{}
+	}
+
+	cols := make([]*Column, 0, t.PrimaryKey.ColumnsNames.Len())
+
+	for _, col := range t.Columns {
+		if t.PrimaryKey.ColumnsNames.Contains(col.Name.Value) {
+			cols = append(cols, col)
+		}
+	}
+
+	return cols
 }

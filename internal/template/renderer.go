@@ -3,6 +3,7 @@ package template
 import (
 	"bytes"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"strings"
 	"time"
 
@@ -45,6 +46,36 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 		return args[0]
 	}
 
+	const spacesAfterArgsCount = 2
+	eng.Functions["spaces_after"] = func(_ stick.Context, args ...stick.Value) stick.Value {
+		if len(args) != spacesAfterArgsCount {
+			return ""
+		}
+
+		var currentStringLen int
+
+		switch v := args[0].(type) {
+		case string:
+			currentStringLen = len(v)
+		case *ds.String:
+			currentStringLen = v.Len()
+		default:
+			return ""
+		}
+
+		needLength, valid := args[1].(int)
+		if !valid {
+			return ""
+		}
+
+		repeats := needLength - currentStringLen
+		if repeats == 0 {
+			return ""
+		}
+
+		return strings.Repeat(" ", repeats)
+	}
+
 	eng.Filters = filter.TwigFilters()
 
 	return &Renderer{
@@ -55,10 +86,16 @@ func NewRenderer(templateLoader stick.Loader) *Renderer {
 func (r *Renderer) Render(name string, params map[string]stick.Value) ([]byte, error) {
 	buf := &bytes.Buffer{}
 
+	r.extendParams(params)
+
 	err := r.engine.Execute(name, buf, params)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	return buf.Bytes(), err
+}
+
+func (r *Renderer) extendParams(params map[string]stick.Value) {
+	params["figure_brace_opened"] = "{"
 }

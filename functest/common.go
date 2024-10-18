@@ -16,9 +16,9 @@ func skipIfRunningShortTests(t *testing.T) {
 }
 
 func loadExpectedFiles(taskName string) map[string]string {
-	dir := fmt.Sprintf("data/%s", taskName)
+	dir := fmt.Sprintf("testdata/%s", taskName)
 
-	files := loadFiles(dir)
+	files := loadFiles(dir, "")
 	if len(files) == 0 {
 		panic(fmt.Sprintf("expected files for test with task name %q not found", taskName))
 	}
@@ -26,7 +26,7 @@ func loadExpectedFiles(taskName string) map[string]string {
 	return files
 }
 
-func loadFiles(dir string) map[string]string {
+func loadFiles(dir, keyPrefix string) map[string]string {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		panic(fmt.Sprintf("failed to read directory %q: %s", dir, err))
@@ -35,17 +35,35 @@ func loadFiles(dir string) map[string]string {
 	files := map[string]string{}
 
 	for _, entry := range entries {
-		content, fileErr := os.ReadFile(fmt.Sprintf("%s/%s", dir, entry.Name()))
+		path := fmt.Sprintf("%s/%s", dir, entry.Name())
 
-		if fileErr != nil {
-			panic(fmt.Sprintf(
-				"failed to load %s: %s",
-				entry.Name(),
-				fileErr,
-			))
+		if entry.IsDir() {
+			kp := entry.Name()
+			if keyPrefix != "" {
+				kp = keyPrefix + "/" + entry.Name()
+			}
+
+			for k, v := range loadFiles(path, kp) {
+				files[k] = v
+			}
+		} else {
+			content, fileErr := os.ReadFile(path)
+
+			if fileErr != nil {
+				panic(fmt.Sprintf(
+					"failed to load %s: %s",
+					entry.Name(),
+					fileErr,
+				))
+			}
+
+			kp := ""
+			if keyPrefix != "" {
+				kp = keyPrefix + "/" + entry.Name()
+			}
+
+			files[kp] = string(content)
 		}
-
-		files[entry.Name()] = string(content)
 	}
 
 	return files

@@ -11,7 +11,7 @@ type File struct {
 	Package  string
 	Services []*Service
 	Messages []*Message
-	Imports  *ds.Set
+	Imports  *ds.Set[string]
 	Options  map[string]Option
 }
 

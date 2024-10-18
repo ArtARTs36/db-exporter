@@ -56,8 +56,16 @@ func (s *String) Pascal() *String {
 	return NewString(strcase.ToCamel(s.Value))
 }
 
+func (s *String) Camel() *String {
+	return NewString(strcase.ToLowerCamel(s.Value))
+}
+
 func (s *String) Len() int {
 	return len(s.Value)
+}
+
+func (s *String) IsEmpty() bool {
+	return s.Len() == 0
 }
 
 func (s *String) IsNotEmpty() bool {
@@ -66,6 +74,14 @@ func (s *String) IsNotEmpty() bool {
 
 func (s *String) Singular() *String {
 	return NewString(inflection.Singular(s.Value))
+}
+
+func (s *String) Plural() *String {
+	return NewString(inflection.Plural(s.Value))
+}
+
+func (s *String) Starts(prefix string) bool {
+	return strings.HasPrefix(s.Value, prefix)
 }
 
 func (s *String) Ends(suffix string) bool {
@@ -93,7 +109,7 @@ func (s *String) SplitWords() []*SplitWord {
 		currChar := string(b)
 		currCharIsLower := strings.ToLower(currChar) == currChar
 
-		if b == '_' || b == '-' || b == ' ' { //nolint:gocritic // not required
+		if b == '_' || b == '-' || b == ' ' || b == '.' || b == '/' { //nolint:gocritic // not required
 			words = append(words, &SplitWord{
 				Word:           string(currWordBytes),
 				SeparatorAfter: currChar,
@@ -144,10 +160,54 @@ func (s *String) FixAbbreviations(abbrSet map[string]bool) *String {
 	return NewString(strings.Join(words, ""))
 }
 
+func (s *String) PluralFixAbbreviations(abbrSet map[string]string) *String {
+	split := s.SplitWords()
+	words := make([]string, 0, len(split))
+
+	for i, word := range split {
+		w := strings.ToLower(word.Word)
+		newWord, exists := abbrSet[w]
+		if exists {
+			if i < len(split)-1 {
+				newWord = strings.ToUpper(w)
+			}
+		} else {
+			if i == len(split)-1 {
+				newWord = inflection.Plural(word.Word)
+			} else {
+				newWord = word.Word
+			}
+		}
+
+		words = append(words, newWord, word.SeparatorAfter)
+	}
+
+	return NewString(strings.Join(words, ""))
+}
+
 func (s *String) Lower() *String {
 	return NewString(strings.ToLower(s.Value))
 }
 
 func (s *String) Equal(str string) bool {
 	return s.Value == str
+}
+
+func (s *String) FirstLine() *String {
+	lines := strings.Split(s.Value, "\n")
+	if len(lines) == 0 {
+		return &String{Value: ""}
+	}
+
+	return &String{Value: lines[0]}
+}
+
+func (s *String) TrimPrefix(cutset string) *String {
+	return &String{Value: strings.TrimPrefix(s.Value, cutset)}
+}
+
+func (s *String) TrimSpaces() *String {
+	return &String{
+		Value: strings.Trim(s.Value, " "),
+	}
 }
