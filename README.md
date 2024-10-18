@@ -1,6 +1,6 @@
 # db-exporter
 
-db-exporter - app for export db schema to formats:
+db-exporter - app for export db schema and data to formats:
 * CSV: export table data `csv`
 * Markdown: export table structure `md`
 * Class diagram: export table structure `diagram`
@@ -96,6 +96,7 @@ tasks:
   export:
     activities:
       - export: go-entity-repository
+        skip_exists: true
         spec:
           entities:
             package: internal/domain
@@ -105,8 +106,9 @@ tasks:
               struct_name: group
             interfaces:
               place: entity
+            with_mocks: true
         out:
-          dir: ./ # is "internal" package
+          dir: ./ # is root project path
 
   import:
     activities:
