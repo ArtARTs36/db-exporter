@@ -34,3 +34,7 @@ func (c *Column) HasForeignKey() bool {
 func (c *Column) IsUniqueOrPrimaryKey() bool {
 	return c.IsUniqueKey() || c.IsPrimaryKey()
 }
+
+func (c *Column) IsAutoincrement() bool {
+	return c.Default != nil && c.Default.Type == ColumnDefaultTypeAutoincrement
+}

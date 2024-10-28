@@ -1,15 +1,15 @@
 package schema
 
-type ColumnDefaultValueType int
+type ColumnDefaultType int
 
 const (
-	ColumnDefaultValueTypeUnknown ColumnDefaultValueType = iota
-	ColumnDefaultValueTypeFunc
-	ColumnDefaultValueTypeInteger
-	ColumnDefaultValueTypeString
+	ColumnDefaultTypeUnknown ColumnDefaultType = iota
+	ColumnDefaultTypeFunc
+	ColumnDefaultTypeValue
+	ColumnDefaultTypeAutoincrement
 )
 
 type ColumnDefault struct {
-	Type  ColumnDefaultValueType
-	Value string
+	Type  ColumnDefaultType
+	Value interface{}
 }

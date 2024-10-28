@@ -19,8 +19,9 @@ import (
 type PGLoader struct{}
 
 var (
-	pgColumnDefaultValueStringRegexp = regexp.MustCompile(`^'(.*)'::character varying$`)
-	pgColumnDefaultValueFuncRegexp   = regexp.MustCompile(`^(.*)\\(\\)$`)
+	pgColumnDefaultValueStringRegexp   = regexp.MustCompile(`^'(.*)'::character varying$`)
+	pgColumnDefaultValueFuncRegexp     = regexp.MustCompile(`^(.*)\(\)$`)
+	pgColumnDefaultValueSequenceRegexp = regexp.MustCompile(`^nextval\('(.*)'::regclass\)$`)
 )
 
 var pgTypeMap = map[string]schema.ColumnType{
@@ -159,23 +160,46 @@ func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault 
 		return nil
 	}
 
-	if _, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
+	if col.DefaultRaw.String == "false" {
 		return &schema.ColumnDefault{
-			Type:  schema.ColumnDefaultValueTypeInteger,
-			Value: col.DefaultRaw.String,
+			Type:  schema.ColumnDefaultTypeValue,
+			Value: false,
+		}
+	}
+
+	if col.DefaultRaw.String == "true" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeValue,
+			Value: true,
+		}
+	}
+
+	if col.PreparedType.IsInteger() {
+		if parsedInt, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
+			return &schema.ColumnDefault{
+				Type:  schema.ColumnDefaultTypeValue,
+				Value: parsedInt,
+			}
 		}
 	}
 
 	if val := regex.ParseSingleValue(pgColumnDefaultValueStringRegexp, col.DefaultRaw.String); val != "" {
 		return &schema.ColumnDefault{
-			Type:  schema.ColumnDefaultValueTypeString,
+			Type:  schema.ColumnDefaultTypeValue,
 			Value: val,
 		}
 	}
 
 	if val := regex.ParseSingleValue(pgColumnDefaultValueFuncRegexp, col.DefaultRaw.String); val != "" {
 		return &schema.ColumnDefault{
-			Type:  schema.ColumnDefaultValueTypeFunc,
+			Type:  schema.ColumnDefaultTypeFunc,
+			Value: val,
+		}
+	}
+
+	if val := regex.ParseSingleValue(pgColumnDefaultValueSequenceRegexp, col.DefaultRaw.String); val != "" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeAutoincrement,
 			Value: val,
 		}
 	}

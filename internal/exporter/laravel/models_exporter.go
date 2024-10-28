@@ -214,7 +214,7 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 		IsMultiple:   false,
 		Column:       pkColumnName,
 		Type:         pkColType.String(),
-		Incrementing: pkColType == php.TypeInt, // @todo need another way
+		Incrementing: pkColumn.IsAutoincrement(),
 	}
 
 	return lpk

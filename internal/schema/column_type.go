@@ -38,3 +38,7 @@ func (t ColumnType) String() string {
 		return "string"
 	}
 }
+
+func (t ColumnType) IsInteger() bool {
+	return t == ColumnTypeInteger || t == ColumnTypeInteger64 || t == ColumnTypeInteger16
+}

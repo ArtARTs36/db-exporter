@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"log"
+	"log/slog"
 
 	"github.com/tyler-sommer/stick"
 
@@ -36,12 +36,12 @@ func NewSQLMigrateExporter(pager *common.Pager, renderer *template.Renderer, ddl
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
-	log.Printf("[go-sql-migrate-exporter] building queries and rendering migration files")
+	slog.DebugContext(ctx, "[go-sql-migrate-exporter] building queries and rendering migration files")
 
 	migrationPage := e.pager.Of("go-sql-migrate/migration.sql")
 
@@ -66,13 +66,13 @@ func (e *Exporter) ExportPerFile(
 }
 
 func (e *Exporter) Export(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	upQueries := make([]string, 0, params.Schema.Tables.Len())
 	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
-	log.Printf("[go-sql-migrate-exporter] building queries")
+	slog.DebugContext(ctx, "[go-sql-migrate-exporter] building queries")
 
 	for _, table := range params.Schema.Tables.List() {
 		migration := e.makeMigration(table)
@@ -81,7 +81,7 @@ func (e *Exporter) Export(
 		downQueries = append(downQueries, migration.downQueries...)
 	}
 
-	log.Printf("[go-sql-migrate-exporter] rendering migration file")
+	slog.DebugContext(ctx, "[go-sql-migrate-exporter] rendering migration file")
 
 	p, err := e.pager.Of("go-sql-migrate/migration.sql").Export(
 		gosqlmigrate.CreateMigrationFilename("init", 1),

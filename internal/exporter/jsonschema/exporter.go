@@ -9,7 +9,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/jsonschema"
 	"github.com/artarts36/db-exporter/internal/shared/pg"
-	"strconv"
 )
 
 type Exporter struct {
@@ -109,23 +108,11 @@ func (e *Exporter) buildJSONSchema(params *exporter.ExportParams, tables []*sche
 }
 
 func (e *Exporter) prepareDefaultValue(col *schema.Column) interface{} {
-	if col.Default == nil {
+	if col.Default == nil || col.Default.Type != schema.ColumnDefaultTypeValue {
 		return nil
 	}
 
-	switch col.Default.Type { //nolint: exhaustive // not need
-	case schema.ColumnDefaultValueTypeInteger:
-		val, err := strconv.Atoi(col.Default.Value)
-		if err != nil {
-			return nil
-		}
-
-		return val
-	case schema.ColumnDefaultValueTypeString:
-		return col.Default.Value
-	}
-
-	return nil
+	return col.Default.Value
 }
 
 func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {

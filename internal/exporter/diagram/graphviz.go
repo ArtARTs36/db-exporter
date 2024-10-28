@@ -3,7 +3,7 @@ package diagram
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
@@ -29,14 +29,14 @@ func (b *GraphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
 
 	defer func() {
 		if err = graph.Close(); err != nil {
-			log.Printf("failed to close graph: %v", err.Error())
+			slog.Warn("failed to close graph: %v", err.Error())
 		}
 		if err = g.Close(); err != nil {
-			log.Printf("failed to close graph: %v", err.Error())
+			slog.Warn("failed to close graph: %v", err.Error())
 		}
 	}()
 
-	log.Println("[diagram] generating svg diagram")
+	slog.Debug("[diagram] generating svg diagram")
 
 	var buf bytes.Buffer
 	if err = g.Render(graph, "svg", &buf); err != nil {
@@ -53,21 +53,21 @@ func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, 
 		return g, graph, fmt.Errorf("failed to create graph: %w", err)
 	}
 
-	log.Print("[graphbuilder] mapping graph")
+	slog.Debug("[graphbuilder] mapping graph")
 
 	tablesNodes, err := b.buildNodes(graph, tables)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build nodes: %w", err)
 	}
 
-	log.Printf("[graphbuilder] builded %d nodes", len(tablesNodes))
+	slog.Debug("[graphbuilder] builded %d nodes", len(tablesNodes))
 
 	edgesCount, err := b.buildEdges(graph, tables, tablesNodes)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build edges: %w", err)
 	}
 
-	log.Printf("[graphbuilder] builded %d edges", edgesCount)
+	slog.Debug("[graphbuilder] builded %d edges", edgesCount)
 
 	return g, graph, nil
 }
