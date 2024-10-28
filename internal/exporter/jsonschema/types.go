@@ -7,15 +7,15 @@ import (
 
 func mapJSONType(col *schema.Column) jsonschema.Type {
 	switch col.PreparedType {
-	case schema.ColumnTypeInteger, schema.ColumnTypeInteger16, schema.ColumnTypeInteger64:
+	case schema.DataTypeInteger, schema.DataTypeInteger16, schema.DataTypeInteger64:
 		return jsonschema.TypeInteger
-	case schema.ColumnTypeString, schema.ColumnTypeTimestamp:
+	case schema.DataTypeString, schema.DataTypeTimestamp:
 		return jsonschema.TypeString
-	case schema.ColumnTypeBoolean:
+	case schema.DataTypeBoolean:
 		return jsonschema.TypeBoolean
-	case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
+	case schema.DataTypeFloat32, schema.DataTypeFloat64:
 		return jsonschema.TypeNumber
-	case schema.ColumnTypeBytes:
+	case schema.DataTypeBytes:
 		return jsonschema.TypeString
 	default:
 		return jsonschema.TypeString

@@ -27,7 +27,7 @@ func TestPGLoader_parseColumnDefault(t *testing.T) {
 		{
 			Title: "parse integer value",
 			Column: &schema.Column{
-				PreparedType: schema.ColumnTypeInteger64,
+				PreparedType: schema.DataTypeInteger64,
 				DefaultRaw: sql.NullString{
 					Valid:  true,
 					String: "123",
@@ -41,7 +41,7 @@ func TestPGLoader_parseColumnDefault(t *testing.T) {
 		{
 			Title: "false value",
 			Column: &schema.Column{
-				PreparedType: schema.ColumnTypeBoolean,
+				PreparedType: schema.DataTypeBoolean,
 				DefaultRaw: sql.NullString{
 					Valid:  true,
 					String: "false",
@@ -55,7 +55,7 @@ func TestPGLoader_parseColumnDefault(t *testing.T) {
 		{
 			Title: "true value",
 			Column: &schema.Column{
-				PreparedType: schema.ColumnTypeBoolean,
+				PreparedType: schema.DataTypeBoolean,
 				DefaultRaw: sql.NullString{
 					Valid:  true,
 					String: "true",
@@ -69,7 +69,7 @@ func TestPGLoader_parseColumnDefault(t *testing.T) {
 		{
 			Title: "parse string value",
 			Column: &schema.Column{
-				PreparedType: schema.ColumnTypeString,
+				PreparedType: schema.DataTypeString,
 				DefaultRaw: sql.NullString{
 					Valid:  true,
 					String: "'str'::character varying",

@@ -177,11 +177,11 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 
 	mapType := func(col *schema.Column) php.Type {
 		switch col.PreparedType { //nolint:exhaustive // not need
-		case schema.ColumnTypeInteger, schema.ColumnTypeInteger16, schema.ColumnTypeInteger64:
+		case schema.DataTypeInteger, schema.DataTypeInteger16, schema.DataTypeInteger64:
 			return php.TypeInt
-		case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
+		case schema.DataTypeFloat32, schema.DataTypeFloat64:
 			return php.TypeFloat
-		case schema.ColumnTypeString, schema.ColumnTypeBytes:
+		case schema.DataTypeString, schema.DataTypeBytes:
 			return php.TypeString
 		}
 
@@ -226,15 +226,15 @@ func (*ModelsExporter) mapPhpType(
 	spec *config.LaravelModelsExportSpec,
 ) string {
 	switch col.PreparedType {
-	case schema.ColumnTypeInteger, schema.ColumnTypeInteger16, schema.ColumnTypeInteger64:
+	case schema.DataTypeInteger, schema.DataTypeInteger16, schema.DataTypeInteger64:
 		return php.TypeInt.String()
-	case schema.ColumnTypeFloat32, schema.ColumnTypeFloat64:
+	case schema.DataTypeFloat32, schema.DataTypeFloat64:
 		return php.TypeFloat.String()
-	case schema.ColumnTypeString, schema.ColumnTypeBytes:
+	case schema.DataTypeString, schema.DataTypeBytes:
 		return php.TypeString.String()
-	case schema.ColumnTypeBoolean:
+	case schema.DataTypeBoolean:
 		return php.TypeBool.String()
-	case schema.ColumnTypeTimestamp:
+	case schema.DataTypeTimestamp:
 		if !col.Name.Equal("created_at") && !col.Name.Equal("updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)
 		}

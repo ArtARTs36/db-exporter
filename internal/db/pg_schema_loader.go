@@ -24,37 +24,37 @@ var (
 	pgColumnDefaultValueSequenceRegexp = regexp.MustCompile(`^nextval\('(.*)'::regclass\)$`)
 )
 
-var pgTypeMap = map[string]schema.ColumnType{
-	pg.TypeText:             schema.ColumnTypeString,
-	pg.TypeUUID:             schema.ColumnTypeString,
-	pg.TypeCharacter:        schema.ColumnTypeString,
-	pg.TypeCharacterVarying: schema.ColumnTypeString,
+var pgTypeMap = map[string]schema.DataType{
+	pg.TypeText:             schema.DataTypeString,
+	pg.TypeUUID:             schema.DataTypeString,
+	pg.TypeCharacter:        schema.DataTypeString,
+	pg.TypeCharacterVarying: schema.DataTypeString,
 
-	pg.TypeTimestampWithoutTZ: schema.ColumnTypeTimestamp,
-	pg.TypeTimestampWithTZ:    schema.ColumnTypeTimestamp,
+	pg.TypeTimestampWithoutTZ: schema.DataTypeTimestamp,
+	pg.TypeTimestampWithTZ:    schema.DataTypeTimestamp,
 
-	pg.TypeInteger: schema.ColumnTypeInteger,
-	pg.TypeInt4:    schema.ColumnTypeInteger,
-	pg.TypeInt8:    schema.ColumnTypeInteger,
-	pg.TypeSerial:  schema.ColumnTypeInteger,
+	pg.TypeInteger: schema.DataTypeInteger,
+	pg.TypeInt4:    schema.DataTypeInteger,
+	pg.TypeInt8:    schema.DataTypeInteger,
+	pg.TypeSerial:  schema.DataTypeInteger,
 
-	pg.TypeSmallInt:    schema.ColumnTypeInteger16,
-	pg.TypeSmallSerial: schema.ColumnTypeInteger16,
+	pg.TypeSmallInt:    schema.DataTypeInteger16,
+	pg.TypeSmallSerial: schema.DataTypeInteger16,
 
-	pg.TypeBigint: schema.ColumnTypeInteger64,
+	pg.TypeBigint: schema.DataTypeInteger64,
 
-	pg.TypeBoolean: schema.ColumnTypeBoolean,
-	pg.TypeBit:     schema.ColumnTypeBoolean,
+	pg.TypeBoolean: schema.DataTypeBoolean,
+	pg.TypeBit:     schema.DataTypeBoolean,
 
-	pg.TypeDoublePrecision: schema.ColumnTypeFloat32,
-	pg.TypeFloat8:          schema.ColumnTypeFloat32,
-	pg.TypeDecimal:         schema.ColumnTypeFloat32,
+	pg.TypeDoublePrecision: schema.DataTypeFloat32,
+	pg.TypeFloat8:          schema.DataTypeFloat32,
+	pg.TypeDecimal:         schema.DataTypeFloat32,
 
-	pg.TypeMoney:   schema.ColumnTypeFloat64,
-	pg.TypeReal:    schema.ColumnTypeFloat64,
-	pg.TypeNumeric: schema.ColumnTypeFloat64,
+	pg.TypeMoney:   schema.DataTypeFloat64,
+	pg.TypeReal:    schema.DataTypeFloat64,
+	pg.TypeNumeric: schema.DataTypeFloat64,
 
-	pg.TypeBytea: schema.ColumnTypeBytes,
+	pg.TypeBytea: schema.DataTypeBytes,
 }
 
 type constraint struct {
@@ -267,13 +267,13 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 	}
 }
 
-func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
+func (l *PGLoader) prepareColumnType(col *schema.Column) schema.DataType {
 	t, exists := pgTypeMap[col.Type.Value]
 	if exists {
 		return t
 	}
 
-	return schema.ColumnTypeString
+	return schema.DataTypeString
 }
 
 func (l *PGLoader) loadConstraints(

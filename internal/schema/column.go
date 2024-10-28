@@ -14,7 +14,7 @@ type Column struct {
 	UniqueKey    *UniqueKey     `db:"-"`
 	ForeignKey   *ForeignKey    `db:"-"`
 	Comment      ds.String      `db:"comment"`
-	PreparedType ColumnType     `db:"-"`
+	PreparedType DataType       `db:"-"`
 	DefaultRaw   sql.NullString `db:"default_value"`
 	Default      *ColumnDefault `db:"-"`
 }
