@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/db"
-	"github.com/artarts36/db-exporter/internal/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 )

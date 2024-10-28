@@ -10,8 +10,13 @@ type Activity struct {
 	Export ExportActivity // fill export or import
 	Import ImportActivity
 
-	Database string   `yaml:"database"`
-	Tables   []string `yaml:"tables"`
+	Database string         `yaml:"database"`
+	Tables   ActivityTables `yaml:"tables"`
+}
+
+type ActivityTables struct {
+	List   []string `yaml:"list"`
+	Prefix string   `yaml:"prefix"`
 }
 
 type ExportActivity struct {
@@ -41,8 +46,9 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		Import ImporterName `yaml:"import"`
 		Spec   yaml.Node    `yaml:"spec"`
 
-		Database string   `yaml:"database"`
-		Tables   []string `yaml:"tables"`
+		Database    string         `yaml:"database"`
+		Tables      ActivityTables `yaml:"tables"`
+		TablePrefix string         `yaml:"table_prefix"`
 	}
 
 	exportOrImportObj := &exportOrImport{}
@@ -68,8 +74,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		switch exportActivity.Format {
 		case ExporterNameDiagram, ExporterNameGoose, ExporterNameGooseFixtures, ExporterNameGoSQLMigrate,
 			ExporterNameLaravelMigrationsRaw, ExporterNameYamlFixtures:
-		case ExporterNameGoStructs:
-			exportActivity.Spec = new(GoStructsExportSpec)
+		case ExporterNameGoEntities:
+			exportActivity.Spec = new(GoEntitiesExportSpec)
 		case ExporterNameMd:
 			exportActivity.Spec = new(MarkdownExportSpec)
 		case ExporterNameGrpcCrud:
@@ -78,6 +84,10 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(CSVExportSpec)
 		case ExporterNameLaravelModels:
 			exportActivity.Spec = new(LaravelModelsExportSpec)
+		case ExporterNameGoEntityRepository:
+			exportActivity.Spec = new(GoEntityRepositorySpec)
+		case ExporterNameJSONSchema:
+			exportActivity.Spec = new(JSONSchemaExportSpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

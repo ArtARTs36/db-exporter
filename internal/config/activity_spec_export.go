@@ -7,7 +7,8 @@ type ExporterName string
 const (
 	ExporterNameMd                   ExporterName = "md"
 	ExporterNameDiagram              ExporterName = "diagram"
-	ExporterNameGoStructs            ExporterName = "go-structs"
+	ExporterNameGoEntities           ExporterName = "go-entities"
+	ExporterNameGoEntityRepository   ExporterName = "go-entity-repository"
 	ExporterNameGoose                ExporterName = "goose"
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
 	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
@@ -16,10 +17,12 @@ const (
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
 	ExporterNameCSV                  ExporterName = "csv"
+	ExporterNameJSONSchema           ExporterName = "json-schema"
 )
 
-type GoStructsExportSpec struct {
-	Package string `yaml:"package"`
+type GoEntitiesExportSpec struct {
+	GoModule string `yaml:"go_module"`
+	Package  string `yaml:"package"` // default: entities
 }
 
 type GRPCCrudExportSpec struct {
@@ -45,4 +48,38 @@ type ExportSpecTransform struct {
 type LaravelModelsExportSpec struct {
 	Namespace string `yaml:"namespace"`
 	TimeAs    string `yaml:"time_as"` // datetime, carbon
+}
+
+type GoEntityRepositorySpecRepoInterfacesPlace string
+
+const (
+	GoEntityRepositorySpecRepoInterfacesPlaceUnspecified    = ""
+	GoEntityRepositorySpecRepoInterfacesPlaceWithEntity     = "with_entity"
+	GoEntityRepositorySpecRepoInterfacesPlaceWithRepository = "with_repository"
+	GoEntityRepositorySpecRepoInterfacesPlaceEntity         = "entity"
+)
+
+type GoEntityRepositorySpec struct {
+	GoModule string `yaml:"go_module" json:"go_module"`
+	Entities struct {
+		Package string `yaml:"package" json:"package"`
+	} `yaml:"entities" json:"entities"`
+	Repositories struct {
+		Package   string `yaml:"package" json:"package"`
+		Container struct {
+			StructName string `yaml:"struct_name" json:"struct_name"`
+		} `yaml:"container" json:"container"`
+		Interfaces struct {
+			Place     GoEntityRepositorySpecRepoInterfacesPlace `yaml:"place" json:"place"`
+			WithMocks bool                                      `yaml:"with_mocks" json:"with_mocks"`
+		} `yaml:"interfaces" json:"interfaces"`
+	} `yaml:"repositories" json:"repositories"`
+}
+
+type JSONSchemaExportSpec struct {
+	Pretty bool `yaml:"pretty" json:"pretty"`
+	Schema struct {
+		Title       string `yaml:"title" json:"title"`
+		Description string `yaml:"description" json:"description"`
+	} `yaml:"schema" json:"schema"`
 }

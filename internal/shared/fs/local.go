@@ -22,7 +22,7 @@ func (*Local) ReadFile(path string) ([]byte, error) {
 }
 
 func (*Local) Mkdir(path string) error {
-	return os.Mkdir(path, 0755)
+	return os.MkdirAll(path, 0755)
 }
 
 func (*Local) Write(path string, content []byte) (FileInfo, error) {

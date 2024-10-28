@@ -4,11 +4,11 @@ databases:
     dsn: ${PG_DSN}
 
 tasks:
-  gen_md:
+  gen_repos:
     activities:
-      - export: md
+      - export: json-schema
         spec:
-          with_diagram: true
+          pretty: true
         out:
           dir: ./out
 
