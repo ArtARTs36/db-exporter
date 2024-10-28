@@ -12,6 +12,8 @@ type Table struct {
 	ForeignKeys map[string]*ForeignKey `db:"-"`
 	UniqueKeys  map[string]*UniqueKey  `db:"-"`
 
+	UsingSequences map[string]*Sequence `db:"-"`
+
 	columnsNames []string `db:"-"`
 }
 

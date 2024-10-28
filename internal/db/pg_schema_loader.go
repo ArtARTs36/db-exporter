@@ -130,20 +130,50 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d constraints", constraintsCount))
 
+	slog.DebugContext(ctx, "[pgloader] loading sequences")
+
+	sequences, err := l.loadSequences(ctx, db, "public")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load sequences")
+	}
+
+	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sequences)))
+
 	for _, col := range cols {
 		table, tableExists := tables.Get(col.TableName)
 		if !tableExists {
 			table = &schema.Table{
-				Name:        col.TableName,
-				ForeignKeys: map[string]*schema.ForeignKey{},
-				UniqueKeys:  map[string]*schema.UniqueKey{},
+				Name:           col.TableName,
+				ForeignKeys:    map[string]*schema.ForeignKey{},
+				UniqueKeys:     map[string]*schema.UniqueKey{},
+				UsingSequences: map[string]*schema.Sequence{},
 			}
 
 			tables.Add(table)
 		}
 
-		col.PreparedType = l.prepareColumnType(col)
+		col.PreparedType = l.prepareDataType(col.Type.Value)
 		col.Default = l.parseColumnDefault(col)
+
+		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
+			seqName, ok := col.Default.Value.(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to get sequence name for %s.%s", table.Name, col.Name)
+			}
+
+			seq, seqExists := sequences[seqName]
+			if !seqExists {
+				return nil, fmt.Errorf("failed to get sequence %q for %s.%s", seqName, table.Name, col.Name)
+			}
+
+			seq.Used++
+
+			col.UsingSequences = map[string]*schema.Sequence{
+				seqName: seq,
+			}
+
+			table.UsingSequences[seqName] = seq
+		}
 
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
@@ -151,7 +181,8 @@ order by c.ordinal_position`
 	}
 
 	return &schema.Schema{
-		Tables: tables,
+		Tables:    tables,
+		Sequences: sequences,
 	}, nil
 }
 
@@ -267,13 +298,40 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 	}
 }
 
-func (l *PGLoader) prepareColumnType(col *schema.Column) schema.DataType {
-	t, exists := pgTypeMap[col.Type.Value]
+func (l *PGLoader) prepareDataType(rawType string) schema.DataType {
+	t, exists := pgTypeMap[rawType]
 	if exists {
 		return t
 	}
 
 	return schema.DataTypeString
+}
+
+func (l *PGLoader) loadSequences(ctx context.Context, db *sqlx.DB, schemaName string) (
+	map[string]*schema.Sequence,
+	error,
+) {
+	query := `select
+    s.sequence_name as name,
+    s.data_type as data_type from information_schema.sequences s
+where s.sequence_schema = $1`
+
+	var sequences []*schema.Sequence
+
+	err := db.SelectContext(ctx, &sequences, query, schemaName)
+	if err != nil {
+		return nil, err
+	}
+
+	sequenceMap := map[string]*schema.Sequence{}
+
+	for _, sequence := range sequences {
+		sequence.PreparedDataType = l.prepareDataType(sequence.DataType)
+
+		sequenceMap[sequence.Name] = sequence
+	}
+
+	return sequenceMap, nil
 }
 
 func (l *PGLoader) loadConstraints(

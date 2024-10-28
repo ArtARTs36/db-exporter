@@ -5,7 +5,8 @@ import (
 )
 
 type Schema struct {
-	Tables *TableMap
+	Tables    *TableMap
+	Sequences map[string]*Sequence
 }
 
 type ForeignKey struct {

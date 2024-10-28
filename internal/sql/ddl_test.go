@@ -1,6 +1,7 @@
 package sql_test
 
 import (
+	sql2 "database/sql"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -119,6 +120,47 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
     CONSTRAINT users_car_id_fk FOREIGN KEY (car_id) REFERENCES cars (id) DEFERRABLE,
     CONSTRAINT users_mobile_id_fk FOREIGN KEY (mobile_id) REFERENCES mobiles (id) DEFERRABLE INITIALLY DEFERRED
 );`,
+			},
+		},
+		{
+			Name: "table with default values and sequences",
+			Table: &schema.Table{
+				Name: ds.String{Value: "users"},
+				Columns: []*schema.Column{
+					{
+						Name: *ds.NewString("id"),
+						Type: *ds.NewString("integer"),
+					},
+					{
+						Name: *ds.NewString("country_id"),
+						Type: *ds.NewString("integer"),
+						DefaultRaw: sql2.NullString{
+							Valid:  true,
+							String: "1",
+						},
+					},
+				},
+				PrimaryKey: &schema.PrimaryKey{
+					Name:         *ds.NewString("users_pk"),
+					ColumnsNames: ds.NewStrings("id"),
+				},
+				UsingSequences: map[string]*schema.Sequence{
+					"users_id_seq": &schema.Sequence{
+						Name:     "users_id_seq",
+						DataType: "integer",
+						Used:     1,
+					},
+				},
+			},
+			ExpectedQueries: []string{
+				`CREATE TABLE users
+(
+    id         integer NOT NULL,
+    country_id integer NOT NULL DEFAULT 1,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);`,
+				`CREATE sequence users_id_seq as integer;`,
 			},
 		},
 	}

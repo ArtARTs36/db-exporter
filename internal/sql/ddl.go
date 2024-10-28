@@ -18,7 +18,7 @@ func NewDDLBuilder() *DDLBuilder {
 
 type isLastLine func() bool
 
-func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
+func (b *DDLBuilder) BuildDDL(table *schema.Table) []string { //nolint:funlen // not need
 	var upQueries []string
 
 	if len(table.Columns) == 0 {
@@ -66,12 +66,18 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 		spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
 
+		defaultValue := ""
+		if column.DefaultRaw.Valid {
+			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+		}
+
 		line := fmt.Sprintf(
-			"    %s%s%s%s%s",
+			"    %s%s%s%s%s%s",
 			column.Name.Value,
 			strings.Repeat(" ", spacesAfterColumnName),
 			column.Type.Value,
 			notNull,
+			defaultValue,
 			comma,
 		)
 
@@ -106,9 +112,19 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 	upSQL := strings.Join(createTableQuery, "\n")
 
+	for _, sequence := range table.UsingSequences {
+		if sequence.Used == 1 {
+			upQueries = append(upQueries, b.buildSequence(sequence))
+		}
+	}
+
 	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries
+}
+
+func (b *DDLBuilder) buildSequence(seq *schema.Sequence) string {
+	return fmt.Sprintf("CREATE sequence %s as %s;", seq.Name, seq.DataType)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {

@@ -4,13 +4,11 @@ databases:
     dsn: ${PG_DSN}
 
 tasks:
-  gen_repos:
+  gen_goose_migrations:
     activities:
-      - export: json-schema
-        spec:
-          pretty: true
+      - export: goose
         out:
-          dir: ./out
+          dir: ./out/goose
 
 options:
   print_stat: true

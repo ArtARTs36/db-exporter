@@ -1,6 +1,8 @@
 package schema
 
 type Sequence struct {
-	Name     string `json:"name"`
-	DataType string `json:"data_type"`
+	Name             string   `db:"name"`
+	DataType         string   `db:"data_type"`
+	PreparedDataType DataType `db:"-"`
+	Used             int      `db:"-"`
 }
