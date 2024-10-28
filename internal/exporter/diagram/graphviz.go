@@ -29,10 +29,10 @@ func (b *GraphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
 
 	defer func() {
 		if err = graph.Close(); err != nil {
-			slog.Warn("failed to close graph: %v", err.Error())
+			slog.Warn("failed to close graph", slog.String("err", err.Error()))
 		}
 		if err = g.Close(); err != nil {
-			slog.Warn("failed to close graph: %v", err.Error())
+			slog.Warn("failed to close graph", slog.String("err", err.Error()))
 		}
 	}()
 
@@ -60,14 +60,14 @@ func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, 
 		return nil, nil, fmt.Errorf("failed to build nodes: %w", err)
 	}
 
-	slog.Debug("[graphbuilder] builded %d nodes", len(tablesNodes))
+	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
 
 	edgesCount, err := b.buildEdges(graph, tables, tablesNodes)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build edges: %w", err)
 	}
 
-	slog.Debug("[graphbuilder] builded %d edges", edgesCount)
+	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
 
 	return g, graph, nil
 }
