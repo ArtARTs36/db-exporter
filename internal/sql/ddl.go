@@ -12,13 +12,15 @@ import (
 type DDLBuilder struct {
 }
 
+type BuildDDLOptions struct{}
+
 func NewDDLBuilder() *DDLBuilder {
 	return &DDLBuilder{}
 }
 
 type isLastLine func() bool
 
-func (b *DDLBuilder) BuildDDL(table *schema.Table) []string { //nolint:funlen // not need
+func (b *DDLBuilder) BuildDDL(table *schema.Table, _ BuildDDLOptions) []string { //nolint:funlen // not need
 	var upQueries []string
 
 	if len(table.Columns) == 0 {
@@ -114,7 +116,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string { //nolint:funlen //
 
 	for _, sequence := range table.UsingSequences {
 		if sequence.Used == 1 {
-			upQueries = append(upQueries, b.buildSequence(sequence))
+			upQueries = append(upQueries, b.BuildSequence(sequence))
 		}
 	}
 
@@ -123,8 +125,12 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string { //nolint:funlen //
 	return upQueries
 }
 
-func (b *DDLBuilder) buildSequence(seq *schema.Sequence) string {
-	return fmt.Sprintf("CREATE sequence %s as %s;", seq.Name, seq.DataType)
+func (b *DDLBuilder) BuildSequence(seq *schema.Sequence) string {
+	return fmt.Sprintf("CREATE SEQUENCE %s as %s;", seq.Name, seq.DataType)
+}
+
+func (b *DDLBuilder) DropSequence(seq *schema.Sequence) string {
+	return fmt.Sprintf("DROP SEQUENCE %s;", seq.Name)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {

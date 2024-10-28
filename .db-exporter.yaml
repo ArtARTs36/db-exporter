@@ -10,6 +10,12 @@ tasks:
         out:
           dir: ./out/goose
 
+  gen_laravel_raw_migrations:
+    activities:
+      - export: laravel-migrations-raw
+        out:
+          dir: ./out/laravel-migrations-raw
+
 options:
   print_stat: true
   debug: true

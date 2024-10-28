@@ -47,7 +47,6 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameGoose: goose.NewMigrationsExporter(pager, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate: gosqlmigrate.NewSQLMigrateExporter(
 			pager,
-			renderer,
 			sql.NewDDLBuilder(),
 		),
 		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, sql.NewDDLBuilder()),

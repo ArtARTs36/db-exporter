@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 
-class {{ migration.Name }} extends Migration
+class {{ migration.Meta["Name"] }} extends Migration
 {
     /**
      * Run the migrations.
@@ -11,7 +11,7 @@ class {{ migration.Name }} extends Migration
      */
     public function up()
     {
-        {% for query in migration.Queries.Up %}\Illuminate\Support\Facades\DB::unprepared(<<<SQL
+        {% for query in migration.UpQueries %}\Illuminate\Support\Facades\DB::unprepared(<<<SQL
 {{ query }}
 SQL);{% if loop.last == false %}
         {% endif %}{% endfor %}
@@ -24,7 +24,7 @@ SQL);{% if loop.last == false %}
      */
     public function down()
     {
-        {% for query in migration.Queries.Down %}\Illuminate\Support\Facades\DB::unprepared(<<<SQL
+        {% for query in migration.DownQueries %}\Illuminate\Support\Facades\DB::unprepared(<<<SQL
 {{ query }}
 SQL);{% if loop.last == false %}
         {% endif %}{% endfor %}
