@@ -18,6 +18,7 @@ type Column struct {
 	DefaultRaw     sql.NullString       `db:"default_value"`
 	Default        *ColumnDefault       `db:"-"`
 	UsingSequences map[string]*Sequence `db:"-"`
+	Enum           *Enum                `db:"-"`
 }
 
 func (c *Column) IsPrimaryKey() bool {

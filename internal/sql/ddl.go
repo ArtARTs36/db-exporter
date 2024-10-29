@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 type DDLBuilder struct {
@@ -98,11 +98,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 		createTableQuery = append(createTableQuery, line)
 
 		if column.Comment.IsNotEmpty() {
-			upQueries = append(upQueries, sqlquery.BuildCommentOnColumn(
-				column.TableName.Value,
-				column.Name.Value,
-				column.Comment.Value,
-			))
+			upQueries = append(upQueries, b.CommentOnColumn(column))
 		}
 	}
 
@@ -131,22 +127,57 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 	return upQueries
 }
 
-func (b *DDLBuilder) BuildSequence(seq *schema.Sequence, ifExists bool) string {
+func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, ifNotExists bool) string {
+	ifne := ""
+	if ifNotExists {
+		ifne = "IF NOT EXISTS "
+	}
+
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, seq.DataType)
+}
+
+func (b *DDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {
 	ife := ""
-	if ifExists {
+	if useIfExists {
 		ife = "IF EXISTS "
 	}
 
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ife, seq.Name, seq.DataType)
+	return fmt.Sprintf("DROP TABLE %s%s;", ife, table.Name.Value)
 }
 
-func (b *DDLBuilder) DropSequence(seq *schema.Sequence, ifNotExists bool) string {
-	ifne := ""
-	if ifNotExists {
-		ifne = "IF NOT EXISTS"
+func (b *DDLBuilder) CreateEnum(enum *schema.Enum) string {
+	valuesString := ""
+	for i, value := range enum.Values {
+		valuesString += fmt.Sprintf("'%s'", value)
+
+		if i < len(enum.Values)-1 {
+			valuesString += ", "
+		}
 	}
 
-	return fmt.Sprintf("DROP SEQUENCE %s%s;", ifne, seq.Name)
+	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name, valuesString)
+}
+
+func (b *DDLBuilder) DropType(name string, ifExists bool) string {
+	ife := ""
+	if ifExists {
+		ife = "IF EXISTS"
+	}
+
+	return fmt.Sprintf("DROP TYPE %s%s;", ife, name)
+}
+
+func (b *DDLBuilder) DropSequence(seq *schema.Sequence, ifExists bool) string {
+	ife := ""
+	if ifExists {
+		ife = "IF EXISTS"
+	}
+
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", ife, seq.Name)
+}
+
+func (b *DDLBuilder) CommentOnColumn(col *schema.Column) string {
+	return fmt.Sprintf("COMMENT ON COLUMN %s.%s IS '%s';", col.TableName, col.Name, col.Comment)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {
@@ -157,9 +188,13 @@ func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) str
 
 	return fmt.Sprintf(
 		"    %s%s",
-		sqlquery.BuildPK(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
+		b.CreatePrimaryKey(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
 		comma,
 	)
+}
+
+func (b *DDLBuilder) CreatePrimaryKey(name string, columns *ds.Strings) string {
+	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Join(", ").Value)
 }
 
 func (b *DDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []string {
@@ -214,10 +249,14 @@ func (b *DDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine) []s
 			comma = ""
 		}
 
-		q := fmt.Sprintf("%s%s", sqlquery.BuildUK(uk.Name.Value, uk.ColumnsNames), comma)
+		q := fmt.Sprintf("%s%s", b.CreateUniqueKey(uk.Name.Value, uk.ColumnsNames), comma)
 
 		queries = append(queries, q)
 	}
 
 	return queries
+}
+
+func (b *DDLBuilder) CreateUniqueKey(name string, columns *ds.Strings) string {
+	return fmt.Sprintf("    CONSTRAINT %s UNIQUE (%s)", name, columns.Join(", ").Value)
 }

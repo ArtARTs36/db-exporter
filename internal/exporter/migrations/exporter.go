@@ -12,7 +12,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/sqlquery"
 	"github.com/artarts36/db-exporter/internal/sql"
 )
 
@@ -61,8 +60,15 @@ func (e *Exporter) ExportPerFile(
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.Used == 1 {
-				upQueries = append(upQueries, e.ddlBuilder.BuildSequence(sequence, spec.Use.IfExists))
-				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence, spec.Use.IfNotExists))
+				upQueries = append(upQueries, e.ddlBuilder.CreateSequence(sequence, spec.Use.IfNotExists))
+				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence, spec.Use.IfExists))
+			}
+		}
+
+		for _, enum := range table.UsingEnums {
+			if enum.Used == 1 {
+				upQueries = append(upQueries, e.ddlBuilder.CreateEnum(enum))
+				downQueries = append(downQueries, e.ddlBuilder.DropType(enum.Name, spec.Use.IfExists))
 			}
 		}
 
@@ -112,7 +118,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, seq := range params.Schema.Sequences {
-		upQueries = append(upQueries, e.ddlBuilder.BuildSequence(seq, spec.Use.IfExists))
+		upQueries = append(upQueries, e.ddlBuilder.CreateSequence(seq, spec.Use.IfExists))
 		downQueries = append(downQueries, e.ddlBuilder.DropSequence(seq, spec.Use.IfNotExists))
 	}
 
@@ -141,7 +147,7 @@ func (e *Exporter) createQueries(table *schema.Table, opts sql.BuildDDLOptions, 
 ) {
 	upQueries = e.ddlBuilder.BuildDDL(table, opts)
 	downQueries = []string{
-		sqlquery.BuildDropTable(table.Name.Value, useIfExists),
+		e.ddlBuilder.DropTable(table, useIfExists),
 	}
 	return
 }

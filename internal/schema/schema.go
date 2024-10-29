@@ -7,6 +7,7 @@ import (
 type Schema struct {
 	Tables    *TableMap
 	Sequences map[string]*Sequence
+	Enums     map[string]*Enum
 }
 
 type ForeignKey struct {
@@ -34,6 +35,7 @@ func (s *Schema) Clone() *Schema {
 	return &Schema{
 		Tables:    s.Tables.Clone(),
 		Sequences: s.Sequences,
+		Enums:     s.Enums,
 	}
 }
 

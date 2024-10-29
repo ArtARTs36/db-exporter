@@ -13,6 +13,7 @@ type Table struct {
 	UniqueKeys  map[string]*UniqueKey  `db:"-"`
 
 	UsingSequences map[string]*Sequence `db:"-"`
+	UsingEnums     map[string]*Enum     `db:"-"`
 
 	columnsNames []string `db:"-"`
 }
