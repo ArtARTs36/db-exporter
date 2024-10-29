@@ -12,6 +12,7 @@ db-exporter - app for export db schema and data to formats:
 * YAML fixtures `yaml-fixtures`
 * Go Entity Repository `go-entity-repository`
 * JSON Schema `json-schema`
+* GraphQL `graphql`
 
 Supported database: PostgreSQL
 
