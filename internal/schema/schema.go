@@ -5,7 +5,8 @@ import (
 )
 
 type Schema struct {
-	Tables *TableMap
+	Tables    *TableMap
+	Sequences map[string]*Sequence
 }
 
 type ForeignKey struct {
@@ -31,7 +32,8 @@ type UniqueKey struct {
 
 func (s *Schema) Clone() *Schema {
 	return &Schema{
-		Tables: s.Tables.Clone(),
+		Tables:    s.Tables.Clone(),
+		Sequences: s.Sequences,
 	}
 }
 

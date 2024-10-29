@@ -116,9 +116,9 @@ func (e *Exporter) prepareDefaultValue(col *schema.Column) interface{} {
 }
 
 func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {
-	if column.PreparedType == schema.ColumnTypeTimestamp {
+	if column.PreparedType == schema.DataTypeTimestamp {
 		return jsonschema.FormatDateTime
-	} else if column.PreparedType == schema.ColumnTypeString {
+	} else if column.PreparedType == schema.DataTypeString {
 		if column.Type.Equal(pg.TypeUUID) { //nolint:gocritic // not need
 			return jsonschema.FormatUUID
 		} else if column.Name.Equal("email") || column.Name.Ends("_email") {

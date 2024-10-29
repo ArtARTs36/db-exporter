@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/migrations"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
@@ -15,7 +16,7 @@ import (
 )
 
 type FixturesExporter struct {
-	pager        *common.Pager
+	page         *common.Page
 	dataLoader   *db.DataLoader
 	queryBuilder *sql.QueryBuilder
 }
@@ -26,7 +27,7 @@ func NewFixturesExporter(
 	insertBuilder *sql.QueryBuilder,
 ) *FixturesExporter {
 	return &FixturesExporter{
-		pager:        pager,
+		page:         pager.Of("goose/migration.sql"),
 		dataLoader:   dataLoader,
 		queryBuilder: insertBuilder,
 	}
@@ -54,16 +55,18 @@ func (e *FixturesExporter) ExportPerFile(
 			return nil, err
 		}
 
-		migration := e.makeMigration([]string{upQuery}, e.queryBuilder.BuildDeleteQueries(table, data))
+		migration := &migrations.Migration{
+			UpQueries:   []string{upQuery},
+			DownQueries: e.queryBuilder.BuildDeleteQueries(table, data),
+		}
 
-		p, err := e.pager.Of("goose/migration.sql").Export(
+		p, err := e.page.Export(
 			goose.CreateMigrationFilename(fmt.Sprintf(
 				"inserts_into_%s_table",
 				table.Name.Value,
 			), i),
 			map[string]stick.Value{
-				"up_queries":   migration.upQueries,
-				"down_queries": migration.downQueries,
+				"migration": migration,
 			},
 		)
 		if err != nil {
@@ -80,8 +83,10 @@ func (e *FixturesExporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	upQueries := make([]string, 0, params.Schema.Tables.Len())
-	downQueries := make([]string, 0, params.Schema.Tables.Len())
+	migration := &migrations.Migration{
+		UpQueries:   make([]string, 0, params.Schema.Tables.Len()),
+		DownQueries: make([]string, 0, params.Schema.Tables.Len()),
+	}
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries")
 
@@ -100,17 +105,16 @@ func (e *FixturesExporter) Export(
 			return nil, err
 		}
 
-		upQueries = append(upQueries, upQuery)
-		downQueries = append(downQueries, e.queryBuilder.BuildDeleteQueries(table, data)...)
+		migration.UpQueries = append(migration.UpQueries, upQuery)
+		migration.DownQueries = append(migration.DownQueries, e.queryBuilder.BuildDeleteQueries(table, data)...)
 	}
 
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] rendering migration file")
 
-	p, err := e.pager.Of("goose/migration.sql").Export(
+	p, err := e.page.Export(
 		goose.CreateMigrationFilename("inserts", 1),
 		map[string]stick.Value{
-			"up_queries":   upQueries,
-			"down_queries": downQueries,
+			"migration": migration,
 		},
 	)
 	if err != nil {
@@ -120,11 +124,4 @@ func (e *FixturesExporter) Export(
 	return []*exporter.ExportedPage{
 		p,
 	}, nil
-}
-
-func (e *FixturesExporter) makeMigration(upQueries []string, downQueries []string) *gooseMigration {
-	return &gooseMigration{
-		upQueries:   upQueries,
-		downQueries: downQueries,
-	}
 }

@@ -74,7 +74,7 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 
 func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg string)) string {
 	switch col.PreparedType {
-	case schema.ColumnTypeInteger64, schema.ColumnTypeInteger:
+	case schema.DataTypeInteger64, schema.DataTypeInteger:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -82,7 +82,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeInt64
-	case schema.ColumnTypeInteger16:
+	case schema.DataTypeInteger16:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -90,7 +90,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeInt16
-	case schema.ColumnTypeString:
+	case schema.DataTypeString:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -98,7 +98,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeString
-	case schema.ColumnTypeTimestamp:
+	case schema.DataTypeTimestamp:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -108,7 +108,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		addImport("time")
 
 		return golang.TypeTimeTime
-	case schema.ColumnTypeBoolean:
+	case schema.DataTypeBoolean:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -116,7 +116,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeBool
-	case schema.ColumnTypeFloat64:
+	case schema.DataTypeFloat64:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -124,7 +124,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeFloat64
-	case schema.ColumnTypeFloat32:
+	case schema.DataTypeFloat32:
 		if col.Nullable {
 			addImport("database/sql")
 
@@ -132,7 +132,7 @@ func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg stri
 		}
 
 		return golang.TypeFloat32
-	case schema.ColumnTypeBytes:
+	case schema.DataTypeBytes:
 		if col.Nullable {
 			return golang.Ptr(golang.TypeByteSlice)
 		}

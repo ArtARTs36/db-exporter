@@ -19,6 +19,7 @@ const (
 ){% if schema.GenInterfaces %}
 
 {% include 'go-entities/repository_interfaces.go.tpl' with {'repositories': schema.Repositories, '_file': _file} only %}
+{% else %}
 {% endif %}
 {% for repo in schema.Repositories %}type {{ repo.Name }} struct {
 	db *sqlx.DB

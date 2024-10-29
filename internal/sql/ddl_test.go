@@ -15,6 +15,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		Name            string
 		Table           *schema.Table
 		ExpectedQueries []string
+		Opts            sql.BuildDDLOptions
 	}{
 		{
 			Name: "empty table",
@@ -127,7 +128,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Name, func(t *testing.T) {
-			queries := builder.BuildDDL(tCase.Table)
+			queries := builder.BuildDDL(tCase.Table, tCase.Opts)
 
 			assert.Equal(t, tCase.ExpectedQueries, queries)
 		})

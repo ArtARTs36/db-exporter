@@ -1,3 +1,4 @@
+//go:generate mockgen -source=country.go -package=repositoriesa -destination=mock_country.go
 package repositoriesa
 
 import (

@@ -24,37 +24,37 @@ var (
 	pgColumnDefaultValueSequenceRegexp = regexp.MustCompile(`^nextval\('(.*)'::regclass\)$`)
 )
 
-var pgTypeMap = map[string]schema.ColumnType{
-	pg.TypeText:             schema.ColumnTypeString,
-	pg.TypeUUID:             schema.ColumnTypeString,
-	pg.TypeCharacter:        schema.ColumnTypeString,
-	pg.TypeCharacterVarying: schema.ColumnTypeString,
+var pgTypeMap = map[string]schema.DataType{
+	pg.TypeText:             schema.DataTypeString,
+	pg.TypeUUID:             schema.DataTypeString,
+	pg.TypeCharacter:        schema.DataTypeString,
+	pg.TypeCharacterVarying: schema.DataTypeString,
 
-	pg.TypeTimestampWithoutTZ: schema.ColumnTypeTimestamp,
-	pg.TypeTimestampWithTZ:    schema.ColumnTypeTimestamp,
+	pg.TypeTimestampWithoutTZ: schema.DataTypeTimestamp,
+	pg.TypeTimestampWithTZ:    schema.DataTypeTimestamp,
 
-	pg.TypeInteger: schema.ColumnTypeInteger,
-	pg.TypeInt4:    schema.ColumnTypeInteger,
-	pg.TypeInt8:    schema.ColumnTypeInteger,
-	pg.TypeSerial:  schema.ColumnTypeInteger,
+	pg.TypeInteger: schema.DataTypeInteger,
+	pg.TypeInt4:    schema.DataTypeInteger,
+	pg.TypeInt8:    schema.DataTypeInteger,
+	pg.TypeSerial:  schema.DataTypeInteger,
 
-	pg.TypeSmallInt:    schema.ColumnTypeInteger16,
-	pg.TypeSmallSerial: schema.ColumnTypeInteger16,
+	pg.TypeSmallInt:    schema.DataTypeInteger16,
+	pg.TypeSmallSerial: schema.DataTypeInteger16,
 
-	pg.TypeBigint: schema.ColumnTypeInteger64,
+	pg.TypeBigint: schema.DataTypeInteger64,
 
-	pg.TypeBoolean: schema.ColumnTypeBoolean,
-	pg.TypeBit:     schema.ColumnTypeBoolean,
+	pg.TypeBoolean: schema.DataTypeBoolean,
+	pg.TypeBit:     schema.DataTypeBoolean,
 
-	pg.TypeDoublePrecision: schema.ColumnTypeFloat32,
-	pg.TypeFloat8:          schema.ColumnTypeFloat32,
-	pg.TypeDecimal:         schema.ColumnTypeFloat32,
+	pg.TypeDoublePrecision: schema.DataTypeFloat32,
+	pg.TypeFloat8:          schema.DataTypeFloat32,
+	pg.TypeDecimal:         schema.DataTypeFloat32,
 
-	pg.TypeMoney:   schema.ColumnTypeFloat64,
-	pg.TypeReal:    schema.ColumnTypeFloat64,
-	pg.TypeNumeric: schema.ColumnTypeFloat64,
+	pg.TypeMoney:   schema.DataTypeFloat64,
+	pg.TypeReal:    schema.DataTypeFloat64,
+	pg.TypeNumeric: schema.DataTypeFloat64,
 
-	pg.TypeBytea: schema.ColumnTypeBytes,
+	pg.TypeBytea: schema.DataTypeBytes,
 }
 
 type constraint struct {
@@ -130,20 +130,50 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d constraints", constraintsCount))
 
+	slog.DebugContext(ctx, "[pgloader] loading sequences")
+
+	sequences, err := l.loadSequences(ctx, db, "public")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load sequences")
+	}
+
+	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sequences)))
+
 	for _, col := range cols {
 		table, tableExists := tables.Get(col.TableName)
 		if !tableExists {
 			table = &schema.Table{
-				Name:        col.TableName,
-				ForeignKeys: map[string]*schema.ForeignKey{},
-				UniqueKeys:  map[string]*schema.UniqueKey{},
+				Name:           col.TableName,
+				ForeignKeys:    map[string]*schema.ForeignKey{},
+				UniqueKeys:     map[string]*schema.UniqueKey{},
+				UsingSequences: map[string]*schema.Sequence{},
 			}
 
 			tables.Add(table)
 		}
 
-		col.PreparedType = l.prepareColumnType(col)
+		col.PreparedType = l.prepareDataType(col.Type.Value)
 		col.Default = l.parseColumnDefault(col)
+
+		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
+			seqName, ok := col.Default.Value.(string)
+			if !ok {
+				return nil, fmt.Errorf("failed to get sequence name for %s.%s", table.Name, col.Name)
+			}
+
+			seq, seqExists := sequences[seqName]
+			if !seqExists {
+				return nil, fmt.Errorf("failed to get sequence %q for %s.%s", seqName, table.Name, col.Name)
+			}
+
+			seq.Used++
+
+			col.UsingSequences = map[string]*schema.Sequence{
+				seqName: seq,
+			}
+
+			table.UsingSequences[seqName] = seq
+		}
 
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
@@ -151,7 +181,8 @@ order by c.ordinal_position`
 	}
 
 	return &schema.Schema{
-		Tables: tables,
+		Tables:    tables,
+		Sequences: sequences,
 	}, nil
 }
 
@@ -267,13 +298,40 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 	}
 }
 
-func (l *PGLoader) prepareColumnType(col *schema.Column) schema.ColumnType {
-	t, exists := pgTypeMap[col.Type.Value]
+func (l *PGLoader) prepareDataType(rawType string) schema.DataType {
+	t, exists := pgTypeMap[rawType]
 	if exists {
 		return t
 	}
 
-	return schema.ColumnTypeString
+	return schema.DataTypeString
+}
+
+func (l *PGLoader) loadSequences(ctx context.Context, db *sqlx.DB, schemaName string) (
+	map[string]*schema.Sequence,
+	error,
+) {
+	query := `select
+    s.sequence_name as name,
+    s.data_type as data_type from information_schema.sequences s
+where s.sequence_schema = $1`
+
+	var sequences []*schema.Sequence
+
+	err := db.SelectContext(ctx, &sequences, query, schemaName)
+	if err != nil {
+		return nil, err
+	}
+
+	sequenceMap := map[string]*schema.Sequence{}
+
+	for _, sequence := range sequences {
+		sequence.PreparedDataType = l.prepareDataType(sequence.DataType)
+
+		sequenceMap[sequence.Name] = sequence
+	}
+
+	return sequenceMap, nil
 }
 
 func (l *PGLoader) loadConstraints(

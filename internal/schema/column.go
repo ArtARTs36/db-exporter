@@ -6,17 +6,18 @@ import (
 )
 
 type Column struct {
-	Name         ds.String      `db:"name"`
-	TableName    ds.String      `db:"table_name"`
-	Type         ds.String      `db:"type"`
-	Nullable     bool           `db:"nullable"`
-	PrimaryKey   *PrimaryKey    `db:"-"`
-	UniqueKey    *UniqueKey     `db:"-"`
-	ForeignKey   *ForeignKey    `db:"-"`
-	Comment      ds.String      `db:"comment"`
-	PreparedType ColumnType     `db:"-"`
-	DefaultRaw   sql.NullString `db:"default_value"`
-	Default      *ColumnDefault `db:"-"`
+	Name           ds.String            `db:"name"`
+	TableName      ds.String            `db:"table_name"`
+	Type           ds.String            `db:"type"`
+	Nullable       bool                 `db:"nullable"`
+	PrimaryKey     *PrimaryKey          `db:"-"`
+	UniqueKey      *UniqueKey           `db:"-"`
+	ForeignKey     *ForeignKey          `db:"-"`
+	Comment        ds.String            `db:"comment"`
+	PreparedType   DataType             `db:"-"`
+	DefaultRaw     sql.NullString       `db:"default_value"`
+	Default        *ColumnDefault       `db:"-"`
+	UsingSequences map[string]*Sequence `db:"-"`
 }
 
 func (c *Column) IsPrimaryKey() bool {

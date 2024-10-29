@@ -12,23 +12,37 @@ import (
 type DDLBuilder struct {
 }
 
+type BuildDDLOptions struct {
+	UseIfNotExists bool
+}
+
 func NewDDLBuilder() *DDLBuilder {
 	return &DDLBuilder{}
 }
 
 type isLastLine func() bool
 
-func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
+func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []string { //nolint:funlen // not need
 	var upQueries []string
 
 	if len(table.Columns) == 0 {
+		ifne := ""
+		if opts.UseIfNotExists {
+			ifne = "IF NOT EXISTS "
+		}
+
 		return []string{
-			fmt.Sprintf("CREATE TABLE %s()", table.Name.Value),
+			fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value),
 		}
 	}
 
+	ifne := ""
+	if opts.UseIfNotExists {
+		ifne = "IF NOT EXISTS "
+	}
+
 	createTableQuery := []string{
-		fmt.Sprintf("CREATE TABLE %s", table.Name.Value),
+		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
 		"(",
 	}
 
@@ -66,12 +80,18 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 
 		spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
 
+		defaultValue := ""
+		if column.DefaultRaw.Valid {
+			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+		}
+
 		line := fmt.Sprintf(
-			"    %s%s%s%s%s",
+			"    %s%s%s%s%s%s",
 			column.Name.Value,
 			strings.Repeat(" ", spacesAfterColumnName),
 			column.Type.Value,
 			notNull,
+			defaultValue,
 			comma,
 		)
 
@@ -109,6 +129,24 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table) []string {
 	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries
+}
+
+func (b *DDLBuilder) BuildSequence(seq *schema.Sequence, ifExists bool) string {
+	ife := ""
+	if ifExists {
+		ife = "IF EXISTS "
+	}
+
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ife, seq.Name, seq.DataType)
+}
+
+func (b *DDLBuilder) DropSequence(seq *schema.Sequence, ifNotExists bool) string {
+	ifne := ""
+	if ifNotExists {
+		ifne = "IF NOT EXISTS"
+	}
+
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", ifne, seq.Name)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {

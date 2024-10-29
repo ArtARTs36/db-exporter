@@ -317,6 +317,10 @@ func (e *Exporter) buildCreateProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
+		if col.IsAutoincrement() {
+			continue
+		}
+
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, buildCtx.prfile.Imports),
@@ -359,6 +363,10 @@ func (e *Exporter) buildPatchProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
+		if col.IsAutoincrement() {
+			continue
+		}
+
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, buildCtx.prfile.Imports),
@@ -377,15 +385,15 @@ func (e *Exporter) buildPatchProcedure(
 
 func (e *Exporter) mapType(column *schema.Column, imports *ds.Set[string]) string {
 	switch column.PreparedType { //nolint: exhaustive // not need
-	case schema.ColumnTypeInteger:
+	case schema.DataTypeInteger:
 		return "int64"
-	case schema.ColumnTypeFloat64:
+	case schema.DataTypeFloat64:
 		return "double"
-	case schema.ColumnTypeFloat32:
+	case schema.DataTypeFloat32:
 		return "double"
-	case schema.ColumnTypeBoolean:
+	case schema.DataTypeBoolean:
 		return "bool"
-	case schema.ColumnTypeTimestamp:
+	case schema.DataTypeTimestamp:
 		imports.Add("google/protobuf/timestamp.proto")
 
 		return "google.protobuf.Timestamp"

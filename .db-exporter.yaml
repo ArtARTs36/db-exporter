@@ -4,13 +4,29 @@ databases:
     dsn: ${PG_DSN}
 
 tasks:
-  gen_repos:
+  gen_goose_migrations:
     activities:
-      - export: json-schema
-        spec:
-          pretty: true
+      - export: goose
         out:
-          dir: ./out
+          dir: ./out/goose
+
+  gen_laravel_raw_migrations:
+    activities:
+      - export: laravel-migrations-raw
+        table_per_file: true
+        spec:
+          use:
+            if_not_exists: true
+            if_exists: true
+        out:
+          dir: ./out/laravel-migrations-raw
+
+  gen_graphql:
+    activities:
+      - export: graphql
+        table_per_file: true
+        out:
+          dir: ./out/graphql
 
 options:
   print_stat: true

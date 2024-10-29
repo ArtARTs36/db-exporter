@@ -189,8 +189,14 @@ func (s *String) Lower() *String {
 	return NewString(strings.ToLower(s.Value))
 }
 
-func (s *String) Equal(str string) bool {
-	return s.Value == str
+func (s *String) Equal(strs ...string) bool {
+	for _, str := range strs {
+		if s.Value == str {
+			return true
+		}
+	}
+
+	return true
 }
 
 func (s *String) FirstLine() *String {

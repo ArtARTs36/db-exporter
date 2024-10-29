@@ -10,6 +10,7 @@ import (
 	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
 	gosqlmigrate "github.com/artarts36/db-exporter/internal/exporter/go-sql-migrate"
 	"github.com/artarts36/db-exporter/internal/exporter/goose"
+	"github.com/artarts36/db-exporter/internal/exporter/graphql"
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
@@ -47,7 +48,6 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameGoose: goose.NewMigrationsExporter(pager, sql.NewDDLBuilder()),
 		config.ExporterNameGoSQLMigrate: gosqlmigrate.NewSQLMigrateExporter(
 			pager,
-			renderer,
 			sql.NewDDLBuilder(),
 		),
 		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, sql.NewDDLBuilder()),
@@ -64,6 +64,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 			goPropertyMapper,
 		),
 		config.ExporterNameJSONSchema: jsonschema.NewExporter(),
+		config.ExporterNameGraphql:    graphql.NewExporter(),
 	}
 }
 
