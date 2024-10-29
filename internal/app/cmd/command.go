@@ -115,10 +115,7 @@ func (c *Command) setupLogger(debug bool) {
 func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.ActivityResult, error) {
 	connections := db.NewConnectionPool()
 
-	err := connections.Setup(params.dbs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to setup database connection pool: %w", err)
-	}
+	connections.Setup(params.dbs)
 
 	defer func() {
 		closeErr := connections.Close()
@@ -130,7 +127,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 		}
 
 		slog.
-			With(slog.Any("err", err)).
+			With(slog.Any("err", closeErr)).
 			ErrorContext(ctx, "[command] failed to close db connections")
 	}()
 

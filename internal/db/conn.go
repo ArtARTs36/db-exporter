@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"log/slog"
 
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
@@ -12,8 +13,7 @@ import (
 
 type Connection struct {
 	db                 *sqlx.DB
-	driverName         DriverName
-	dsn                string
+	cfg                config.Database
 	transactionManager *manager.Manager
 }
 
@@ -31,15 +31,15 @@ func NewOpenedConnection(db *sqlx.DB) (*Connection, error) {
 	}, nil
 }
 
-func NewConnection(driverName DriverName, dsn string) *Connection {
-	return &Connection{driverName: driverName, dsn: dsn}
+func NewConnection(cfg config.Database) *Connection {
+	return &Connection{cfg: cfg}
 }
 
 func (c *Connection) Connect(ctx context.Context) (*sqlx.DB, error) {
 	if c.db == nil {
 		slog.DebugContext(ctx, "[db-connection] connecting to database")
 
-		db, err := sqlx.Connect(c.driverName.String(), c.dsn)
+		db, err := sqlx.Connect(string(c.cfg.Driver), c.cfg.DSN)
 		if err != nil {
 			return nil, err
 		}
