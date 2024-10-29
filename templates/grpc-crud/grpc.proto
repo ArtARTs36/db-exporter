@@ -18,3 +18,7 @@ option {{ optName }} = {% if opt.Quotes %}"{{ opt.Value }}"{% else %}{{ opt.Valu
 }
 
 {% endfor %}
+{% for enum in file.Enums %}enum {{ enum.Name }} {{ figure_brace_opened }}{% for value in enum.Values %}
+  {{ value }} = {{ loop.index0 }};{% if loop.last == false %}{% endif %}{% endfor %}
+}
+{% endfor %}

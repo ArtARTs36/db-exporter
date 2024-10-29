@@ -11,6 +11,7 @@ type File struct {
 	Package  string
 	Services []*Service
 	Messages []*Message
+	Enums    []*Enum
 	Imports  *ds.Set[string]
 	Options  map[string]Option
 }

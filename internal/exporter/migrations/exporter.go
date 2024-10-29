@@ -68,7 +68,7 @@ func (e *Exporter) ExportPerFile(
 		for _, enum := range table.UsingEnums {
 			if enum.Used == 1 {
 				upQueries = append(upQueries, e.ddlBuilder.CreateEnum(enum))
-				downQueries = append(downQueries, e.ddlBuilder.DropType(enum.Name, spec.Use.IfExists))
+				downQueries = append(downQueries, e.ddlBuilder.DropType(enum.Name.Value, spec.Use.IfExists))
 			}
 		}
 

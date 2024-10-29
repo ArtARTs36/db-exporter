@@ -86,7 +86,7 @@ func NewPGLoader() *PGLoader {
 	return &PGLoader{}
 }
 
-func (l *PGLoader) Load(ctx context.Context, conn *Connection) (*schema.Schema, error) {
+func (l *PGLoader) Load(ctx context.Context, conn *Connection) (*schema.Schema, error) { //nolint:funlen // not need
 	db, err := conn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
@@ -168,7 +168,7 @@ order by c.ordinal_position`
 			col.Enum = enum
 			enum.Used++
 
-			table.UsingEnums[enum.Name] = enum
+			table.UsingEnums[enum.Name.Value] = enum
 		}
 
 		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
@@ -351,10 +351,12 @@ where n.nspname = $1`
 		enum, ok := enums[value.EnumName]
 		if !ok {
 			enum = &schema.Enum{
-				Name:   value.EnumName,
+				Name:   ds.NewString(value.EnumName),
 				Values: make([]string, 0),
 			}
 		}
+
+		enum.Values = append(enum.Values, value.EnumValue)
 
 		enums[value.EnumName] = enum
 	}

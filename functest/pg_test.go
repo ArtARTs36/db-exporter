@@ -297,16 +297,18 @@ func TestPGExport(t *testing.T) {
 		{
 			Title: "test pg with grpc-crud",
 			InitQueries: []string{
+				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
 				`CREATE TABLE users
 		(
 		    id   integer NOT NULL,
 		    name character varying NOT NULL,
+		    current_mood mood NOT NULL,
 		
 		    CONSTRAINT users_pk PRIMARY KEY (id)
 		);`,
-				`INSERT INTO users (id, name) VALUES
-		(1, 'a'),
-		(2, 'b')
+				`INSERT INTO users (id, name, current_mood) VALUES
+		(1, 'a', 'ok'),
+		(2, 'b', 'ok')
 		`,
 			},
 			DownQueries: []string{

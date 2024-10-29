@@ -9,6 +9,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
+const expIfNotExists = "IF NOT EXISTS "
+
 type DDLBuilder struct {
 }
 
@@ -28,7 +30,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 	if len(table.Columns) == 0 {
 		ifne := ""
 		if opts.UseIfNotExists {
-			ifne = "IF NOT EXISTS "
+			ifne = expIfNotExists
 		}
 
 		return []string{
@@ -38,7 +40,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 
 	ifne := ""
 	if opts.UseIfNotExists {
-		ifne = "IF NOT EXISTS "
+		ifne = expIfNotExists
 	}
 
 	createTableQuery := []string{
@@ -130,7 +132,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, ifNotExists bool) string {
 	ifne := ""
 	if ifNotExists {
-		ifne = "IF NOT EXISTS "
+		ifne = expIfNotExists
 	}
 
 	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, seq.DataType)
@@ -155,7 +157,7 @@ func (b *DDLBuilder) CreateEnum(enum *schema.Enum) string {
 		}
 	}
 
-	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name, valuesString)
+	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name.Value, valuesString)
 }
 
 func (b *DDLBuilder) DropType(name string, ifExists bool) string {
