@@ -56,7 +56,7 @@ func (e *Exporter) ExportPerFile(
 	}
 
 	for i, table := range params.Schema.Tables.List() {
-		upQueries, downQueries := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQueries, downQueries := make([]string, 0), make([]string, 0)
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.Used == 1 {
@@ -71,6 +71,10 @@ func (e *Exporter) ExportPerFile(
 				downQueries = append(downQueries, e.ddlBuilder.DropType(enum.Name, spec.Use.IfExists))
 			}
 		}
+
+		upQ, downQ := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQueries = append(upQueries, upQ...)
+		downQueries = append(downQueries, downQ...)
 
 		migMeta := e.maker.MakeSingle(i, table.Name)
 		mig := &Migration{
