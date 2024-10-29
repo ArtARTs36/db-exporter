@@ -112,7 +112,7 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, "[pgloader] loading columns")
 
-	err = db.SelectContext(ctx, &cols, query, "public") //nolint: musttag // false-positive
+	err = db.SelectContext(ctx, &cols, query, conn.cfg.Schema) //nolint: musttag // false-positive
 	if err != nil {
 		return nil, err
 	}

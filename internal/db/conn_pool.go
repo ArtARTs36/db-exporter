@@ -16,19 +16,10 @@ func NewConnectionPool() *ConnectionPool {
 	}
 }
 
-func (p *ConnectionPool) Setup(ds map[string]config.Database) error {
+func (p *ConnectionPool) Setup(ds map[string]config.Database) {
 	for name, db := range ds {
-		var err error
-
-		driver, err := CreateDriverName(db.Driver)
-		if err != nil {
-			return err
-		}
-
-		p.connections[name] = NewConnection(driver, db.DSN)
+		p.connections[name] = NewConnection(db)
 	}
-
-	return nil
 }
 
 func (p *ConnectionPool) Get(name string) (*Connection, bool) {

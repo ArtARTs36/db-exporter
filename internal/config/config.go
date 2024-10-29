@@ -15,11 +15,6 @@ type Task struct {
 	Commit     Commit     `yaml:"commit"`
 }
 
-type Database struct {
-	Driver string `yaml:"driver"`
-	DSN    string `yaml:"dsn"`
-}
-
 type Commit struct {
 	Message string `yaml:"message"`
 	Author  string `yaml:"author"`

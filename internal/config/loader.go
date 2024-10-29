@@ -2,11 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/artarts36/db-exporter/internal/shared/env"
 )
 
 type Loader struct {
@@ -91,8 +90,18 @@ func (l *Loader) injectEnvVars(cfg *Config) error {
 func (l *Loader) validate(cfg *Config) error {
 	for tid, task := range cfg.Tasks {
 		for aid, activity := range task.Activities {
-			if _, ok := cfg.Databases[activity.Database]; !ok {
+			db, ok := cfg.Databases[activity.Database]
+			if !ok {
 				return fmt.Errorf("task[%s][%d] have invalid database name %q", tid, aid, activity.Database)
+			}
+
+			if !db.Driver.Valid() {
+				return fmt.Errorf(
+					"databases[%s] have unsupported driver %q. Available: %v",
+					activity.Database,
+					db.Driver,
+					DatabaseDrivers,
+				)
 			}
 		}
 	}
@@ -104,6 +113,13 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 	defaultDB, exists := cfg.GetDefaultDatabaseName()
 	if !exists {
 		return fmt.Errorf("databases not filled")
+	}
+
+	for name, database := range cfg.Databases {
+		if database.Schema == "" {
+			database.Schema = DefaultDatabaseSchema
+			cfg.Databases[name] = database
+		}
 	}
 
 	for tid, task := range cfg.Tasks {
