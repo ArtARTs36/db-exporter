@@ -32,7 +32,8 @@ type UniqueKey struct {
 
 func (s *Schema) Clone() *Schema {
 	return &Schema{
-		Tables: s.Tables.Clone(),
+		Tables:    s.Tables.Clone(),
+		Sequences: s.Sequences,
 	}
 }
 
