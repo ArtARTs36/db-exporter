@@ -317,6 +317,10 @@ func (e *Exporter) buildCreateProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
+		if col.IsAutoincrement() {
+			continue
+		}
+
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, buildCtx.prfile.Imports),
@@ -359,6 +363,10 @@ func (e *Exporter) buildPatchProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
+		if col.IsAutoincrement() {
+			continue
+		}
+
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
 			Type: e.mapType(col, buildCtx.prfile.Imports),

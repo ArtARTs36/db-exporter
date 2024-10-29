@@ -13,8 +13,20 @@ tasks:
   gen_laravel_raw_migrations:
     activities:
       - export: laravel-migrations-raw
+        table_per_file: true
+        spec:
+          use:
+            if_not_exists: true
+            if_exists: true
         out:
           dir: ./out/laravel-migrations-raw
+
+  gen_graphql:
+    activities:
+      - export: graphql
+        table_per_file: true
+        out:
+          dir: ./out/graphql
 
 options:
   print_stat: true

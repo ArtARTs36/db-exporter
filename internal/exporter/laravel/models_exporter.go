@@ -235,7 +235,7 @@ func (*ModelsExporter) mapPhpType(
 	case schema.DataTypeBoolean:
 		return php.TypeBool.String()
 	case schema.DataTypeTimestamp:
-		if !col.Name.Equal("created_at") && !col.Name.Equal("updated_at") {
+		if !col.Name.Equal("created_at", "updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)
 		}
 

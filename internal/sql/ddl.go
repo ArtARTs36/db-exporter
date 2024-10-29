@@ -12,7 +12,9 @@ import (
 type DDLBuilder struct {
 }
 
-type BuildDDLOptions struct{}
+type BuildDDLOptions struct {
+	UseIfNotExists bool
+}
 
 func NewDDLBuilder() *DDLBuilder {
 	return &DDLBuilder{}
@@ -20,17 +22,27 @@ func NewDDLBuilder() *DDLBuilder {
 
 type isLastLine func() bool
 
-func (b *DDLBuilder) BuildDDL(table *schema.Table, _ BuildDDLOptions) []string { //nolint:funlen // not need
+func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []string { //nolint:funlen // not need
 	var upQueries []string
 
 	if len(table.Columns) == 0 {
+		ifne := ""
+		if opts.UseIfNotExists {
+			ifne = "IF NOT EXISTS "
+		}
+
 		return []string{
-			fmt.Sprintf("CREATE TABLE %s()", table.Name.Value),
+			fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value),
 		}
 	}
 
+	ifne := ""
+	if opts.UseIfNotExists {
+		ifne = "IF NOT EXISTS "
+	}
+
 	createTableQuery := []string{
-		fmt.Sprintf("CREATE TABLE %s", table.Name.Value),
+		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
 		"(",
 	}
 
@@ -114,23 +126,27 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, _ BuildDDLOptions) []string {
 
 	upSQL := strings.Join(createTableQuery, "\n")
 
-	for _, sequence := range table.UsingSequences {
-		if sequence.Used == 1 {
-			upQueries = append(upQueries, b.BuildSequence(sequence))
-		}
-	}
-
 	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries
 }
 
-func (b *DDLBuilder) BuildSequence(seq *schema.Sequence) string {
-	return fmt.Sprintf("CREATE SEQUENCE %s as %s;", seq.Name, seq.DataType)
+func (b *DDLBuilder) BuildSequence(seq *schema.Sequence, ifExists bool) string {
+	ife := ""
+	if ifExists {
+		ife = "IF EXISTS "
+	}
+
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ife, seq.Name, seq.DataType)
 }
 
-func (b *DDLBuilder) DropSequence(seq *schema.Sequence) string {
-	return fmt.Sprintf("DROP SEQUENCE %s;", seq.Name)
+func (b *DDLBuilder) DropSequence(seq *schema.Sequence, ifNotExists bool) string {
+	ifne := ""
+	if ifNotExists {
+		ifne = "IF NOT EXISTS"
+	}
+
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", ifne, seq.Name)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {

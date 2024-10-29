@@ -18,6 +18,7 @@ const (
 	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
 	ExporterNameCSV                  ExporterName = "csv"
 	ExporterNameJSONSchema           ExporterName = "json-schema"
+	ExporterNameGraphql              ExporterName = "graphql"
 )
 
 type GoEntitiesExportSpec struct {
@@ -82,4 +83,11 @@ type JSONSchemaExportSpec struct {
 		Title       string `yaml:"title" json:"title"`
 		Description string `yaml:"description" json:"description"`
 	} `yaml:"schema" json:"schema"`
+}
+
+type MigrationsSpec struct {
+	Use struct {
+		IfNotExists bool `yaml:"if_not_exists"`
+		IfExists    bool `yaml:"if_exists"`
+	} `yaml:"use"`
 }

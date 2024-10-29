@@ -2,7 +2,9 @@ package migrations
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
@@ -41,19 +43,26 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
+	spec, ok := params.Spec.(*config.MigrationsSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
+
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries and rendering migration files", e.name))
 
-	ddlOpts := sql.BuildDDLOptions{}
+	ddlOpts := sql.BuildDDLOptions{
+		UseIfNotExists: spec.Use.IfNotExists,
+	}
 
 	for i, table := range params.Schema.Tables.List() {
-		upQueries, downQueries := e.createQueries(table, ddlOpts)
+		upQueries, downQueries := e.createQueries(table, ddlOpts, spec.Use.IfExists)
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.Used == 1 {
-				upQueries = append(upQueries, e.ddlBuilder.BuildSequence(sequence))
-				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence))
+				upQueries = append(upQueries, e.ddlBuilder.BuildSequence(sequence, spec.Use.IfExists))
+				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence, spec.Use.IfNotExists))
 			}
 		}
 
@@ -81,23 +90,30 @@ func (e *Exporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
+	spec, ok := params.Spec.(*config.MigrationsSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
+
 	upQueries := make([]string, 0, params.Schema.Tables.Len())
 	downQueries := make([]string, 0, params.Schema.Tables.Len())
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries", e.name))
 
-	ddlOpts := sql.BuildDDLOptions{}
+	ddlOpts := sql.BuildDDLOptions{
+		UseIfNotExists: spec.Use.IfNotExists,
+	}
 
 	for _, table := range params.Schema.Tables.List() {
-		upQs, downQs := e.createQueries(table, ddlOpts)
+		upQs, downQs := e.createQueries(table, ddlOpts, spec.Use.IfExists)
 
 		upQueries = append(upQueries, upQs...)
 		downQueries = append(downQueries, downQs...)
 	}
 
 	for _, seq := range params.Schema.Sequences {
-		upQueries = append(upQueries, e.ddlBuilder.BuildSequence(seq))
-		downQueries = append(downQueries, e.ddlBuilder.DropSequence(seq))
+		upQueries = append(upQueries, e.ddlBuilder.BuildSequence(seq, spec.Use.IfExists))
+		downQueries = append(downQueries, e.ddlBuilder.DropSequence(seq, spec.Use.IfNotExists))
 	}
 
 	migMeta := e.maker.MakeMultiple()
@@ -119,13 +135,13 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) createQueries(table *schema.Table, opts sql.BuildDDLOptions) (
+func (e *Exporter) createQueries(table *schema.Table, opts sql.BuildDDLOptions, useIfExists bool) (
 	upQueries []string,
 	downQueries []string,
 ) {
 	upQueries = e.ddlBuilder.BuildDDL(table, opts)
 	downQueries = []string{
-		sqlquery.BuildDropTable(table.Name.Value),
+		sqlquery.BuildDropTable(table.Name.Value, useIfExists),
 	}
 	return
 }

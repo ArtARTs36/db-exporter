@@ -21,9 +21,9 @@ func NewLaravelMigrationsRawExporter(
 		migrations.NewFuncMigrationMaker(
 			func(i int, tableName ds.String) *migrations.MigrationMeta {
 				return &migrations.MigrationMeta{
-					Filename: laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", tableName), i),
+					Filename: laravel.CreateMigrationFilename(fmt.Sprintf("create_%s_table", tableName.Value), i),
 					Attrs: map[string]interface{}{
-						"Name": fmt.Sprintf("Create%sTable", tableName.Pascal().Value),
+						"name": fmt.Sprintf("Create%sTable", tableName.Pascal().Value),
 					},
 				}
 			},
@@ -31,7 +31,7 @@ func NewLaravelMigrationsRawExporter(
 				return &migrations.MigrationMeta{
 					Filename: laravel.CreateMigrationFilename("init", 1),
 					Attrs: map[string]interface{}{
-						"Name": "InitMigration",
+						"name": "InitMigration",
 					},
 				}
 			},

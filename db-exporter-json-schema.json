@@ -108,7 +108,7 @@
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
-            "go-entity-repository", "json-schema"
+            "go-entity-repository", "json-schema", "graphql"
           ]
         },
         "database": {
@@ -196,6 +196,9 @@
             },
             {
               "$ref": "#/definitions/spec_json_schema_export"
+            },
+            {
+              "$ref": "#/definitions/spec_migrations_export"
             }
           ]
         }
@@ -229,16 +232,6 @@
         }
       },
       "required": ["import", "from"],
-      "additionalProperties": false
-    },
-    "spec_md_export": {
-      "type": "object",
-      "properties": {
-        "with_diagram": {
-          "type": "boolean",
-          "default": false
-        }
-      },
       "additionalProperties": false
     },
     "spec_go_entities_export": {
@@ -495,6 +488,38 @@
             },
             "description": {
               "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_md_export": {
+      "type": "object",
+      "properties": {
+        "with_diagram": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_migrations_export": {
+      "type": "object",
+      "properties": {
+        "use": {
+          "type": "object",
+          "properties": {
+            "if_not_exists": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use 'if not exists' for create table"
+            },
+            "if_exists": {
+              "type": "boolean",
+              "default": false,
+              "description": "Use 'if exists' for drop table"
             }
           },
           "additionalProperties": false

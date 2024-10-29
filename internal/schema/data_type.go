@@ -42,3 +42,11 @@ func (t DataType) String() string {
 func (t DataType) IsInteger() bool {
 	return t == DataTypeInteger || t == DataTypeInteger64 || t == DataTypeInteger16
 }
+
+func (t DataType) IsFloat() bool {
+	return t == DataTypeFloat32 || t == DataTypeFloat64
+}
+
+func (t DataType) IsBool() bool {
+	return t == DataTypeBoolean
+}
