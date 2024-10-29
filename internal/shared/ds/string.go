@@ -191,7 +191,7 @@ func (s *String) Lower() *String {
 
 func (s *String) Equal(strs ...string) bool {
 	for _, str := range strs {
-		if s.Equal(str) {
+		if s.Value == str {
 			return true
 		}
 	}
