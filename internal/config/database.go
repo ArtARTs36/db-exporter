@@ -10,6 +10,10 @@ const (
 	DatabaseDriverPostgres DatabaseDriver = "postgres"
 )
 
+const (
+	DefaultDatabaseSchema = "public"
+)
+
 var DatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverPostgres,
 }

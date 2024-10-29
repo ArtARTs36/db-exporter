@@ -47,6 +47,11 @@
         "dsn": {
           "type": "string",
           "title": "Data Source Name in GO syntax, allow env vars. Golang format: 'port=5459 user=db password=db dbname=db sslmode=disable'"
+        },
+        "schema": {
+          "type": "string",
+          "title": "Database schema",
+          "default": "public"
         }
       },
       "required": [

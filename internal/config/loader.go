@@ -115,6 +115,13 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 		return fmt.Errorf("databases not filled")
 	}
 
+	for name, database := range cfg.Databases {
+		if database.Schema == "" {
+			database.Schema = DefaultDatabaseSchema
+			cfg.Databases[name] = database
+		}
+	}
+
 	for tid, task := range cfg.Tasks {
 		for aid, activity := range task.Activities {
 			if activity.Database == "" {
