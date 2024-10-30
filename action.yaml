@@ -21,4 +21,4 @@ runs:
           run: eval "./db-exporter ${CMD_RUN_ARGS}"
           shell: bash
           env:
-            CMD_RUN_ARGS: "'${{ inputs.config != '' && '--config' || '' }}' '${{ inputs.tasks != '' && '--tasks' || '' }}'"
+            CMD_RUN_ARGS: "'${{ inputs.config != '' && format('--config={0}', inputs.config) || '' }}' '${{ inputs.tasks != '' && format('--tasks={0}', inputs.tasks) || '' }}'"
