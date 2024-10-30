@@ -7,6 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/tyler-sommer/stick"
@@ -24,6 +25,7 @@ type RepositoryExporter struct {
 		entityRepo         *common.Page
 		container          *common.Page
 		containerInterface *common.Page
+		enumString         *common.Page
 	}
 }
 
@@ -45,8 +47,40 @@ func NewRepositoryExporter(
 	exp.page.entityRepo = pager.Of("go-entities/entity_repos.go.tpl")
 	exp.page.container = pager.Of("go-entities/repository_container.go.tpl")
 	exp.page.containerInterface = pager.Of("go-entities/repository_container_interface.go.tpl")
+	exp.page.enumString = pager.Of("go-entities/enum_string.go.tpl")
 
 	return exp
+}
+
+func (e *RepositoryExporter) renderEnums(pipeline *erPipeline, sch *schema.Schema) (
+	[]*exporter.ExportedPage,
+	map[string]*golang.StringEnum,
+	error,
+) {
+	enums := map[string]*golang.StringEnum{}
+	pages := make([]*exporter.ExportedPage, 0, len(sch.Enums))
+
+	for _, enum := range sch.Enums {
+		enumFile := golang.NewFile(fmt.Sprintf("%s.go", enum.Name.Value), pipeline.packages.entity)
+
+		goEnum := golang.NewStringEnumOfValues(enum.Name, enum.Values)
+		enums[enum.Name.Value] = goEnum
+
+		page, enumErr := e.page.enumString.Export(
+			fmt.Sprintf("%s/%s", pipeline.packages.entity.ProjectRelativePath, enumFile.Name),
+			map[string]stick.Value{
+				"enum":  goEnum,
+				"_file": enumFile,
+			},
+		)
+		if enumErr != nil {
+			return nil, nil, fmt.Errorf("failed to generate enum %q: %w", enum.Name.Value, enumErr)
+		}
+
+		pages = append(pages, page)
+	}
+
+	return pages, enums, nil
 }
 
 func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
@@ -66,11 +100,21 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages := make([]*exporter.ExportedPage, 0, e.calculatePages(params, spec))
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
+	enumPages, enums, err := e.renderEnums(pipeline, params.Schema)
+	if err != nil {
+		return nil, fmt.Errorf("failed to render enums: %w", err)
+	}
+	pages = append(pages, enumPages...)
+
 	for _, table := range params.Schema.Tables.List() {
-		entity := e.entityMapper.MapEntity(table, pipeline.packages.entity)
+		entity := e.entityMapper.MapEntity(&MapEntityParams{
+			Table:   table,
+			Package: pipeline.packages.entity,
+			Enums:   enums,
+		})
 		repository := buildRepository(entity, pipeline.packages.repo, pipeline.packages.interfaces)
 
-		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), nil)
+		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), enums, nil)
 		e.allocateRepositoryFilters(entity, repository, pipeline.packages.filters, pkProps)
 
 		if len(repository.Name) > pipeline.store.repoNameMaxLength {
@@ -209,6 +253,8 @@ func (e *RepositoryExporter) calculatePages(
 	if spec.Repositories.Container.StructName != "" {
 		pagesLen++
 	}
+
+	pagesLen += len(params.Schema.Enums)
 
 	return pagesLen
 }

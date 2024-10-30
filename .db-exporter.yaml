@@ -4,6 +4,37 @@ databases:
     dsn: ${PG_DSN}
 
 tasks:
+  go-entities:
+    activities:
+      - export: go-entities
+        spec:
+          go_module: github.com/artarts36/repo
+        out:
+          dir: ./out/go-entities
+
+  go-entities-per-table:
+    activities:
+      - export: go-entities
+        table_per_file: true
+        spec:
+          go_module: github.com/artarts36/repo
+        out:
+          dir: ./out/go-entities-per-table
+
+  go_entity_repository:
+    activities:
+      - export: go-entity-repository
+        out:
+          dir: ./out/go-entity-repository
+
+  gen_json_schema:
+    activities:
+      - export: json-schema
+        spec:
+          pretty: true
+        out:
+          dir: ./out/json-schema
+
   gen_goose_migrations:
     activities:
       - export: goose

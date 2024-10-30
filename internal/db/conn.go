@@ -76,3 +76,7 @@ func (c *Connection) extContext(ctx context.Context) (sqlx.ExtContext, error) {
 
 	return trmsqlx.DefaultCtxGetter.DefaultTrOrDB(ctx, c.db), nil
 }
+
+func (c *Connection) Database() config.Database {
+	return c.cfg
+}

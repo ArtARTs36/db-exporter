@@ -22,6 +22,7 @@ type buildProcedureContext struct {
 	table             *schema.Table
 	tableMsg          *proto.Message
 	tableSingularName string
+	enumPages         map[string]*exporter.ExportedPage
 }
 
 func NewCrudExporter(pager *common.Pager) *Exporter {
@@ -39,10 +40,32 @@ func (e *Exporter) ExportPerFile(
 		return nil, fmt.Errorf("invalid spec")
 	}
 
-	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
+	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
 
 	grpcPage := e.pager.Of("grpc-crud/grpc.proto")
+	enumPages := map[string]*exporter.ExportedPage{}
+
+	for _, enum := range params.Schema.Enums {
+		prfile := &proto.File{
+			Package: spec.Package,
+			Options: options,
+			Enums:   []*proto.Enum{proto.NewEnumWithValues(enum.Name, enum.Values)},
+		}
+
+		expPage, err := grpcPage.Export(
+			fmt.Sprintf("%s_enum.proto", enum.Name.Value),
+			map[string]stick.Value{
+				"file": prfile,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		enumPages[enum.Name.Value] = expPage
+		pages = append(pages, expPage)
+	}
 
 	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
@@ -53,7 +76,7 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv, messages := e.buildService(prfile, table)
+		srv, messages := e.buildService(prfile, table, enumPages)
 
 		if len(srv.Procedures) == 0 {
 			continue
@@ -95,10 +118,15 @@ func (e *Exporter) Export(
 		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
 		Imports:  ds.NewSet[string](),
 		Options:  options,
+		Enums:    make([]*proto.Enum, 0, len(params.Schema.Enums)),
+	}
+
+	for _, enum := range params.Schema.Enums {
+		prfile.Enums = append(prfile.Enums, proto.NewEnumWithValues(enum.Name, enum.Values))
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		srv, messages := e.buildService(prfile, table)
+		srv, messages := e.buildService(prfile, table, map[string]*exporter.ExportedPage{})
 
 		if len(srv.Procedures) == 0 {
 			continue
@@ -120,7 +148,11 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) buildService(prfile *proto.File, table *schema.Table) (*proto.Service, []*proto.Message) {
+func (e *Exporter) buildService(
+	prfile *proto.File,
+	table *schema.Table,
+	enumPages map[string]*exporter.ExportedPage,
+) (*proto.Service, []*proto.Message) {
 	procedureBuilders := []func(buildCtx *buildProcedureContext) (
 		*proto.ServiceProcedure,
 		[]*proto.Message,
@@ -145,6 +177,7 @@ func (e *Exporter) buildService(prfile *proto.File, table *schema.Table) (*proto
 			Name:   table.Name.Pascal().Singular().Value,
 			Fields: make([]*proto.Field, 0, len(table.Columns)),
 		},
+		enumPages: enumPages,
 	}
 	buildCtx.tableSingularName = buildCtx.tableMsg.Name
 
@@ -155,7 +188,7 @@ func (e *Exporter) buildService(prfile *proto.File, table *schema.Table) (*proto
 	for _, column := range table.Columns {
 		buildCtx.tableMsg.Fields = append(buildCtx.tableMsg.Fields, &proto.Field{
 			Name: column.Name.Lower().Value,
-			Type: e.mapType(column, prfile.Imports),
+			Type: e.mapType(column, prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -196,7 +229,7 @@ func (e *Exporter) buildGetProcedure(
 
 		getReqMsg.Fields = append(getReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -277,7 +310,7 @@ func (e *Exporter) buildDeleteProcedure(
 
 		deleteReqMsg.Fields = append(deleteReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -323,7 +356,7 @@ func (e *Exporter) buildCreateProcedure(
 
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -369,7 +402,7 @@ func (e *Exporter) buildPatchProcedure(
 
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports),
+			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -383,7 +416,20 @@ func (e *Exporter) buildPatchProcedure(
 	}, []*proto.Message{patchReqMsg, patchRespMsg}
 }
 
-func (e *Exporter) mapType(column *schema.Column, imports *ds.Set[string]) string {
+func (e *Exporter) mapType(
+	column *schema.Column,
+	imports *ds.Set[string],
+	enumPages map[string]*exporter.ExportedPage,
+) string {
+	if column.Enum != nil {
+		enumPage, enumPageExists := enumPages[column.Enum.Name.Value]
+		if enumPageExists {
+			imports.Add(enumPage.FileName)
+		}
+
+		return column.Enum.Name.Pascal().Value
+	}
+
 	switch column.PreparedType { //nolint: exhaustive // not need
 	case schema.DataTypeInteger:
 		return "int64"

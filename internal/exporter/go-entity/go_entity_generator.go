@@ -44,12 +44,17 @@ func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporte
 	)
 }
 
-func (g *EntityGenerator) GenerateEntities(entities *Entities, pkg *golang.Package) (*exporter.ExportedPage, error) {
+func (g *EntityGenerator) GenerateEntities(
+	entities *Entities,
+	pkg *golang.Package,
+	enums map[string]*golang.StringEnum,
+) (*exporter.ExportedPage, error) {
 	return g.pager.Of("go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/entities.go", pkg.ProjectRelativePath),
 		map[string]stick.Value{
 			"schema": map[string]stick.Value{
 				"Entities": entities.Entities,
+				"Enums":    enums,
 			},
 			"_file": golang.File{
 				Name:    "entities.go",

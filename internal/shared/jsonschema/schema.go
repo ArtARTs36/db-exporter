@@ -25,6 +25,7 @@ type Property struct {
 	Ref                  string              `json:"$ref,omitempty"`
 	Format               Format              `json:"format,omitempty"`
 	Default              interface{}         `json:"default,omitempty"`
+	Enum                 []string            `json:"enum,omitempty"`
 }
 
 func Draft04() *Schema {

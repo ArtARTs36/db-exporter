@@ -16,6 +16,7 @@ service UsersService {
 message User { 
   int64 id = 1;
   string name = 2;
+  Mood current_mood = 3;
 }
 
 message ListUserRequest { 
@@ -43,6 +44,7 @@ message DeleteUserResponse {
 message CreateUserRequest { 
   int64 id = 1;
   string name = 2;
+  Mood current_mood = 3;
 }
 
 message CreateUserResponse { 
@@ -52,6 +54,7 @@ message CreateUserResponse {
 message PatchUserRequest { 
   int64 id = 1;
   string name = 2;
+  Mood current_mood = 3;
 }
 
 message PatchUserResponse { 
@@ -59,3 +62,8 @@ message PatchUserResponse {
 }
 
 
+enum Mood {
+  MOOD_UNDEFINED = 0;
+  MOOD_OK = 1;
+  MOOD_HAPPY = 2;
+}

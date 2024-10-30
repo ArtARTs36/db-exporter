@@ -189,6 +189,10 @@ func (s *String) Lower() *String {
 	return NewString(strings.ToLower(s.Value))
 }
 
+func (s *String) Upper() *String {
+	return NewString(strings.ToUpper(s.Value))
+}
+
 func (s *String) Equal(strs ...string) bool {
 	for _, str := range strs {
 		if s.Value == str {
@@ -196,7 +200,7 @@ func (s *String) Equal(strs ...string) bool {
 		}
 	}
 
-	return true
+	return false
 }
 
 func (s *String) FirstLine() *String {
@@ -216,4 +220,12 @@ func (s *String) TrimSpaces() *String {
 	return &String{
 		Value: strings.Trim(s.Value, " "),
 	}
+}
+
+func (s *String) Prepend(prefix string) *String {
+	return NewString(fmt.Sprintf("%s%s", prefix, s.Value))
+}
+
+func (s *String) Append(suffix string) *String {
+	return NewString(fmt.Sprintf("%s%s", s.Value, suffix))
 }
