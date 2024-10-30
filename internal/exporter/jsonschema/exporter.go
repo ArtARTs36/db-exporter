@@ -83,6 +83,10 @@ func (e *Exporter) buildJSONSchema(params *exporter.ExportParams, tables []*sche
 				required = append(required, column.Name.Value)
 			}
 
+			if column.Enum != nil {
+				colProp.Enum = column.Enum.Values
+			}
+
 			tableObject.Properties[column.Name.Value] = colProp
 		}
 

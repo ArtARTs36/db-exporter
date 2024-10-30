@@ -47,33 +47,51 @@ func (e *Entity) Call(pkg *golang.Package) string {
 	return e.Package.CallToStruct(pkg, e.Name.Value)
 }
 
-func (m *EntityMapper) MapEntities(tables []*schema.Table, pkg *golang.Package) *Entities {
+type MapEntitiesParams struct {
+	Tables  []*schema.Table
+	Package *golang.Package
+	Enums   map[string]*golang.StringEnum
+}
+
+func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
 	ents := &Entities{
-		Entities: make([]*Entity, len(tables)),
+		Entities: make([]*Entity, len(params.Tables)),
 		Imports:  golang.NewImportGroups(),
 	}
 	addImportCallback := func(pkg string) {
 		ents.Imports.AddStd(pkg)
 	}
 
-	for i, table := range tables {
-		ents.Entities[i] = m.mapEntity(table, pkg, addImportCallback)
+	for i, table := range params.Tables {
+		ents.Entities[i] = m.mapEntity(&MapEntityParams{
+			Table:   table,
+			Package: params.Package,
+			Enums:   params.Enums,
+		}, addImportCallback)
 	}
 
 	return ents
 }
 
-func (m *EntityMapper) MapEntity(table *schema.Table, pkg *golang.Package) *Entity {
-	return m.mapEntity(table, pkg, func(_ string) {})
+type MapEntityParams struct {
+	Table   *schema.Table
+	Package *golang.Package
+	Enums   map[string]*golang.StringEnum
 }
 
-func (m *EntityMapper) mapEntity(table *schema.Table, pkg *golang.Package, addImportCallback func(pkg string)) *Entity {
+func (m *EntityMapper) MapEntity(
+	params *MapEntityParams,
+) *Entity {
+	return m.mapEntity(params, func(_ string) {})
+}
+
+func (m *EntityMapper) mapEntity(params *MapEntityParams, addImportCallback func(pkg string)) *Entity {
 	entity := &Entity{
-		Name:      table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
-		Table:     table,
+		Name:      params.Table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
+		Table:     params.Table,
 		Imports:   golang.NewImportGroups(),
-		AsVarName: table.Name.Singular().Camel().Value,
-		Package:   pkg,
+		AsVarName: params.Table.Name.Singular().Camel().Value,
+		Package:   params.Package,
 	}
 
 	addImport := func(pkg string) {
@@ -81,7 +99,7 @@ func (m *EntityMapper) mapEntity(table *schema.Table, pkg *golang.Package, addIm
 		addImportCallback(pkg)
 	}
 
-	entity.Properties = m.propertyMapper.mapColumns(table.Columns, addImport)
+	entity.Properties = m.propertyMapper.mapColumns(params.Table.Columns, params.Enums, addImport)
 
 	return entity
 }

@@ -30,7 +30,11 @@ func NewGoPropertyMapper() *GoPropertyMapper {
 	return &GoPropertyMapper{}
 }
 
-func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallback addImportCallback) *goProperties {
+func (m *GoPropertyMapper) mapColumns(
+	columns []*schema.Column,
+	enums map[string]*golang.StringEnum,
+	addImportCallback addImportCallback,
+) *goProperties {
 	props := &goProperties{
 		List: make([]*GoProperty, len(columns)),
 	}
@@ -46,7 +50,7 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 		prop := &GoProperty{
 			Name:       column.Name.Pascal().FixAbbreviations(goAbbreviationsSet),
 			PluralName: column.Name.Pascal().PluralFixAbbreviations(goAbbreviationsPluralsSet).Value,
-			Type:       m.mapGoType(column, addImportCallback),
+			Type:       m.mapGoType(column, enums, addImportCallback),
 			Column:     column,
 		}
 
@@ -72,7 +76,15 @@ func (m *GoPropertyMapper) mapColumns(columns []*schema.Column, addImportCallbac
 	return props
 }
 
-func (m *GoPropertyMapper) mapGoType(col *schema.Column, addImport func(pkg string)) string {
+func (m *GoPropertyMapper) mapGoType(
+	col *schema.Column,
+	enums map[string]*golang.StringEnum,
+	addImport func(pkg string),
+) string {
+	if e, ok := enums[col.Type.Value]; ok {
+		return e.Name.Value
+	}
+
 	switch col.PreparedType {
 	case schema.DataTypeInteger64, schema.DataTypeInteger:
 		if col.Nullable {

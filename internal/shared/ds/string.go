@@ -200,7 +200,7 @@ func (s *String) Equal(strs ...string) bool {
 		}
 	}
 
-	return true
+	return false
 }
 
 func (s *String) FirstLine() *String {
