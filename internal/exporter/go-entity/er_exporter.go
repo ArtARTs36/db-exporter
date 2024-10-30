@@ -7,6 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/tyler-sommer/stick"
@@ -51,6 +52,37 @@ func NewRepositoryExporter(
 	return exp
 }
 
+func (e *RepositoryExporter) renderEnums(pipeline *erPipeline, sch *schema.Schema) (
+	[]*exporter.ExportedPage,
+	map[string]*golang.StringEnum,
+	error,
+) {
+	enums := map[string]*golang.StringEnum{}
+	pages := make([]*exporter.ExportedPage, 0, len(sch.Enums))
+
+	for _, enum := range sch.Enums {
+		enumFile := golang.NewFile(fmt.Sprintf("%s.go", enum.Name.Value), pipeline.packages.entity)
+
+		goEnum := golang.NewStringEnumOfValues(enum.Name, enum.Values)
+		enums[enum.Name.Value] = goEnum
+
+		page, enumErr := e.page.enumString.Export(
+			fmt.Sprintf("%s/%s", pipeline.packages.entity.ProjectRelativePath, enumFile.Name),
+			map[string]stick.Value{
+				"enum":  goEnum,
+				"_file": enumFile,
+			},
+		)
+		if enumErr != nil {
+			return nil, nil, fmt.Errorf("failed to generate enum %q: %w", enum.Name.Value, enumErr)
+		}
+
+		pages = append(pages, page)
+	}
+
+	return pages, enums, nil
+}
+
 func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
@@ -68,27 +100,11 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages := make([]*exporter.ExportedPage, 0, e.calculatePages(params, spec))
 	repositories := make([]*Repository, 0, params.Schema.Tables.Len())
 
-	enums := map[string]*golang.StringEnum{}
-
-	for _, enum := range params.Schema.Enums {
-		enumFile := golang.NewFile(fmt.Sprintf("%s.go", enum.Name.Value), pipeline.packages.entity)
-
-		goEnum := golang.NewStringEnumOfValues(enum.Name, enum.Values)
-		enums[enum.Name.Value] = goEnum
-
-		page, enumErr := e.page.enumString.Export(
-			fmt.Sprintf("%s/%s", pipeline.packages.entity.ProjectRelativePath, enumFile.Name),
-			map[string]stick.Value{
-				"enum":  goEnum,
-				"_file": enumFile,
-			},
-		)
-		if enumErr != nil {
-			return nil, fmt.Errorf("failed to generate enum %q: %w", enum.Name.Value, enumErr)
-		}
-
-		pages = append(pages, page)
+	enumPages, enums, err := e.renderEnums(pipeline, params.Schema)
+	if err != nil {
+		return nil, fmt.Errorf("failed to render enums: %w", err)
 	}
+	pages = append(pages, enumPages...)
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(&MapEntityParams{
