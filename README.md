@@ -6,6 +6,7 @@ db-exporter - app for export db schema and data to formats:
 * Class diagram: export table structure `diagram`
 * Go structures with db tags `go-entities`
 * Goose migrations `goose`
+* Goose Fixtures: Goose migrations with inserts `goose-fixtures`
 * Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
 * Raw SQL Laravel migrations `laravel-migrations-raw`
 * Laravel models `laravel-models`
