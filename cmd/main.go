@@ -39,10 +39,12 @@ func main() {
 			{
 				Name:        "config",
 				Description: "Path to config file (yaml), default: ./.db-exporter.yaml",
+				WithValue:   true,
 			},
 			{
 				Name:        "tasks",
 				Description: "task names of config file",
+				WithValue:   true,
 			},
 		},
 		UsageExamples: []*cli.UsageExample{
