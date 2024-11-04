@@ -1,8 +1,8 @@
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/DATA-DOG/go-sqlmock v1.5.1 h1:FK6RCIUSfmbnI/imIICmboyQBkOckutaa6R5YYlLZyo=
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
-github.com/artarts36/singlecli v0.0.0-20241005122145-2cd4f318881c h1:R8ZSMOhJBlqvNUIKvcZUo9PLwrySe+e7LqgEcElyH+Q=
-github.com/artarts36/singlecli v0.0.0-20241005122145-2cd4f318881c/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
+github.com/artarts36/gods v0.1.1 h1:pmkT0mmUq1WXHJuCSBFi+iS0m1fuXTGDiPBoNcOTRc4=
+github.com/artarts36/gods v0.1.1/go.mod h1:mGIvmXt66FAIP/BHiDC7XHu3jV+/yuWXc/GUP9fbEjA=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO92i8J8Mo7jg0TCx4punC3eF6hmeytxVNc=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6 h1:aLd6YRH0sAW5ev/Y4EZ6e1s9ZvhAJEoWZNvDTt9760E=

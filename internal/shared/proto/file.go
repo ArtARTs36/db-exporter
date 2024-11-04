@@ -2,7 +2,7 @@ package proto
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gods"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"log/slog"
 )
@@ -12,7 +12,7 @@ type File struct {
 	Services []*Service
 	Messages []*Message
 	Enums    []*Enum
-	Imports  *ds.Set[string]
+	Imports  *gods.Set[string]
 	Options  map[string]Option
 }
 

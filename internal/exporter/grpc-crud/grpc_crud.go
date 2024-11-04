@@ -6,7 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gods"
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -72,7 +72,7 @@ func (e *Exporter) ExportPerFile(
 			Package:  spec.Package,
 			Services: make([]*proto.Service, 0, 1),
 			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-			Imports:  ds.NewSet[string](),
+			Imports:  gods.NewSet[string](),
 			Options:  options,
 		}
 
@@ -116,7 +116,7 @@ func (e *Exporter) Export(
 		Package:  spec.Package,
 		Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
 		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-		Imports:  ds.NewSet[string](),
+		Imports:  gods.NewSet[string](),
 		Options:  options,
 		Enums:    make([]*proto.Enum, 0, len(params.Schema.Enums)),
 	}
@@ -418,7 +418,7 @@ func (e *Exporter) buildPatchProcedure(
 
 func (e *Exporter) mapType(
 	column *schema.Column,
-	imports *ds.Set[string],
+	imports *gods.Set[string],
 	enumPages map[string]*exporter.ExportedPage,
 ) string {
 	if column.Enum != nil {

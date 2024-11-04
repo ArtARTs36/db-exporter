@@ -1,12 +1,12 @@
 package golang
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gods"
 	"slices"
 )
 
 type ImportGroup struct {
-	*ds.Set[string]
+	*gods.Set[string]
 }
 
 type ImportGroups struct {
@@ -17,9 +17,9 @@ type ImportGroups struct {
 
 func NewImportGroups() *ImportGroups {
 	return &ImportGroups{
-		std:    &ImportGroup{Set: ds.NewSet[string]()},
-		shared: &ImportGroup{Set: ds.NewSet[string]()},
-		local:  &ImportGroup{Set: ds.NewSet[string]()},
+		std:    &ImportGroup{Set: gods.NewSet[string]()},
+		shared: &ImportGroup{Set: gods.NewSet[string]()},
+		local:  &ImportGroup{Set: gods.NewSet[string]()},
 	}
 }
 
