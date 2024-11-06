@@ -3,7 +3,7 @@ module github.com/artarts36/db-exporter
 go 1.22.8
 
 require (
-	github.com/artarts36/gods v0.1.1
+	github.com/artarts36/gds v0.1.3
 	github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8

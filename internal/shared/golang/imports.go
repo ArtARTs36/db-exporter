@@ -1,12 +1,12 @@
 package golang
 
 import (
-	"github.com/artarts36/gods"
+	"github.com/artarts36/gds"
 	"slices"
 )
 
 type ImportGroup struct {
-	*gods.Set[string]
+	*gds.Set[string]
 }
 
 type ImportGroups struct {
@@ -17,9 +17,9 @@ type ImportGroups struct {
 
 func NewImportGroups() *ImportGroups {
 	return &ImportGroups{
-		std:    &ImportGroup{Set: gods.NewSet[string]()},
-		shared: &ImportGroup{Set: gods.NewSet[string]()},
-		local:  &ImportGroup{Set: gods.NewSet[string]()},
+		std:    &ImportGroup{Set: gds.NewSet[string]()},
+		shared: &ImportGroup{Set: gds.NewSet[string]()},
+		local:  &ImportGroup{Set: gds.NewSet[string]()},
 	}
 }
 
@@ -46,15 +46,15 @@ func (g *ImportGroups) Sorted() [][]string {
 
 	groups := make([][]string, 0, groupCapacity)
 
-	if g.std.Valid() {
+	if !g.std.IsEmpty() {
 		groups = append(groups, g.std.SortedList())
 	}
 
-	if g.shared.Valid() {
+	if !g.shared.IsEmpty() {
 		groups = append(groups, g.shared.SortedList())
 	}
 
-	if g.local.Valid() {
+	if !g.local.IsEmpty() {
 		groups = append(groups, g.local.SortedList())
 	}
 
@@ -62,5 +62,5 @@ func (g *ImportGroups) Sorted() [][]string {
 }
 
 func (g *ImportGroups) Valid() bool {
-	return g.std.Valid() || g.shared.Valid() || g.local.Valid()
+	return !g.std.IsEmpty() || !g.shared.IsEmpty() || !g.local.IsEmpty()
 }
