@@ -1,7 +1,11 @@
 databases:
   default:
-    driver: postgres
-    dsn: ${PG_DSN}
+    driver: dbml
+    dsn: "./test.dbml"
+
+  dbml:
+    driver: dbml
+    dsn: "./test.dbml"
 
 tasks:
   go-entities:

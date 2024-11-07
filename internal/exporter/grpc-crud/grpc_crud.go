@@ -350,7 +350,7 @@ func (e *Exporter) buildCreateProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
-		if col.IsAutoincrement() {
+		if col.IsAutoincrement {
 			continue
 		}
 
@@ -396,7 +396,7 @@ func (e *Exporter) buildPatchProcedure(
 	id := 1
 
 	for _, col := range buildCtx.table.Columns {
-		if col.IsAutoincrement() {
+		if col.IsAutoincrement {
 			continue
 		}
 

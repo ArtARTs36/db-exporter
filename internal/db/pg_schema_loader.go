@@ -172,6 +172,8 @@ order by c.ordinal_position`
 		}
 
 		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
+			col.IsAutoincrement = true
+
 			seqName, ok := col.Default.Value.(string)
 			if !ok {
 				return nil, fmt.Errorf("failed to get sequence name for %s.%s", table.Name, col.Name)

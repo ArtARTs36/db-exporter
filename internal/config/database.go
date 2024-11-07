@@ -8,6 +8,7 @@ type DatabaseDriver string
 
 const (
 	DatabaseDriverPostgres DatabaseDriver = "postgres"
+	DatabaseDriverDBML     DatabaseDriver = "dbml"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 
 var DatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverPostgres,
+	DatabaseDriverDBML,
 }
 
 type Database struct {

@@ -179,7 +179,7 @@ func (b *DDLBuilder) DropSequence(seq *schema.Sequence, ifExists bool) string {
 }
 
 func (b *DDLBuilder) CommentOnColumn(col *schema.Column) string {
-	return fmt.Sprintf("COMMENT ON COLUMN %s.%s IS '%s';", col.TableName, col.Name, col.Comment)
+	return fmt.Sprintf("COMMENT ON COLUMN %s.%s IS '%s';", col.TableName.Value, col.Name.Value, col.Comment.Value)
 }
 
 func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {

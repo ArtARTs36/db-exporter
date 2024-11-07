@@ -21,14 +21,17 @@ type ForeignKey struct {
 	IsInitiallyDeferred bool
 }
 
-type PrimaryKey struct {
+type UniqueKey struct {
 	Name         ds.String
 	ColumnsNames *ds.Strings
 }
 
-type UniqueKey struct {
-	Name         ds.String
-	ColumnsNames *ds.Strings
+func NewSchema() *Schema {
+	return &Schema{
+		Tables:    NewTableMap(),
+		Sequences: map[string]*Sequence{},
+		Enums:     map[string]*Enum{},
+	}
 }
 
 func (s *Schema) Clone() *Schema {

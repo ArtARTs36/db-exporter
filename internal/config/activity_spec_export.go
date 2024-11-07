@@ -19,6 +19,7 @@ const (
 	ExporterNameCSV                  ExporterName = "csv"
 	ExporterNameJSONSchema           ExporterName = "json-schema"
 	ExporterNameGraphql              ExporterName = "graphql"
+	ExporterNameDBML                 ExporterName = "dbml"
 )
 
 type GoEntitiesExportSpec struct {

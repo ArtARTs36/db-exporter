@@ -19,6 +19,8 @@ type Column struct {
 	Default        *ColumnDefault       `db:"-"`
 	UsingSequences map[string]*Sequence `db:"-"`
 	Enum           *Enum                `db:"-"`
+
+	IsAutoincrement bool `db:"-"`
 }
 
 func (c *Column) IsPrimaryKey() bool {
@@ -35,8 +37,4 @@ func (c *Column) HasForeignKey() bool {
 
 func (c *Column) IsUniqueOrPrimaryKey() bool {
 	return c.IsUniqueKey() || c.IsPrimaryKey()
-}
-
-func (c *Column) IsAutoincrement() bool {
-	return c.Default != nil && c.Default.Type == ColumnDefaultTypeAutoincrement
 }
