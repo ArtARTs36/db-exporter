@@ -1,6 +1,9 @@
 package dbml
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+)
 
 type ColumnDefaultType int
 
@@ -9,6 +12,11 @@ const (
 	ColumnDefaultTypeString
 	ColumnDefaultTypeExpression
 	ColumnDefaultTypeBoolean
+)
+
+var (
+	ColumnDefaultValueStringRegexp     = regexp.MustCompile(`^'(.*)'$`)
+	ColumnDefaultValueExpressionRegexp = regexp.MustCompile("^`(.*)`$")
 )
 
 type ColumnDefault struct {

@@ -4,11 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
-
 	"github.com/artarts36/dbml-go/core"
 	"github.com/artarts36/dbml-go/parser"
 	"github.com/artarts36/dbml-go/scanner"
+	"os"
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
@@ -61,9 +60,10 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 				Nullable:        col.Settings.Null,
 				IsAutoincrement: col.Settings.Increment,
 				DefaultRaw: sql.NullString{
-					Valid:  col.Settings.Default != "",
-					String: col.Settings.Default,
+					Valid:  col.Settings.Default.Raw != "",
+					String: col.Settings.Default.Raw,
 				},
+				Default:        l.parseDefaultValue(col.Settings.Default),
 				UsingSequences: map[string]*schema.Sequence{},
 				Comment:        *ds.NewString(col.Settings.Note),
 			}
@@ -135,6 +135,32 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 	}
 
 	return sch, nil
+}
+
+func (l *DBMLLoader) parseDefaultValue(raw core.ColumnDefault) *schema.ColumnDefault {
+	if raw.Raw == "" {
+		return nil
+	}
+
+	switch raw.Type { //nolint:exhaustive // not need
+	case core.ColumnDefaultTypeString:
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeValue,
+			Value: raw.Value,
+		}
+	case core.ColumnDefaultTypeNumber:
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeValue,
+			Value: raw.Value,
+		}
+	case core.ColumnDefaultTypeExpression:
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeFunc,
+			Value: raw.Value,
+		}
+	}
+
+	return nil
 }
 
 func (l *DBMLLoader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum {

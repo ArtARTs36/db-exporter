@@ -3,6 +3,8 @@ github.com/DATA-DOG/go-sqlmock v1.5.1 h1:FK6RCIUSfmbnI/imIICmboyQBkOckutaa6R5YYl
 github.com/DATA-DOG/go-sqlmock v1.5.1/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/artarts36/dbml-go v0.0.0-20241107182843-4e758cfd4d88 h1:qsyiF+9C5quJT4IaZfFnIeV083OxEVEyUdWBnSHnOHY=
 github.com/artarts36/dbml-go v0.0.0-20241107182843-4e758cfd4d88/go.mod h1:+RYcdkY+DZ6x6Ya8Xs9jbvfEzAC3tWAAggPXM2ICtbY=
+github.com/artarts36/dbml-go v0.0.0-20241107223905-dd856613686e h1:in4Te5cSJJru2gANqvymakpK3Glxvvu3XcU7XwzWAwk=
+github.com/artarts36/dbml-go v0.0.0-20241107223905-dd856613686e/go.mod h1:zIZs7zQln2jKStSZ5spUTV0pzIAltICy9FLHkis9suc=
 github.com/artarts36/gds v0.1.4 h1:kCpeP6fvZCtmM5A6cQaZPFl2P6b6+DuSXDwYNEASBlc=
 github.com/artarts36/gds v0.1.4/go.mod h1:CvBjGkRiHY8YLZDWb3RFAy+Ve7yQdjHQqTmKfjjlWjY=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO92i8J8Mo7jg0TCx4punC3eF6hmeytxVNc=
@@ -95,6 +97,7 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/tyler-sommer/stick v1.0.6 h1:LLdJ8oGotXCsAuVx2BRZZT6s3bYXHe0ImQ+azF4HtJg=

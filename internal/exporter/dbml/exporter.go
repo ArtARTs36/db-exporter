@@ -112,6 +112,10 @@ func (e *Exporter) mapTable(ctx context.Context, tbl *schema.Table) (*dbml.Table
 }
 
 func (e *Exporter) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
+	if col.Default == nil {
+		return dbml.ColumnDefault{}, nil
+	}
+
 	if col.Default.Type == schema.ColumnDefaultTypeValue {
 		switch v := col.Default.Value.(type) {
 		case bool:
