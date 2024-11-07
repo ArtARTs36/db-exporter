@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/dbml"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"os"
+
 	"github.com/artarts36/dbml-go/core"
 	"github.com/artarts36/dbml-go/parser"
 	"github.com/artarts36/dbml-go/scanner"
-	"os"
 
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/dbml"
+	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 type DBMLLoader struct { //nolint:revive // 'DB' part of the name
