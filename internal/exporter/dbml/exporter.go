@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
+	"log/slog"
 )
 
 type Exporter struct {
@@ -16,14 +17,14 @@ func NewExporter() *Exporter {
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	for _, tbl := range params.Schema.Tables.List() {
 		dbmlFile := &dbml.File{}
-		table, refs := e.mapTable(tbl)
+		table, refs := e.mapTable(ctx, tbl)
 		dbmlFile.Tables = []*dbml.Table{table}
 		dbmlFile.Refs = refs
 
@@ -37,15 +38,16 @@ func (e *Exporter) ExportPerFile(
 }
 
 func (e *Exporter) Export(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	dbmlFile := &dbml.File{
 		Tables: make([]*dbml.Table, 0, params.Schema.Tables.Len()),
+		Refs:   make([]*dbml.Ref, 0),
 	}
 
 	for _, tbl := range params.Schema.Tables.List() {
-		table, refs := e.mapTable(tbl)
+		table, refs := e.mapTable(ctx, tbl)
 		dbmlFile.Tables = append(dbmlFile.Tables, table)
 		dbmlFile.Refs = append(dbmlFile.Refs, refs...)
 	}
@@ -58,7 +60,7 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) mapTable(tbl *schema.Table) (*dbml.Table, []*dbml.Ref) {
+func (e *Exporter) mapTable(ctx context.Context, tbl *schema.Table) (*dbml.Table, []*dbml.Ref) {
 	table := &dbml.Table{
 		Name:    tbl.Name.Value,
 		Columns: make([]*dbml.Column, 0, len(tbl.Columns)),
@@ -81,6 +83,18 @@ func (e *Exporter) mapTable(tbl *schema.Table) (*dbml.Table, []*dbml.Ref) {
 			column.AsNullable()
 		}
 
+		def, err := e.mapDefault(col)
+		if err != nil {
+			slog.
+				With(slog.String("table_name", table.Name)).
+				With(slog.String("column_name", column.Name)).
+				WarnContext(ctx, "[dbml-exporter] failed to map default value of column")
+
+			column.Settings.Default.Value = col.DefaultRaw.String
+		} else {
+			column.Settings.Default = def
+		}
+
 		table.Columns = append(table.Columns, column)
 	}
 
@@ -95,4 +109,42 @@ func (e *Exporter) mapTable(tbl *schema.Table) (*dbml.Table, []*dbml.Ref) {
 	}
 
 	return table, refs
+}
+
+func (e *Exporter) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
+	if col.Default.Type == schema.ColumnDefaultTypeValue {
+		switch v := col.Default.Value.(type) {
+		case bool:
+			boolVal := "false"
+			if v {
+				boolVal = "true"
+			}
+
+			return dbml.ColumnDefault{
+				Value: boolVal,
+				Type:  dbml.ColumnDefaultTypeBoolean,
+			}, nil
+		case string:
+			return dbml.ColumnDefault{
+				Value: v,
+				Type:  dbml.ColumnDefaultTypeString,
+			}, nil
+		case int:
+			return dbml.ColumnDefault{
+				Value: fmt.Sprintf("%d", v),
+				Type:  dbml.ColumnDefaultTypeNumber,
+			}, nil
+		default:
+			return dbml.ColumnDefault{}, fmt.Errorf("value of %T unsupported", col.Default.Value)
+		}
+	}
+
+	if col.Default.Type == schema.ColumnDefaultTypeFunc {
+		return dbml.ColumnDefault{
+			Type:  dbml.ColumnDefaultTypeExpression,
+			Value: col.Default.Value.(string),
+		}, nil
+	}
+
+	return dbml.ColumnDefault{}, nil
 }
