@@ -2,7 +2,6 @@ package factory
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/dbml"
@@ -17,6 +16,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 	"github.com/artarts36/db-exporter/internal/exporter/yaml"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/db-exporter/internal/sql"
 
@@ -25,7 +25,7 @@ import (
 
 func CreateExporters(renderer *template.Renderer) map[config.ExporterName]exporter.Exporter {
 	pager := common.NewPager(renderer)
-	dataLoader := db.NewDataLoader()
+	dataLoader := data.NewLoader()
 	dataTransformers := []csv.DataTransformer{
 		csv.OnlyColumnsDataTransformer(),
 		csv.SkipColumnsDataTransformer(),
@@ -55,7 +55,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
 		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
-		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, db.NewInserter()),
+		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, data.NewInserter()),
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(
 			pager,
@@ -72,6 +72,6 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 
 func CreateImporters() map[config.ImporterName]exporter.Importer {
 	return map[config.ImporterName]exporter.Importer{
-		config.ImporterNameYamlFixtures: yaml.NewFixturesExporter(db.NewDataLoader(), db.NewInserter()),
+		config.ImporterNameYamlFixtures: yaml.NewFixturesExporter(data.NewLoader(), data.NewInserter()),
 	}
 }

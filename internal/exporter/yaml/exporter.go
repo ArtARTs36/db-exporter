@@ -4,20 +4,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v3"
-
-	"github.com/artarts36/db-exporter/internal/db"
 )
 
 const yamlFixturesFilename = "fixtures.yaml"
 
 type FixturesExporter struct {
-	dataLoader *db.DataLoader
-	inserter   *db.Inserter
+	dataLoader *data.Loader
+	inserter   *data.Inserter
 }
 
 type yamlFixture struct {
@@ -35,8 +34,8 @@ type yamlFixtureTable struct {
 }
 
 func NewFixturesExporter(
-	dataLoader *db.DataLoader,
-	inserter *db.Inserter,
+	dataLoader *data.Loader,
+	inserter *data.Inserter,
 ) *FixturesExporter {
 	return &FixturesExporter{
 		dataLoader: dataLoader,

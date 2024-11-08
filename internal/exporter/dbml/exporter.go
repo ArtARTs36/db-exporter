@@ -3,7 +3,9 @@ package dbml
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/typemap"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
 	"log/slog"
@@ -20,11 +22,19 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
+	pagesLen := params.Schema.Tables.Len()
+	if len(params.Schema.Enums) > 0 {
+		pagesLen++
+	}
+
+	pages := make([]*exporter.ExportedPage, 0, pagesLen)
 
 	for _, tbl := range params.Schema.Tables.List() {
 		dbmlFile := &dbml.File{}
-		table, refs := e.mapTable(ctx, tbl)
+		table, refs, err := e.mapTable(ctx, tbl, params.Schema.Driver)
+		if err != nil {
+			return nil, fmt.Errorf("failed to map table %q: w", err)
+		}
 		dbmlFile.Tables = []*dbml.Table{table}
 		dbmlFile.Refs = refs
 
@@ -33,6 +43,12 @@ func (e *Exporter) ExportPerFile(
 			Content:  []byte(dbmlFile.Render()),
 		})
 	}
+
+	enumFile := &dbml.File{Enums: e.mapEnums(params.Schema)}
+	pages = append(pages, &exporter.ExportedPage{
+		FileName: "enums.dbml",
+		Content:  []byte(enumFile.Render()),
+	})
 
 	return pages, nil
 }
@@ -44,10 +60,14 @@ func (e *Exporter) Export(
 	dbmlFile := &dbml.File{
 		Tables: make([]*dbml.Table, 0, params.Schema.Tables.Len()),
 		Refs:   make([]*dbml.Ref, 0),
+		Enums:  e.mapEnums(params.Schema),
 	}
 
 	for _, tbl := range params.Schema.Tables.List() {
-		table, refs := e.mapTable(ctx, tbl)
+		table, refs, err := e.mapTable(ctx, tbl, params.Schema.Driver)
+		if err != nil {
+			return nil, fmt.Errorf("failed to map table %q: %w", table.Name, err)
+		}
 		dbmlFile.Tables = append(dbmlFile.Tables, table)
 		dbmlFile.Refs = append(dbmlFile.Refs, refs...)
 	}
@@ -60,7 +80,11 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) mapTable(ctx context.Context, tbl *schema.Table) (*dbml.Table, []*dbml.Ref) {
+func (e *Exporter) mapTable(
+	ctx context.Context,
+	tbl *schema.Table,
+	source config.DatabaseDriver,
+) (*dbml.Table, []*dbml.Ref, error) {
 	table := &dbml.Table{
 		Name:    tbl.Name.Value,
 		Columns: make([]*dbml.Column, 0, len(tbl.Columns)),
@@ -68,9 +92,14 @@ func (e *Exporter) mapTable(ctx context.Context, tbl *schema.Table) (*dbml.Table
 	}
 
 	for _, col := range tbl.Columns {
+		typ, err := typemap.TransitSQLType(source, config.DatabaseDriverDBML, col.Type.Value)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
+		}
+
 		column := &dbml.Column{
 			Name: col.Name.Value,
-			Type: col.Type.Value,
+			Type: typ,
 			Settings: dbml.ColumnSettings{
 				PrimaryKey: col.IsPrimaryKey(),
 				Increment:  col.IsAutoincrement,
@@ -108,7 +137,7 @@ func (e *Exporter) mapTable(ctx context.Context, tbl *schema.Table) (*dbml.Table
 		})
 	}
 
-	return table, refs
+	return table, refs, nil
 }
 
 func (e *Exporter) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
@@ -151,4 +180,29 @@ func (e *Exporter) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
 	}
 
 	return dbml.ColumnDefault{}, nil
+}
+
+func (e *Exporter) mapEnums(sch *schema.Schema) []*dbml.Enum {
+	enums := make([]*dbml.Enum, 0, len(sch.Enums))
+
+	for _, enum := range sch.Enums {
+		enums = append(enums, e.mapEnum(enum))
+	}
+
+	return enums
+}
+
+func (e *Exporter) mapEnum(en *schema.Enum) *dbml.Enum {
+	enum := &dbml.Enum{
+		Name:   en.Name.Value,
+		Values: make([]dbml.EnumValue, 0, len(en.Values)),
+	}
+
+	for _, val := range en.Values {
+		enum.Values = append(enum.Values, dbml.EnumValue{
+			Name: val,
+		})
+	}
+
+	return enum
 }

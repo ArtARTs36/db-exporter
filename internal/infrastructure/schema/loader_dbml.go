@@ -1,12 +1,13 @@
-package db
+package schema
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/dbml-go/core"
 	"github.com/artarts36/dbml-go/parser"
-	"github.com/artarts36/dbml-go/scanner"
 	"os"
 
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -14,20 +15,20 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
-type DBMLLoader struct { //nolint:revive // 'DB' part of the name
+type DBMLLoader struct {
 }
 
 func NewDBMLLoader() *DBMLLoader {
 	return &DBMLLoader{}
 }
 
-func (l *DBMLLoader) Load(_ context.Context, conn *Connection) (*schema.Schema, error) {
-	f, err := os.OpenFile(conn.cfg.DSN, os.O_RDONLY, 0755)
+func (l *DBMLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
+	f, err := os.OpenFile(cn.Database().DSN, os.O_RDONLY, 0755)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file %q: %w", conn.cfg.DSN, err)
+		return nil, fmt.Errorf("failed to read file %q: %w", cn.Database().DSN, err)
 	}
 
-	parsedDBML, err := parser.NewParser(scanner.NewScanner(f)).Parse()
+	parsedDBML, err := parser.Parse(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse dbml: %w", err)
 	}
@@ -36,7 +37,7 @@ func (l *DBMLLoader) Load(_ context.Context, conn *Connection) (*schema.Schema, 
 }
 
 func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) {
-	sch := schema.NewSchema()
+	sch := schema.NewSchema(config.DatabaseDriverDBML)
 	sch.Enums = l.collectEnums(parsedDBML)
 
 	for _, tbl := range parsedDBML.Tables {

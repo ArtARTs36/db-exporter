@@ -1,8 +1,9 @@
-package db
+package data
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 
 	"github.com/doug-martin/goqu/v9"
 
@@ -18,11 +19,11 @@ func NewInserter() *Inserter {
 
 func (i *Inserter) Insert(
 	ctx context.Context,
-	conn *Connection,
+	cn *conn.Connection,
 	table string,
 	dataset []map[string]interface{},
 ) (int64, error) {
-	db, err := conn.extContext(ctx)
+	extCtx, err := cn.ExtContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +38,7 @@ func (i *Inserter) Insert(
 		return 0, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	res, err := db.ExecContext(ctx, q)
+	res, err := extCtx.ExecContext(ctx, q)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert dataset into database: %w", err)
 	}
@@ -47,11 +48,11 @@ func (i *Inserter) Insert(
 
 func (i *Inserter) Upsert(
 	ctx context.Context,
-	conn *Connection,
+	cn *conn.Connection,
 	table *schema.Table,
 	dataset []map[string]interface{},
 ) (int64, error) {
-	db, err := conn.extContext(ctx)
+	extCtx, err := cn.ExtContext(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -78,7 +79,7 @@ func (i *Inserter) Upsert(
 		return 0, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	res, err := db.ExecContext(ctx, q)
+	res, err := extCtx.ExecContext(ctx, q)
 	if err != nil {
 		return 0, fmt.Errorf("failed to insert dataset into database: %w", err)
 	}

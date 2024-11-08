@@ -103,6 +103,16 @@ func (l *Loader) validate(cfg *Config) error {
 					DatabaseDrivers,
 				)
 			}
+
+			if activity.Export.Spec != nil {
+				validatableSpec, isValidatableSpec := activity.Export.Spec.(ValidatableSpec)
+				if isValidatableSpec {
+					err := validatableSpec.Validate()
+					if err != nil {
+						return fmt.Errorf("task[%s][%d] have invalid spec: %w", tid, aid, err)
+					}
+				}
+			}
 		}
 	}
 

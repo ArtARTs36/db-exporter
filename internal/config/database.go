@@ -20,6 +20,10 @@ var DatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverDBML,
 }
 
+var writeableDatabaseDrivers = []DatabaseDriver{
+	DatabaseDriverPostgres,
+}
+
 type Database struct {
 	Driver DatabaseDriver `yaml:"driver"`
 	DSN    string         `yaml:"dsn"`
@@ -28,4 +32,14 @@ type Database struct {
 
 func (d DatabaseDriver) Valid() bool {
 	return slices.Contains(DatabaseDrivers, d)
+}
+
+func (d DatabaseDriver) CanWrite() bool {
+	switch d {
+	case DatabaseDriverPostgres:
+		return true
+	case DatabaseDriverDBML:
+		return false
+	}
+	return true
 }

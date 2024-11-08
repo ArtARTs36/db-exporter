@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/db"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
+	schemaInfra "github.com/artarts36/db-exporter/internal/infrastructure/schema"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"github.com/artarts36/db-exporter/internal/task"
@@ -113,8 +114,7 @@ func (c *Command) setupLogger(debug bool) {
 }
 
 func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.ActivityResult, error) {
-	connections := db.NewConnectionPool()
-
+	connections := conn.NewPool()
 	connections.Setup(params.dbs)
 
 	defer func() {
@@ -131,7 +131,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 			ErrorContext(ctx, "[command] failed to close db connections")
 	}()
 
-	schemas, err := db.LoadSchemasForPool(ctx, connections)
+	schemas, err := schemaInfra.LoadForPool(ctx, connections)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 		slog.InfoContext(ctx, "[command] running task", slog.String("task", taskName))
 
 		for _, activity := range ttask.Activities {
-			conn, ok := connections.Get(activity.Database)
+			cn, ok := connections.Get(activity.Database)
 			if !ok {
 				return nil, fmt.Errorf("failed to get connection for database %q", activity.Database)
 			}
@@ -158,7 +158,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 			activityResult, genErr := c.activityRunner.Run(ctx, &task.ActivityRunParams{
 				Activity: activity,
 				Schema:   schemas[activity.Database],
-				Conn:     conn,
+				Conn:     cn,
 			})
 			if genErr != nil {
 				return nil, genErr

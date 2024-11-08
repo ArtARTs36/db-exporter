@@ -6,24 +6,24 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/migrations"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
 
-	"github.com/artarts36/db-exporter/internal/db"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
 	"github.com/artarts36/db-exporter/internal/sql"
 )
 
 type FixturesExporter struct {
 	page         *common.Page
-	dataLoader   *db.DataLoader
+	dataLoader   *data.Loader
 	queryBuilder *sql.QueryBuilder
 }
 
 func NewFixturesExporter(
 	pager *common.Pager,
-	dataLoader *db.DataLoader,
+	dataLoader *data.Loader,
 	insertBuilder *sql.QueryBuilder,
 ) *FixturesExporter {
 	return &FixturesExporter{

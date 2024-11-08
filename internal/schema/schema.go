@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
@@ -8,6 +9,8 @@ type Schema struct {
 	Tables    *TableMap
 	Sequences map[string]*Sequence
 	Enums     map[string]*Enum
+
+	Driver config.DatabaseDriver
 }
 
 type ForeignKey struct {
@@ -26,11 +29,12 @@ type UniqueKey struct {
 	ColumnsNames *ds.Strings
 }
 
-func NewSchema() *Schema {
+func NewSchema(driver config.DatabaseDriver) *Schema {
 	return &Schema{
 		Tables:    NewTableMap(),
 		Sequences: map[string]*Sequence{},
 		Enums:     map[string]*Enum{},
+		Driver:    driver,
 	}
 }
 

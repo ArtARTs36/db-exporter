@@ -2,6 +2,8 @@ package sql
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/typemap"
 	"slices"
 	"strings"
 
@@ -14,8 +16,11 @@ const expIfNotExists = "IF NOT EXISTS "
 type DDLBuilder struct {
 }
 
-type BuildDDLOptions struct {
+type BuildDDLParams struct {
 	UseIfNotExists bool
+
+	Source config.DatabaseDriver
+	Target config.DatabaseDriver
 }
 
 func NewDDLBuilder() *DDLBuilder {
@@ -24,22 +29,22 @@ func NewDDLBuilder() *DDLBuilder {
 
 type isLastLine func() bool
 
-func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []string { //nolint:funlen // not need
+func (b *DDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]string, error) { //nolint:funlen,lll // not need
 	var upQueries []string
 
 	if len(table.Columns) == 0 {
 		ifne := ""
-		if opts.UseIfNotExists {
+		if params.UseIfNotExists {
 			ifne = expIfNotExists
 		}
 
 		return []string{
 			fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value),
-		}
+		}, nil
 	}
 
 	ifne := ""
-	if opts.UseIfNotExists {
+	if params.UseIfNotExists {
 		ifne = expIfNotExists
 	}
 
@@ -87,11 +92,16 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
+		colType, err := typemap.TransitSQLType(params.Source, params.Target, column.Type.Value)
+		if err != nil {
+			return nil, fmt.Errorf("failed to map column type: %w", err)
+		}
+
 		line := fmt.Sprintf(
 			"    %s%s%s%s%s%s",
 			column.Name.Value,
 			strings.Repeat(" ", spacesAfterColumnName),
-			column.Type.Value,
+			colType,
 			notNull,
 			defaultValue,
 			comma,
@@ -126,16 +136,28 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, opts BuildDDLOptions) []strin
 
 	upQueries = append([]string{upSQL}, upQueries...)
 
-	return upQueries
+	return upQueries, nil
 }
 
-func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, ifNotExists bool) string {
+type CreateSequenceParams struct {
+	UseIfNotExists bool
+
+	Source config.DatabaseDriver
+	Target config.DatabaseDriver
+}
+
+func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
 	ifne := ""
-	if ifNotExists {
+	if params.UseIfNotExists {
 		ifne = expIfNotExists
 	}
 
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, seq.DataType)
+	dType, err := typemap.TransitSQLType(params.Source, params.Target, seq.DataType)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType), nil
 }
 
 func (b *DDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {
