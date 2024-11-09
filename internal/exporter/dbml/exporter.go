@@ -99,7 +99,7 @@ func (e *Exporter) mapTable(
 
 		column := &dbml.Column{
 			Name: col.Name.Value,
-			Type: typ,
+			Type: typ.Name,
 			Settings: dbml.ColumnSettings{
 				PrimaryKey: col.IsPrimaryKey(),
 				Increment:  col.IsAutoincrement,

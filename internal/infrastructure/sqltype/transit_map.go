@@ -2,90 +2,88 @@ package sqltype
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/shared/dbml"
-	"github.com/artarts36/db-exporter/internal/shared/mysql"
-	"github.com/artarts36/db-exporter/internal/shared/pg"
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[string]string{ //nolint:exhaustive,lll // not need
+var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[schema.Type]schema.Type{ //nolint:exhaustive,lll // not need
 	config.DatabaseDriverDBML: {
-		config.DatabaseDriverPostgres: map[string]string{
-			mysql.TypeChar:    pg.TypeCharacter,
-			mysql.TypeVarchar: pg.TypeCharacterVarying,
-			mysql.TypeBinary:  pg.TypeBytea,
-			mysql.TypeText:    pg.TypeText,
+		config.DatabaseDriverPostgres: {
+			DBMLChar:    PGCharacter,
+			DBMLVarchar: PGCharacterVarying,
+			DBMLBinary:  PGBytea,
+			DBMLText:    PGText,
 
-			mysql.TypeInt:     pg.TypeInteger,
-			mysql.TypeInteger: pg.TypeInteger,
+			DBMLInt:     PGInteger,
+			DBMLInteger: PGInteger,
 
-			mysql.TypeTimestamp: pg.TypeTimestampWithTZ,
+			DBMLTimestamp: PGTimestampWithTZ,
 
-			dbml.TypeUUID: pg.TypeUUID,
+			DBMLUUID: PGUUID,
 
-			dbml.TypeFloat: pg.TypeDoublePrecision,
-			pg.TypeFloat8:  pg.TypeFloat8,
+			DBMLFloat:  PGDoublePrecision,
+			DBMLFloat8: PGFloat8,
 		},
 	},
 	config.DatabaseDriverPostgres: {
 		config.DatabaseDriverDBML: {
-			pg.TypeCharacter:        mysql.TypeChar,
-			pg.TypeCharacterVarying: mysql.TypeVarchar,
-			pg.TypeBytea:            mysql.TypeBinary,
-			pg.TypeText:             mysql.TypeText,
+			PGCharacter:        DBMLChar,
+			PGCharacterVarying: DBMLVarchar,
+			PGBytea:            DBMLBinary,
+			PGText:             DBMLText,
 
-			pg.TypeInteger: mysql.TypeInteger,
+			PGInteger: DBMLInteger,
 
-			pg.TypeTimestampWithTZ:    mysql.TypeTimestamp,
-			pg.TypeTimestampWithoutTZ: mysql.TypeTimestamp,
+			PGTimestampWithTZ:    DBMLTimestamp,
+			PGTimestampWithoutTZ: DBMLTimestamp,
 
-			pg.TypeUUID: dbml.TypeUUID,
+			PGUUID: DBMLUUID,
 
-			pg.TypeDoublePrecision: dbml.TypeFloat,
-			pg.TypeFloat8:          pg.TypeFloat8,
+			PGDoublePrecision: DBMLFloat,
+			PGFloat8:          PGFloat8,
 		},
 
 		// https://dev.mysql.com/doc/workbench/en/wb-migration-database-postgresql-typemapping.html
 		config.DatabaseDriverMySQL: {
-			pg.TypeInt:                mysql.TypeInt,
-			pg.TypeSmallInt:           mysql.TypeSmallInt,
-			pg.TypeBigint:             mysql.TypeInt,
-			pg.TypeSerial:             mysql.TypeInt,
-			pg.TypeSmallSerial:        mysql.TypeSmallInt,
-			pg.TypeBigSerial:          mysql.TypeBigInt,
-			pg.TypeBit:                mysql.TypeBit,
-			pg.TypeBoolean:            mysql.TypeTinyint, // 1
-			pg.TypeReal:               mysql.TypeFloat,
-			pg.TypeDoublePrecision:    mysql.TypeDouble,
-			pg.TypeNumeric:            mysql.TypeDecimal,
-			pg.TypeDecimal:            mysql.TypeDecimal,
-			pg.TypeMoney:              mysql.TypeDecimal, // 19,2
-			pg.TypeCharacter:          mysql.TypeChar,
-			pg.TypeChar:               mysql.TypeChar,
-			pg.TypeCharacterVarying:   mysql.TypeLongText,
-			pg.TypeDate:               mysql.TypeDate,
-			pg.TypeTimeWithTZ:         mysql.TypeTime,
-			pg.TypeTimeWithoutTZ:      mysql.TypeTime,
-			pg.TypeTimestampWithTZ:    mysql.TypeDateTime,
-			pg.TypeTimestampWithoutTZ: mysql.TypeDateTime,
-			pg.TypeInterval:           mysql.TypeTime,
-			pg.TypeBytea:              mysql.TypeLongBlob,
-			pg.TypeCidr:               mysql.TypeVarchar, // 43
-			pg.TypeInet:               mysql.TypeVarchar, // 43
-			pg.TypeMacaddr:            mysql.TypeVarchar, // 17
-			pg.TypeUUID:               mysql.TypeVarchar, // 36
-			pg.TypeXML:                mysql.TypeLongText,
-			pg.TypeJSON:               mysql.TypeLongText,
-			pg.TypeTSVector:           mysql.TypeLongText,
-			pg.TypeTSQuery:            mysql.TypeLongText,
-			pg.TypeArray:              mysql.TypeLongText,
-			pg.TypePoint:              mysql.TypeLongText,
-			pg.TypeLine:               mysql.TypeLineString,
-			pg.TypeLseq:               mysql.TypeLineString,
-			pg.TypeBox:                mysql.TypePolygon,
-			pg.TypePath:               mysql.TypeLineString,
-			pg.TypePolygon:            mysql.TypePolygon,
-			pg.TypeCircle:             mysql.TypePolygon,
-			pg.TxidSnapshot:           mysql.TypeVarchar,
+			PGInt:                MySQLInt,
+			PGSmallInt:           MySQLSmallInt,
+			PGBigint:             MySQLInt,
+			PGSerial:             MySQLInt,
+			PGSmallSerial:        MySQLSmallInt,
+			PGBigSerial:          MySQLBigInt,
+			PGBit:                MySQLBit,
+			PGBoolean:            MySQLTinyint, // 1
+			PGReal:               MySQLFloat,
+			PGDoublePrecision:    MySQLDouble,
+			PGNumeric:            MySQLDecimal,
+			PGDecimal:            MySQLDecimal,
+			PGMoney:              MySQLDecimal, // 19,2
+			PGCharacter:          MySQLChar,
+			PGChar:               MySQLChar,
+			PGCharacterVarying:   MySQLLongText,
+			PGDate:               MySQLDate,
+			PGTimeWithTZ:         MySQLTime,
+			PGTimeWithoutTZ:      MySQLTime,
+			PGTimestampWithTZ:    MySQLDateTime,
+			PGTimestampWithoutTZ: MySQLDateTime,
+			PGInterval:           MySQLTime,
+			PGBytea:              MySQLLongBlob,
+			PGCidr:               MySQLVarchar, // 43
+			PGInet:               MySQLVarchar, // 43
+			PGMacaddr:            MySQLVarchar, // 17
+			PGUUID:               MySQLVarchar, // 36
+			PGXML:                MySQLLongText,
+			PGJSON:               MySQLLongText,
+			PGTSVector:           MySQLLongText,
+			PGTSQuery:            MySQLLongText,
+			PGArray:              MySQLLongText,
+			PGPoint:              MySQLLongText,
+			PGLine:               MySQLLineString,
+			PGLseq:               MySQLLineString,
+			PGBox:                MySQLPolygon,
+			PGPath:               MySQLLineString,
+			PGPolygon:            MySQLPolygon,
+			PGCircle:             MySQLPolygon,
+			PGTxidSnapshot:       MySQLVarchar,
 		},
 	},
 }

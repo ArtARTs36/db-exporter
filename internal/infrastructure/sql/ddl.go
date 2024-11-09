@@ -101,7 +101,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]str
 			"    %s%s%s%s%s%s",
 			column.Name.Value,
 			strings.Repeat(" ", spacesAfterColumnName),
-			colType,
+			colType.Name,
 			notNull,
 			defaultValue,
 			comma,
@@ -157,7 +157,7 @@ func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceP
 		return "", err
 	}
 
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType), nil
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
 }
 
 func (b *DDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {

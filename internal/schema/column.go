@@ -6,7 +6,7 @@ import (
 )
 
 type Column struct {
-	Name           gds.String           `db:"name"`
+	Name           gds.String           `db:"Name"`
 	TableName      gds.String           `db:"table_name"`
 	Type           gds.String           `db:"type"`
 	Nullable       bool                 `db:"nullable"`
