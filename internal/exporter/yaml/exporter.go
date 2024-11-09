@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
-
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gds"
 
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v3"
@@ -179,8 +178,8 @@ func (e *FixturesExporter) doImport(
 		var ar int64
 		var err error
 
-		if table.Value.Options.Upsert && params.Schema.Tables.Has(*ds.NewString(table.Key)) {
-			tbl, _ := params.Schema.Tables.Get(*ds.NewString(table.Key))
+		if table.Value.Options.Upsert && params.Schema.Tables.Has(*gds.NewString(table.Key)) {
+			tbl, _ := params.Schema.Tables.Get(*gds.NewString(table.Key))
 			ar, err = e.inserter.Upsert(ctx, params.Conn, tbl, table.Value.Rows)
 			if err != nil {
 				return exporter.ImportedFile{}, fmt.Errorf("failed to insert: %w", err)

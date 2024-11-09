@@ -2,17 +2,18 @@ package schema
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+
+	"github.com/artarts36/gds"
 )
 
 type PrimaryKey struct {
-	Name         ds.String
-	ColumnsNames *ds.Strings
+	Name         gds.String
+	ColumnsNames *gds.Strings
 }
 
 func CreatePrimaryKeyForColumn(col *Column) *PrimaryKey {
 	return &PrimaryKey{
-		Name:         *ds.NewString(fmt.Sprintf("%s_%s_pk", col.TableName.Value, col.Name)),
-		ColumnsNames: ds.NewStrings(col.Name.Value),
+		Name:         *gds.NewString(fmt.Sprintf("%s_%s_pk", col.TableName.Value, col.Name)),
+		ColumnsNames: gds.NewStrings(col.Name.Value),
 	}
 }

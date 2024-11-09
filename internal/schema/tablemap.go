@@ -1,18 +1,18 @@
 package schema
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gds"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type TableMap struct {
-	oMap *orderedmap.OrderedMap[ds.String, *Table]
+	oMap *orderedmap.OrderedMap[gds.String, *Table]
 
 	list []*Table
 }
 
 func NewTableMap(table ...*Table) *TableMap {
-	oMap := orderedmap.New[ds.String, *Table]()
+	oMap := orderedmap.New[gds.String, *Table]()
 
 	for _, t := range table {
 		oMap.Set(t.Name, t)
@@ -53,11 +53,11 @@ func (m *TableMap) Len() int {
 	return m.oMap.Len()
 }
 
-func (m *TableMap) Get(name ds.String) (*Table, bool) {
+func (m *TableMap) Get(name gds.String) (*Table, bool) {
 	return m.oMap.Get(name)
 }
 
-func (m *TableMap) Has(name ds.String) bool {
+func (m *TableMap) Has(name gds.String) bool {
 	_, exists := m.oMap.Get(name)
 
 	return exists

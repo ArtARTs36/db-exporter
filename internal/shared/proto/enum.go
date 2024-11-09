@@ -1,14 +1,14 @@
 package proto
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import "github.com/artarts36/gds"
 
 type Enum struct {
-	Name        *ds.String
+	Name        *gds.String
 	Values      []string
-	valuePrefix *ds.String
+	valuePrefix *gds.String
 }
 
-func NewEnum(name *ds.String, valuesCount int) *Enum {
+func NewEnum(name *gds.String, valuesCount int) *Enum {
 	enum := &Enum{
 		Name:        name.Pascal(),
 		Values:      make([]string, 0, 1+valuesCount),
@@ -20,7 +20,7 @@ func NewEnum(name *ds.String, valuesCount int) *Enum {
 	return enum
 }
 
-func NewEnumWithValues(name *ds.String, values []string) *Enum {
+func NewEnumWithValues(name *gds.String, values []string) *Enum {
 	enum := NewEnum(name, len(values))
 	enum.AddValue(values...)
 	return enum
@@ -28,6 +28,6 @@ func NewEnumWithValues(name *ds.String, values []string) *Enum {
 
 func (e *Enum) AddValue(value ...string) {
 	for _, v := range value {
-		e.Values = append(e.Values, e.valuePrefix.Append(ds.NewString(v).Upper().Value).Value)
+		e.Values = append(e.Values, e.valuePrefix.Append(gds.NewString(v).Upper().Value).Value)
 	}
 }

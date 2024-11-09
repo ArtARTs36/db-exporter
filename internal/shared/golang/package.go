@@ -3,7 +3,7 @@ package golang
 import (
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gds"
 )
 
 type Package struct {
@@ -23,7 +23,7 @@ func BuildPackage(pkgName string, module string) (*Package, error) {
 		FullName:            module + "/" + pkgName,
 	}
 
-	pkgParts := ds.NewString(pkgName).SplitWords()
+	pkgParts := gds.NewString(pkgName).SplitWords()
 	if len(pkgParts) > 0 {
 		pkg.Name = pkgParts[len(pkgParts)-1].Word
 	}

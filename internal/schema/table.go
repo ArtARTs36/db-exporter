@@ -1,12 +1,12 @@
 package schema
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gds"
 )
 
 type Table struct {
-	Name    ds.String `db:"name"`
-	Columns []*Column `db:"-"`
+	Name    gds.String `db:"name"`
+	Columns []*Column  `db:"-"`
 
 	PrimaryKey  *PrimaryKey            `db:"-"`
 	ForeignKeys map[string]*ForeignKey `db:"-"`

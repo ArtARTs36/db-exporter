@@ -1,9 +1,9 @@
 package schema
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import "github.com/artarts36/gds"
 
 type Enum struct {
-	Name   *ds.String
+	Name   *gds.String
 	Values []string
 	Used   int
 }

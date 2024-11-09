@@ -1,8 +1,9 @@
 package schema
 
 import (
+	"github.com/artarts36/gds"
+
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 type Schema struct {
@@ -14,19 +15,19 @@ type Schema struct {
 }
 
 type ForeignKey struct {
-	Name          ds.String
-	Table         ds.String
-	ColumnsNames  *ds.Strings
-	ForeignTable  ds.String
-	ForeignColumn ds.String
+	Name          gds.String
+	Table         gds.String
+	ColumnsNames  *gds.Strings
+	ForeignTable  gds.String
+	ForeignColumn gds.String
 
 	IsDeferrable        bool
 	IsInitiallyDeferred bool
 }
 
 type UniqueKey struct {
-	Name         ds.String
-	ColumnsNames *ds.Strings
+	Name         gds.String
+	ColumnsNames *gds.Strings
 }
 
 func NewSchema(driver config.DatabaseDriver) *Schema {
