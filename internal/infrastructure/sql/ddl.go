@@ -3,7 +3,7 @@ package sql
 import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/infrastructure/typemap"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/gds"
 	"slices"
 	"strings"
@@ -92,7 +92,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]str
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
-		colType, err := typemap.TransitSQLType(params.Source, params.Target, column.Type.Value)
+		colType, err := sqltype.TransitSQLType(params.Source, params.Target, column.Type.Value)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map column type: %w", err)
 		}
@@ -152,7 +152,7 @@ func (b *DDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceP
 		ifne = expIfNotExists
 	}
 
-	dType, err := typemap.TransitSQLType(params.Source, params.Target, seq.DataType)
+	dType, err := sqltype.TransitSQLType(params.Source, params.Target, seq.DataType)
 	if err != nil {
 		return "", err
 	}

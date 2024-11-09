@@ -1,4 +1,4 @@
-package typemap
+package sqltype
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"

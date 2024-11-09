@@ -1,4 +1,4 @@
-package typemap
+package sqltype
 
 import (
 	"fmt"
