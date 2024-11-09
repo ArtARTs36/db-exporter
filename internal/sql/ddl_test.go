@@ -1,13 +1,13 @@
 package sql_test
 
 import (
+	"github.com/artarts36/gds"
 	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/sql"
 )
 
@@ -21,7 +21,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "empty table",
 			Table: &schema.Table{
-				Name:    ds.String{Value: "cars"},
+				Name:    gds.String{Value: "cars"},
 				Columns: []*schema.Column{},
 			},
 			ExpectedQueries: []string{
@@ -31,11 +31,11 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with 1 column",
 			Table: &schema.Table{
-				Name: ds.String{Value: "cars"},
+				Name: gds.String{Value: "cars"},
 				Columns: []*schema.Column{
 					{
-						Name: *ds.NewString("id"),
-						Type: *ds.NewString("integer"),
+						Name: *gds.NewString("id"),
+						Type: *gds.NewString("integer"),
 					},
 				},
 			},
@@ -49,16 +49,16 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with 1 column and primary key",
 			Table: &schema.Table{
-				Name: ds.String{Value: "cars"},
+				Name: gds.String{Value: "cars"},
 				Columns: []*schema.Column{
 					{
-						Name: *ds.NewString("id"),
-						Type: *ds.NewString("integer"),
+						Name: *gds.NewString("id"),
+						Type: *gds.NewString("integer"),
 					},
 				},
 				PrimaryKey: &schema.PrimaryKey{
-					Name:         *ds.NewString("cars_pk"),
-					ColumnsNames: ds.NewStrings("id"),
+					Name:         *gds.NewString("cars_pk"),
+					ColumnsNames: gds.NewStrings("id"),
 				},
 			},
 			ExpectedQueries: []string{
@@ -73,38 +73,38 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		{
 			Name: "table with deferrable foreign keys",
 			Table: &schema.Table{
-				Name: ds.String{Value: "users"},
+				Name: gds.String{Value: "users"},
 				Columns: []*schema.Column{
 					{
-						Name: *ds.NewString("id"),
-						Type: *ds.NewString("integer"),
+						Name: *gds.NewString("id"),
+						Type: *gds.NewString("integer"),
 					},
 					{
-						Name: *ds.NewString("car_id"),
-						Type: *ds.NewString("integer"),
+						Name: *gds.NewString("car_id"),
+						Type: *gds.NewString("integer"),
 					},
 					{
-						Name: *ds.NewString("mobile_id"),
-						Type: *ds.NewString("integer"),
+						Name: *gds.NewString("mobile_id"),
+						Type: *gds.NewString("integer"),
 					},
 				},
 				PrimaryKey: &schema.PrimaryKey{
-					Name:         *ds.NewString("users_pk"),
-					ColumnsNames: ds.NewStrings("id"),
+					Name:         *gds.NewString("users_pk"),
+					ColumnsNames: gds.NewStrings("id"),
 				},
 				ForeignKeys: map[string]*schema.ForeignKey{
 					"users_car_id_fk": {
-						Name:          *ds.NewString("users_car_id_fk"),
-						ColumnsNames:  ds.NewStrings("car_id"),
-						ForeignTable:  *ds.NewString("cars"),
-						ForeignColumn: *ds.NewString("id"),
+						Name:          *gds.NewString("users_car_id_fk"),
+						ColumnsNames:  gds.NewStrings("car_id"),
+						ForeignTable:  *gds.NewString("cars"),
+						ForeignColumn: *gds.NewString("id"),
 						IsDeferrable:  true,
 					},
 					"users_mobile_id_fk": {
-						Name:                *ds.NewString("users_mobile_id_fk"),
-						ColumnsNames:        ds.NewStrings("mobile_id"),
-						ForeignTable:        *ds.NewString("mobiles"),
-						ForeignColumn:       *ds.NewString("id"),
+						Name:                *gds.NewString("users_mobile_id_fk"),
+						ColumnsNames:        gds.NewStrings("mobile_id"),
+						ForeignTable:        *gds.NewString("mobiles"),
+						ForeignColumn:       *gds.NewString("id"),
 						IsDeferrable:        true,
 						IsInitiallyDeferred: true,
 					},

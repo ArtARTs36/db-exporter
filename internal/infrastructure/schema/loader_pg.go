@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/shared/regex"
+	"github.com/artarts36/gds"
 	"log/slog"
 	"regexp"
 	"strconv"
@@ -13,7 +14,6 @@ import (
 	_ "github.com/lib/pq" // for pg driver
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
@@ -74,7 +74,7 @@ type constraint struct {
 type squashedConstraint struct {
 	Name         string
 	TableName    string
-	ColumnsNames *ds.Strings
+	ColumnsNames *gds.Strings
 	Type         string
 
 	ForeignTableName  string
@@ -118,7 +118,7 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, "[pgloader] loading columns")
 
-	err = db.SelectContext(ctx, &cols, query, cn.Database().Schema) //nolint: musttag // false-positive
+	err = db.SelectContext(ctx, &cols, query, cn.Database().Schema)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			pk := table.PrimaryKey
 			if pk == nil {
 				pk = &schema.PrimaryKey{
-					Name: ds.String{
+					Name: gds.String{
 						Value: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,
@@ -277,15 +277,15 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 
 			if fk == nil {
 				fk = &schema.ForeignKey{
-					Name: ds.String{
+					Name: gds.String{
 						Value: constr.Name,
 					},
 					Table:        table.Name,
 					ColumnsNames: constr.ColumnsNames,
-					ForeignTable: ds.String{
+					ForeignTable: gds.String{
 						Value: constr.ForeignTableName,
 					},
-					ForeignColumn: ds.String{
+					ForeignColumn: gds.String{
 						Value: constr.ForeignColumnName,
 					},
 					IsDeferrable:        constr.IsDeferrable,
@@ -301,7 +301,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 
 			if uk == nil {
 				uk = &schema.UniqueKey{
-					Name: ds.String{
+					Name: gds.String{
 						Value: constr.Name,
 					},
 					ColumnsNames: constr.ColumnsNames,
@@ -356,7 +356,7 @@ where n.nspname = $1`
 		enum, ok := enums[value.EnumName]
 		if !ok {
 			enum = &schema.Enum{
-				Name:   ds.NewString(value.EnumName),
+				Name:   gds.NewString(value.EnumName),
 				Values: make([]string, 0),
 			}
 		}
@@ -459,7 +459,7 @@ order by kcu.table_schema,
 			sc = &squashedConstraint{
 				Name:                constr.Name,
 				TableName:           constr.TableName,
-				ColumnsNames:        ds.NewStrings(constr.ColumnName),
+				ColumnsNames:        gds.NewStrings(constr.ColumnName),
 				Type:                constr.Type,
 				ForeignTableName:    constr.ForeignTableName,
 				ForeignColumnName:   constr.ForeignColumnName,

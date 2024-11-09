@@ -8,8 +8,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
+	"github.com/artarts36/gds"
 	"github.com/tyler-sommer/stick"
 	"strings"
 )
@@ -205,7 +205,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
 					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
 					"Container": map[string]interface{}{
-						"Name": ds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
+						"Name": gds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 					},
 					"GenInterfaces": spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/typemap"
+	"github.com/artarts36/gds"
 	"slices"
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 const expIfNotExists = "IF NOT EXISTS "
@@ -217,7 +217,7 @@ func (b *DDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) str
 	)
 }
 
-func (b *DDLBuilder) CreatePrimaryKey(name string, columns *ds.Strings) string {
+func (b *DDLBuilder) CreatePrimaryKey(name string, columns *gds.Strings) string {
 	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Join(", ").Value)
 }
 
@@ -281,6 +281,6 @@ func (b *DDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine) []s
 	return queries
 }
 
-func (b *DDLBuilder) CreateUniqueKey(name string, columns *ds.Strings) string {
+func (b *DDLBuilder) CreateUniqueKey(name string, columns *gds.Strings) string {
 	return fmt.Sprintf("    CONSTRAINT %s UNIQUE (%s)", name, columns.Join(", ").Value)
 }

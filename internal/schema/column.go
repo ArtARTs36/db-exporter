@@ -2,18 +2,18 @@ package schema
 
 import (
 	"database/sql"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
+	"github.com/artarts36/gds"
 )
 
 type Column struct {
-	Name           ds.String            `db:"name"`
-	TableName      ds.String            `db:"table_name"`
-	Type           ds.String            `db:"type"`
+	Name           gds.String           `db:"name"`
+	TableName      gds.String           `db:"table_name"`
+	Type           gds.String           `db:"type"`
 	Nullable       bool                 `db:"nullable"`
 	PrimaryKey     *PrimaryKey          `db:"-"`
 	UniqueKey      *UniqueKey           `db:"-"`
 	ForeignKey     *ForeignKey          `db:"-"`
-	Comment        ds.String            `db:"comment"`
+	Comment        gds.String           `db:"comment"`
 	PreparedType   DataType             `db:"-"`
 	DefaultRaw     sql.NullString       `db:"default_value"`
 	Default        *ColumnDefault       `db:"-"`

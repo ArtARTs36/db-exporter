@@ -2,8 +2,8 @@ package goentity
 
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
+	"github.com/artarts36/gds"
 )
 
 type addImportCallback func(pkg string)
@@ -12,7 +12,7 @@ type GoPropertyMapper struct {
 }
 
 type GoProperty struct {
-	Name       *ds.String
+	Name       *gds.String
 	PluralName string
 	Type       string
 

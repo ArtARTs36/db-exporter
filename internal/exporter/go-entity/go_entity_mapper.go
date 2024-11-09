@@ -2,8 +2,8 @@ package goentity
 
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
+	"github.com/artarts36/gds"
 )
 
 var goAbbreviationsSet = map[string]bool{
@@ -30,7 +30,7 @@ type Entities struct {
 }
 
 type Entity struct {
-	Name       *ds.String
+	Name       *gds.String
 	Table      *schema.Table
 	Properties *goProperties
 	Imports    *golang.ImportGroups

@@ -8,11 +8,11 @@ import (
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/dbml-go/core"
 	"github.com/artarts36/dbml-go/parser"
+	"github.com/artarts36/gds"
 	"os"
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 type DBMLLoader struct {
@@ -42,7 +42,7 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 
 	for _, tbl := range parsedDBML.Tables {
 		table := &schema.Table{
-			Name:           *ds.NewString(tbl.Name),
+			Name:           *gds.NewString(tbl.Name),
 			Comment:        tbl.Note,
 			ForeignKeys:    map[string]*schema.ForeignKey{},
 			UsingSequences: map[string]*schema.Sequence{},
@@ -55,8 +55,8 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 
 		for _, col := range tbl.Columns {
 			column := &schema.Column{
-				Name:            *ds.NewString(col.Name),
-				Type:            *ds.NewString(col.Type),
+				Name:            *gds.NewString(col.Name),
+				Type:            *gds.NewString(col.Type),
 				PreparedType:    l.mapGoType(col.Type),
 				TableName:       table.Name,
 				Nullable:        col.Settings.Null,
@@ -67,13 +67,13 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 				},
 				Default:        l.parseDefaultValue(col.Settings.Default),
 				UsingSequences: map[string]*schema.Sequence{},
-				Comment:        *ds.NewString(col.Settings.Note),
+				Comment:        *gds.NewString(col.Settings.Note),
 			}
 
 			if col.Settings.Unique {
 				uk := &schema.UniqueKey{
-					Name:         *ds.NewString(fmt.Sprintf("%s_%s_uk", table.Name.Value, col.Name)),
-					ColumnsNames: ds.NewStrings(col.Name),
+					Name:         *gds.NewString(fmt.Sprintf("%s_%s_uk", table.Name.Value, col.Name)),
+					ColumnsNames: gds.NewStrings(col.Name),
 				}
 
 				column.UniqueKey, table.UniqueKeys[uk.Name.Value] = uk, uk
@@ -81,8 +81,8 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 
 			if col.Settings.PK {
 				pk := &schema.PrimaryKey{
-					Name:         *ds.NewString(fmt.Sprintf("%s_%s_pk", table.Name.Value, col.Name)),
-					ColumnsNames: ds.NewStrings(col.Name),
+					Name:         *gds.NewString(fmt.Sprintf("%s_%s_pk", table.Name.Value, col.Name)),
+					ColumnsNames: gds.NewStrings(col.Name),
 				}
 
 				column.PrimaryKey, table.PrimaryKey = pk, pk
@@ -170,7 +170,7 @@ func (l *DBMLLoader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum
 
 	for _, en := range parsedDBML.Enums {
 		enum := &schema.Enum{
-			Name:   ds.NewString(en.Name),
+			Name:   gds.NewString(en.Name),
 			Values: make([]string, 0, len(en.Values)),
 		}
 
@@ -195,7 +195,7 @@ func (l *DBMLLoader) buildForeignKey(from *dbmlRelationSubject, to *dbmlRelation
 			Append("_fk"),
 
 		Table:         from.Table.Name,
-		ColumnsNames:  ds.NewStrings(from.Column.Name.Value),
+		ColumnsNames:  gds.NewStrings(from.Column.Name.Value),
 		ForeignTable:  to.Table.Name,
 		ForeignColumn: to.Column.Name,
 	}
@@ -212,7 +212,7 @@ func (l *DBMLLoader) getRelationSubject(sch *schema.Schema, subj string) (*dbmlR
 		return nil, fmt.Errorf("failed to parse ref: %w", err)
 	}
 
-	table, ok := sch.Tables.Get(*ds.NewString(rel.Table))
+	table, ok := sch.Tables.Get(*gds.NewString(rel.Table))
 	if !ok {
 		return nil, fmt.Errorf("table %q not found", rel.Table)
 	}

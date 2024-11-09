@@ -2,12 +2,11 @@ package template
 
 import (
 	"fmt"
+	"github.com/artarts36/gds"
 	"strings"
 	"time"
 
 	"github.com/tyler-sommer/stick"
-
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 func twigFuncs() map[string]stick.Func {
@@ -50,7 +49,7 @@ func twigFuncs() map[string]stick.Func {
 			switch v := args[0].(type) {
 			case string:
 				currentStringLen = len(v)
-			case *ds.String:
+			case *gds.String:
 				currentStringLen = v.Len()
 			default:
 				return ""

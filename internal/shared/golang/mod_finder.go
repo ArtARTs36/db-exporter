@@ -3,8 +3,8 @@ package golang
 import (
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/artarts36/gds"
 	"os"
 )
 
@@ -41,7 +41,7 @@ func (f *ModFinder) FindIn(dir *fs.Directory) (*ModFile, error) {
 }
 
 func (f *ModFinder) parseFile(content []byte) (*ModFile, error) {
-	module := ds.NewString(string(content)).FirstLine().TrimPrefix("module ").TrimSpaces()
+	module := gds.NewString(string(content)).FirstLine().TrimPrefix("module ").TrimSpaces()
 	if module.IsEmpty() {
 		return nil, errors.New("failed to parse go.mod: module not found")
 	}

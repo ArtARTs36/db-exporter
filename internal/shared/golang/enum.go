@@ -1,11 +1,9 @@
 package golang
 
-import (
-	"github.com/artarts36/db-exporter/internal/shared/ds"
-)
+import "github.com/artarts36/gds"
 
 type StringEnum struct {
-	Name   *ds.String
+	Name   *gds.String
 	Values []*StringEnumValue
 }
 
@@ -14,7 +12,7 @@ type StringEnumValue struct {
 	Value string
 }
 
-func NewStringEnumOfValues(name *ds.String, values []string) *StringEnum {
+func NewStringEnumOfValues(name *gds.String, values []string) *StringEnum {
 	enum := &StringEnum{
 		Name:   name.Pascal(),
 		Values: make([]*StringEnumValue, 0, 1+len(values)),
@@ -28,7 +26,7 @@ func NewStringEnumOfValues(name *ds.String, values []string) *StringEnum {
 
 func (e *StringEnum) AddNamedValue(name string, value string) {
 	v := &StringEnumValue{
-		Name:  e.Name.Append(ds.NewString(name).Pascal().Value).Value,
+		Name:  e.Name.Append(gds.NewString(name).Pascal().Value).Value,
 		Value: value,
 	}
 

@@ -2,13 +2,13 @@ package sql_test
 
 import (
 	"fmt"
+	"github.com/artarts36/gds"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/sql"
 )
 
@@ -21,10 +21,10 @@ func TestInsertBuilder_Build(t *testing.T) {
 	}{
 		{
 			Table: &schema.Table{
-				Name: *ds.NewString("users"),
+				Name: *gds.NewString("users"),
 				Columns: []*schema.Column{
 					{
-						Name: *ds.NewString("id"),
+						Name: *gds.NewString("id"),
 					},
 				},
 			},
@@ -32,13 +32,13 @@ func TestInsertBuilder_Build(t *testing.T) {
 		},
 		{
 			Table: &schema.Table{
-				Name: *ds.NewString("users"),
+				Name: *gds.NewString("users"),
 				Columns: []*schema.Column{
 					{
-						Name: *ds.NewString("id"),
+						Name: *gds.NewString("id"),
 					},
 					{
-						Name: *ds.NewString("name"),
+						Name: *gds.NewString("name"),
 					},
 				},
 			},

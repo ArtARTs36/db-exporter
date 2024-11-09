@@ -1,14 +1,16 @@
 package migrations
 
-import "github.com/artarts36/db-exporter/internal/shared/ds"
+import (
+	"github.com/artarts36/gds"
+)
 
 type MigrationMaker interface {
-	MakeSingle(index int, tableName ds.String) *MigrationMeta
+	MakeSingle(index int, tableName gds.String) *MigrationMeta
 	MakeMultiple() *MigrationMeta
 }
 
 type (
-	MakeSingleMigrationFunc   func(index int, tableName ds.String) *MigrationMeta
+	MakeSingleMigrationFunc   func(index int, tableName gds.String) *MigrationMeta
 	MakeMultipleMigrationFunc func() *MigrationMeta
 )
 
@@ -36,7 +38,7 @@ func NewFuncMigrationMaker(single MakeSingleMigrationFunc, multiple MakeMultiple
 	}
 }
 
-func (m *FuncMigrationMaker) MakeSingle(index int, tableName ds.String) *MigrationMeta {
+func (m *FuncMigrationMaker) MakeSingle(index int, tableName gds.String) *MigrationMeta {
 	return m.makeSingle(index, tableName)
 }
 

@@ -1,12 +1,12 @@
 package schema_test
 
 import (
+	"github.com/artarts36/gds"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 func TestSchema_SortByRelations(t *testing.T) {
@@ -20,15 +20,15 @@ func TestSchema_SortByRelations(t *testing.T) {
 			Schema: &schema.Schema{
 				Tables: schema.NewTableMap(
 					&schema.Table{
-						Name: *ds.NewString("a"),
+						Name: *gds.NewString("a"),
 						ForeignKeys: map[string]*schema.ForeignKey{
 							"a_b": {
-								ForeignTable: *ds.NewString("b"),
+								ForeignTable: *gds.NewString("b"),
 							},
 						},
 					},
 					&schema.Table{
-						Name: *ds.NewString("b"),
+						Name: *gds.NewString("b"),
 					},
 				),
 			},
@@ -42,30 +42,30 @@ func TestSchema_SortByRelations(t *testing.T) {
 			Schema: &schema.Schema{
 				Tables: schema.NewTableMap(
 					&schema.Table{
-						Name: *ds.NewString("cars"),
+						Name: *gds.NewString("cars"),
 					},
 					&schema.Table{
-						Name: *ds.NewString("users"),
+						Name: *gds.NewString("users"),
 					},
 					&schema.Table{
-						Name: *ds.NewString("a"),
+						Name: *gds.NewString("a"),
 						ForeignKeys: map[string]*schema.ForeignKey{
 							"a_b": {
-								ForeignTable: *ds.NewString("b"),
+								ForeignTable: *gds.NewString("b"),
 							},
 							"a_cars": {
-								ForeignTable: *ds.NewString("cars"),
+								ForeignTable: *gds.NewString("cars"),
 							},
 						},
 					},
 					&schema.Table{
-						Name: *ds.NewString("b"),
+						Name: *gds.NewString("b"),
 						ForeignKeys: map[string]*schema.ForeignKey{
 							"b_a": {
-								ForeignTable: *ds.NewString("a"),
+								ForeignTable: *gds.NewString("a"),
 							},
 							"b_users": {
-								ForeignTable: *ds.NewString("users"),
+								ForeignTable: *gds.NewString("users"),
 							},
 						},
 					},

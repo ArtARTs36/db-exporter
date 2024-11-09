@@ -8,11 +8,11 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/gds"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 )
 
 type Exporter struct {
@@ -136,7 +136,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) createIndexPageName(sch *schema.Schema) string {
-	if sch.Tables.Has(ds.String{Value: "INDEX"}) {
+	if sch.Tables.Has(gds.String{Value: "INDEX"}) {
 		return "index.md"
 	}
 
