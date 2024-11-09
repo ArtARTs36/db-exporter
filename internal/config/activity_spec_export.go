@@ -1,6 +1,9 @@
 package config
 
-import orderedmap "github.com/wk8/go-ordered-map/v2"
+import (
+	"fmt"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
+)
 
 type ExporterName string
 
@@ -19,6 +22,7 @@ const (
 	ExporterNameCSV                  ExporterName = "csv"
 	ExporterNameJSONSchema           ExporterName = "json-schema"
 	ExporterNameGraphql              ExporterName = "graphql"
+	ExporterNameDBML                 ExporterName = "dbml"
 )
 
 type GoEntitiesExportSpec struct {
@@ -90,4 +94,26 @@ type MigrationsSpec struct {
 		IfNotExists bool `yaml:"if_not_exists"`
 		IfExists    bool `yaml:"if_exists"`
 	} `yaml:"use"`
+	Target DatabaseDriver
+}
+
+func (m *MigrationsSpec) Validate() error {
+	if m.Target == "" {
+		m.Target = DatabaseDriverPostgres
+		return nil
+	}
+
+	if !m.Target.Valid() {
+		return fmt.Errorf(
+			"target have unsupported driver %q. Available: %v",
+			m.Target,
+			writeableDatabaseDrivers,
+		)
+	}
+
+	if !m.Target.CanWrite() {
+		return fmt.Errorf("target have driver %q, which unsupported modified queries", m.Target)
+	}
+
+	return nil
 }

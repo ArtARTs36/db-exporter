@@ -1,4 +1,4 @@
-package db
+package conn
 
 import (
 	"context"
@@ -69,7 +69,7 @@ func (c *Connection) Close() error {
 	return c.db.Close()
 }
 
-func (c *Connection) extContext(ctx context.Context) (sqlx.ExtContext, error) {
+func (c *Connection) ExtContext(ctx context.Context) (sqlx.ExtContext, error) {
 	if _, err := c.Connect(ctx); err != nil {
 		return nil, err
 	}

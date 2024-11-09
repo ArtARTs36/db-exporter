@@ -16,6 +16,8 @@ type Table struct {
 	UsingEnums     map[string]*Enum     `db:"-"`
 
 	columnsNames []string `db:"-"`
+
+	Comment string
 }
 
 func (t *Table) ColumnsNames() []string {
@@ -28,6 +30,16 @@ func (t *Table) ColumnsNames() []string {
 	}
 
 	return t.columnsNames
+}
+
+func (t *Table) GetColumn(name string) *Column {
+	for _, column := range t.Columns {
+		if column.Name.Equal(name) {
+			return column
+		}
+	}
+
+	return nil
 }
 
 func (t *Table) HasUniqueKeys() bool {

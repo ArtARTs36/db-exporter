@@ -6,21 +6,21 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/db"
 )
 
 type Exporter struct {
-	dataLoader       *db.DataLoader
+	dataLoader       *data.Loader
 	pager            *common.Pager
 	dataTransformers []DataTransformer
 }
 
 func NewExporter(
-	dataLoader *db.DataLoader,
+	dataLoader *data.Loader,
 	pager *common.Pager,
 	dataTransformers []DataTransformer,
 ) *Exporter {

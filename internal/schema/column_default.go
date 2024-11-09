@@ -4,7 +4,7 @@ type ColumnDefaultType int
 
 const (
 	ColumnDefaultTypeUnknown ColumnDefaultType = iota
-	ColumnDefaultTypeFunc
+	ColumnDefaultTypeFunc                      // @todo need refactor to expression
 	ColumnDefaultTypeValue
 	ColumnDefaultTypeAutoincrement
 )

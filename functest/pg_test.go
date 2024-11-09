@@ -3,7 +3,8 @@ package functest
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/db"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -409,15 +410,15 @@ func TestPGImport(t *testing.T) {
 
 			assert.NoError(t, cmdErr)
 
-			dl := db.NewDataLoader()
+			dl := data.NewLoader()
 
 			got := map[string][]map[string]interface{}{}
 
-			conn, err := db.NewOpenedConnection(env.db)
+			cn, err := conn.NewOpenedConnection(env.db)
 			require.NoError(t, err)
 
 			for table := range tCase.ExpectedRows {
-				gotTableRows, lerr := dl.Load(context.Background(), conn, table)
+				gotTableRows, lerr := dl.Load(context.Background(), cn, table)
 				if lerr != nil {
 					panic(lerr)
 				}

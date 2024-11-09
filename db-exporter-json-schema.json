@@ -41,7 +41,7 @@
       "properties": {
         "driver": {
           "type": "string",
-          "enum": ["postgres"],
+          "enum": ["postgres", "dbml"],
           "title": "Database driver"
         },
         "dsn": {
@@ -113,7 +113,7 @@
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
-            "go-entity-repository", "json-schema", "graphql"
+            "go-entity-repository", "json-schema", "graphql", "dbml"
           ]
         },
         "database": {

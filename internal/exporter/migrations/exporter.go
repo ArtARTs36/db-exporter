@@ -51,8 +51,10 @@ func (e *Exporter) ExportPerFile(
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries and rendering migration files", e.name))
 
-	ddlOpts := sql.BuildDDLOptions{
+	ddlOpts := sql.BuildDDLParams{
 		UseIfNotExists: spec.Use.IfNotExists,
+		Source:         params.Schema.Driver,
+		Target:         spec.Target,
 	}
 
 	for i, table := range params.Schema.Tables.List() {
@@ -60,7 +62,18 @@ func (e *Exporter) ExportPerFile(
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.Used == 1 {
-				upQueries = append(upQueries, e.ddlBuilder.CreateSequence(sequence, spec.Use.IfNotExists))
+				seqParams := sql.CreateSequenceParams{
+					UseIfNotExists: spec.Use.IfExists,
+					Source:         params.Schema.Driver,
+					Target:         spec.Target,
+				}
+
+				seqSQL, err := e.ddlBuilder.CreateSequence(sequence, seqParams)
+				if err != nil {
+					return nil, fmt.Errorf("failed to build query for create sequence %q: %w", sequence.Name, err)
+				}
+
+				upQueries = append(upQueries, seqSQL)
 				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence, spec.Use.IfExists))
 			}
 		}
@@ -72,7 +85,11 @@ func (e *Exporter) ExportPerFile(
 			}
 		}
 
-		upQ, downQ := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQ, downQ, err := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create queries: %w", err)
+		}
+
 		upQueries = append(upQueries, upQ...)
 		downQueries = append(downQueries, downQ...)
 
@@ -110,19 +127,35 @@ func (e *Exporter) Export(
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries", e.name))
 
-	ddlOpts := sql.BuildDDLOptions{
+	ddlOpts := sql.BuildDDLParams{
 		UseIfNotExists: spec.Use.IfNotExists,
+		Source:         params.Schema.Driver,
+		Target:         spec.Target,
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		upQs, downQs := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQs, downQs, err := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create queries: %w", err)
+		}
 
 		upQueries = append(upQueries, upQs...)
 		downQueries = append(downQueries, downQs...)
 	}
 
+	seqParams := sql.CreateSequenceParams{
+		UseIfNotExists: spec.Use.IfExists,
+		Source:         params.Schema.Driver,
+		Target:         spec.Target,
+	}
+
 	for _, seq := range params.Schema.Sequences {
-		upQueries = append(upQueries, e.ddlBuilder.CreateSequence(seq, spec.Use.IfExists))
+		seqSQL, err := e.ddlBuilder.CreateSequence(seq, seqParams)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build query for create sequence %q: %w", seq.Name, err)
+		}
+
+		upQueries = append(upQueries, seqSQL)
 		downQueries = append(downQueries, e.ddlBuilder.DropSequence(seq, spec.Use.IfNotExists))
 	}
 
@@ -145,13 +178,22 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) createQueries(table *schema.Table, opts sql.BuildDDLOptions, useIfExists bool) (
+func (e *Exporter) createQueries(
+	table *schema.Table,
+	opts sql.BuildDDLParams,
+	useIfExists bool,
+) (
 	upQueries []string,
 	downQueries []string,
+	err error,
 ) {
-	upQueries = e.ddlBuilder.BuildDDL(table, opts)
+	upQueries, err = e.ddlBuilder.BuildDDL(table, opts)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to build ddl: %w", err)
+	}
+
 	downQueries = []string{
 		e.ddlBuilder.DropTable(table, useIfExists),
 	}
-	return
+	return //nolint: nakedret // not need
 }

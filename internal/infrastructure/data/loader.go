@@ -1,20 +1,23 @@
-package db
+package data
 
 import (
 	"context"
 	"fmt"
+
 	"log/slog"
+
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 )
 
 type TableData []map[string]interface{}
 
-type DataLoader struct{}
+type Loader struct{}
 
-func NewDataLoader() *DataLoader {
-	return &DataLoader{}
+func NewLoader() *Loader {
+	return &Loader{}
 }
 
-func (l *DataLoader) Load(ctx context.Context, conn *Connection, table string) (TableData, error) {
+func (l *Loader) Load(ctx context.Context, conn *conn.Connection, table string) (TableData, error) {
 	data := make(TableData, 0)
 
 	q := fmt.Sprintf("select * from %s", table)

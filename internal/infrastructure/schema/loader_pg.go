@@ -1,8 +1,10 @@
-package db
+package schema
 
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/shared/regex"
 	"log/slog"
 	"regexp"
@@ -86,8 +88,8 @@ func NewPGLoader() *PGLoader {
 	return &PGLoader{}
 }
 
-func (l *PGLoader) Load(ctx context.Context, conn *Connection) (*schema.Schema, error) { //nolint:funlen // not need
-	db, err := conn.Connect(ctx)
+func (l *PGLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
+	db, err := cn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed connect to db: %w", err)
 	}
@@ -110,22 +112,22 @@ from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`
 
+	sch := schema.NewSchema(config.DatabaseDriverPostgres)
+
 	var cols []*schema.Column
 
 	slog.DebugContext(ctx, "[pgloader] loading columns")
 
-	err = db.SelectContext(ctx, &cols, query, conn.cfg.Schema) //nolint: musttag // false-positive
+	err = db.SelectContext(ctx, &cols, query, cn.Database().Schema) //nolint: musttag // false-positive
 	if err != nil {
 		return nil, err
 	}
 
 	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d columns", len(cols)))
 
-	tables := schema.NewTableMap()
-
 	slog.DebugContext(ctx, "[pgloader] loading constraints")
 
-	constraints, constraintsCount, err := l.loadConstraints(ctx, conn)
+	constraints, constraintsCount, err := l.loadConstraints(ctx, cn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load constraints: %w", err)
 	}
@@ -134,20 +136,20 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, "[pgloader] loading sequences")
 
-	sequences, err := l.loadSequences(ctx, conn)
+	sch.Sequences, err = l.loadSequences(ctx, cn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load sequences: %w", err)
 	}
 
-	enums, err := l.loadEnums(ctx, conn)
+	sch.Enums, err = l.loadEnums(ctx, cn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load enums: %w", err)
 	}
 
-	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sequences)))
+	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sch.Sequences)))
 
 	for _, col := range cols {
-		table, tableExists := tables.Get(col.TableName)
+		table, tableExists := sch.Tables.Get(col.TableName)
 		if !tableExists {
 			table = &schema.Table{
 				Name:           col.TableName,
@@ -157,13 +159,13 @@ order by c.ordinal_position`
 				UsingEnums:     map[string]*schema.Enum{},
 			}
 
-			tables.Add(table)
+			sch.Tables.Add(table)
 		}
 
 		col.PreparedType = l.prepareDataType(col.Type.Value)
 		col.Default = l.parseColumnDefault(col)
 
-		enum, enumExists := enums[col.Type.Value]
+		enum, enumExists := sch.Enums[col.Type.Value]
 		if enumExists {
 			col.Enum = enum
 			enum.Used++
@@ -172,12 +174,14 @@ order by c.ordinal_position`
 		}
 
 		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
+			col.IsAutoincrement = true
+
 			seqName, ok := col.Default.Value.(string)
 			if !ok {
 				return nil, fmt.Errorf("failed to get sequence name for %s.%s", table.Name, col.Name)
 			}
 
-			seq, seqExists := sequences[seqName]
+			seq, seqExists := sch.Sequences[seqName]
 			if !seqExists {
 				return nil, fmt.Errorf("failed to get sequence %q for %s.%s", seqName, table.Name, col.Name)
 			}
@@ -196,11 +200,7 @@ order by c.ordinal_position`
 		table.Columns = append(table.Columns, col)
 	}
 
-	return &schema.Schema{
-		Tables:    tables,
-		Sequences: sequences,
-		Enums:     enums,
-	}, nil
+	return sch, nil
 }
 
 func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
@@ -324,7 +324,7 @@ func (l *PGLoader) prepareDataType(rawType string) schema.DataType {
 	return schema.DataTypeString
 }
 
-func (l *PGLoader) loadEnums(ctx context.Context, conn *Connection) (map[string]*schema.Enum, error) {
+func (l *PGLoader) loadEnums(ctx context.Context, conn *conn.Connection) (map[string]*schema.Enum, error) {
 	query := `select
        t.typname as enum_name,
        e.enumlabel as enum_value
@@ -340,7 +340,12 @@ where n.nspname = $1`
 
 	var enumValues []*enumValue
 
-	err := conn.db.SelectContext(ctx, &enumValues, query, conn.cfg.Schema)
+	db, err := conn.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.SelectContext(ctx, &enumValues, query, conn.Database().Schema)
 	if err != nil {
 		return nil, err
 	}
@@ -364,7 +369,7 @@ where n.nspname = $1`
 	return enums, nil
 }
 
-func (l *PGLoader) loadSequences(ctx context.Context, conn *Connection) (
+func (l *PGLoader) loadSequences(ctx context.Context, conn *conn.Connection) (
 	map[string]*schema.Sequence,
 	error,
 ) {
@@ -375,7 +380,12 @@ where s.sequence_schema = $1`
 
 	var sequences []*schema.Sequence
 
-	err := conn.db.SelectContext(ctx, &sequences, query, conn.cfg.Schema)
+	db, err := conn.Connect(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.SelectContext(ctx, &sequences, query, conn.Database().Schema)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +403,7 @@ where s.sequence_schema = $1`
 
 func (l *PGLoader) loadConstraints(
 	ctx context.Context,
-	conn *Connection,
+	cn *conn.Connection,
 ) (map[string]map[string][]*squashedConstraint, int, error) {
 	count := 0
 
@@ -426,7 +436,12 @@ order by kcu.table_schema,
 
 	var constraints []*constraint
 
-	err := conn.db.SelectContext(ctx, &constraints, query, conn.cfg.Schema)
+	db, err := cn.Connect(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	err = db.SelectContext(ctx, &constraints, query, cn.Database().Schema)
 	if err != nil {
 		return nil, count, err
 	}

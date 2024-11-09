@@ -10,30 +10,30 @@ type Activity struct {
 	Export ExportActivity // fill export or import
 	Import ImportActivity
 
-	Database string         `yaml:"database"`
-	Tables   ActivityTables `yaml:"tables"`
+	Database string         `yaml:"database" json:"database"`
+	Tables   ActivityTables `yaml:"tables" json:"tables"`
 }
 
 type ActivityTables struct {
-	List   []string `yaml:"list"`
-	Prefix string   `yaml:"prefix"`
+	List   []string `yaml:"list" json:"list"`
+	Prefix string   `yaml:"prefix" json:"prefix"`
 }
 
 type ExportActivity struct {
 	Format       ExporterName
-	TablePerFile bool `yaml:"table_per_file"`
-	SkipExists   bool `yaml:"skip_exists"` // OnlyColumns generate already exists files
+	TablePerFile bool `yaml:"table_per_file" json:"table_per_file"`
+	SkipExists   bool `yaml:"skip_exists" json:"skip_exists"`
 	Out          struct {
-		Dir        string `yaml:"dir"`
-		FilePrefix string `yaml:"file_prefix"`
-	} `yaml:"out"`
-	Spec interface{} `yaml:"-"`
+		Dir        string `yaml:"dir" json:"dir"`
+		FilePrefix string `yaml:"file_prefix" json:"file_prefix"`
+	} `yaml:"out" json:"out"`
+	Spec interface{} `yaml:"-" json:"spec"`
 }
 
 type ImportActivity struct {
 	Format ImporterName
 	Spec   interface{} `yaml:"-"`
-	From   string      `yaml:"from"` // path to file or dir
+	From   string      `yaml:"from" json:"from"` // path to file or dir
 }
 
 func (s *Activity) IsExport() bool {
@@ -42,13 +42,13 @@ func (s *Activity) IsExport() bool {
 
 func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 	type exportOrImport struct {
-		Export ExporterName `yaml:"export"`
-		Import ImporterName `yaml:"import"`
-		Spec   yaml.Node    `yaml:"spec"`
+		Export ExporterName `yaml:"export" json:"export"`
+		Import ImporterName `yaml:"import" json:"import"`
+		Spec   yaml.Node    `yaml:"spec" json:"spec"`
 
-		Database    string         `yaml:"database"`
-		Tables      ActivityTables `yaml:"tables"`
-		TablePrefix string         `yaml:"table_prefix"`
+		Database    string         `yaml:"database" json:"database"`
+		Tables      ActivityTables `yaml:"tables" json:"tables"`
+		TablePrefix string         `yaml:"table_prefix" json:"table_prefix"`
 	}
 
 	exportOrImportObj := &exportOrImport{}
@@ -72,7 +72,7 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		exportActivity.Format = exportOrImportObj.Export
 
 		switch exportActivity.Format {
-		case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameYamlFixtures, ExporterNameGraphql:
+		case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameYamlFixtures, ExporterNameGraphql, ExporterNameDBML:
 		case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw:
 			exportActivity.Spec = new(MigrationsSpec)
 		case ExporterNameGoEntities:

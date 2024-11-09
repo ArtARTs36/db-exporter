@@ -1,6 +1,6 @@
 # db-exporter
 
-db-exporter - app for export db schema and data to formats:
+**db-exporter** - application for export db schema and data to formats:
 * CSV: export table data `csv`
 * Markdown: export table structure `md`
 * Class diagram: export table structure `diagram`
@@ -14,8 +14,11 @@ db-exporter - app for export db schema and data to formats:
 * Go Entity Repository `go-entity-repository`
 * JSON Schema `json-schema`
 * GraphQL `graphql`
+* DBML `dbml`: export db schema (table, ref, enum) to dbml
 
-Supported database: PostgreSQL
+Supported database schemas:
+- PostgreSQL
+- DBML
 
 usage:
 ```text
