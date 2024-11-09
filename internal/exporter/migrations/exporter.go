@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
@@ -12,7 +13,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/sql"
 )
 
 type Exporter struct {

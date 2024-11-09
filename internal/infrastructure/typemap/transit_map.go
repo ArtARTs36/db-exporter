@@ -7,7 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
-var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[string]string{
+var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[string]string{ //nolint:exhaustive,lll // not need
 	config.DatabaseDriverDBML: {
 		config.DatabaseDriverPostgres: map[string]string{
 			mysql.TypeChar:    pg.TypeCharacter,
@@ -75,8 +75,8 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			pg.TypeUUID:               mysql.TypeVarchar, // 36
 			pg.TypeXML:                mysql.TypeLongText,
 			pg.TypeJSON:               mysql.TypeLongText,
-			pg.TypeTsVector:           mysql.TypeLongText,
-			pg.TypeTsQuery:            mysql.TypeLongText,
+			pg.TypeTSVector:           mysql.TypeLongText,
+			pg.TypeTSQuery:            mysql.TypeLongText,
 			pg.TypeArray:              mysql.TypeLongText,
 			pg.TypePoint:              mysql.TypeLongText,
 			pg.TypeLine:               mysql.TypeLineString,

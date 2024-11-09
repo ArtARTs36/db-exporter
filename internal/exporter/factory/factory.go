@@ -17,8 +17,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 	"github.com/artarts36/db-exporter/internal/exporter/yaml"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
-	"github.com/artarts36/db-exporter/internal/sql"
 
 	"github.com/artarts36/db-exporter/internal/template"
 )

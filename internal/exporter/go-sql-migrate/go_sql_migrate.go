@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/migrations"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/gosqlmigrate"
-	"github.com/artarts36/db-exporter/internal/sql"
 	"github.com/artarts36/gds"
 )
 

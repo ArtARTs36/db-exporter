@@ -44,8 +44,8 @@ const (
 	TypeXML  = "xml"
 	TypeJSON = "json"
 
-	TypeTsVector = "tsvector"
-	TypeTsQuery  = "tsquery"
+	TypeTSVector = "tsvector"
+	TypeTSQuery  = "tsquery"
 
 	TypeArray = "array"
 

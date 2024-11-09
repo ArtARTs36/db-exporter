@@ -11,8 +11,8 @@ import (
 
 	"github.com/tyler-sommer/stick"
 
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/goose"
-	"github.com/artarts36/db-exporter/internal/sql"
 )
 
 type FixturesExporter struct {

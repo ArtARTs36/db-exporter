@@ -1,4 +1,4 @@
-package sql_test
+package sql
 
 import (
 	"github.com/artarts36/gds"
@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/sql"
 )
 
 func TestDDLBuilder_BuildDDL(t *testing.T) {
@@ -16,7 +15,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		Name            string
 		Table           *schema.Table
 		ExpectedQueries []string
-		Opts            sql.BuildDDLParams
+		Opts            BuildDDLParams
 	}{
 		{
 			Name: "empty table",
@@ -125,7 +124,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		},
 	}
 
-	builder := sql.NewDDLBuilder()
+	builder := NewDDLBuilder()
 
 	for _, tCase := range cases {
 		t.Run(tCase.Name, func(t *testing.T) {
