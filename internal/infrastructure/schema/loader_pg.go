@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/shared/regex"
 	"github.com/artarts36/gds"
 	"log/slog"
@@ -24,39 +25,6 @@ var (
 	pgColumnDefaultValueFuncRegexp     = regexp.MustCompile(`^(.*)\(\)$`)
 	pgColumnDefaultValueSequenceRegexp = regexp.MustCompile(`^nextval\('(.*)'::regclass\)$`)
 )
-
-var pgTypeMap = map[string]schema.DataType{
-	pg.TypeText:             schema.DataTypeString,
-	pg.TypeUUID:             schema.DataTypeString,
-	pg.TypeCharacter:        schema.DataTypeString,
-	pg.TypeCharacterVarying: schema.DataTypeString,
-
-	pg.TypeTimestampWithoutTZ: schema.DataTypeTimestamp,
-	pg.TypeTimestampWithTZ:    schema.DataTypeTimestamp,
-
-	pg.TypeInteger: schema.DataTypeInteger,
-	pg.TypeInt4:    schema.DataTypeInteger,
-	pg.TypeInt8:    schema.DataTypeInteger,
-	pg.TypeSerial:  schema.DataTypeInteger,
-
-	pg.TypeSmallInt:    schema.DataTypeInteger16,
-	pg.TypeSmallSerial: schema.DataTypeInteger16,
-
-	pg.TypeBigint: schema.DataTypeInteger64,
-
-	pg.TypeBoolean: schema.DataTypeBoolean,
-	pg.TypeBit:     schema.DataTypeBoolean,
-
-	pg.TypeDoublePrecision: schema.DataTypeFloat32,
-	pg.TypeFloat8:          schema.DataTypeFloat32,
-	pg.TypeDecimal:         schema.DataTypeFloat32,
-
-	pg.TypeMoney:   schema.DataTypeFloat64,
-	pg.TypeReal:    schema.DataTypeFloat64,
-	pg.TypeNumeric: schema.DataTypeFloat64,
-
-	pg.TypeBytea: schema.DataTypeBytes,
-}
 
 type constraint struct {
 	Name       string `db:"name"`
@@ -100,7 +68,7 @@ select c.column_name as name,
        case
 			when (c.data_type = 'USER-DEFINED') then c.udt_name
 			else c.data_type
-	   END as type,
+	   END as type_raw,
        pg_catalog.col_description(format('%s.%s',c.table_schema,c.table_name)::regclass::oid,c.ordinal_position)
            as "comment",
        case
@@ -162,10 +130,11 @@ order by c.ordinal_position`
 			sch.Tables.Add(table)
 		}
 
-		col.PreparedType = l.prepareDataType(col.Type.Value)
+		col.Type = sqltype.MapPGType(col.TypeRaw.Value)
+		col.PreparedType = l.prepareDataType(col.Type)
 		col.Default = l.parseColumnDefault(col)
 
-		enum, enumExists := sch.Enums[col.Type.Value]
+		enum, enumExists := sch.Enums[col.TypeRaw.Value]
 		if enumExists {
 			col.Enum = enum
 			enum.Used++
@@ -315,13 +284,8 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 	}
 }
 
-func (l *PGLoader) prepareDataType(rawType string) schema.DataType {
-	t, exists := pgTypeMap[rawType]
-	if exists {
-		return t
-	}
-
-	return schema.DataTypeString
+func (l *PGLoader) prepareDataType(typ schema.Type) schema.DataType {
+	return sqltype.MapGoTypeFromPG(typ)
 }
 
 func (l *PGLoader) loadEnums(ctx context.Context, conn *conn.Connection) (map[string]*schema.Enum, error) {
@@ -375,7 +339,7 @@ func (l *PGLoader) loadSequences(ctx context.Context, conn *conn.Connection) (
 ) {
 	query := `select
     s.sequence_name as name,
-    s.data_type as data_type from information_schema.sequences s
+    s.data_type as data_type_raw from information_schema.sequences s
 where s.sequence_schema = $1`
 
 	var sequences []*schema.Sequence
@@ -393,6 +357,7 @@ where s.sequence_schema = $1`
 	sequenceMap := map[string]*schema.Sequence{}
 
 	for _, sequence := range sequences {
+		sequence.DataType = sqltype.MapPGType(sequence.DataTypeRaw)
 		sequence.PreparedDataType = l.prepareDataType(sequence.DataType)
 
 		sequenceMap[sequence.Name] = sequence

@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/gds"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -34,7 +35,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 				Columns: []*schema.Column{
 					{
 						Name: *gds.NewString("id"),
-						Type: *gds.NewString("integer"),
+						Type: sqltype.PGInteger,
 					},
 				},
 			},
@@ -52,7 +53,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 				Columns: []*schema.Column{
 					{
 						Name: *gds.NewString("id"),
-						Type: *gds.NewString("integer"),
+						Type: sqltype.PGInteger,
 					},
 				},
 				PrimaryKey: &schema.PrimaryKey{
@@ -76,15 +77,15 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 				Columns: []*schema.Column{
 					{
 						Name: *gds.NewString("id"),
-						Type: *gds.NewString("integer"),
+						Type: sqltype.PGInteger,
 					},
 					{
 						Name: *gds.NewString("car_id"),
-						Type: *gds.NewString("integer"),
+						Type: sqltype.PGInteger,
 					},
 					{
 						Name: *gds.NewString("mobile_id"),
-						Type: *gds.NewString("integer"),
+						Type: sqltype.PGInteger,
 					},
 				},
 				PrimaryKey: &schema.PrimaryKey{

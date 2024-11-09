@@ -92,7 +92,7 @@ func (b *DDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]str
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
-		colType, err := sqltype.TransitSQLType(params.Source, params.Target, column.Type.Value)
+		colType, err := sqltype.TransitSQLType(params.Source, params.Target, column.Type)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map column type: %w", err)
 		}

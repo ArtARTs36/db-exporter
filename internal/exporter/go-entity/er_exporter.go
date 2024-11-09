@@ -205,7 +205,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
 					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
 					"Container": map[string]interface{}{
-						"name": gds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
+						"Name": gds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 					},
 					"GenInterfaces": spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},

@@ -81,7 +81,7 @@ func (m *GoPropertyMapper) mapGoType(
 	enums map[string]*golang.StringEnum,
 	addImport func(pkg string),
 ) string {
-	if e, ok := enums[col.Type.Value]; ok {
+	if e, ok := enums[col.Name.Value]; ok {
 		return e.Name.Value
 	}
 

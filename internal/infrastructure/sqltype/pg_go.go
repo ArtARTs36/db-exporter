@@ -5,14 +5,6 @@ import (
 )
 
 var pgGoTypeMap = map[schema.Type]schema.DataType{
-	PGText:             schema.DataTypeString,
-	PGUUID:             schema.DataTypeString,
-	PGCharacter:        schema.DataTypeString,
-	PGCharacterVarying: schema.DataTypeString,
-
-	PGTimestampWithoutTZ: schema.DataTypeTimestamp,
-	PGTimestampWithTZ:    schema.DataTypeTimestamp,
-
 	PGInteger: schema.DataTypeInteger,
 	PGInt4:    schema.DataTypeInteger,
 	PGInt8:    schema.DataTypeInteger,
@@ -35,4 +27,33 @@ var pgGoTypeMap = map[schema.Type]schema.DataType{
 	PGNumeric: schema.DataTypeFloat64,
 
 	PGBytea: schema.DataTypeBytes,
+}
+
+func MapGoTypeFromPG(t schema.Type) schema.DataType {
+	if t.IsStringable {
+		return schema.DataTypeString
+	}
+
+	if t.IsDatetime {
+		return schema.DataTypeTimestamp
+	}
+
+	if t.IsBoolean {
+		return schema.DataTypeBoolean
+	}
+
+	dt, ok := pgGoTypeMap[t]
+	if ok {
+		return dt
+	}
+
+	if t.IsInteger {
+		return schema.DataTypeInteger
+	}
+
+	if t.IsFloat {
+		return schema.DataTypeFloat64
+	}
+
+	return schema.DataTypeString
 }

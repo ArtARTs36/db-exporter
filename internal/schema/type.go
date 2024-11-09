@@ -1,5 +1,7 @@
 package schema
 
+import "fmt"
+
 type Type struct {
 	Name string
 
@@ -41,4 +43,12 @@ func (t *Type) MarkAsUUID() Type {
 	newType.IsUUID = true
 
 	return newType
+}
+
+func (t *Type) String() string {
+	if t.Length == "" {
+		return t.Name
+	}
+
+	return fmt.Sprintf("%s(%s)", t.Name, t.Length)
 }

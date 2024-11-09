@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/dbml-go/core"
 	"github.com/artarts36/dbml-go/parser"
 	"github.com/artarts36/gds"
@@ -56,7 +57,7 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 		for _, col := range tbl.Columns {
 			column := &schema.Column{
 				Name:            *gds.NewString(col.Name),
-				Type:            *gds.NewString(col.Type),
+				Type:            sqltype.MapDBMLType(col.Type),
 				PreparedType:    l.mapGoType(col.Type),
 				TableName:       table.Name,
 				Nullable:        col.Settings.Null,

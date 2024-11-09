@@ -92,7 +92,7 @@ func (e *Exporter) mapTable(
 	}
 
 	for _, col := range tbl.Columns {
-		typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type.Value)
+		typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
 		}
