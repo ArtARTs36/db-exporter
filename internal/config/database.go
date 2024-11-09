@@ -9,6 +9,7 @@ type DatabaseDriver string
 const (
 	DatabaseDriverPostgres DatabaseDriver = "postgres"
 	DatabaseDriverDBML     DatabaseDriver = "dbml"
+	DatabaseDriverMySQL    DatabaseDriver = "mysql"
 )
 
 const (
@@ -16,6 +17,12 @@ const (
 )
 
 var DatabaseDrivers = []DatabaseDriver{
+	DatabaseDriverPostgres,
+	DatabaseDriverDBML,
+	DatabaseDriverMySQL,
+}
+
+var readableDatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverPostgres,
 	DatabaseDriverDBML,
 }
@@ -34,12 +41,10 @@ func (d DatabaseDriver) Valid() bool {
 	return slices.Contains(DatabaseDrivers, d)
 }
 
+func (d DatabaseDriver) CanRead() bool {
+	return slices.Contains(readableDatabaseDrivers, d)
+}
+
 func (d DatabaseDriver) CanWrite() bool {
-	switch d {
-	case DatabaseDriverPostgres:
-		return true
-	case DatabaseDriverDBML:
-		return false
-	}
-	return true
+	return slices.Contains(writeableDatabaseDrivers, d)
 }

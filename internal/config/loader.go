@@ -104,6 +104,15 @@ func (l *Loader) validate(cfg *Config) error {
 				)
 			}
 
+			if !db.Driver.CanRead() {
+				return fmt.Errorf(
+					"databases[%s] have driver %q which read schema unsupported. Available: %v",
+					activity.Database,
+					db.Driver,
+					readableDatabaseDrivers,
+				)
+			}
+
 			if activity.Export.Spec != nil {
 				validatableSpec, isValidatableSpec := activity.Export.Spec.(ValidatableSpec)
 				if isValidatableSpec {
