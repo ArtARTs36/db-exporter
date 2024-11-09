@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/migrations"
-	"github.com/artarts36/db-exporter/internal/shared/ds"
 	"github.com/artarts36/db-exporter/internal/shared/gosqlmigrate"
 	"github.com/artarts36/db-exporter/internal/sql"
+	"github.com/artarts36/gds"
 )
 
 func NewSQLMigrateExporter(
@@ -19,7 +19,7 @@ func NewSQLMigrateExporter(
 		"go-sql-migrate/migration.sql",
 		ddlBuilder,
 		migrations.NewFuncMigrationMaker(
-			func(i int, tableName ds.String) *migrations.MigrationMeta {
+			func(i int, tableName gds.String) *migrations.MigrationMeta {
 				return &migrations.MigrationMeta{
 					Filename: gosqlmigrate.CreateMigrationFilename(fmt.Sprintf("create_%s_table", tableName), i),
 				}
