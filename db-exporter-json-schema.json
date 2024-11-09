@@ -528,6 +528,11 @@
             }
           },
           "additionalProperties": false
+        },
+        "target": {
+          "type": "string",
+          "enum": ["postgres"],
+          "default": "postgres"
         }
       },
       "additionalProperties": false
