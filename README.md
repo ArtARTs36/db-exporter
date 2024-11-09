@@ -14,7 +14,7 @@
 * Go Entity Repository `go-entity-repository`
 * JSON Schema `json-schema`
 * GraphQL `graphql`
-* DBML `dbml`: export db schema (table, ref) to dbml
+* DBML `dbml`: export db schema (table, ref, enum) to dbml
 
 Supported database schemas:
 - PostgreSQL
