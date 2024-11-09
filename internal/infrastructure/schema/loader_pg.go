@@ -358,7 +358,6 @@ where s.sequence_schema = $1`
 
 	for _, sequence := range sequences {
 		sequence.DataType = sqltype.MapPGType(sequence.DataTypeRaw)
-		sequence.PreparedDataType = l.prepareDataType(sequence.DataType)
 
 		sequenceMap[sequence.Name] = sequence
 	}

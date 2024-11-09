@@ -6,17 +6,13 @@ import (
 )
 
 func mapJSONType(col *schema.Column) jsonschema.Type {
-	switch col.PreparedType {
-	case schema.DataTypeInteger, schema.DataTypeInteger16, schema.DataTypeInteger64:
-		return jsonschema.TypeInteger
-	case schema.DataTypeString, schema.DataTypeTimestamp:
-		return jsonschema.TypeString
-	case schema.DataTypeBoolean:
-		return jsonschema.TypeBoolean
-	case schema.DataTypeFloat32, schema.DataTypeFloat64:
+	switch true {
+	case col.Type.IsNumeric:
 		return jsonschema.TypeNumber
-	case schema.DataTypeBytes:
+	case col.Type.IsStringable:
 		return jsonschema.TypeString
+	case col.Type.IsBoolean:
+		return jsonschema.TypeBoolean
 	default:
 		return jsonschema.TypeString
 	}
