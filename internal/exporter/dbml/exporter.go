@@ -131,9 +131,9 @@ func (e *Exporter) mapTable(
 
 	for _, fk := range tbl.ForeignKeys {
 		refs = append(refs, &dbml.Ref{
-			From: tbl.Name.Append(".").Append(fk.ColumnsNames.Join(",").Value).Value,
+			From: fk.Table.Append(".").Append(fk.ColumnsNames.Join(",").Value).Value,
 			Type: ">",
-			To:   fk.Table.Append(".").Append(fk.Table.Value).Value,
+			To:   fk.ForeignTable.Append(".").Append(fk.ForeignColumn.Value).Value,
 		})
 	}
 

@@ -46,6 +46,7 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 			Comment:        tbl.Note,
 			ForeignKeys:    map[string]*schema.ForeignKey{},
 			UsingSequences: map[string]*schema.Sequence{},
+			UniqueKeys:     map[string]*schema.UniqueKey{},
 		}
 
 		sch.Tables.Add(table)

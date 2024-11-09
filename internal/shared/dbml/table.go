@@ -26,8 +26,7 @@ type ColumnSettings struct {
 	Unique     bool
 	Default    ColumnDefault
 
-	null    bool
-	notNull bool
+	null bool
 }
 
 func (t *Table) Render() string {
@@ -63,12 +62,6 @@ func (c *Column) Render() string {
 
 func (c *Column) AsNullable() {
 	c.Settings.null = true
-	c.Settings.notNull = false
-}
-
-func (c *Column) AsRequired() {
-	c.Settings.null = false
-	c.Settings.notNull = true
 }
 
 func (s *ColumnSettings) Render() string {
@@ -82,9 +75,7 @@ func (s *ColumnSettings) Render() string {
 		strs = append(strs, "primary key")
 	}
 
-	if s.null {
-		strs = append(strs, "null")
-	} else if s.notNull {
+	if !s.null {
 		strs = append(strs, "not null")
 	}
 

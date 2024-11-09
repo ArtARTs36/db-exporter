@@ -41,7 +41,8 @@ func (v *EnumValue) Render() string {
 	if st != "" {
 		st = " " + st
 	}
-	return fmt.Sprintf("%s%s", v.Name, st)
+
+	return fmt.Sprintf("%q%s", v.Name, st)
 }
 
 func (s *EnumValueSettings) Render() string {

@@ -5,6 +5,10 @@ github.com/artarts36/dbml-go v0.0.0-20241108001423-431ed3be76fa h1:DA1/ALVN4nYz9
 github.com/artarts36/dbml-go v0.0.0-20241108001423-431ed3be76fa/go.mod h1:LVETs2AVtd7Ph3snI3Ig9wuccciwpsTl0z4TNub3z4A=
 github.com/artarts36/dbml-go v0.0.0-20241108162259-0a73f1db98fe h1:QmIgn6duNvuOgq8p/a3OPuwqzNlY23HN388UDVQIwxQ=
 github.com/artarts36/dbml-go v0.0.0-20241108162259-0a73f1db98fe/go.mod h1:LVETs2AVtd7Ph3snI3Ig9wuccciwpsTl0z4TNub3z4A=
+github.com/artarts36/dbml-go v0.0.0-20241108211638-b8c43c2016e5 h1:/oaRWE+QT3z54cQShDSTy3NfqK8CEodNenR+ZIDSfSo=
+github.com/artarts36/dbml-go v0.0.0-20241108211638-b8c43c2016e5/go.mod h1:LVETs2AVtd7Ph3snI3Ig9wuccciwpsTl0z4TNub3z4A=
+github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18 h1:a0BSeYaq9jpqD0jl2x7g4nLEKqz5buKR9TnZr5zVuP8=
+github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18/go.mod h1:LVETs2AVtd7Ph3snI3Ig9wuccciwpsTl0z4TNub3z4A=
 github.com/artarts36/gds v0.1.4 h1:kCpeP6fvZCtmM5A6cQaZPFl2P6b6+DuSXDwYNEASBlc=
 github.com/artarts36/gds v0.1.4/go.mod h1:CvBjGkRiHY8YLZDWb3RFAy+Ve7yQdjHQqTmKfjjlWjY=
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO92i8J8Mo7jg0TCx4punC3eF6hmeytxVNc=
