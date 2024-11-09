@@ -43,5 +43,49 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			pg.TypeDoublePrecision: dbml.TypeFloat,
 			pg.TypeFloat8:          pg.TypeFloat8,
 		},
+
+		// https://dev.mysql.com/doc/workbench/en/wb-migration-database-postgresql-typemapping.html
+		config.DatabaseDriverMySQL: {
+			pg.TypeInt:                mysql.TypeInt,
+			pg.TypeSmallInt:           mysql.TypeSmallInt,
+			pg.TypeBigint:             mysql.TypeInt,
+			pg.TypeSerial:             mysql.TypeInt,
+			pg.TypeSmallSerial:        mysql.TypeSmallInt,
+			pg.TypeBigSerial:          mysql.TypeBigInt,
+			pg.TypeBit:                mysql.TypeBit,
+			pg.TypeBoolean:            mysql.TypeTinyint, // 1
+			pg.TypeReal:               mysql.TypeFloat,
+			pg.TypeDoublePrecision:    mysql.TypeDouble,
+			pg.TypeNumeric:            mysql.TypeDecimal,
+			pg.TypeDecimal:            mysql.TypeDecimal,
+			pg.TypeMoney:              mysql.TypeDecimal, // 19,2
+			pg.TypeCharacter:          mysql.TypeChar,
+			pg.TypeChar:               mysql.TypeChar,
+			pg.TypeCharacterVarying:   mysql.TypeLongText,
+			pg.TypeDate:               mysql.TypeDate,
+			pg.TypeTimeWithTZ:         mysql.TypeTime,
+			pg.TypeTimeWithoutTZ:      mysql.TypeTime,
+			pg.TypeTimestampWithTZ:    mysql.TypeDateTime,
+			pg.TypeTimestampWithoutTZ: mysql.TypeDateTime,
+			pg.TypeInterval:           mysql.TypeTime,
+			pg.TypeBytea:              mysql.TypeLongBlob,
+			pg.TypeCidr:               mysql.TypeVarchar, // 43
+			pg.TypeInet:               mysql.TypeVarchar, // 43
+			pg.TypeMacaddr:            mysql.TypeVarchar, // 17
+			pg.TypeUUID:               mysql.TypeVarchar, // 36
+			pg.TypeXML:                mysql.TypeLongText,
+			pg.TypeJSON:               mysql.TypeLongText,
+			pg.TypeTsVector:           mysql.TypeLongText,
+			pg.TypeTsQuery:            mysql.TypeLongText,
+			pg.TypeArray:              mysql.TypeLongText,
+			pg.TypePoint:              mysql.TypeLongText,
+			pg.TypeLine:               mysql.TypeLineString,
+			pg.TypeLseq:               mysql.TypeLineString,
+			pg.TypeBox:                mysql.TypePolygon,
+			pg.TypePath:               mysql.TypeLineString,
+			pg.TypePolygon:            mysql.TypePolygon,
+			pg.TypeCircle:             mysql.TypePolygon,
+			pg.TxidSnapshot:           mysql.TypeVarchar,
+		},
 	},
 }

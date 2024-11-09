@@ -17,8 +17,9 @@
 * DBML `dbml`: export db schema (table, ref, enum) to dbml
 
 Supported database schemas:
-- PostgreSQL
-- DBML
+- PostgreSQL: full-support
+- DBML: only export db schema, without fixtures and import
+- MySQL: only generate migrations from PostgreSQL
 
 usage:
 ```text

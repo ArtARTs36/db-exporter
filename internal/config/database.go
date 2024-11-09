@@ -31,6 +31,11 @@ var writeableDatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverPostgres,
 }
 
+var migrateableDatabaseDrivers = []DatabaseDriver{
+	DatabaseDriverPostgres,
+	DatabaseDriverMySQL,
+}
+
 type Database struct {
 	Driver DatabaseDriver `yaml:"driver"`
 	DSN    string         `yaml:"dsn"`
@@ -47,4 +52,8 @@ func (d DatabaseDriver) CanRead() bool {
 
 func (d DatabaseDriver) CanWrite() bool {
 	return slices.Contains(writeableDatabaseDrivers, d)
+}
+
+func (d DatabaseDriver) CanMigrate() bool {
+	return slices.Contains(migrateableDatabaseDrivers, d)
 }

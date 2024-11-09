@@ -531,7 +531,7 @@
         },
         "target": {
           "type": "string",
-          "enum": ["postgres"],
+          "enum": ["postgres", "mysql"],
           "default": "postgres"
         }
       },

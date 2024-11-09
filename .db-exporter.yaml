@@ -1,7 +1,7 @@
 databases:
   default:
-    driver: dbml
-    dsn: "./test.dbml"
+    driver: postgres
+    dsn: ${PG_DSN}
 
   dbml:
     driver: dbml
@@ -50,6 +50,14 @@ tasks:
       - export: goose
         out:
           dir: ./out/goose
+
+  gen_goose_migrations_mysql:
+    activities:
+      - export: goose
+        spec:
+          target: mysql
+        out:
+          dir: ./out/goose_mysql
 
   gen_laravel_raw_migrations:
     activities:
