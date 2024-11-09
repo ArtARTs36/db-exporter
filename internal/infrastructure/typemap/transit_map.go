@@ -7,7 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
-var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[string]string{ //nolint:exhaustive,lll // not need
+var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[string]string{
 	config.DatabaseDriverDBML: {
 		config.DatabaseDriverPostgres: map[string]string{
 			mysql.TypeChar:    pg.TypeCharacter,
@@ -21,6 +21,9 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			mysql.TypeTimestamp: pg.TypeTimestampWithTZ,
 
 			dbml.TypeUUID: pg.TypeUUID,
+
+			dbml.TypeFloat: pg.TypeDoublePrecision,
+			pg.TypeFloat8:  pg.TypeFloat8,
 		},
 	},
 	config.DatabaseDriverPostgres: {
@@ -30,11 +33,15 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			pg.TypeBytea:            mysql.TypeBinary,
 			pg.TypeText:             mysql.TypeText,
 
-			pg.TypeInteger:            mysql.TypeInteger,
+			pg.TypeInteger: mysql.TypeInteger,
+
 			pg.TypeTimestampWithTZ:    mysql.TypeTimestamp,
 			pg.TypeTimestampWithoutTZ: mysql.TypeTimestamp,
 
 			pg.TypeUUID: dbml.TypeUUID,
+
+			pg.TypeDoublePrecision: dbml.TypeFloat,
+			pg.TypeFloat8:          pg.TypeFloat8,
 		},
 	},
 }

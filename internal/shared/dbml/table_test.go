@@ -31,7 +31,7 @@ func TestRender_Build(t *testing.T) {
 				},
 			},
 			Expected: `Table posts {
-  id varchar
+  id varchar [not null]
 }`,
 		},
 		{
@@ -53,8 +53,8 @@ func TestRender_Build(t *testing.T) {
 				},
 			},
 			Expected: `Table posts {
-  id integer [primary key]
-  title varchar
+  id integer [primary key, not null]
+  title varchar [not null]
 }`,
 		},
 		{
@@ -83,9 +83,9 @@ func TestRender_Build(t *testing.T) {
 				},
 			},
 			Expected: `Table posts {
-  id integer [primary key]
-  title varchar
-  body varchar [note: 'Content of the post']
+  id integer [primary key, not null]
+  title varchar [not null]
+  body varchar [not null, note: 'Content of the post']
 }`,
 		},
 	}

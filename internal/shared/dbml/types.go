@@ -1,6 +1,7 @@
 package dbml
 
 const (
-	TypeInt  = "int"
-	TypeUUID = "uuid"
+	TypeInt   = "int"
+	TypeUUID  = "uuid"
+	TypeFloat = "float"
 )
