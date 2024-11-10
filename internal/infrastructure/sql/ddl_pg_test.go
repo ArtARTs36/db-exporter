@@ -125,7 +125,7 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 		},
 	}
 
-	builder := NewDDLBuilder()
+	builder := NewPostgresDDLBuilder()
 
 	for _, tCase := range cases {
 		t.Run(tCase.Name, func(t *testing.T) {

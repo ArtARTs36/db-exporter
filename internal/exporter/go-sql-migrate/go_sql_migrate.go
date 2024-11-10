@@ -11,7 +11,7 @@ import (
 
 func NewSQLMigrateExporter(
 	pager *common.Pager,
-	ddlBuilder *sql.DDLBuilder,
+	ddlBuilder *sql.DDLBuilderManager,
 ) *migrations.Exporter {
 	return migrations.NewExporter(
 		"go-sql-migrate-exporter",

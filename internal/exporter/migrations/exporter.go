@@ -18,23 +18,23 @@ import (
 type Exporter struct {
 	name string
 
-	page       *common.Page
-	maker      MigrationMaker
-	ddlBuilder *sql.DDLBuilder
+	page              *common.Page
+	maker             MigrationMaker
+	ddlBuilderManager *sql.DDLBuilderManager
 }
 
 func NewExporter(
 	name string,
 	pager *common.Pager,
 	templateName string,
-	ddlBuilder *sql.DDLBuilder,
+	ddlBuilder *sql.DDLBuilderManager,
 	maker MigrationMaker,
 ) *Exporter {
 	return &Exporter{
-		name:       name,
-		page:       pager.Of(templateName),
-		maker:      maker,
-		ddlBuilder: ddlBuilder,
+		name:              name,
+		page:              pager.Of(templateName),
+		maker:             maker,
+		ddlBuilderManager: ddlBuilder,
 	}
 }
 
@@ -54,8 +54,9 @@ func (e *Exporter) ExportPerFile(
 	ddlOpts := sql.BuildDDLParams{
 		UseIfNotExists: spec.Use.IfNotExists,
 		Source:         params.Schema.Driver,
-		Target:         spec.Target,
 	}
+
+	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
 
 	for i, table := range params.Schema.Tables.List() {
 		upQueries, downQueries := make([]string, 0), make([]string, 0)
@@ -68,24 +69,24 @@ func (e *Exporter) ExportPerFile(
 					Target:         spec.Target,
 				}
 
-				seqSQL, err := e.ddlBuilder.CreateSequence(sequence, seqParams)
+				seqSQL, err := ddlBuilder.CreateSequence(sequence, seqParams)
 				if err != nil {
 					return nil, fmt.Errorf("failed to build query for create sequence %q: %w", sequence.Name, err)
 				}
 
 				upQueries = append(upQueries, seqSQL)
-				downQueries = append(downQueries, e.ddlBuilder.DropSequence(sequence, spec.Use.IfExists))
+				downQueries = append(downQueries, ddlBuilder.DropSequence(sequence, spec.Use.IfExists))
 			}
 		}
 
 		for _, enum := range table.UsingEnums {
 			if enum.Used == 1 {
-				upQueries = append(upQueries, e.ddlBuilder.CreateEnum(enum))
-				downQueries = append(downQueries, e.ddlBuilder.DropType(enum.Name.Value, spec.Use.IfExists))
+				upQueries = append(upQueries, ddlBuilder.CreateEnum(enum))
+				downQueries = append(downQueries, ddlBuilder.DropType(enum.Name.Value, spec.Use.IfExists))
 			}
 		}
 
-		upQ, downQ, err := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQ, downQ, err := e.createQueries(ddlBuilder, table, ddlOpts, spec.Use.IfExists)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create queries: %w", err)
 		}
@@ -130,11 +131,12 @@ func (e *Exporter) Export(
 	ddlOpts := sql.BuildDDLParams{
 		UseIfNotExists: spec.Use.IfNotExists,
 		Source:         params.Schema.Driver,
-		Target:         spec.Target,
 	}
 
+	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
+
 	for _, table := range params.Schema.Tables.List() {
-		upQs, downQs, err := e.createQueries(table, ddlOpts, spec.Use.IfExists)
+		upQs, downQs, err := e.createQueries(ddlBuilder, table, ddlOpts, spec.Use.IfExists)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create queries: %w", err)
 		}
@@ -150,13 +152,13 @@ func (e *Exporter) Export(
 	}
 
 	for _, seq := range params.Schema.Sequences {
-		seqSQL, err := e.ddlBuilder.CreateSequence(seq, seqParams)
+		seqSQL, err := ddlBuilder.CreateSequence(seq, seqParams)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build query for create sequence %q: %w", seq.Name, err)
 		}
 
 		upQueries = append(upQueries, seqSQL)
-		downQueries = append(downQueries, e.ddlBuilder.DropSequence(seq, spec.Use.IfNotExists))
+		downQueries = append(downQueries, ddlBuilder.DropSequence(seq, spec.Use.IfNotExists))
 	}
 
 	migMeta := e.maker.MakeMultiple()
@@ -179,6 +181,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) createQueries(
+	ddlBuilder sql.DDLBuilder,
 	table *schema.Table,
 	opts sql.BuildDDLParams,
 	useIfExists bool,
@@ -187,13 +190,13 @@ func (e *Exporter) createQueries(
 	downQueries []string,
 	err error,
 ) {
-	upQueries, err = e.ddlBuilder.BuildDDL(table, opts)
+	upQueries, err = ddlBuilder.BuildDDL(table, opts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build ddl: %w", err)
 	}
 
 	downQueries = []string{
-		e.ddlBuilder.DropTable(table, useIfExists),
+		ddlBuilder.DropTable(table, useIfExists),
 	}
 	return //nolint: nakedret // not need
 }

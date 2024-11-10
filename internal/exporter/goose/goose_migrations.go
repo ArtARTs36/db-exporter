@@ -13,7 +13,7 @@ import (
 
 func NewMigrationsExporter(
 	pager *common.Pager,
-	ddlBuilder *sql.DDLBuilder,
+	ddlBuilder *sql.DDLBuilderManager,
 ) *migrations.Exporter {
 	return migrations.NewExporter(
 		"goose-migrations-exporter",

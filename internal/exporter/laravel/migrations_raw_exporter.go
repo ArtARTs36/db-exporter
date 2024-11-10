@@ -11,7 +11,7 @@ import (
 
 func NewLaravelMigrationsRawExporter(
 	pager *common.Pager,
-	ddlBuilder *sql.DDLBuilder,
+	ddlBuilder *sql.DDLBuilderManager,
 ) *migrations.Exporter {
 	return migrations.NewExporter(
 		"laravel-raw-migrations-exporter",
