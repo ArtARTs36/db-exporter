@@ -18,6 +18,7 @@ type PostgresDDLBuilder struct {
 
 type BuildDDLParams struct {
 	UseIfNotExists bool
+	UseIfExists    bool
 
 	Source config.DatabaseDriver
 	Target config.DatabaseDriver
@@ -29,18 +30,28 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 
 type isLastLine func() bool
 
-func (b *PostgresDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]string, error) { //nolint:funlen,lll // not need
-	var upQueries []string
+func (b *PostgresDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists bool) string {
+	ifne := ""
+	if useIfNotExists {
+		ifne = expIfNotExists
+	}
 
+	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
+}
+
+func (b *PostgresDDLBuilder) BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error) { //nolint:funlen,lll // not need
 	if len(table.Columns) == 0 {
-		ifne := ""
-		if params.UseIfNotExists {
-			ifne = expIfNotExists
-		}
-
-		return []string{
-			fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value),
+		return &DDL{
+			Name:        table.Name.Value,
+			UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
+			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
 		}, nil
+	}
+
+	ddl := &DDL{
+		Name:        table.Name.Value,
+		UpQueries:   []string{},
+		DownQueries: []string{},
 	}
 
 	ifne := ""
@@ -110,7 +121,7 @@ func (b *PostgresDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams
 		createTableQuery = append(createTableQuery, line)
 
 		if column.Comment.IsNotEmpty() {
-			upQueries = append(upQueries, b.CommentOnColumn(column))
+			ddl.UpQueries = append(ddl.UpQueries, b.CommentOnColumn(column))
 		}
 	}
 
@@ -134,9 +145,10 @@ func (b *PostgresDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams
 
 	upSQL := strings.Join(createTableQuery, "\n")
 
-	upQueries = append([]string{upSQL}, upQueries...)
+	ddl.UpQueries = append([]string{upSQL}, ddl.UpQueries...)
+	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
 
-	return upQueries, nil
+	return ddl, nil
 }
 
 type CreateSequenceParams struct {
@@ -160,7 +172,7 @@ func (b *PostgresDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateS
 	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
 }
 
-func (b *PostgresDDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {
+func (b *PostgresDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
 	ife := ""
 	if useIfExists {
 		ife = "IF EXISTS "

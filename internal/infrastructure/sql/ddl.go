@@ -5,10 +5,15 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
+type DDL struct {
+	Name        string
+	UpQueries   []string
+	DownQueries []string
+}
+
 type DDLBuilder interface {
-	BuildDDL(table *schema.Table, params BuildDDLParams) ([]string, error)
+	BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error)
 	CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error)
-	DropTable(table *schema.Table, useIfExists bool) string
 	CreateEnum(enum *schema.Enum) string
 	DropType(name string, ifExists bool) string
 	DropSequence(seq *schema.Sequence, ifExists bool) string

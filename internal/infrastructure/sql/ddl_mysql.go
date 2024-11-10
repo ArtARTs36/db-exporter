@@ -20,18 +20,28 @@ func NewMySQLDDLBuilder() *MySQLDDLBuilder {
 	return &MySQLDDLBuilder{}
 }
 
-func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) ([]string, error) { //nolint:funlen,lll // not need
-	var upQueries []string
+func (b *MySQLDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists bool) string {
+	ifne := ""
+	if useIfNotExists {
+		ifne = expIfNotExists
+	}
 
+	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
+}
+
+func (b *MySQLDDLBuilder) BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error) { //nolint:funlen,lll // not need
 	if len(table.Columns) == 0 {
-		ifne := ""
-		if params.UseIfNotExists {
-			ifne = expIfNotExists
-		}
-
-		return []string{
-			fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value),
+		return &DDL{
+			Name:        table.Name.Value,
+			UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
+			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
 		}, nil
+	}
+
+	ddl := &DDL{
+		Name:        table.Name.Value,
+		UpQueries:   make([]string, 0),
+		DownQueries: make([]string, 0),
 	}
 
 	ifne := ""
@@ -141,11 +151,12 @@ func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) (
 
 	createTableQuery = append(createTableQuery, ");")
 
-	upSQL := strings.Join(createTableQuery, "\n")
+	ddl.UpQueries = append([]string{
+		strings.Join(createTableQuery, "\n"),
+	}, ddl.UpQueries...)
+	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
 
-	upQueries = append([]string{upSQL}, upQueries...)
-
-	return upQueries, nil
+	return ddl, nil
 }
 
 func (b *MySQLDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
@@ -162,7 +173,7 @@ func (b *MySQLDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequ
 	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
 }
 
-func (b *MySQLDDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {
+func (b *MySQLDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
 	ife := ""
 	if useIfExists {
 		ife = "IF EXISTS "

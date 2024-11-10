@@ -53,6 +53,7 @@ func (e *Exporter) ExportPerFile(
 
 	ddlOpts := sql.BuildDDLParams{
 		UseIfNotExists: spec.Use.IfNotExists,
+		UseIfExists:    spec.Use.IfExists,
 		Source:         params.Schema.Driver,
 	}
 
@@ -86,7 +87,7 @@ func (e *Exporter) ExportPerFile(
 			}
 		}
 
-		upQ, downQ, err := e.createQueries(ddlBuilder, table, ddlOpts, spec.Use.IfExists)
+		upQ, downQ, err := e.createQueries(ddlBuilder, table, ddlOpts)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create queries: %w", err)
 		}
@@ -136,7 +137,7 @@ func (e *Exporter) Export(
 	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
 
 	for _, table := range params.Schema.Tables.List() {
-		upQs, downQs, err := e.createQueries(ddlBuilder, table, ddlOpts, spec.Use.IfExists)
+		upQs, downQs, err := e.createQueries(ddlBuilder, table, ddlOpts)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create queries: %w", err)
 		}
@@ -184,19 +185,17 @@ func (e *Exporter) createQueries(
 	ddlBuilder sql.DDLBuilder,
 	table *schema.Table,
 	opts sql.BuildDDLParams,
-	useIfExists bool,
 ) (
 	upQueries []string,
 	downQueries []string,
 	err error,
 ) {
-	upQueries, err = ddlBuilder.BuildDDL(table, opts)
+	ddl, err := ddlBuilder.BuildForTable(table, opts)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build ddl: %w", err)
 	}
 
-	downQueries = []string{
-		ddlBuilder.DropTable(table, useIfExists),
-	}
+	upQueries = ddl.UpQueries
+	downQueries = ddl.DownQueries
 	return //nolint: nakedret // not need
 }

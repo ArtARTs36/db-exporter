@@ -13,10 +13,10 @@ import (
 
 func TestDDLBuilder_BuildDDL(t *testing.T) {
 	cases := []struct {
-		Name            string
-		Table           *schema.Table
-		ExpectedQueries []string
-		Opts            BuildDDLParams
+		Name        string
+		Table       *schema.Table
+		ExpectedDDL *DDL
+		Opts        BuildDDLParams
 	}{
 		{
 			Name: "empty table",
@@ -24,8 +24,10 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 				Name:    gds.String{Value: "cars"},
 				Columns: []*schema.Column{},
 			},
-			ExpectedQueries: []string{
-				"CREATE TABLE cars()",
+			ExpectedDDL: &DDL{
+				Name:        "cars",
+				UpQueries:   []string{"CREATE TABLE cars()"},
+				DownQueries: []string{"DROP TABLE cars;"},
 			},
 		},
 		{
@@ -39,11 +41,15 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 					},
 				},
 			},
-			ExpectedQueries: []string{
-				`CREATE TABLE cars
+			ExpectedDDL: &DDL{
+				Name: "cars",
+				UpQueries: []string{
+					`CREATE TABLE cars
 (
     id integer NOT NULL
 );`,
+				},
+				DownQueries: []string{"DROP TABLE cars;"},
 			},
 		},
 		{
@@ -61,13 +67,17 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 					ColumnsNames: gds.NewStrings("id"),
 				},
 			},
-			ExpectedQueries: []string{
-				`CREATE TABLE cars
+			ExpectedDDL: &DDL{
+				Name: "cars",
+				UpQueries: []string{
+					`CREATE TABLE cars
 (
     id integer NOT NULL,
 
     CONSTRAINT cars_pk PRIMARY KEY (id)
 );`,
+				},
+				DownQueries: []string{"DROP TABLE cars;"},
 			},
 		},
 		{
@@ -110,8 +120,10 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 					},
 				},
 			},
-			ExpectedQueries: []string{
-				`CREATE TABLE users
+			ExpectedDDL: &DDL{
+				Name: "users",
+				UpQueries: []string{
+					`CREATE TABLE users
 (
     id        integer NOT NULL,
     car_id    integer NOT NULL,
@@ -121,6 +133,8 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
     CONSTRAINT users_car_id_fk FOREIGN KEY (car_id) REFERENCES cars (id) DEFERRABLE,
     CONSTRAINT users_mobile_id_fk FOREIGN KEY (mobile_id) REFERENCES mobiles (id) DEFERRABLE INITIALLY DEFERRED
 );`,
+				},
+				DownQueries: []string{"DROP TABLE users;"},
 			},
 		},
 	}
@@ -129,10 +143,10 @@ func TestDDLBuilder_BuildDDL(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Name, func(t *testing.T) {
-			queries, err := builder.BuildDDL(tCase.Table, tCase.Opts)
+			queries, err := builder.BuildForTable(tCase.Table, tCase.Opts)
 			require.NoError(t, err)
 
-			assert.Equal(t, tCase.ExpectedQueries, queries)
+			assert.Equal(t, tCase.ExpectedDDL, queries)
 		})
 	}
 }
