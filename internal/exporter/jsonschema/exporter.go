@@ -124,6 +124,8 @@ func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {
 		return jsonschema.FormatDateTime
 	case column.Type.IsUUID:
 		return jsonschema.FormatUUID
+	case column.Type.IsDate:
+		return jsonschema.FormatDate
 	case column.Type.IsStringable:
 		if column.Name.Equal("email") || column.Name.Ends("_email") {
 			return jsonschema.FormatEmail
