@@ -51,12 +51,12 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			PGSmallSerial:        MySQLSmallInt,
 			PGBigSerial:          MySQLBigInt,
 			PGBit:                MySQLBit,
-			PGBoolean:            MySQLTinyint, // 1
+			PGBoolean:            MySQLTinyint.WithLength("1"),
 			PGReal:               MySQLFloat,
 			PGDoublePrecision:    MySQLDouble,
 			PGNumeric:            MySQLDecimal,
 			PGDecimal:            MySQLDecimal,
-			PGMoney:              MySQLDecimal, // 19,2
+			PGMoney:              MySQLDecimal.WithLength("19,2"),
 			PGCharacter:          MySQLChar,
 			PGChar:               MySQLChar,
 			PGCharacterVarying:   MySQLLongText,
@@ -67,10 +67,10 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			PGTimestampWithoutTZ: MySQLDateTime,
 			PGInterval:           MySQLTime,
 			PGBytea:              MySQLLongBlob,
-			PGCidr:               MySQLVarchar, // 43
-			PGInet:               MySQLVarchar, // 43
-			PGMacaddr:            MySQLVarchar, // 17
-			PGUUID:               MySQLVarchar, // 36
+			PGCidr:               MySQLVarchar.WithLength("43"), // 43
+			PGInet:               MySQLVarchar.WithLength("43"), // 43
+			PGMacaddr:            MySQLVarchar.WithLength("17"), // 17
+			PGUUID:               MySQLVarchar.WithLength("36"), // 36
 			PGXML:                MySQLLongText,
 			PGJSON:               MySQLLongText,
 			PGTSVector:           MySQLLongText,
@@ -78,7 +78,7 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			PGArray:              MySQLLongText,
 			PGPoint:              MySQLLongText,
 			PGLine:               MySQLLineString,
-			PGLseq:               MySQLLineString,
+			PGLseg:               MySQLLineString,
 			PGBox:                MySQLPolygon,
 			PGPath:               MySQLLineString,
 			PGPolygon:            MySQLPolygon,

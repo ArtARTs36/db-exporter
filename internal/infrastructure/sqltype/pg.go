@@ -10,6 +10,7 @@ var (
 	PGCharacter        = schema.Type{Name: "character", IsStringable: true}
 	PGChar             = schema.Type{Name: "char", IsStringable: true}
 	PGCharacterVarying = schema.Type{Name: "character varying", IsStringable: true}
+	PGBpchar           = schema.Type{Name: "bpchar", IsStringable: true}
 
 	PGTimestampWithoutTZ = schema.Type{Name: "timestamp without time zone", IsDatetime: true}
 	PGTimestampWithTZ    = schema.Type{Name: "timestamp with time zone", IsDatetime: true}
@@ -45,8 +46,9 @@ var (
 	PGInet    = schema.Type{Name: "inet"}
 	PGMacaddr = schema.Type{Name: "macaddr"}
 
-	PGXML  = schema.Type{Name: "xml"}
-	PGJSON = schema.Type{Name: "json"}
+	PGXML   = schema.Type{Name: "xml"}
+	PGJSON  = schema.Type{Name: "json", IsJSON: true}
+	PGJSONB = schema.Type{Name: "jsonb", IsJSON: true}
 
 	PGTSVector = schema.Type{Name: "tsvector"}
 	PGTSQuery  = schema.Type{Name: "tsquery"}
@@ -54,8 +56,8 @@ var (
 	PGArray = schema.Type{Name: "array"}
 
 	PGPoint        = schema.Type{Name: "point"}
-	PGLine         = schema.Type{Name: "lint"}
-	PGLseq         = schema.Type{Name: "lseq"}
+	PGLine         = schema.Type{Name: "line"}
+	PGLseg         = schema.Type{Name: "lseg"}
 	PGBox          = schema.Type{Name: "box"}
 	PGPath         = schema.Type{Name: "path"}
 	PGPolygon      = schema.Type{Name: "polygon"}
@@ -69,6 +71,7 @@ var pgTypeMap = map[string]schema.Type{
 	"character":         PGCharacter,
 	"char":              PGChar,
 	"character varying": PGCharacterVarying,
+	"bpchar":            PGBpchar,
 
 	"timestamp without time zone": PGTimestampWithoutTZ,
 	"timestamp with time zone":    PGTimestampWithTZ,
@@ -104,8 +107,9 @@ var pgTypeMap = map[string]schema.Type{
 	"inet":    PGInet,
 	"macaddr": PGMacaddr,
 
-	"xml":  PGXML,
-	"json": PGJSON,
+	"xml":   PGXML,
+	"json":  PGJSON,
+	"jsonb": PGJSONB,
 
 	"tsvector": PGTSVector,
 	"tsquery":  PGTSQuery,
@@ -114,7 +118,7 @@ var pgTypeMap = map[string]schema.Type{
 
 	"point":         PGPoint,
 	"lint":          PGLine,
-	"lseq":          PGLseq,
+	"lseg":          PGLseg,
 	"box":           PGBox,
 	"path":          PGPath,
 	"polygon":       PGPolygon,

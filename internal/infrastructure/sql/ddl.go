@@ -12,7 +12,6 @@ type DDLBuilder interface {
 	CreateEnum(enum *schema.Enum) string
 	DropType(name string, ifExists bool) string
 	DropSequence(seq *schema.Sequence, ifExists bool) string
-	CommentOnColumn(col *schema.Column) string
 }
 
 type DDLBuilderManager struct {
@@ -23,10 +22,15 @@ func NewDDLBuilderManager() *DDLBuilderManager {
 	return &DDLBuilderManager{
 		builders: map[config.DatabaseDriver]DDLBuilder{
 			config.DatabaseDriverPostgres: NewPostgresDDLBuilder(),
+			config.DatabaseDriverMySQL:    NewMySQLDDLBuilder(),
 		},
 	}
 }
 
-func (m *DDLBuilderManager) For(_ config.DatabaseDriver) DDLBuilder {
+func (m *DDLBuilderManager) For(driver config.DatabaseDriver) DDLBuilder {
+	builder, ok := m.builders[driver]
+	if ok {
+		return builder
+	}
 	return NewPostgresDDLBuilder()
 }

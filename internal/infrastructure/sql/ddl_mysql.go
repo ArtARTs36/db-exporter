@@ -11,6 +11,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
+const mySQLColumnNameWrapper = "`"
+
 type MySQLDDLBuilder struct {
 }
 
@@ -55,13 +57,16 @@ func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) (
 	}
 
 	maxColumnLen := 0
-	for _, column := range table.Columns {
-		if column.Name.Len() > maxColumnLen {
-			maxColumnLen = column.Name.Len()
+	columnNames := make([]string, len(table.Columns))
+	for i, column := range table.Columns {
+		colName := column.Name.Wrap(mySQLColumnNameWrapper).Value
+		if len(colName) > maxColumnLen {
+			maxColumnLen = len(colName)
 		}
+		columnNames[i] = colName
 	}
 
-	for _, column := range table.Columns {
+	for i, column := range table.Columns {
 		lineID++
 
 		notNull := ""
@@ -74,10 +79,12 @@ func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) (
 			comma = ""
 		}
 
-		spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
+		colName := columnNames[i]
+
+		spacesAfterColumnName := maxColumnLen - len(colName) + 1
 
 		defaultValue := ""
-		if column.DefaultRaw.Valid {
+		if column.DefaultRaw.Valid && params.Source == config.DatabaseDriverMySQL {
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
@@ -86,21 +93,34 @@ func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) (
 			return nil, fmt.Errorf("failed to map column type: %w", err)
 		}
 
+		autoIncrement := ""
+		if column.IsAutoincrement {
+			autoIncrement = " AUTO_INCREMENT"
+		}
+
+		comment := ""
+		if column.Comment.IsNotEmpty() {
+			comment = fmt.Sprintf(" COMMENT '%s'", column.Comment.Value)
+		}
+
+		colTypeDef := colType.String()
+		if column.Enum != nil {
+			colTypeDef = b.buildEnumColumnType(column.Enum)
+		}
+
 		line := fmt.Sprintf(
-			"    %s%s%s%s%s%s",
-			column.Name.Value,
+			"    %s%s%s%s%s%s%s%s",
+			colName,
 			strings.Repeat(" ", spacesAfterColumnName),
-			colType.Name,
+			colTypeDef,
 			notNull,
 			defaultValue,
+			autoIncrement,
+			comment,
 			comma,
 		)
 
 		createTableQuery = append(createTableQuery, line)
-
-		if column.Comment.IsNotEmpty() {
-			upQueries = append(upQueries, b.CommentOnColumn(column))
-		}
 	}
 
 	if lineID != lines {
@@ -126,6 +146,20 @@ func (b *MySQLDDLBuilder) BuildDDL(table *schema.Table, params BuildDDLParams) (
 	upQueries = append([]string{upSQL}, upQueries...)
 
 	return upQueries, nil
+}
+
+func (b *MySQLDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
+	ifne := ""
+	if params.UseIfNotExists {
+		ifne = expIfNotExists
+	}
+
+	dType, err := sqltype.TransitSQLType(params.Source, params.Target, seq.DataType)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
 }
 
 func (b *MySQLDDLBuilder) DropTable(table *schema.Table, useIfExists bool) string {
@@ -159,8 +193,13 @@ func (b *MySQLDDLBuilder) DropType(name string, ifExists bool) string {
 	return fmt.Sprintf("DROP TYPE %s%s;", ife, name)
 }
 
-func (b *MySQLDDLBuilder) CommentOnColumn(col *schema.Column) string {
-	return fmt.Sprintf("COMMENT ON COLUMN %s.%s IS '%s';", col.TableName.Value, col.Name.Value, col.Comment.Value)
+func (b *MySQLDDLBuilder) DropSequence(seq *schema.Sequence, ifExists bool) string {
+	ife := ""
+	if ifExists {
+		ife = "IF EXISTS"
+	}
+
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", ife, seq.Name)
 }
 
 func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {
@@ -177,7 +216,7 @@ func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine
 }
 
 func (b *MySQLDDLBuilder) CreatePrimaryKey(name string, columns *gds.Strings) string {
-	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Join(", ").Value)
+	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value)
 }
 
 func (b *MySQLDDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []string {
@@ -210,9 +249,9 @@ func (b *MySQLDDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLin
 		q := fmt.Sprintf(
 			"    CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s)%s%s",
 			fk.Name.Value,
-			fk.ColumnsNames.Join(", ").Value,
+			fk.ColumnsNames.Wrap(mySQLColumnNameWrapper).Join(", ").Value,
 			fk.ForeignTable.Value,
-			fk.ForeignColumn.Value,
+			fk.ForeignColumn.Wrap(mySQLColumnNameWrapper).Value,
 			deferrableString,
 			comma,
 		)
@@ -241,5 +280,13 @@ func (b *MySQLDDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine
 }
 
 func (b *MySQLDDLBuilder) CreateUniqueKey(name string, columns *gds.Strings) string {
-	return fmt.Sprintf("    CONSTRAINT %s UNIQUE (%s)", name, columns.Join(", ").Value)
+	return fmt.Sprintf(
+		"    CONSTRAINT %s UNIQUE (%s)",
+		name,
+		columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value,
+	)
+}
+
+func (b *MySQLDDLBuilder) buildEnumColumnType(en *schema.Enum) string {
+	return fmt.Sprintf("ENUM(%s)", gds.NewStrings(en.Values...).Wrap("'").Join(", "))
 }
