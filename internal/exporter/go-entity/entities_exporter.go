@@ -82,9 +82,10 @@ func (e *EntitiesExporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		page, genErr := e.entityGenerator.GenerateEntity(&GenerateEntityParams{
 			Entity: e.entityMapper.MapEntity(&MapEntityParams{
-				Table:   table,
-				Package: pkg,
-				Enums:   enums,
+				SourceDriver: params.Schema.Driver,
+				Table:        table,
+				Package:      pkg,
+				Enums:        enums,
 			}),
 			Package: pkg,
 		})
@@ -121,9 +122,10 @@ func (e *EntitiesExporter) Export(
 	}
 
 	entities := e.entityMapper.MapEntities(&MapEntitiesParams{
-		Tables:  params.Schema.Tables.List(),
-		Package: pkg,
-		Enums:   map[string]*golang.StringEnum{},
+		SourceDriver: params.Schema.Driver,
+		Tables:       params.Schema.Tables.List(),
+		Package:      pkg,
+		Enums:        map[string]*golang.StringEnum{},
 	})
 
 	page, err := e.entityGenerator.GenerateEntities(entities, pkg, enums)

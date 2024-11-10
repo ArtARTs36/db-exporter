@@ -20,6 +20,8 @@ type Exporter struct {
 }
 
 type buildProcedureContext struct {
+	sourceDriver config.DatabaseDriver
+
 	prfile            *proto.File
 	table             *schema.Table
 	tableMsg          *proto.Message
@@ -78,7 +80,7 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv, messages := e.buildService(prfile, table, enumPages)
+		srv, messages := e.buildService(params.Schema.Driver, prfile, table, enumPages)
 
 		if len(srv.Procedures) == 0 {
 			continue
@@ -128,7 +130,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		srv, messages := e.buildService(prfile, table, map[string]*exporter.ExportedPage{})
+		srv, messages := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
 
 		if len(srv.Procedures) == 0 {
 			continue
@@ -151,6 +153,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
+	sourceDriver config.DatabaseDriver,
 	prfile *proto.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
@@ -173,8 +176,9 @@ func (e *Exporter) buildService(
 	}
 
 	buildCtx := &buildProcedureContext{
-		prfile: prfile,
-		table:  table,
+		sourceDriver: sourceDriver,
+		prfile:       prfile,
+		table:        table,
 		tableMsg: &proto.Message{
 			Name:   table.Name.Pascal().Singular().Value,
 			Fields: make([]*proto.Field, 0, len(table.Columns)),
@@ -190,7 +194,7 @@ func (e *Exporter) buildService(
 	for _, column := range table.Columns {
 		buildCtx.tableMsg.Fields = append(buildCtx.tableMsg.Fields, &proto.Field{
 			Name: column.Name.Lower().Value,
-			Type: e.mapType(column, prfile.Imports, buildCtx.enumPages),
+			Type: e.mapType(buildCtx.sourceDriver, column, prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -231,7 +235,7 @@ func (e *Exporter) buildGetProcedure(
 
 		getReqMsg.Fields = append(getReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
+			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -312,7 +316,7 @@ func (e *Exporter) buildDeleteProcedure(
 
 		deleteReqMsg.Fields = append(deleteReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
+			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -358,7 +362,7 @@ func (e *Exporter) buildCreateProcedure(
 
 		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
+			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -404,7 +408,7 @@ func (e *Exporter) buildPatchProcedure(
 
 		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
 			Name: col.Name.Lower().Value,
-			Type: e.mapType(col, buildCtx.prfile.Imports, buildCtx.enumPages),
+			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
 			ID:   id,
 		})
 
@@ -419,6 +423,7 @@ func (e *Exporter) buildPatchProcedure(
 }
 
 func (e *Exporter) mapType(
+	sourceDriver config.DatabaseDriver,
 	column *schema.Column,
 	imports *gds.Set[string],
 	enumPages map[string]*exporter.ExportedPage,
@@ -432,7 +437,7 @@ func (e *Exporter) mapType(
 		return column.Enum.Name.Pascal().Value
 	}
 
-	goType := sqltype.MapGoTypeFromPG(column.Type)
+	goType := sqltype.MapGoType(sourceDriver, column.Type)
 
 	switch goType {
 	case golang.TypeInt, golang.TypeInt16, golang.TypeInt64:

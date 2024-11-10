@@ -30,7 +30,7 @@ var pgGoTypeMap = map[schema.Type]golang.Type{
 	PGBytea: golang.TypeByteSlice,
 }
 
-func MapGoTypeFromPG(t schema.Type) golang.Type {
+func mapGoTypeFromPG(t schema.Type) golang.Type {
 	if t.IsStringable {
 		return golang.TypeString
 	}

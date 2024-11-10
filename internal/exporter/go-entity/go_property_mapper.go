@@ -1,6 +1,7 @@
 package goentity
 
 import (
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -32,6 +33,7 @@ func NewGoPropertyMapper() *GoPropertyMapper {
 }
 
 func (m *GoPropertyMapper) mapColumns(
+	sourceDriver config.DatabaseDriver,
 	columns []*schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImportCallback addImportCallback,
@@ -51,7 +53,7 @@ func (m *GoPropertyMapper) mapColumns(
 		prop := &GoProperty{
 			Name:       column.Name.Pascal().FixAbbreviations(goAbbreviationsSet),
 			PluralName: column.Name.Pascal().PluralFixAbbreviations(goAbbreviationsPluralsSet).Value,
-			Type:       m.mapGoType(column, enums, addImportCallback),
+			Type:       m.mapGoType(sourceDriver, column, enums, addImportCallback),
 			Column:     column,
 		}
 
@@ -78,6 +80,7 @@ func (m *GoPropertyMapper) mapColumns(
 }
 
 func (m *GoPropertyMapper) mapGoType(
+	sourceDriver config.DatabaseDriver,
 	col *schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImport func(pkg string),
@@ -86,7 +89,7 @@ func (m *GoPropertyMapper) mapGoType(
 		return e.Name.Value
 	}
 
-	goType := sqltype.MapGoTypeFromPG(col.Type)
+	goType := sqltype.MapGoType(sourceDriver, col.Type)
 
 	if !col.Nullable {
 		if goType.PackagePath != "" {

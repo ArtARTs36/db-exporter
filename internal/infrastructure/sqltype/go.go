@@ -8,11 +8,11 @@ import (
 
 func MapGoType(driver config.DatabaseDriver, typ schema.Type) golang.Type {
 	if driver == config.DatabaseDriverPostgres {
-		return MapGoTypeFromPG(typ)
+		return mapGoTypeFromPG(typ)
 	}
 
 	if driver == config.DatabaseDriverDBML {
-		return MapGoTypeFromDBML(typ)
+		return mapGoTypeFromDBML(typ)
 	}
 
 	return golang.TypeString

@@ -47,7 +47,7 @@ func MapDBMLType(name string) schema.Type {
 	return mapType(dbmlTypeMap, name)
 }
 
-func MapGoTypeFromDBML(t schema.Type) golang.Type {
+func mapGoTypeFromDBML(t schema.Type) golang.Type {
 	if t.IsStringable {
 		return golang.TypeString
 	}

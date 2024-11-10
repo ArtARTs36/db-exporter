@@ -108,13 +108,14 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.entityMapper.MapEntity(&MapEntityParams{
-			Table:   table,
-			Package: pipeline.packages.entity,
-			Enums:   enums,
+			SourceDriver: params.Schema.Driver,
+			Table:        table,
+			Package:      pipeline.packages.entity,
+			Enums:        enums,
 		})
 		repository := buildRepository(entity, pipeline.packages.repo, pipeline.packages.interfaces)
 
-		pkProps := e.propertyMapper.mapColumns(table.GetPKColumns(), enums, nil)
+		pkProps := e.propertyMapper.mapColumns(params.Schema.Driver, table.GetPKColumns(), enums, nil)
 		e.allocateRepositoryFilters(entity, repository, pipeline.packages.filters, pkProps)
 
 		if len(repository.Name) > pipeline.store.repoNameMaxLength {
