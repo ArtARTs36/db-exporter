@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID          int64           `db:"id"`
+	ID          int             `db:"id"`
 	Name        string          `db:"name"`
 	CountryID   sql.NullInt64   `db:"country_id"`
 	Balance     float64         `db:"balance"`

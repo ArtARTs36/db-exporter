@@ -1,6 +1,7 @@
 package goentity
 
 import (
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/gds"
@@ -85,76 +86,27 @@ func (m *GoPropertyMapper) mapGoType(
 		return e.Name.Value
 	}
 
-	switch col.PreparedType {
-	case schema.DataTypeInteger64, schema.DataTypeInteger:
-		if col.Nullable {
-			addImport("database/sql")
+	goType := sqltype.MapGoTypeFromPG(col.Type)
 
-			return golang.TypeSQLNullInt64
+	if !col.Nullable {
+		if goType.PackagePath != "" {
+			addImport(goType.PackagePath)
 		}
 
-		return golang.TypeInt64
-	case schema.DataTypeInteger16:
-		if col.Nullable {
-			addImport("database/sql")
+		return goType.Call()
+	} else {
+		if goType.Null != nil {
+			if goType.Null.PackagePath != "" {
+				addImport(goType.Null.PackagePath)
+			}
 
-			return golang.TypeSQLNullInt16
+			return goType.Null.Call()
 		}
 
-		return golang.TypeInt16
-	case schema.DataTypeString:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullString
-		}
-
-		return golang.TypeString
-	case schema.DataTypeTimestamp:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullTime
-		}
-
-		addImport("time")
-
-		return golang.TypeTimeTime
-	case schema.DataTypeBoolean:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullBool
-		}
-
-		return golang.TypeBool
-	case schema.DataTypeFloat64:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullFloat64
-		}
-
-		return golang.TypeFloat64
-	case schema.DataTypeFloat32:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.Ptr(golang.TypeFloat32)
-		}
-
-		return golang.TypeFloat32
-	case schema.DataTypeBytes:
-		if col.Nullable {
-			return golang.Ptr(golang.TypeByteSlice)
-		}
-
-		return golang.TypeByteSlice
+		return golang.Ptr(goType.Call())
 	}
-
-	return golang.TypeString
 }
 
 func (p *GoProperty) IsString() bool {
-	return p.Type == golang.TypeString
+	return p.Type == golang.TypeString.Name
 }

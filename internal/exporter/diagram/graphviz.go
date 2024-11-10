@@ -85,7 +85,7 @@ func (b *GraphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) 
 		node.SafeSet("class", "db-tables", "")
 
 		ht, tableErr := b.renderer.Render("diagram/table.html", map[string]stick.Value{
-			"table": table,
+			"table": mapTable(table),
 		})
 		if tableErr != nil {
 			return tableErr

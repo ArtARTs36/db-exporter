@@ -131,7 +131,6 @@ order by c.ordinal_position`
 		}
 
 		col.Type = sqltype.MapPGType(col.TypeRaw.Value)
-		col.PreparedType = l.prepareDataType(col.Type)
 		col.Default = l.parseColumnDefault(col)
 
 		enum, enumExists := sch.Enums[col.TypeRaw.Value]
@@ -191,7 +190,7 @@ func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault 
 		}
 	}
 
-	if col.PreparedType.IsInteger() {
+	if col.Type.IsInteger {
 		if parsedInt, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
 			return &schema.ColumnDefault{
 				Type:  schema.ColumnDefaultTypeValue,
@@ -282,10 +281,6 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 			col.UniqueKey = uk
 		}
 	}
-}
-
-func (l *PGLoader) prepareDataType(typ schema.Type) schema.DataType {
-	return sqltype.MapGoTypeFromPG(typ)
 }
 
 func (l *PGLoader) loadEnums(ctx context.Context, conn *conn.Connection) (map[string]*schema.Enum, error) {

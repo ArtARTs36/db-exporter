@@ -6,6 +6,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/gds"
 	"github.com/tyler-sommer/stick"
 
@@ -430,16 +432,18 @@ func (e *Exporter) mapType(
 		return column.Enum.Name.Pascal().Value
 	}
 
-	switch column.PreparedType { //nolint: exhaustive // not need
-	case schema.DataTypeInteger:
+	goType := sqltype.MapGoTypeFromPG(column.Type)
+
+	switch goType {
+	case golang.TypeInt, golang.TypeInt16, golang.TypeInt64:
 		return "int64"
-	case schema.DataTypeFloat64:
+	case golang.TypeFloat64:
 		return "double"
-	case schema.DataTypeFloat32:
+	case golang.TypeFloat32:
 		return "double"
-	case schema.DataTypeBoolean:
+	case golang.TypeBool:
 		return "bool"
-	case schema.DataTypeTimestamp:
+	case golang.TypeTimeTime:
 		imports.Add("google/protobuf/timestamp.proto")
 
 		return "google.protobuf.Timestamp"

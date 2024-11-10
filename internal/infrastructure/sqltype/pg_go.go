@@ -2,44 +2,45 @@ package sqltype
 
 import (
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
 
-var pgGoTypeMap = map[schema.Type]schema.DataType{
-	PGInteger: schema.DataTypeInteger,
-	PGInt4:    schema.DataTypeInteger,
-	PGInt8:    schema.DataTypeInteger,
-	PGSerial:  schema.DataTypeInteger,
+var pgGoTypeMap = map[schema.Type]golang.Type{
+	PGInteger: golang.TypeInt,
+	PGInt4:    golang.TypeInt,
+	PGInt8:    golang.TypeInt,
+	PGSerial:  golang.TypeInt,
 
-	PGSmallInt:    schema.DataTypeInteger16,
-	PGSmallSerial: schema.DataTypeInteger16,
+	PGSmallInt:    golang.TypeInt16,
+	PGSmallSerial: golang.TypeInt16,
 
-	PGBigint: schema.DataTypeInteger64,
+	PGBigint: golang.TypeInt64,
 
-	PGBoolean: schema.DataTypeBoolean,
-	PGBit:     schema.DataTypeBoolean,
+	PGBoolean: golang.TypeBool,
+	PGBit:     golang.TypeBool,
 
-	PGDoublePrecision: schema.DataTypeFloat32,
-	PGFloat8:          schema.DataTypeFloat32,
-	PGDecimal:         schema.DataTypeFloat32,
+	PGDoublePrecision: golang.TypeFloat32,
+	PGFloat8:          golang.TypeFloat32,
+	PGDecimal:         golang.TypeFloat32,
 
-	PGMoney:   schema.DataTypeFloat64,
-	PGReal:    schema.DataTypeFloat64,
-	PGNumeric: schema.DataTypeFloat64,
+	PGMoney:   golang.TypeFloat64,
+	PGReal:    golang.TypeFloat64,
+	PGNumeric: golang.TypeFloat64,
 
-	PGBytea: schema.DataTypeBytes,
+	PGBytea: golang.TypeByteSlice,
 }
 
-func MapGoTypeFromPG(t schema.Type) schema.DataType {
+func MapGoTypeFromPG(t schema.Type) golang.Type {
 	if t.IsStringable {
-		return schema.DataTypeString
+		return golang.TypeString
 	}
 
 	if t.IsDatetime {
-		return schema.DataTypeTimestamp
+		return golang.TypeTimeTime
 	}
 
 	if t.IsBoolean {
-		return schema.DataTypeBoolean
+		return golang.TypeBool
 	}
 
 	dt, ok := pgGoTypeMap[t]
@@ -48,12 +49,12 @@ func MapGoTypeFromPG(t schema.Type) schema.DataType {
 	}
 
 	if t.IsInteger {
-		return schema.DataTypeInteger
+		return golang.TypeInt
 	}
 
 	if t.IsFloat {
-		return schema.DataTypeFloat64
+		return golang.TypeFloat64
 	}
 
-	return schema.DataTypeString
+	return golang.TypeString
 }

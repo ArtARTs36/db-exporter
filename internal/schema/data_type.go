@@ -8,10 +8,13 @@ const (
 	DataTypeInteger16 DataType = iota
 	DataTypeString    DataType = iota
 	DataTypeTimestamp DataType = iota
-	DataTypeBoolean   DataType = iota
-	DataTypeFloat32   DataType = iota
-	DataTypeFloat64   DataType = iota
-	DataTypeBytes     DataType = iota
+
+	DataTypeBoolean DataType = iota
+
+	DataTypeFloat32 DataType = iota
+	DataTypeFloat64 DataType = iota
+
+	DataTypeBytes DataType = iota
 )
 
 func (t DataType) String() string {

@@ -21,15 +21,15 @@ type PGCountryRepository struct {
 }
 
 type ListCountryFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 type GetCountryFilter struct {
-	ID int64
+	ID int
 }
 
 type DeleteCountryFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 func NewPGCountryRepository(db *sqlx.DB) *PGCountryRepository {

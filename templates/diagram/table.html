@@ -7,11 +7,11 @@
     {% for col in table.Columns %}
     <TR width="100%">
         {% if loop.index % 2 == 0 %}
-        <TD bgcolor="#dfe6e9">{{ col.Name.Value }} </TD>
-        <TD bgcolor="#dfe6e9">{{ col.PreparedType }} </TD>
+        <TD bgcolor="#dfe6e9">{{ col.Name }} </TD>
+        <TD bgcolor="#dfe6e9">{{ col.Type }} </TD>
         {% else %}
-        <TD>{{ col.Name.Value }} </TD>
-        <TD>{{ col.PreparedType }} </TD>
+        <TD>{{ col.Name }} </TD>
+        <TD>{{ col.Type }} </TD>
         {% endif %}
     </TR>
     {% endfor %}
