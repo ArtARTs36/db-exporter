@@ -15,6 +15,7 @@ type Type struct {
 	IsDatetime   bool
 	IsDate       bool
 	IsBoolean    bool
+	IsBinary     bool
 }
 
 func (t *Type) Clone() Type {

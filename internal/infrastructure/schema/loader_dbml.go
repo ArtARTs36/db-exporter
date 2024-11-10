@@ -58,7 +58,6 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 			column := &schema.Column{
 				Name:            *gds.NewString(col.Name),
 				Type:            sqltype.MapDBMLType(col.Type),
-				PreparedType:    l.mapGoType(col.Type),
 				TableName:       table.Name,
 				Nullable:        col.Settings.Null,
 				IsAutoincrement: col.Settings.Increment,
@@ -227,16 +226,4 @@ func (l *DBMLLoader) getRelationSubject(sch *schema.Schema, subj string) (*dbmlR
 		Table:  table,
 		Column: column,
 	}, nil
-}
-
-func (l *DBMLLoader) mapGoType(rawType string) schema.DataType {
-	switch rawType {
-	case "integer":
-		return schema.DataTypeInteger
-	case "varchar", "text":
-		return schema.DataTypeString
-	case "bool", "boolean":
-		return schema.DataTypeBoolean
-	}
-	return schema.DataTypeString
 }

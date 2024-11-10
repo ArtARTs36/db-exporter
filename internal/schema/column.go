@@ -15,7 +15,6 @@ type Column struct {
 	UniqueKey      *UniqueKey           `db:"-"`
 	ForeignKey     *ForeignKey          `db:"-"`
 	Comment        gds.String           `db:"comment"`
-	PreparedType   DataType             `db:"-"`
 	DefaultRaw     sql.NullString       `db:"default_value"`
 	Default        *ColumnDefault       `db:"-"`
 	UsingSequences map[string]*Sequence `db:"-"`
