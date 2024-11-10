@@ -23,7 +23,7 @@ func NewMigrationsExporter(
 		migrations.NewFuncMigrationMaker(
 			func(i int, tableName gds.String) *migrations.MigrationMeta {
 				return &migrations.MigrationMeta{
-					Filename: goose.CreateMigrationFilename(fmt.Sprintf("create_%s_table", tableName), i),
+					Filename: goose.CreateMigrationFilename(fmt.Sprintf("create_%s_table", tableName.Value), i),
 				}
 			},
 			func() *migrations.MigrationMeta {

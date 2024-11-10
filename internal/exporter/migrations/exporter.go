@@ -51,11 +51,7 @@ func (e *Exporter) ExportPerFile(
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries and rendering migration files", e.name))
 
-	ddlOpts := sql.BuildDDLParams{
-		UseIfNotExists: spec.Use.IfNotExists,
-		UseIfExists:    spec.Use.IfExists,
-		Source:         params.Schema.Driver,
-	}
+	ddlOpts := e.mapBuildDDLOpts(params.Schema, spec)
 
 	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
 
@@ -115,7 +111,51 @@ func (e *Exporter) ExportPerFile(
 	return pages, nil
 }
 
+func (e *Exporter) mapBuildDDLOpts(sch *schema.Schema, spec *config.MigrationsSpec) sql.BuildDDLOpts {
+	return sql.BuildDDLOpts{
+		UseIfNotExists: spec.Use.IfNotExists,
+		UseIfExists:    spec.Use.IfExists,
+		Source:         sch.Driver,
+	}
+}
+
 func (e *Exporter) Export(
+	ctx context.Context,
+	params *exporter.ExportParams,
+) ([]*exporter.ExportedPage, error) {
+	spec, ok := params.Spec.(*config.MigrationsSpec)
+	if !ok {
+		return nil, errors.New("got invalid spec")
+	}
+
+	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries", e.name))
+
+	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
+	ddl, err := ddlBuilder.Build(params.Schema, e.mapBuildDDLOpts(params.Schema, spec))
+	if err != nil {
+		return nil, fmt.Errorf("failed to build ddl for schema: %w", err)
+	}
+
+	migMeta := e.maker.MakeMultiple()
+	mig := &Migration{
+		Meta:        migMeta.Attrs,
+		UpQueries:   ddl.UpQueries,
+		DownQueries: ddl.DownQueries,
+	}
+
+	p, err := e.page.Export(migMeta.Filename, map[string]stick.Value{
+		"migration": mig,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return []*exporter.ExportedPage{
+		p,
+	}, nil
+}
+
+func (e *Exporter) oldExport(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -129,10 +169,7 @@ func (e *Exporter) Export(
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries", e.name))
 
-	ddlOpts := sql.BuildDDLParams{
-		UseIfNotExists: spec.Use.IfNotExists,
-		Source:         params.Schema.Driver,
-	}
+	ddlOpts := e.mapBuildDDLOpts(params.Schema, spec)
 
 	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
 
@@ -184,18 +221,18 @@ func (e *Exporter) Export(
 func (e *Exporter) createQueries(
 	ddlBuilder sql.DDLBuilder,
 	table *schema.Table,
-	opts sql.BuildDDLParams,
+	opts sql.BuildDDLOpts,
 ) (
 	upQueries []string,
 	downQueries []string,
 	err error,
 ) {
-	ddl, err := ddlBuilder.BuildForTable(table, opts)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to build ddl: %w", err)
-	}
-
-	upQueries = ddl.UpQueries
-	downQueries = ddl.DownQueries
+	// ddl, err := ddlBuilder.BuildPerTable(table, opts)
+	// if err != nil {
+	// 	return nil, nil, fmt.Errorf("failed to build ddl: %w", err)
+	// }
+	//
+	// upQueries = ddl.UpQueries
+	// downQueries = ddl.DownQueries
 	return //nolint: nakedret // not need
 }

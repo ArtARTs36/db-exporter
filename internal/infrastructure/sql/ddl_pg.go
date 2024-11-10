@@ -16,12 +16,11 @@ const expIfNotExists = "IF NOT EXISTS "
 type PostgresDDLBuilder struct {
 }
 
-type BuildDDLParams struct {
+type BuildDDLOpts struct {
 	UseIfNotExists bool
 	UseIfExists    bool
 
 	Source config.DatabaseDriver
-	Target config.DatabaseDriver
 }
 
 func NewPostgresDDLBuilder() *PostgresDDLBuilder {
@@ -30,7 +29,7 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 
 type isLastLine func() bool
 
-func (b *PostgresDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists bool) string {
+func (b *PostgresDDLBuilder) buildCreateEmptyTable(table *schema.Table, useIfNotExists bool) string {
 	ifne := ""
 	if useIfNotExists {
 		ifne = expIfNotExists
@@ -39,116 +38,174 @@ func (b *PostgresDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExist
 	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
 }
 
-func (b *PostgresDDLBuilder) BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error) { //nolint:funlen,lll // not need
-	if len(table.Columns) == 0 {
-		return &DDL{
-			Name:        table.Name.Value,
-			UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
-			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
-		}, nil
-	}
-
+func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
 	ddl := &DDL{
-		Name:        table.Name.Value,
-		UpQueries:   []string{},
+		Name:        "init",
+		UpQueries:   make([]string, 0, len(schema.Enums)+schema.Tables.Len()),
 		DownQueries: []string{},
 	}
 
-	ifne := ""
-	if params.UseIfNotExists {
-		ifne = expIfNotExists
+	for _, enum := range schema.Enums {
+		ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
 	}
 
-	createTableQuery := []string{
-		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
-		"(",
-	}
-
-	lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
-	if table.PrimaryKey != nil {
-		lines++
-	}
-	lineID := 0
-
-	isLast := func() bool {
-		lineID++
-
-		return lineID == lines
-	}
-
-	maxColumnLen := 0
-	for _, column := range table.Columns {
-		if column.Name.Len() > maxColumnLen {
-			maxColumnLen = column.Name.Len()
-		}
-	}
-
-	for _, column := range table.Columns {
-		lineID++
-
-		notNull := ""
-		if !column.Nullable {
-			notNull = " NOT NULL"
-		}
-
-		comma := ","
-		if lineID == lines {
-			comma = ""
-		}
-
-		spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
-
-		defaultValue := ""
-		if column.DefaultRaw.Valid {
-			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
-		}
-
-		colType, err := sqltype.TransitSQLType(params.Source, config.DatabaseDriverPostgres, column.Type)
+	for _, sequence := range schema.Sequences {
+		seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
+			UseIfNotExists: params.UseIfNotExists,
+		})
 		if err != nil {
-			return nil, fmt.Errorf("failed to map column type: %w", err)
+			return nil, err
 		}
 
-		line := fmt.Sprintf(
-			"    %s%s%s%s%s%s",
-			column.Name.Value,
-			strings.Repeat(" ", spacesAfterColumnName),
-			colType.Name,
-			notNull,
-			defaultValue,
-			comma,
-		)
-
-		createTableQuery = append(createTableQuery, line)
-
-		if column.Comment.IsNotEmpty() {
-			ddl.UpQueries = append(ddl.UpQueries, b.CommentOnColumn(column))
-		}
+		ddl.UpQueries = append(ddl.UpQueries, seqSQL)
 	}
 
-	if lineID != lines {
-		createTableQuery = append(createTableQuery, "")
+	ddls, err := b.BuildPerTable(schema, params)
+	if err != nil {
+		return nil, err
 	}
 
-	if table.PrimaryKey != nil {
-		createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
+	for _, tableDDL := range ddls {
+		ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
+		ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
 	}
 
-	if len(table.ForeignKeys) > 0 {
-		createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
+	for _, enum := range schema.Enums {
+		ddl.DownQueries = append(ddl.DownQueries, b.DropType(enum.Name.Value, params.UseIfExists))
 	}
 
-	if len(table.UniqueKeys) > 0 {
-		createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
+	for _, seq := range schema.Sequences {
+		ddl.DownQueries = append(ddl.DownQueries, b.DropSequence(seq, params.UseIfExists))
 	}
-
-	createTableQuery = append(createTableQuery, ");")
-
-	upSQL := strings.Join(createTableQuery, "\n")
-
-	ddl.UpQueries = append([]string{upSQL}, ddl.UpQueries...)
-	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
 
 	return ddl, nil
+}
+
+func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
+	build := func(table *schema.Table) (*DDL, error) {
+		if len(table.Columns) == 0 {
+			return &DDL{
+				Name:        table.Name.Value,
+				UpQueries:   []string{b.buildCreateEmptyTable(table, params.UseIfNotExists)},
+				DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
+			}, nil
+		}
+
+		ddl := &DDL{
+			Name:        table.Name.Value,
+			UpQueries:   []string{},
+			DownQueries: []string{},
+		}
+
+		ifne := ""
+		if params.UseIfNotExists {
+			ifne = expIfNotExists
+		}
+
+		createTableQuery := []string{
+			fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
+			"(",
+		}
+
+		lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
+		if table.PrimaryKey != nil {
+			lines++
+		}
+		lineID := 0
+
+		isLast := func() bool {
+			lineID++
+
+			return lineID == lines
+		}
+
+		maxColumnLen := 0
+		for _, column := range table.Columns {
+			if column.Name.Len() > maxColumnLen {
+				maxColumnLen = column.Name.Len()
+			}
+		}
+
+		for _, column := range table.Columns {
+			lineID++
+
+			notNull := ""
+			if !column.Nullable {
+				notNull = " NOT NULL"
+			}
+
+			comma := ","
+			if lineID == lines {
+				comma = ""
+			}
+
+			spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
+
+			defaultValue := ""
+			if column.DefaultRaw.Valid {
+				defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+			}
+
+			colType, err := sqltype.TransitSQLType(sch.Driver, config.DatabaseDriverPostgres, column.Type)
+			if err != nil {
+				return nil, fmt.Errorf("failed to map column type: %w", err)
+			}
+
+			line := fmt.Sprintf(
+				"    %s%s%s%s%s%s",
+				column.Name.Value,
+				strings.Repeat(" ", spacesAfterColumnName),
+				colType.Name,
+				notNull,
+				defaultValue,
+				comma,
+			)
+
+			createTableQuery = append(createTableQuery, line)
+
+			if column.Comment.IsNotEmpty() {
+				ddl.UpQueries = append(ddl.UpQueries, b.CommentOnColumn(column))
+			}
+		}
+
+		if lineID != lines {
+			createTableQuery = append(createTableQuery, "")
+		}
+
+		if table.PrimaryKey != nil {
+			createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
+		}
+
+		if len(table.ForeignKeys) > 0 {
+			createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
+		}
+
+		if len(table.UniqueKeys) > 0 {
+			createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
+		}
+
+		createTableQuery = append(createTableQuery, ");")
+
+		upSQL := strings.Join(createTableQuery, "\n")
+
+		ddl.UpQueries = append([]string{upSQL}, ddl.UpQueries...)
+		ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
+
+		return ddl, nil
+	}
+
+	ddls := make([]*DDL, 0)
+
+	for _, table := range sch.Tables.List() {
+		ddl, err := build(table)
+		if err != nil {
+			return nil, err
+		}
+
+		ddls = append(ddls, ddl)
+	}
+
+	return ddls, nil
 }
 
 type CreateSequenceParams struct {
@@ -158,27 +215,31 @@ type CreateSequenceParams struct {
 	Target config.DatabaseDriver
 }
 
-func (b *PostgresDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
-	ifne := ""
-	if params.UseIfNotExists {
-		ifne = expIfNotExists
+func (b *PostgresDDLBuilder) ifne(use bool) string {
+	if use {
+		return expIfNotExists
 	}
+	return ""
+}
 
+func (b *PostgresDDLBuilder) ife(use bool) string {
+	if use {
+		return "IF EXISTS"
+	}
+	return ""
+}
+
+func (b *PostgresDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
 	dType, err := sqltype.TransitSQLType(params.Source, params.Target, seq.DataType)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", b.ifne(params.UseIfNotExists), seq.Name, dType.Name), nil
 }
 
 func (b *PostgresDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
-	ife := ""
-	if useIfExists {
-		ife = "IF EXISTS "
-	}
-
-	return fmt.Sprintf("DROP TABLE %s%s;", ife, table.Name.Value)
+	return fmt.Sprintf("DROP TABLE %s%s;", b.ife(useIfExists), table.Name.Value)
 }
 
 func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
@@ -195,21 +256,11 @@ func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
 }
 
 func (b *PostgresDDLBuilder) DropType(name string, ifExists bool) string {
-	ife := ""
-	if ifExists {
-		ife = "IF EXISTS"
-	}
-
-	return fmt.Sprintf("DROP TYPE %s%s;", ife, name)
+	return fmt.Sprintf("DROP TYPE %s%s;", b.ife(ifExists), name)
 }
 
 func (b *PostgresDDLBuilder) DropSequence(seq *schema.Sequence, ifExists bool) string {
-	ife := ""
-	if ifExists {
-		ife = "IF EXISTS"
-	}
-
-	return fmt.Sprintf("DROP SEQUENCE %s%s;", ife, seq.Name)
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", b.ife(ifExists), seq.Name)
 }
 
 func (b *PostgresDDLBuilder) CommentOnColumn(col *schema.Column) string {

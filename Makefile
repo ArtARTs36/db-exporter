@@ -35,4 +35,4 @@ functest:
 
 .PHONY: try
 try:
-	PG_DSN=${PG_DSN} go run ./cmd/main.go
+	PG_DSN=${PG_DSN} go run ./cmd/main.go --tasks=gen_goose_migrations,gen_goose_migrations_per

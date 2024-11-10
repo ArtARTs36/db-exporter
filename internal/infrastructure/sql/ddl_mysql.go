@@ -29,134 +29,169 @@ func (b *MySQLDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists b
 	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
 }
 
-func (b *MySQLDDLBuilder) BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error) { //nolint:funlen,lll // not need
-	if len(table.Columns) == 0 {
-		return &DDL{
-			Name:        table.Name.Value,
-			UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
-			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
-		}, nil
-	}
-
+func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
 	ddl := &DDL{
-		Name:        table.Name.Value,
-		UpQueries:   make([]string, 0),
-		DownQueries: make([]string, 0),
+		Name:        "init",
+		UpQueries:   []string{},
+		DownQueries: []string{},
 	}
 
-	ifne := ""
-	if params.UseIfNotExists {
-		ifne = expIfNotExists
+	ddls, err := b.BuildPerTable(schema, params)
+	if err != nil {
+		return nil, err
 	}
 
-	createTableQuery := []string{
-		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
-		"(",
+	for _, tableDDL := range ddls {
+		ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
+		ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
 	}
-
-	lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
-	if table.PrimaryKey != nil {
-		lines++
-	}
-	lineID := 0
-
-	isLast := func() bool {
-		lineID++
-
-		return lineID == lines
-	}
-
-	maxColumnLen := 0
-	columnNames := make([]string, len(table.Columns))
-	for i, column := range table.Columns {
-		colName := column.Name.Wrap(mySQLColumnNameWrapper).Value
-		if len(colName) > maxColumnLen {
-			maxColumnLen = len(colName)
-		}
-		columnNames[i] = colName
-	}
-
-	for i, column := range table.Columns {
-		lineID++
-
-		notNull := ""
-		if !column.Nullable {
-			notNull = " NOT NULL"
-		}
-
-		comma := ","
-		if lineID == lines {
-			comma = ""
-		}
-
-		colName := columnNames[i]
-
-		spacesAfterColumnName := maxColumnLen - len(colName) + 1
-
-		defaultValue := ""
-		if column.DefaultRaw.Valid && params.Source == config.DatabaseDriverMySQL {
-			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
-		}
-
-		colType, err := sqltype.TransitSQLType(params.Source, config.DatabaseDriverMySQL, column.Type)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map column type: %w", err)
-		}
-
-		autoIncrement := ""
-		if column.IsAutoincrement {
-			autoIncrement = " AUTO_INCREMENT"
-		}
-
-		comment := ""
-		if column.Comment.IsNotEmpty() {
-			comment = fmt.Sprintf(" COMMENT '%s'", column.Comment.Value)
-		}
-
-		colTypeDef := colType.String()
-		if column.Enum != nil {
-			colTypeDef = b.buildEnumColumnType(column.Enum)
-		}
-
-		line := fmt.Sprintf(
-			"    %s%s%s%s%s%s%s%s",
-			colName,
-			strings.Repeat(" ", spacesAfterColumnName),
-			colTypeDef,
-			notNull,
-			defaultValue,
-			autoIncrement,
-			comment,
-			comma,
-		)
-
-		createTableQuery = append(createTableQuery, line)
-	}
-
-	if lineID != lines {
-		createTableQuery = append(createTableQuery, "")
-	}
-
-	if table.PrimaryKey != nil {
-		createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
-	}
-
-	if len(table.ForeignKeys) > 0 {
-		createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
-	}
-
-	if len(table.UniqueKeys) > 0 {
-		createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
-	}
-
-	createTableQuery = append(createTableQuery, ");")
-
-	ddl.UpQueries = append([]string{
-		strings.Join(createTableQuery, "\n"),
-	}, ddl.UpQueries...)
-	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
-
 	return ddl, nil
+}
+
+func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
+	build := func(table *schema.Table) (*DDL, error) {
+
+		if len(table.Columns) == 0 {
+			return &DDL{
+				Name:        table.Name.Value,
+				UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
+				DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
+			}, nil
+		}
+
+		ddl := &DDL{
+			Name:        table.Name.Value,
+			UpQueries:   make([]string, 0),
+			DownQueries: make([]string, 0),
+		}
+
+		ifne := ""
+		if params.UseIfNotExists {
+			ifne = expIfNotExists
+		}
+
+		createTableQuery := []string{
+			fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
+			"(",
+		}
+
+		lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
+		if table.PrimaryKey != nil {
+			lines++
+		}
+		lineID := 0
+
+		isLast := func() bool {
+			lineID++
+
+			return lineID == lines
+		}
+
+		maxColumnLen := 0
+		columnNames := make([]string, len(table.Columns))
+		for i, column := range table.Columns {
+			colName := column.Name.Wrap(mySQLColumnNameWrapper).Value
+			if len(colName) > maxColumnLen {
+				maxColumnLen = len(colName)
+			}
+			columnNames[i] = colName
+		}
+
+		for i, column := range table.Columns {
+			lineID++
+
+			notNull := ""
+			if !column.Nullable {
+				notNull = " NOT NULL"
+			}
+
+			comma := ","
+			if lineID == lines {
+				comma = ""
+			}
+
+			colName := columnNames[i]
+
+			spacesAfterColumnName := maxColumnLen - len(colName) + 1
+
+			defaultValue := ""
+			if column.DefaultRaw.Valid && sch.Driver == config.DatabaseDriverMySQL {
+				defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+			}
+
+			colType, err := sqltype.TransitSQLType(sch.Driver, config.DatabaseDriverMySQL, column.Type)
+			if err != nil {
+				return nil, fmt.Errorf("failed to map column type: %w", err)
+			}
+
+			autoIncrement := ""
+			if column.IsAutoincrement {
+				autoIncrement = " AUTO_INCREMENT"
+			}
+
+			comment := ""
+			if column.Comment.IsNotEmpty() {
+				comment = fmt.Sprintf(" COMMENT '%s'", column.Comment.Value)
+			}
+
+			colTypeDef := colType.String()
+			if column.Enum != nil {
+				colTypeDef = b.buildEnumColumnType(column.Enum)
+			}
+
+			line := fmt.Sprintf(
+				"    %s%s%s%s%s%s%s%s",
+				colName,
+				strings.Repeat(" ", spacesAfterColumnName),
+				colTypeDef,
+				notNull,
+				defaultValue,
+				autoIncrement,
+				comment,
+				comma,
+			)
+
+			createTableQuery = append(createTableQuery, line)
+		}
+
+		if lineID != lines {
+			createTableQuery = append(createTableQuery, "")
+		}
+
+		if table.PrimaryKey != nil {
+			createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
+		}
+
+		if len(table.ForeignKeys) > 0 {
+			createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
+		}
+
+		if len(table.UniqueKeys) > 0 {
+			createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
+		}
+
+		createTableQuery = append(createTableQuery, ");")
+
+		ddl.UpQueries = append([]string{
+			strings.Join(createTableQuery, "\n"),
+		}, ddl.UpQueries...)
+		ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
+
+		return ddl, nil
+	}
+
+	ddls := make([]*DDL, 0)
+
+	for _, table := range sch.Tables.List() {
+		ddl, err := build(table)
+		if err != nil {
+			return nil, err
+		}
+
+		ddls = append(ddls, ddl)
+	}
+
+	return ddls, nil
 }
 
 func (b *MySQLDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {

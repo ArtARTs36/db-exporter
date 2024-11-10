@@ -12,7 +12,8 @@ type DDL struct {
 }
 
 type DDLBuilder interface {
-	BuildForTable(table *schema.Table, params BuildDDLParams) (*DDL, error)
+	Build(schema *schema.Schema, opts BuildDDLOpts) (*DDL, error)
+	BuildPerTable(schema *schema.Schema, opts BuildDDLOpts) ([]*DDL, error)
 	CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error)
 	CreateEnum(enum *schema.Enum) string
 	DropType(name string, ifExists bool) string
