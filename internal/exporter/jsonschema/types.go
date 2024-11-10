@@ -6,7 +6,7 @@ import (
 )
 
 func mapJSONType(col *schema.Column) jsonschema.Type {
-	switch true {
+	switch {
 	case col.Type.IsNumeric:
 		return jsonschema.TypeNumber
 	case col.Type.IsStringable:

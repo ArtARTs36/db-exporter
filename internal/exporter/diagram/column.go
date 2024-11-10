@@ -30,7 +30,7 @@ func mapColumn(col *schema.Column) *diagramColumn {
 		Name: col.Name.Value,
 	}
 
-	switch true {
+	switch {
 	case col.Type.IsUUID:
 		column.Type = "uuid"
 	case col.Type.IsInteger:

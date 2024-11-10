@@ -94,17 +94,17 @@ func (m *GoPropertyMapper) mapGoType(
 		}
 
 		return goType.Call()
-	} else {
-		if goType.Null != nil {
-			if goType.Null.PackagePath != "" {
-				addImport(goType.Null.PackagePath)
-			}
+	}
 
-			return goType.Null.Call()
+	if goType.Null != nil {
+		if goType.Null.PackagePath != "" {
+			addImport(goType.Null.PackagePath)
 		}
 
-		return golang.Ptr(goType.Call())
+		return goType.Null.Call()
 	}
+
+	return golang.Ptr(goType.Call())
 }
 
 func (p *GoProperty) IsString() bool {

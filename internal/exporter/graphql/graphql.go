@@ -84,7 +84,7 @@ func (e *Exporter) buildEntity(table *schema.Table) *gEntity {
 }
 
 func (e *Exporter) mapGraphqlPropertyType(col *schema.Column) graphql.Type {
-	switch true {
+	switch {
 	case col.Type.IsInteger:
 		return graphql.TypeInt
 	case col.Type.IsFloat:

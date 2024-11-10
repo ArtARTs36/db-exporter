@@ -176,7 +176,7 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 	}
 
 	mapType := func(col *schema.Column) php.Type {
-		switch true {
+		switch {
 		case col.Type.IsInteger:
 			return php.TypeInt
 		case col.Type.IsFloat:
@@ -227,7 +227,7 @@ func (*ModelsExporter) mapPhpType(
 	model *laravelModel,
 	spec *config.LaravelModelsExportSpec,
 ) string {
-	switch true {
+	switch {
 	case col.Type.IsInteger:
 		return php.TypeInt.String()
 	case col.Type.IsFloat:

@@ -119,11 +119,12 @@ func (e *Exporter) prepareDefaultValue(col *schema.Column) interface{} {
 }
 
 func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {
-	if column.Type.IsDatetime {
+	switch {
+	case column.Type.IsDatetime:
 		return jsonschema.FormatDateTime
-	} else if column.Type.IsUUID { //nolint:gocritic // not need
+	case column.Type.IsUUID:
 		return jsonschema.FormatUUID
-	} else if column.Type.IsStringable {
+	case column.Type.IsStringable:
 		if column.Name.Equal("email") || column.Name.Ends("_email") {
 			return jsonschema.FormatEmail
 		} else if column.Name.Equal("uri") || column.Name.Ends("_uri") {
