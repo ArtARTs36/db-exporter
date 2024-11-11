@@ -31,4 +31,6 @@ var (
 
 	MySQLLineString = schema.Type{Name: "linestring"}
 	MySQLPolygon    = schema.Type{Name: "polygon"}
+
+	MySQLPseudoUUID = MySQLVarchar.WithLength("36")
 )
