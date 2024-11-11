@@ -137,8 +137,8 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 	}
 
 	if !params.Config.Options.WithMigrationsTable {
-		for _, sc := range schemas {
-			sc = sc.WithoutTable(func(table *schema.Table) bool {
+		for k, sc := range schemas {
+			schemas[k] = sc.WithoutTable(func(table *schema.Table) bool {
 				return c.migrationsTblDetector.IsMigrationsTable(table.Name.Value, table.ColumnsNames())
 			})
 		}

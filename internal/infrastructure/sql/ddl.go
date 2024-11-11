@@ -3,10 +3,11 @@ package sql
 import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/gds"
 )
 
 type DDL struct {
-	Name        string
+	Name        gds.String
 	UpQueries   []string
 	DownQueries []string
 }
@@ -14,10 +15,6 @@ type DDL struct {
 type DDLBuilder interface {
 	Build(schema *schema.Schema, opts BuildDDLOpts) (*DDL, error)
 	BuildPerTable(schema *schema.Schema, opts BuildDDLOpts) ([]*DDL, error)
-	CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error)
-	CreateEnum(enum *schema.Enum) string
-	DropType(name string, ifExists bool) string
-	DropSequence(seq *schema.Sequence, ifExists bool) string
 }
 
 type DDLBuilderManager struct {
@@ -26,7 +23,7 @@ type DDLBuilderManager struct {
 
 func NewDDLBuilderManager() *DDLBuilderManager {
 	return &DDLBuilderManager{
-		builders: map[config.DatabaseDriver]DDLBuilder{
+		builders: map[config.DatabaseDriver]DDLBuilder{ //nolint:exhaustive // no all drivers unsupported ddl
 			config.DatabaseDriverPostgres: NewPostgresDDLBuilder(),
 			config.DatabaseDriverMySQL:    NewMySQLDDLBuilder(),
 		},

@@ -31,7 +31,7 @@ func (b *MySQLDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists b
 
 func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
 	ddl := &DDL{
-		Name:        "init",
+		Name:        *gds.NewString("init"),
 		UpQueries:   []string{},
 		DownQueries: []string{},
 	}
@@ -53,14 +53,14 @@ func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts)
 
 		if len(table.Columns) == 0 {
 			return &DDL{
-				Name:        table.Name.Value,
+				Name:        table.Name,
 				UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
 				DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
 			}, nil
 		}
 
 		ddl := &DDL{
-			Name:        table.Name.Value,
+			Name:        table.Name,
 			UpQueries:   make([]string, 0),
 			DownQueries: make([]string, 0),
 		}
@@ -194,20 +194,6 @@ func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts)
 	return ddls, nil
 }
 
-func (b *MySQLDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
-	ifne := ""
-	if params.UseIfNotExists {
-		ifne = expIfNotExists
-	}
-
-	dType, err := sqltype.TransitSQLType(params.Source, params.Target, seq.DataType)
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne, seq.Name, dType.Name), nil
-}
-
 func (b *MySQLDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
 	ife := ""
 	if useIfExists {
@@ -215,37 +201,6 @@ func (b *MySQLDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) 
 	}
 
 	return fmt.Sprintf("DROP TABLE %s%s;", ife, table.Name.Value)
-}
-
-func (b *MySQLDDLBuilder) CreateEnum(enum *schema.Enum) string {
-	valuesString := ""
-	for i, value := range enum.Values {
-		valuesString += fmt.Sprintf("'%s'", value)
-
-		if i < len(enum.Values)-1 {
-			valuesString += ", "
-		}
-	}
-
-	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name.Value, valuesString)
-}
-
-func (b *MySQLDDLBuilder) DropType(name string, ifExists bool) string {
-	ife := ""
-	if ifExists {
-		ife = "IF EXISTS"
-	}
-
-	return fmt.Sprintf("DROP TYPE %s%s;", ife, name)
-}
-
-func (b *MySQLDDLBuilder) DropSequence(seq *schema.Sequence, ifExists bool) string {
-	ife := ""
-	if ifExists {
-		ife = "IF EXISTS"
-	}
-
-	return fmt.Sprintf("DROP SEQUENCE %s%s;", ife, seq.Name)
 }
 
 func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {
@@ -256,12 +211,12 @@ func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine
 
 	return fmt.Sprintf(
 		"    %s%s",
-		b.CreatePrimaryKey(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
+		b.createPrimaryKey(table.PrimaryKey.Name.Value, table.PrimaryKey.ColumnsNames),
 		comma,
 	)
 }
 
-func (b *MySQLDDLBuilder) CreatePrimaryKey(name string, columns *gds.Strings) string {
+func (b *MySQLDDLBuilder) createPrimaryKey(name string, columns *gds.Strings) string {
 	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value)
 }
 

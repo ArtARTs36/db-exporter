@@ -150,11 +150,8 @@
             {
               "properties": {
                 "prefix": {
-                  "type": "array",
-                  "description": "Table prefix for export",
-                  "items": {
-                    "type": "string"
-                  }
+                  "type": "string",
+                  "description": "Table prefix for export"
                 }
               },
               "required": [

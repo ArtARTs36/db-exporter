@@ -30,7 +30,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name:        "init",
+				Name:        *gds.NewString("init"),
 				UpQueries:   []string{"CREATE TABLE cars()"},
 				DownQueries: []string{"DROP TABLE cars;"},
 			},
@@ -50,7 +50,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name: "init",
+				Name: *gds.NewString("init"),
 				UpQueries: []string{
 					`CREATE TABLE cars
 (
@@ -79,7 +79,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name: "init",
+				Name: *gds.NewString("init"),
 				UpQueries: []string{
 					`CREATE TABLE cars
 (
@@ -135,7 +135,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name: "init",
+				Name: *gds.NewString("init"),
 				UpQueries: []string{
 					`CREATE TABLE users
 (
@@ -186,7 +186,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name: "init",
+				Name: *gds.NewString("init"),
 				UpQueries: []string{
 					`CREATE TYPE status AS ENUM ('a', 'b', 'c', 'd');`,
 					`CREATE TABLE users
@@ -244,7 +244,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 				Driver: config.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
-				Name: "init",
+				Name: *gds.NewString("init"),
 				UpQueries: []string{
 					`CREATE TYPE status AS ENUM ('a', 'b', 'c', 'd');`,
 					`CREATE SEQUENCE users_id_seq as integer;`,

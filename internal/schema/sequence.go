@@ -13,6 +13,10 @@ func (s *Sequence) Inc() {
 	s.Used++
 }
 
+func (s *Sequence) UsedOnce() bool {
+	return s.Used == 1
+}
+
 func CreateSequenceForColumn(col *Column) *Sequence {
 	return &Sequence{
 		Name:     fmt.Sprintf("%s_%s_seq", col.TableName.Value, col.Name.Value),

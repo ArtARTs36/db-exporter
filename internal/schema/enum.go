@@ -7,3 +7,7 @@ type Enum struct {
 	Values []string
 	Used   int
 }
+
+func (e *Enum) UsedOnce() bool {
+	return e.Used == 1
+}
