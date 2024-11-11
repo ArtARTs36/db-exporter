@@ -51,7 +51,7 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 		"build sequences create queries": func() error {
 			for _, sequence := range schema.Sequences {
 				seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
-					Source:         params.Source,
+					Source:         schema.Driver,
 					UseIfNotExists: params.UseIfNotExists,
 				})
 				if err != nil {
@@ -249,7 +249,7 @@ func (b *PostgresDDLBuilder) createSequencesDDL(sch *schema.Schema, opts BuildDD
 		if seq.UsedOnce() {
 			seqSQL, err := b.CreateSequence(seq, CreateSequenceParams{
 				UseIfNotExists: opts.UseIfNotExists,
-				Source:         opts.Source,
+				Source:         sch.Driver,
 			})
 			if err != nil {
 				return nil, err
@@ -279,6 +279,11 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 		ddls = append(ddls, seqDDL)
 	}
 
+	createSeqParams := CreateSequenceParams{
+		UseIfNotExists: opts.UseIfNotExists,
+		Source:         sch.Driver,
+	}
+
 	for _, table := range sch.Tables.List() {
 		ddl := &DDL{}
 
@@ -291,10 +296,7 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.UsedOnce() {
-				seqSQL, serr := b.CreateSequence(sequence, CreateSequenceParams{
-					UseIfNotExists: opts.UseIfNotExists,
-					Source:         opts.Source,
-				})
+				seqSQL, serr := b.CreateSequence(sequence, createSeqParams)
 				if serr != nil {
 					return nil, serr
 				}

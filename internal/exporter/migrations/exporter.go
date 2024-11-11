@@ -12,7 +12,6 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Exporter struct {
@@ -51,7 +50,7 @@ func (e *Exporter) ExportPerFile(
 
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries and rendering migration files", e.name))
 
-	ddlOpts := e.mapBuildDDLOpts(params.Schema, spec)
+	ddlOpts := e.mapBuildDDLOpts(spec)
 
 	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
 	ddls, err := ddlBuilder.BuildPerTable(params.Schema, ddlOpts)
@@ -80,11 +79,10 @@ func (e *Exporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *Exporter) mapBuildDDLOpts(sch *schema.Schema, spec *config.MigrationsSpec) sql.BuildDDLOpts {
+func (e *Exporter) mapBuildDDLOpts(spec *config.MigrationsSpec) sql.BuildDDLOpts {
 	return sql.BuildDDLOpts{
 		UseIfNotExists: spec.Use.IfNotExists,
 		UseIfExists:    spec.Use.IfExists,
-		Source:         sch.Driver,
 	}
 }
 
@@ -100,7 +98,7 @@ func (e *Exporter) Export(
 	slog.DebugContext(ctx, fmt.Sprintf("[%s] building queries", e.name))
 
 	ddlBuilder := e.ddlBuilderManager.For(spec.Target)
-	ddl, err := ddlBuilder.Build(params.Schema, e.mapBuildDDLOpts(params.Schema, spec))
+	ddl, err := ddlBuilder.Build(params.Schema, e.mapBuildDDLOpts(spec))
 	if err != nil {
 		return nil, fmt.Errorf("failed to build ddl for schema: %w", err)
 	}
