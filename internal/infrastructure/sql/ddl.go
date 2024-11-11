@@ -37,3 +37,7 @@ func (m *DDLBuilderManager) For(driver config.DatabaseDriver) DDLBuilder {
 	}
 	return NewPostgresDDLBuilder()
 }
+
+func (d *DDL) filled() bool {
+	return len(d.UpQueries) > 0
+}

@@ -40,14 +40,20 @@ func (b *PostgresDDLBuilder) buildCreateEmptyTable(table *schema.Table, useIfNot
 }
 
 func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
+	const oneTypeQueries = 1
+
 	ddl := &DDL{
-		Name:        *gds.NewString("init"),
-		UpQueries:   make([]string, 0, (len(schema.Enums)*2)+(len(schema.Sequences)*2)+(schema.Tables.Len())*2),
+		Name: *gds.NewString("init"),
+		UpQueries: make([]string, 0,
+			(len(schema.Enums)*oneTypeQueries)+
+				(len(schema.Sequences)*oneTypeQueries)+
+				(schema.Tables.Len()*oneTypeQueries),
+		),
 		DownQueries: []string{},
 	}
 
 	steps := map[string]func() error{
-		"build enums create queries": func() error {
+		"build enums create queries": func() error { //nolint:unparam // false-positive
 			for _, enum := range schema.Enums {
 				ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
 			}
@@ -77,13 +83,13 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 			}
 			return nil
 		},
-		"build enums drop queries": func() error {
+		"build enums drop queries": func() error { //nolint:unparam // false-positive
 			for _, enum := range schema.Enums {
 				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, params.UseIfExists))
 			}
 			return nil
 		},
-		"build sequences drop queries": func() error {
+		"build sequences drop queries": func() error { //nolint:unparam // false-positive
 			for _, seq := range schema.Sequences {
 				ddl.DownQueries = append(ddl.DownQueries, b.dropSequence(seq, params.UseIfExists))
 			}
@@ -215,52 +221,60 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 	return ddl, nil
 }
 
-func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
-	ddlsLen := sch.Tables.Len()
-
+func (b *PostgresDDLBuilder) createEnumsDDL(sch *schema.Schema, opts BuildDDLOpts) *DDL {
 	enumsDDL := &DDL{
 		Name:        *gds.NewString("enums"),
 		UpQueries:   make([]string, 0, len(sch.Enums)),
 		DownQueries: make([]string, 0, len(sch.Enums)),
 	}
+
+	for _, enum := range sch.Enums {
+		if enum.Used > 1 {
+			enumsDDL.UpQueries = append(enumsDDL.UpQueries, b.CreateEnum(enum))
+			enumsDDL.DownQueries = append(enumsDDL.DownQueries, b.dropType(enum.Name.Value, opts.UseIfExists))
+		}
+	}
+
+	return enumsDDL
+}
+
+func (b *PostgresDDLBuilder) createSequencesDDL(sch *schema.Schema, opts BuildDDLOpts) (*DDL, error) {
 	seqDDL := &DDL{
 		Name:        *gds.NewString("sequences"),
 		UpQueries:   make([]string, 0, len(sch.Sequences)),
 		DownQueries: make([]string, 0, len(sch.Sequences)),
 	}
-	for _, enum := range sch.Enums {
-		if enum.Used > 1 {
-			enumsDDL.UpQueries = append(enumsDDL.UpQueries, b.CreateEnum(enum))
-			enumsDDL.DownQueries = append(enumsDDL.DownQueries, b.dropType(enum.Name.Value, params.UseIfExists))
-		}
-	}
 	for _, seq := range sch.Sequences {
-		if seq.Used > 1 {
+		if seq.UsedOnce() {
 			seqSQL, err := b.CreateSequence(seq, CreateSequenceParams{
-				UseIfNotExists: params.UseIfNotExists,
-				Source:         params.Source,
+				UseIfNotExists: opts.UseIfNotExists,
+				Source:         opts.Source,
 			})
 			if err != nil {
 				return nil, err
 			}
 			seqDDL.UpQueries = append(seqDDL.UpQueries, seqSQL)
-			seqDDL.DownQueries = append(seqDDL.DownQueries, b.dropSequence(seq, params.UseIfExists))
+			seqDDL.DownQueries = append(seqDDL.DownQueries, b.dropSequence(seq, opts.UseIfExists))
 		}
 	}
 
-	if len(enumsDDL.UpQueries) > 0 {
-		ddlsLen++
-	}
-	if len(seqDDL.UpQueries) > 0 {
-		ddlsLen++
+	return seqDDL, nil
+}
+
+func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
+	enumsDDL := b.createEnumsDDL(sch, opts)
+	seqDDL, err := b.createSequencesDDL(sch, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	ddls := make([]*DDL, 0, ddlsLen)
+	const defaultDDLsCount = 2
+	ddls := make([]*DDL, 0, sch.Tables.Len()+defaultDDLsCount)
 
-	if len(enumsDDL.UpQueries) > 0 {
+	if enumsDDL.filled() {
 		ddls = append(ddls, enumsDDL)
 	}
-	if len(seqDDL.UpQueries) > 0 {
+	if seqDDL.filled() {
 		ddls = append(ddls, seqDDL)
 	}
 
@@ -270,25 +284,25 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOp
 		for _, enum := range table.UsingEnums {
 			if enum.UsedOnce() {
 				ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
-				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, params.UseIfExists))
+				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, opts.UseIfExists))
 			}
 		}
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.UsedOnce() {
 				seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
-					UseIfNotExists: params.UseIfNotExists,
-					Source:         params.Source,
+					UseIfNotExists: opts.UseIfNotExists,
+					Source:         opts.Source,
 				})
 				if err != nil {
 					return nil, err
 				}
 				seqDDL.UpQueries = append(seqDDL.UpQueries, seqSQL)
-				seqDDL.DownQueries = append(seqDDL.DownQueries, b.dropSequence(sequence, params.UseIfExists))
+				seqDDL.DownQueries = append(seqDDL.DownQueries, b.dropSequence(sequence, opts.UseIfExists))
 			}
 		}
 
-		tableDDL, err := b.buildCreateTable(table, sch.Driver, params)
+		tableDDL, err := b.buildCreateTable(table, sch.Driver, opts)
 		if err != nil {
 			return nil, err
 		}

@@ -50,7 +50,6 @@ func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DD
 
 func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
 	build := func(table *schema.Table) (*DDL, error) {
-
 		if len(table.Columns) == 0 {
 			return &DDL{
 				Name:        table.Name,
