@@ -41,56 +41,74 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 		DownQueries: []string{},
 	}
 
-	steps := map[string]func() error{
-		"build enums create queries": func() error { //nolint:unparam // false-positive
-			for _, enum := range schema.Enums {
-				ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
-			}
-			return nil
-		},
-		"build sequences create queries": func() error {
-			for _, sequence := range schema.Sequences {
-				seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
-					Source:         schema.Driver,
-					UseIfNotExists: params.UseIfNotExists,
-				})
-				if err != nil {
-					return err
+	steps := []struct {
+		name   string
+		action func() error
+	}{
+		{
+			name: "build enums create queries",
+			action: func() error {
+				for _, enum := range schema.Enums {
+					ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
 				}
-				ddl.UpQueries = append(ddl.UpQueries, seqSQL)
-			}
-			return nil
+				return nil
+			},
 		},
-		"build tables create/drop queries": func() error {
-			for _, table := range schema.Tables.List() {
-				tableDDL, err := b.buildCreateTable(table, schema.Driver, params)
-				if err != nil {
-					return err
+		{
+			name: "build sequences create queries",
+			action: func() error {
+				for _, sequence := range schema.Sequences {
+					seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
+						Source:         schema.Driver,
+						UseIfNotExists: params.UseIfNotExists,
+					})
+					if err != nil {
+						return err
+					}
+					ddl.UpQueries = append(ddl.UpQueries, seqSQL)
 				}
-				ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
-				ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
-			}
-			return nil
+				return nil
+			},
 		},
-		"build enums drop queries": func() error { //nolint:unparam // false-positive
-			for _, enum := range schema.Enums {
-				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, params.UseIfExists))
-			}
-			return nil
+		{
+			name: "build tables create/drop queries",
+			action: func() error {
+				for _, table := range schema.Tables.List() {
+					tableDDL, err := b.buildCreateTable(table, schema.Driver, params)
+					if err != nil {
+						return err
+					}
+					ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
+					ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
+				}
+				return nil
+			},
 		},
-		"build sequences drop queries": func() error { //nolint:unparam // false-positive
-			for _, seq := range schema.Sequences {
-				ddl.DownQueries = append(ddl.DownQueries, b.dropSequence(seq, params.UseIfExists))
-			}
-			return nil
+		{
+			name: "build enums drop queries",
+			action: func() error {
+				for _, enum := range schema.Enums {
+					ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, params.UseIfExists))
+				}
+				return nil
+			},
+		},
+		{
+			name: "build sequences drop queries",
+			action: func() error {
+				for _, seq := range schema.Sequences {
+					ddl.DownQueries = append(ddl.DownQueries, b.dropSequence(seq, params.UseIfExists))
+				}
+				return nil
+			},
 		},
 	}
 
-	for name, step := range steps {
-		slog.Debug(fmt.Sprintf("[pg-ddl-builder] %s", name))
+	for _, step := range steps {
+		slog.Debug(fmt.Sprintf("[pg-ddl-builder] %s", step.name))
 
-		if err := step(); err != nil {
-			return nil, fmt.Errorf("failed to %s: %w", name, err)
+		if err := step.action(); err != nil {
+			return nil, fmt.Errorf("failed to %s: %w", step.name, err)
 		}
 	}
 
