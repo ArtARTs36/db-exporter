@@ -49,7 +49,14 @@ tasks:
     activities:
       - export: goose
         out:
-          dir: ./out/goose
+          dir: ./out/goose/common
+
+  gen_goose_migrations_per:
+    activities:
+      - export: goose
+        table_per_file: true
+        out:
+          dir: ./out/goose/per
 
   gen_goose_migrations_mysql:
     activities:

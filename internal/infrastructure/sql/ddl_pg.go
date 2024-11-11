@@ -12,8 +12,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-const expIfNotExists = "IF NOT EXISTS "
-
 type PostgresDDLBuilder struct {
 }
 
@@ -29,15 +27,6 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 }
 
 type isLastLine func() bool
-
-func (b *PostgresDDLBuilder) buildCreateEmptyTable(table *schema.Table, useIfNotExists bool) string {
-	ifne := ""
-	if useIfNotExists {
-		ifne = expIfNotExists
-	}
-
-	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
-}
 
 func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
 	const oneTypeQueries = 1
@@ -116,7 +105,7 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 	if len(table.Columns) == 0 {
 		return &DDL{
 			Name:        table.Name,
-			UpQueries:   []string{b.buildCreateEmptyTable(table, params.UseIfNotExists)},
+			UpQueries:   []string{buildCreateEmptyTable(table, params.UseIfNotExists)},
 			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
 		}, nil
 	}
@@ -127,7 +116,7 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 		DownQueries: []string{},
 	}
 
-	ifne := b.ifne(params.UseIfNotExists)
+	ifne := ifne(params.UseIfNotExists)
 
 	createTableQuery := []string{
 		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
@@ -156,37 +145,15 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 	for _, column := range table.Columns {
 		lineID++
 
-		notNull := ""
-		if !column.Nullable {
-			notNull = " NOT NULL"
-		}
-
 		comma := ","
 		if lineID == lines {
 			comma = ""
 		}
 
-		spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
-
-		defaultValue := ""
-		if column.DefaultRaw.Valid {
-			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
-		}
-
-		colType, err := sqltype.TransitSQLType(sourceDriver, config.DatabaseDriverPostgres, column.Type)
+		line, err := b.createColumnDefinition(column, sourceDriver, maxColumnLen, comma)
 		if err != nil {
-			return nil, fmt.Errorf("failed to map column type: %w", err)
+			return nil, fmt.Errorf("failed to build definition for column %q: %w", column.Name.Value, err)
 		}
-
-		line := fmt.Sprintf(
-			"    %s%s%s%s%s%s",
-			column.Name.Value,
-			strings.Repeat(" ", spacesAfterColumnName),
-			colType.Name,
-			notNull,
-			defaultValue,
-			comma,
-		)
 
 		createTableQuery = append(createTableQuery, line)
 
@@ -219,6 +186,40 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
 
 	return ddl, nil
+}
+
+func (b *PostgresDDLBuilder) createColumnDefinition(
+	column *schema.Column,
+	sourceDriver config.DatabaseDriver,
+	maxColumnLen int,
+	comma string,
+) (string, error) {
+	spacesAfterColumnName := maxColumnLen - column.Name.Len() + 1
+
+	notNull := ""
+	if !column.Nullable {
+		notNull = " NOT NULL"
+	}
+
+	defaultValue := ""
+	if column.DefaultRaw.Valid {
+		defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+	}
+
+	colType, err := sqltype.TransitSQLType(sourceDriver, config.DatabaseDriverPostgres, column.Type)
+	if err != nil {
+		return "", fmt.Errorf("failed to map column type: %w", err)
+	}
+
+	return fmt.Sprintf(
+		"    %s%s%s%s%s%s",
+		column.Name.Value,
+		strings.Repeat(" ", spacesAfterColumnName),
+		colType.Name,
+		notNull,
+		defaultValue,
+		comma,
+	), nil
 }
 
 func (b *PostgresDDLBuilder) createEnumsDDL(sch *schema.Schema, opts BuildDDLOpts) *DDL {
@@ -261,7 +262,7 @@ func (b *PostgresDDLBuilder) createSequencesDDL(sch *schema.Schema, opts BuildDD
 	return seqDDL, nil
 }
 
-func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
+func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts) ([]*DDL, error) { //nolint:lll // not need
 	enumsDDL := b.createEnumsDDL(sch, opts)
 	seqDDL, err := b.createSequencesDDL(sch, opts)
 	if err != nil {
@@ -290,21 +291,21 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 
 		for _, sequence := range table.UsingSequences {
 			if sequence.UsedOnce() {
-				seqSQL, err := b.CreateSequence(sequence, CreateSequenceParams{
+				seqSQL, serr := b.CreateSequence(sequence, CreateSequenceParams{
 					UseIfNotExists: opts.UseIfNotExists,
 					Source:         opts.Source,
 				})
-				if err != nil {
-					return nil, err
+				if serr != nil {
+					return nil, serr
 				}
 				seqDDL.UpQueries = append(seqDDL.UpQueries, seqSQL)
 				seqDDL.DownQueries = append(seqDDL.DownQueries, b.dropSequence(sequence, opts.UseIfExists))
 			}
 		}
 
-		tableDDL, err := b.buildCreateTable(table, sch.Driver, opts)
-		if err != nil {
-			return nil, err
+		tableDDL, terr := b.buildCreateTable(table, sch.Driver, opts)
+		if terr != nil {
+			return nil, terr
 		}
 		ddl.Name = tableDDL.Name
 		ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
@@ -322,31 +323,17 @@ type CreateSequenceParams struct {
 	Source config.DatabaseDriver
 }
 
-func (b *PostgresDDLBuilder) ifne(use bool) string {
-	if use {
-		return expIfNotExists
-	}
-	return ""
-}
-
-func (b *PostgresDDLBuilder) ife(use bool) string {
-	if use {
-		return "IF EXISTS"
-	}
-	return ""
-}
-
 func (b *PostgresDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
 	dType, err := sqltype.TransitSQLType(params.Source, config.DatabaseDriverPostgres, seq.DataType)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", b.ifne(params.UseIfNotExists), seq.Name, dType.Name), nil
+	return fmt.Sprintf("CREATE SEQUENCE %s%s as %s;", ifne(params.UseIfNotExists), seq.Name, dType.Name), nil
 }
 
 func (b *PostgresDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
-	return fmt.Sprintf("DROP TABLE %s%s;", b.ife(useIfExists), table.Name.Value)
+	return fmt.Sprintf("DROP TABLE %s%s;", ife(useIfExists), table.Name.Value)
 }
 
 func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
@@ -363,11 +350,11 @@ func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
 }
 
 func (b *PostgresDDLBuilder) dropType(name string, ifExists bool) string {
-	return fmt.Sprintf("DROP TYPE %s%s;", b.ife(ifExists), name)
+	return fmt.Sprintf("DROP TYPE %s%s;", ife(ifExists), name)
 }
 
 func (b *PostgresDDLBuilder) dropSequence(seq *schema.Sequence, ifExists bool) string {
-	return fmt.Sprintf("DROP SEQUENCE %s%s;", b.ife(ifExists), seq.Name)
+	return fmt.Sprintf("DROP SEQUENCE %s%s;", ife(ifExists), seq.Name)
 }
 
 func (b *PostgresDDLBuilder) CommentOnColumn(col *schema.Column) string {

@@ -20,15 +20,6 @@ func NewMySQLDDLBuilder() *MySQLDDLBuilder {
 	return &MySQLDDLBuilder{}
 }
 
-func (b *MySQLDDLBuilder) buildCreateTable(table *schema.Table, useIfNotExists bool) string {
-	ifne := ""
-	if useIfNotExists {
-		ifne = expIfNotExists
-	}
-
-	return fmt.Sprintf("CREATE TABLE %s%s()", ifne, table.Name.Value)
-}
-
 func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
 	ddl := &DDL{
 		Name:        *gds.NewString("init"),
@@ -36,153 +27,158 @@ func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DD
 		DownQueries: []string{},
 	}
 
-	ddls, err := b.BuildPerTable(schema, params)
-	if err != nil {
-		return nil, err
-	}
+	for _, table := range schema.Tables.List() {
+		tableDDL, err := b.buildCreateTable(table, schema.Driver, params)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build DDL for table %q: %w", table.Name.Value, err)
+		}
 
-	for _, tableDDL := range ddls {
 		ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
 		ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
 	}
+
 	return ddl, nil
 }
 
-func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:funlen,lll // not need
-	build := func(table *schema.Table) (*DDL, error) {
-		if len(table.Columns) == 0 {
-			return &DDL{
-				Name:        table.Name,
-				UpQueries:   []string{b.buildCreateTable(table, params.UseIfNotExists)},
-				DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
-			}, nil
-		}
-
-		ddl := &DDL{
+func (b *MySQLDDLBuilder) buildCreateTable( //nolint:funlen // not need
+	table *schema.Table,
+	sourceDriver config.DatabaseDriver,
+	params BuildDDLOpts,
+) (*DDL, error) {
+	if len(table.Columns) == 0 {
+		return &DDL{
 			Name:        table.Name,
-			UpQueries:   make([]string, 0),
-			DownQueries: make([]string, 0),
-		}
-
-		ifne := ""
-		if params.UseIfNotExists {
-			ifne = expIfNotExists
-		}
-
-		createTableQuery := []string{
-			fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
-			"(",
-		}
-
-		lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
-		if table.PrimaryKey != nil {
-			lines++
-		}
-		lineID := 0
-
-		isLast := func() bool {
-			lineID++
-
-			return lineID == lines
-		}
-
-		maxColumnLen := 0
-		columnNames := make([]string, len(table.Columns))
-		for i, column := range table.Columns {
-			colName := column.Name.Wrap(mySQLColumnNameWrapper).Value
-			if len(colName) > maxColumnLen {
-				maxColumnLen = len(colName)
-			}
-			columnNames[i] = colName
-		}
-
-		for i, column := range table.Columns {
-			lineID++
-
-			notNull := ""
-			if !column.Nullable {
-				notNull = " NOT NULL"
-			}
-
-			comma := ","
-			if lineID == lines {
-				comma = ""
-			}
-
-			colName := columnNames[i]
-
-			spacesAfterColumnName := maxColumnLen - len(colName) + 1
-
-			defaultValue := ""
-			if column.DefaultRaw.Valid && sch.Driver == config.DatabaseDriverMySQL {
-				defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
-			}
-
-			colType, err := sqltype.TransitSQLType(sch.Driver, config.DatabaseDriverMySQL, column.Type)
-			if err != nil {
-				return nil, fmt.Errorf("failed to map column type: %w", err)
-			}
-
-			autoIncrement := ""
-			if column.IsAutoincrement {
-				autoIncrement = " AUTO_INCREMENT"
-			}
-
-			comment := ""
-			if column.Comment.IsNotEmpty() {
-				comment = fmt.Sprintf(" COMMENT '%s'", column.Comment.Value)
-			}
-
-			colTypeDef := colType.String()
-			if column.Enum != nil {
-				colTypeDef = b.buildEnumColumnType(column.Enum)
-			}
-
-			line := fmt.Sprintf(
-				"    %s%s%s%s%s%s%s%s",
-				colName,
-				strings.Repeat(" ", spacesAfterColumnName),
-				colTypeDef,
-				notNull,
-				defaultValue,
-				autoIncrement,
-				comment,
-				comma,
-			)
-
-			createTableQuery = append(createTableQuery, line)
-		}
-
-		if lineID != lines {
-			createTableQuery = append(createTableQuery, "")
-		}
-
-		if table.PrimaryKey != nil {
-			createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
-		}
-
-		if len(table.ForeignKeys) > 0 {
-			createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
-		}
-
-		if len(table.UniqueKeys) > 0 {
-			createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
-		}
-
-		createTableQuery = append(createTableQuery, ");")
-
-		ddl.UpQueries = append([]string{
-			strings.Join(createTableQuery, "\n"),
-		}, ddl.UpQueries...)
-		ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
-
-		return ddl, nil
+			UpQueries:   []string{buildCreateEmptyTable(table, params.UseIfNotExists)},
+			DownQueries: []string{b.buildDropTable(table, params.UseIfNotExists)},
+		}, nil
 	}
 
+	ddl := &DDL{
+		Name:        table.Name,
+		UpQueries:   make([]string, 0),
+		DownQueries: make([]string, 0),
+	}
+
+	ifne := ifne(params.UseIfNotExists)
+
+	createTableQuery := []string{
+		fmt.Sprintf("CREATE TABLE %s%s", ifne, table.Name.Value),
+		"(",
+	}
+
+	lines := len(table.Columns) + len(table.ForeignKeys) + len(table.UniqueKeys)
+	if table.PrimaryKey != nil {
+		lines++
+	}
+	lineID := 0
+
+	isLast := func() bool {
+		lineID++
+
+		return lineID == lines
+	}
+
+	columnNames, maxColumnLen := b.prepareColumnNames(table.Columns)
+
+	for i, column := range table.Columns {
+		notNull := ""
+		if !column.Nullable {
+			notNull = " NOT NULL"
+		}
+
+		comma := ","
+		if isLast() {
+			comma = ""
+		}
+
+		colName := columnNames[i]
+
+		spacesAfterColumnName := maxColumnLen - len(colName) + 1
+
+		defaultValue := ""
+		if column.DefaultRaw.Valid && sourceDriver == config.DatabaseDriverMySQL {
+			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
+		}
+
+		colType, err := sqltype.TransitSQLType(sourceDriver, config.DatabaseDriverMySQL, column.Type)
+		if err != nil {
+			return nil, fmt.Errorf("failed to map column type: %w", err)
+		}
+
+		autoIncrement := ""
+		if column.IsAutoincrement {
+			autoIncrement = " AUTO_INCREMENT"
+		}
+
+		comment := ""
+		if column.Comment.IsNotEmpty() {
+			comment = fmt.Sprintf(" COMMENT '%s'", column.Comment.Value)
+		}
+
+		colTypeDef := colType.String()
+		if column.Enum != nil {
+			colTypeDef = b.buildEnumColumnType(column.Enum)
+		}
+
+		line := fmt.Sprintf(
+			"    %s%s%s%s%s%s%s%s",
+			colName,
+			strings.Repeat(" ", spacesAfterColumnName),
+			colTypeDef,
+			notNull,
+			defaultValue,
+			autoIncrement,
+			comment,
+			comma,
+		)
+
+		createTableQuery = append(createTableQuery, line)
+	}
+
+	if lineID != lines {
+		createTableQuery = append(createTableQuery, "")
+	}
+
+	if table.PrimaryKey != nil {
+		createTableQuery = append(createTableQuery, b.buildPrimaryKey(table, isLast))
+	}
+
+	if len(table.ForeignKeys) > 0 {
+		createTableQuery = append(createTableQuery, b.buildForeignKeys(table, isLast)...)
+	}
+
+	if len(table.UniqueKeys) > 0 {
+		createTableQuery = append(createTableQuery, b.buildUniqueKeys(table, isLast)...)
+	}
+
+	createTableQuery = append(createTableQuery, ");")
+
+	ddl.UpQueries = append([]string{
+		strings.Join(createTableQuery, "\n"),
+	}, ddl.UpQueries...)
+	ddl.DownQueries = append(ddl.DownQueries, b.buildDropTable(table, params.UseIfExists))
+
+	return ddl, nil
+}
+
+func (b *MySQLDDLBuilder) prepareColumnNames(cols []*schema.Column) ([]string, int) {
+	maxColumnLen := 0
+	columnNames := make([]string, len(cols))
+	for i, column := range cols {
+		colName := column.Name.Wrap(mySQLColumnNameWrapper).Value
+		if len(colName) > maxColumnLen {
+			maxColumnLen = len(colName)
+		}
+		columnNames[i] = colName
+	}
+	return columnNames, maxColumnLen
+}
+
+func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts) ([]*DDL, error) { //nolint:lll // not need
 	ddls := make([]*DDL, 0)
 
 	for _, table := range sch.Tables.List() {
-		ddl, err := build(table)
+		ddl, err := b.buildCreateTable(table, sch.Driver, params)
 		if err != nil {
 			return nil, err
 		}
@@ -194,12 +190,7 @@ func (b *MySQLDDLBuilder) BuildPerTable(sch *schema.Schema, params BuildDDLOpts)
 }
 
 func (b *MySQLDDLBuilder) buildDropTable(table *schema.Table, useIfExists bool) string {
-	ife := ""
-	if useIfExists {
-		ife = "IF EXISTS "
-	}
-
-	return fmt.Sprintf("DROP TABLE %s%s;", ife, table.Name.Value)
+	return fmt.Sprintf("DROP TABLE %s%s;", ife(useIfExists), table.Name.Value)
 }
 
 func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine) string {
