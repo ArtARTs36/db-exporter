@@ -63,7 +63,7 @@ func (m *TableMap) Has(name gds.String) bool {
 	return exists
 }
 
-func (m *TableMap) Reject(callback func(table *Table) bool) *TableMap {
+func (m *TableMap) reject(callback func(table *Table) bool) *TableMap {
 	tm := NewTableMap()
 
 	for pair := m.oMap.Oldest(); pair != nil; pair = pair.Next() {
@@ -73,17 +73,6 @@ func (m *TableMap) Reject(callback func(table *Table) bool) *TableMap {
 	}
 
 	return tm
-}
-
-func (m *TableMap) Only(tableNames []string) *TableMap {
-	tableFilter := map[string]bool{}
-	for _, table := range tableNames {
-		tableFilter[table] = true
-	}
-
-	return m.Reject(func(table *Table) bool {
-		return !tableFilter[table.Name.Value]
-	})
 }
 
 func (m *TableMap) List() []*Table {

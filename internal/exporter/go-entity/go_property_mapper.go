@@ -1,6 +1,8 @@
 package goentity
 
 import (
+	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/gds"
@@ -31,6 +33,7 @@ func NewGoPropertyMapper() *GoPropertyMapper {
 }
 
 func (m *GoPropertyMapper) mapColumns(
+	sourceDriver config.DatabaseDriver,
 	columns []*schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImportCallback addImportCallback,
@@ -50,7 +53,7 @@ func (m *GoPropertyMapper) mapColumns(
 		prop := &GoProperty{
 			Name:       column.Name.Pascal().FixAbbreviations(goAbbreviationsSet),
 			PluralName: column.Name.Pascal().PluralFixAbbreviations(goAbbreviationsPluralsSet).Value,
-			Type:       m.mapGoType(column, enums, addImportCallback),
+			Type:       m.mapGoType(sourceDriver, column, enums, addImportCallback),
 			Column:     column,
 		}
 
@@ -77,84 +80,36 @@ func (m *GoPropertyMapper) mapColumns(
 }
 
 func (m *GoPropertyMapper) mapGoType(
+	sourceDriver config.DatabaseDriver,
 	col *schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImport func(pkg string),
 ) string {
-	if e, ok := enums[col.Type.Value]; ok {
+	if e, ok := enums[col.Name.Value]; ok {
 		return e.Name.Value
 	}
 
-	switch col.PreparedType {
-	case schema.DataTypeInteger64, schema.DataTypeInteger:
-		if col.Nullable {
-			addImport("database/sql")
+	goType := sqltype.MapGoType(sourceDriver, col.Type)
 
-			return golang.TypeSQLNullInt64
+	if !col.Nullable {
+		if goType.PackagePath != "" {
+			addImport(goType.PackagePath)
 		}
 
-		return golang.TypeInt64
-	case schema.DataTypeInteger16:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullInt16
-		}
-
-		return golang.TypeInt16
-	case schema.DataTypeString:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullString
-		}
-
-		return golang.TypeString
-	case schema.DataTypeTimestamp:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullTime
-		}
-
-		addImport("time")
-
-		return golang.TypeTimeTime
-	case schema.DataTypeBoolean:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullBool
-		}
-
-		return golang.TypeBool
-	case schema.DataTypeFloat64:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.TypeSQLNullFloat64
-		}
-
-		return golang.TypeFloat64
-	case schema.DataTypeFloat32:
-		if col.Nullable {
-			addImport("database/sql")
-
-			return golang.Ptr(golang.TypeFloat32)
-		}
-
-		return golang.TypeFloat32
-	case schema.DataTypeBytes:
-		if col.Nullable {
-			return golang.Ptr(golang.TypeByteSlice)
-		}
-
-		return golang.TypeByteSlice
+		return goType.Call()
 	}
 
-	return golang.TypeString
+	if goType.Null != nil {
+		if goType.Null.PackagePath != "" {
+			addImport(goType.Null.PackagePath)
+		}
+
+		return goType.Null.Call()
+	}
+
+	return golang.Ptr(goType.Call())
 }
 
 func (p *GoProperty) IsString() bool {
-	return p.Type == golang.TypeString
+	return p.Type == golang.TypeString.Name
 }

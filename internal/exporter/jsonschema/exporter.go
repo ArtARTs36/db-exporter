@@ -8,7 +8,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/jsonschema"
-	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
 type Exporter struct {
@@ -120,12 +119,15 @@ func (e *Exporter) prepareDefaultValue(col *schema.Column) interface{} {
 }
 
 func (e *Exporter) mapFormat(column *schema.Column) jsonschema.Format {
-	if column.PreparedType == schema.DataTypeTimestamp {
+	switch {
+	case column.Type.IsDatetime:
 		return jsonschema.FormatDateTime
-	} else if column.PreparedType == schema.DataTypeString {
-		if column.Type.Equal(pg.TypeUUID) { //nolint:gocritic // not need
-			return jsonschema.FormatUUID
-		} else if column.Name.Equal("email") || column.Name.Ends("_email") {
+	case column.Type.IsUUID:
+		return jsonschema.FormatUUID
+	case column.Type.IsDate:
+		return jsonschema.FormatDate
+	case column.Type.IsStringable:
+		if column.Name.Equal("email") || column.Name.Ends("_email") {
 			return jsonschema.FormatEmail
 		} else if column.Name.Equal("uri") || column.Name.Ends("_uri") {
 			return jsonschema.FormatURI

@@ -8,4 +8,5 @@ const (
 	FormatUUID     Format = "uuid"
 	FormatEmail    Format = "email"
 	FormatURI      Format = "uri"
+	FormatDate     Format = "date"
 )

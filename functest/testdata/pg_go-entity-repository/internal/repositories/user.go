@@ -21,15 +21,15 @@ type PGUserRepository struct {
 }
 
 type ListUserFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 type GetUserFilter struct {
-	ID int64
+	ID int
 }
 
 type DeleteUserFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 func NewPGUserRepository(db *sqlx.DB) *PGUserRepository {

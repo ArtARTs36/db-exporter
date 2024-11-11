@@ -5,7 +5,7 @@ import (
 )
 
 type Table struct {
-	Name    gds.String `db:"name"`
+	Name    gds.String `db:"Name"`
 	Columns []*Column  `db:"-"`
 
 	PrimaryKey  *PrimaryKey            `db:"-"`

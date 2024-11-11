@@ -111,8 +111,8 @@ func (m *MigrationsSpec) Validate() error {
 		)
 	}
 
-	if !m.Target.CanWrite() {
-		return fmt.Errorf("target have driver %q, which unsupported modified queries", m.Target)
+	if !m.Target.CanMigrate() {
+		return fmt.Errorf("target have driver %q, which unsupported migrate queries", m.Target)
 	}
 
 	return nil

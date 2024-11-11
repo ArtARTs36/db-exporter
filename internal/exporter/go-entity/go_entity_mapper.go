@@ -1,6 +1,7 @@
 package goentity
 
 import (
+	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/gds"
@@ -48,9 +49,10 @@ func (e *Entity) Call(pkg *golang.Package) string {
 }
 
 type MapEntitiesParams struct {
-	Tables  []*schema.Table
-	Package *golang.Package
-	Enums   map[string]*golang.StringEnum
+	SourceDriver config.DatabaseDriver
+	Tables       []*schema.Table
+	Package      *golang.Package
+	Enums        map[string]*golang.StringEnum
 }
 
 func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
@@ -64,9 +66,10 @@ func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
 
 	for i, table := range params.Tables {
 		ents.Entities[i] = m.mapEntity(&MapEntityParams{
-			Table:   table,
-			Package: params.Package,
-			Enums:   params.Enums,
+			SourceDriver: params.SourceDriver,
+			Table:        table,
+			Package:      params.Package,
+			Enums:        params.Enums,
 		}, addImportCallback)
 	}
 
@@ -74,9 +77,10 @@ func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
 }
 
 type MapEntityParams struct {
-	Table   *schema.Table
-	Package *golang.Package
-	Enums   map[string]*golang.StringEnum
+	SourceDriver config.DatabaseDriver
+	Table        *schema.Table
+	Package      *golang.Package
+	Enums        map[string]*golang.StringEnum
 }
 
 func (m *EntityMapper) MapEntity(
@@ -99,7 +103,7 @@ func (m *EntityMapper) mapEntity(params *MapEntityParams, addImportCallback func
 		addImportCallback(pkg)
 	}
 
-	entity.Properties = m.propertyMapper.mapColumns(params.Table.Columns, params.Enums, addImport)
+	entity.Properties = m.propertyMapper.mapColumns(params.SourceDriver, params.Table.Columns, params.Enums, addImport)
 
 	return entity
 }

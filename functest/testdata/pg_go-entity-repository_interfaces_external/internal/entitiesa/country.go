@@ -14,18 +14,18 @@ type CountryRepository interface {
 }
 
 type ListCountryFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 type GetCountryFilter struct {
-	ID int64
+	ID int
 }
 
 type DeleteCountryFilter struct {
-	IDs []int64
+	IDs []int
 }
 
 type Country struct {
-	ID   int64  `db:"id"`
+	ID   int    `db:"id"`
 	Name string `db:"name"`
 }

@@ -17,8 +17,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 	"github.com/artarts36/db-exporter/internal/exporter/yaml"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
-	"github.com/artarts36/db-exporter/internal/sql"
 
 	"github.com/artarts36/db-exporter/internal/template"
 )
@@ -36,6 +36,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 	goModFinder := golang.NewModFinder()
 	goPropertyMapper := goentity.NewGoPropertyMapper()
 	graphBuilder := diagram.NewGraphBuilder(renderer)
+	ddlBuilderManager := sql.NewDDLBuilderManager()
 
 	return map[config.ExporterName]exporter.Exporter{
 		config.ExporterNameMd:      markdown.NewMarkdownExporter(pager, graphBuilder),
@@ -46,12 +47,12 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 			goEntityGenerator,
 			goModFinder,
 		),
-		config.ExporterNameGoose: goose.NewMigrationsExporter(pager, sql.NewDDLBuilder()),
+		config.ExporterNameGoose: goose.NewMigrationsExporter(pager, ddlBuilderManager),
 		config.ExporterNameGoSQLMigrate: gosqlmigrate.NewSQLMigrateExporter(
 			pager,
-			sql.NewDDLBuilder(),
+			ddlBuilderManager,
 		),
-		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, sql.NewDDLBuilder()),
+		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, ddlBuilderManager),
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
 		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),

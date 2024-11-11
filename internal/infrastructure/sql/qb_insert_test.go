@@ -1,4 +1,4 @@
-package sql_test
+package sql
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/sql"
 )
 
 func TestInsertBuilder_Build(t *testing.T) {
@@ -59,7 +58,7 @@ VALUES
 		},
 	}
 
-	builder := &sql.QueryBuilder{}
+	builder := &QueryBuilder{}
 
 	for i, tCase := range cases {
 		t.Run(fmt.Sprintf("#%d", i), func(t *testing.T) {

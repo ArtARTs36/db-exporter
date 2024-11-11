@@ -8,13 +8,13 @@ import (
 type Column struct {
 	Name           gds.String           `db:"name"`
 	TableName      gds.String           `db:"table_name"`
-	Type           gds.String           `db:"type"`
+	Type           Type                 `db:"-"`
+	TypeRaw        gds.String           `db:"type_raw"`
 	Nullable       bool                 `db:"nullable"`
 	PrimaryKey     *PrimaryKey          `db:"-"`
 	UniqueKey      *UniqueKey           `db:"-"`
 	ForeignKey     *ForeignKey          `db:"-"`
 	Comment        gds.String           `db:"comment"`
-	PreparedType   DataType             `db:"-"`
 	DefaultRaw     sql.NullString       `db:"default_value"`
 	Default        *ColumnDefault       `db:"-"`
 	UsingSequences map[string]*Sequence `db:"-"`

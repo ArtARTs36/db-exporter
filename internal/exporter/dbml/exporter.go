@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"github.com/artarts36/db-exporter/internal/infrastructure/typemap"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
 	"log/slog"
@@ -92,14 +92,14 @@ func (e *Exporter) mapTable(
 	}
 
 	for _, col := range tbl.Columns {
-		typ, err := typemap.TransitSQLType(source, config.DatabaseDriverDBML, col.Type.Value)
+		typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
 		}
 
 		column := &dbml.Column{
 			Name: col.Name.Value,
-			Type: typ,
+			Type: typ.Name,
 			Settings: dbml.ColumnSettings{
 				PrimaryKey: col.IsPrimaryKey(),
 				Increment:  col.IsAutoincrement,
