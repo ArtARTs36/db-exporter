@@ -19,7 +19,7 @@
 Supported database schemas:
 - PostgreSQL: full-support
 - DBML: only export db schema, without fixtures and import
-- MySQL: only generate migrations from PostgreSQL
+- MySQL: only generate migrations from PostgreSQL/DBML
 
 usage:
 ```text
