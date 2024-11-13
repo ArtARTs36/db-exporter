@@ -45,7 +45,7 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 
 	args := make([]string, 0)
 
-	if commit.Author != nil {
+	if author != nil {
 		args = append(args, "-c")
 		args = append(args, fmt.Sprintf("user.name=%s", author.Name))
 		args = append(args, "-c")
