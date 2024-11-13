@@ -63,7 +63,7 @@ func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 		Author:  gitAuthor,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to commitParams: %w", err)
+		return fmt.Errorf("failed to commit: %w", err)
 	}
 
 	if params.Commit.Push {
