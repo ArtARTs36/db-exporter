@@ -15,8 +15,9 @@ type Activity struct {
 }
 
 type ActivityTables struct {
-	List   []string `yaml:"list" json:"list"`
-	Prefix string   `yaml:"prefix" json:"prefix"`
+	List        stringOrStringSlice `yaml:"list" json:"list"`
+	ListFromEnv string              `yaml:"from_env" json:"from_env"`
+	Prefix      string              `yaml:"prefix" json:"prefix"`
 }
 
 type ExportActivity struct {

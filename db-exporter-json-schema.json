@@ -135,11 +135,19 @@
             {
               "properties": {
                 "list": {
-                  "type": "array",
-                  "description": "Tables for export",
-                  "items": {
-                    "type": "string"
-                  }
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "description": "Tables list for export",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "string",
+                      "description": "Environment expression for tables list or one table name"
+                    }
+                  ]
                 }
               },
               "required": [

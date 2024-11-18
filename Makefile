@@ -1,6 +1,6 @@
 CURRENT_DATE := $(shell date '+%Y-%m-%d %H:%M:%S')
 BUILD_FLAGS := -ldflags="-X 'main.Version=v0.1.0' -X 'main.BuildDate=${CURRENT_DATE}'"
-PG_DSN := "port=5459 user=db password=db dbname=db sslmode=disable"
+PG_DSN := "port=5500 user=root password=root dbname=auth sslmode=disable"
 
 .PHONY: build
 build:
@@ -35,4 +35,4 @@ functest:
 
 .PHONY: try
 try:
-	PG_DSN=${PG_DSN} go run ./cmd/main.go
+	PG_DSN=${PG_DSN} go run ./cmd/main.go --tasks=gen_json_schema

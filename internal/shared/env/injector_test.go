@@ -16,7 +16,7 @@ func TestInjector_Inject(t *testing.T) {
 			}),
 		}
 
-		got, err := injector.Inject("${DSN}")
+		got, err := injector.Inject("${DSN}", nil)
 		require.NoError(t, err)
 
 		assert.Equal(t, "dbname=test", got)
@@ -29,7 +29,7 @@ func TestInjector_Inject(t *testing.T) {
 			}),
 		}
 
-		got, err := injector.Inject("random string")
+		got, err := injector.Inject("random string", nil)
 		require.NoError(t, err)
 
 		assert.Equal(t, "random string", got)
@@ -42,7 +42,7 @@ func TestInjector_Inject(t *testing.T) {
 			}),
 		}
 
-		_, err := injector.Inject("${VAR}")
+		_, err := injector.Inject("${VAR}", nil)
 		require.Error(t, err)
 	})
 }

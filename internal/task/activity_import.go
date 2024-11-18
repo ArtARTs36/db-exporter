@@ -8,7 +8,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log/slog"
-	"slices"
 	"strings"
 )
 
@@ -86,7 +85,7 @@ func (a *ImportActivityRunner) doImport(
 	importerParams := &exporter.ImportParams{
 		Directory: fs.NewDirectory(a.fs, params.Activity.Import.From),
 		TableFilter: func(tableName string) bool {
-			if len(params.Activity.Tables.List) > 0 && !slices.Contains(params.Activity.Tables.List, tableName) {
+			if params.Activity.Tables.List.Len() > 0 && !params.Activity.Tables.List.Has(tableName) {
 				return false
 			}
 

@@ -126,6 +126,35 @@ Run export: `$PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" d
 
 Run import: `$PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" db-exporter --tasks=import`
 
+## Environment variables
+You can inject environment variables to config:
+
+- **DSN** to database in `databases`:
+    ```yaml
+    databases:
+      default:
+        driver: postgres
+        dsn: $PG_DSN
+    ```
+- **Commit Author** in `tasks`:
+    ```yaml
+  tasks:
+    gen_docs:
+      commit: 
+        author: ${COMMIT_AUTHOR}
+      activities:
+        ...
+    ```
+- **Tables List** in `activities`
+    ```yaml
+  tasks:
+    gen_csv:
+      activities:
+        - export: csv
+          tables:
+            list: ${MY_TABLES}
+    ```
+
 ## Using custom templates
 
 [Twig syntax](https://twig.symfony.com) is used to compile templates. The Twig port is a [Stick](https://github.com/tyler-sommer/stick).
