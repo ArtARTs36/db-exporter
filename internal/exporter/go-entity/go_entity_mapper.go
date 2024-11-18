@@ -94,7 +94,7 @@ func (m *EntityMapper) mapEntity(params *MapEntityParams, addImportCallback func
 		Name:      params.Table.Name.Singular().Pascal().FixAbbreviations(goAbbreviationsSet),
 		Table:     params.Table,
 		Imports:   golang.NewImportGroups(),
-		AsVarName: params.Table.Name.Singular().Camel().Value,
+		AsVarName: genVarNameForTable(params.Table),
 		Package:   params.Package,
 	}
 
@@ -106,4 +106,12 @@ func (m *EntityMapper) mapEntity(params *MapEntityParams, addImportCallback func
 	entity.Properties = m.propertyMapper.mapColumns(params.SourceDriver, params.Table.Columns, params.Enums, addImport)
 
 	return entity
+}
+
+func genVarNameForTable(table *schema.Table) string {
+	varName := table.Name.Singular().Camel().Value
+	if replace, ok := golang.ReservedNameReplaceMap[varName]; ok {
+		return replace
+	}
+	return varName
 }
