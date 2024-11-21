@@ -95,7 +95,8 @@ func (a *ImportActivityRunner) doImport(
 
 			return true
 		},
-		Conn: params.Conn,
+		Conn:   params.Conn,
+		Schema: params.Schema,
 	}
 
 	pages, err = exp.Import(ctx, importerParams)
