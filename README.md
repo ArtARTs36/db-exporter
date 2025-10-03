@@ -1,5 +1,8 @@
 # db-exporter
 
+![Docker Image Version](https://img.shields.io/docker/v/artarts36/db-exporter?style=for-the-badge&logo=docker&label=Image%20Version&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fartarts36%2Fdb-exporter)
+![Docker Image Size](https://img.shields.io/docker/image-size/artarts36/db-exporter?style=for-the-badge&logo=docker&label=Image%20Size&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fartarts36%2Fdb-exporter)
+
 **db-exporter** - application for export db schema and data to formats:
 * CSV: export table data `csv`
 * Markdown: export table structure `md`
