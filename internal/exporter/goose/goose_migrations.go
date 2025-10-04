@@ -18,7 +18,7 @@ func NewMigrationsExporter(
 	return migrations.NewExporter(
 		"goose-migrations-exporter",
 		pager,
-		"goose/migration.sql",
+		"@embed/goose/migration.sql",
 		ddlBuilder,
 		migrations.NewFuncMigrationMaker(
 			func(i int, tableName gds.String) *migrations.MigrationMeta {

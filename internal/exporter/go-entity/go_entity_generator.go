@@ -30,7 +30,7 @@ func (g *EntityGenerator) GenerateEntity(params *GenerateEntityParams) (*exporte
 		Imports: params.Entity.Imports,
 	}
 
-	return g.pager.Of("go-entities/entity.go.tpl").Export(
+	return g.pager.Of("@embed/go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/%s", params.Package.ProjectRelativePath, goFile.Name),
 		map[string]stick.Value{
 			"schema": map[string]stick.Value{
@@ -49,7 +49,7 @@ func (g *EntityGenerator) GenerateEntities(
 	pkg *golang.Package,
 	enums map[string]*golang.StringEnum,
 ) (*exporter.ExportedPage, error) {
-	return g.pager.Of("go-entities/entity.go.tpl").Export(
+	return g.pager.Of("@embed/go-entities/entity.go.tpl").Export(
 		fmt.Sprintf("%s/entities.go", pkg.ProjectRelativePath),
 		map[string]stick.Value{
 			"schema": map[string]stick.Value{

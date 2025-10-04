@@ -29,7 +29,10 @@ func (c *generator) generate(data *transformingData, columnDelimiter string) (st
 
 			sb.WriteString(val)
 			if colID < len(data.cols)-1 {
-				sb.WriteString(columnDelimiter)
+				_, err := sb.WriteString(columnDelimiter)
+				if err != nil {
+					return "", fmt.Errorf("write string: %w", err)
+				}
 			}
 		}
 	}

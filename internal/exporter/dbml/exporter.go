@@ -175,7 +175,7 @@ func (e *Exporter) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
 	if col.Default.Type == schema.ColumnDefaultTypeFunc {
 		return dbml.ColumnDefault{
 			Type:  dbml.ColumnDefaultTypeExpression,
-			Value: col.Default.Value.(string),
+			Value: fmt.Sprintf("%s", col.Default.Value),
 		}, nil
 	}
 

@@ -1,4 +1,4 @@
-{% if schema.WithMocks %}{% include 'go-entities/gomock_call.go.tpl' with {'_file': _file, 'repositories': schema.Repositories} only %}
+{% if schema.WithMocks %}{% include '@embed/go-entities/gomock_call.go.tpl' with {'_file': _file, 'repositories': schema.Repositories} only %}
 {% endif %}package {{ _file.Package.Name }}
 
 import (
@@ -18,14 +18,14 @@ const (
 {% endif %}{% endfor %}
 ){% if schema.GenInterfaces %}
 
-{% include 'go-entities/repository_interfaces.go.tpl' with {'repositories': schema.Repositories, '_file': _file} only %}
+{% include '@embed/go-entities/repository_interfaces.go.tpl' with {'repositories': schema.Repositories, '_file': _file} only %}
 {% else %}
 {% endif %}
 {% for repo in schema.Repositories %}type {{ repo.Name }} struct {
 	db *sqlx.DB
 }{% endfor %}
 {% if schema.GenFilters %}
-{% for repo in schema.Repositories %}{% include 'go-entities/repository_filters.go.tpl' with {'filters': repo.Filters} only %}{% endfor %}
+{% for repo in schema.Repositories %}{% include '@embed/go-entities/repository_filters.go.tpl' with {'filters': repo.Filters} only %}{% endfor %}
 {% endif %}
 {% for repo in schema.Repositories %}func New{{ repo.Name }}(db *sqlx.DB) *{{ repo.Name }} {
 	return &{{ repo.Name }}{db: db}

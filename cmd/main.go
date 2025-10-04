@@ -2,23 +2,21 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/env"
-	"github.com/artarts36/db-exporter/internal/task"
 	"strings"
 
+	"github.com/artarts36/db-exporter/internal/app/cmd"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/factory"
+	"github.com/artarts36/db-exporter/internal/shared/env"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/git"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
+	"github.com/artarts36/db-exporter/internal/task"
 	"github.com/artarts36/db-exporter/internal/template"
 	"github.com/artarts36/db-exporter/templates"
 	"github.com/artarts36/singlecli"
-	"github.com/tyler-sommer/stick"
-	"log/slog"
 
-	"github.com/artarts36/db-exporter/internal/app/cmd"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/tyler-sommer/stick"
 )
 
 var (
@@ -80,7 +78,7 @@ func run(ctx *cli.Context) error {
 }
 
 func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
-	renderer := createRenderer(fs)
+	renderer := createRenderer()
 
 	return cmd.NewCommand(
 		migrations.NewTableDetector(),
@@ -108,20 +106,9 @@ func loadConfig(ctx *cli.Context, fs fs.Driver) (*config.Config, error) {
 	return loader.Load(configPath)
 }
 
-func createRenderer(fs fs.Driver) *template.Renderer {
-	const localTemplatesFolder = "./db-exporter-templates"
-
-	var templateLoader stick.Loader
-
-	if fs.Exists(localTemplatesFolder) {
-		slog.Debug(fmt.Sprintf("[main] loading templates from folder %q", localTemplatesFolder))
-
-		templateLoader = stick.NewFilesystemLoader(localTemplatesFolder)
-	} else {
-		slog.Debug("[main] loading templates from embedded files")
-
-		templateLoader = template.NewEmbedLoader(templates.FS)
-	}
-
-	return template.NewRenderer(templateLoader)
+func createRenderer() *template.Renderer {
+	return template.NewRenderer(template.NewNamespaceLoader(map[string]stick.Loader{
+		"embed": template.NewEmbedLoader(templates.FS),
+		"local": stick.NewFilesystemLoader("./"),
+	}))
 }

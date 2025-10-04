@@ -64,7 +64,7 @@ func (e *ModelsExporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 	namespace := e.selectNamespace(spec)
 
-	modelPage := e.pager.Of("laravel/model.php")
+	modelPage := e.pager.Of("@embed/laravel/model.php")
 
 	for _, table := range params.Schema.Tables.List() {
 		laravelSch := e.makeLaravelModelSchema([]*schema.Table{
@@ -101,7 +101,7 @@ func (e *ModelsExporter) Export(
 
 	laravelSch := e.makeLaravelModelSchema(params.Schema.Tables.List(), spec, namespace)
 
-	page, err := e.pager.Of("laravel/model.php").Export(
+	page, err := e.pager.Of("@embed/laravel/model.php").Export(
 		"models.php",
 		map[string]stick.Value{
 			"schema":    laravelSch,

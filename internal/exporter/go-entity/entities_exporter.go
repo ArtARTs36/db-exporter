@@ -35,7 +35,7 @@ func NewEntitiesExporter(
 		goModFinder:     goModFinder,
 	}
 
-	exp.page.enumString = pager.Of("go-entities/enum_string.go.tpl")
+	exp.page.enumString = pager.Of("@embed/go-entities/enum_string.go.tpl")
 
 	return exp
 }

@@ -73,26 +73,3 @@ You can inject environment variables to config:
           tables:
             list: ${MY_TABLES}
     ```
-
-## Using custom templates
-
-[Twig syntax](https://twig.symfony.com) is used to compile templates. The Twig port is a [Stick](https://github.com/tyler-sommer/stick).
-
-| Exporter               | Template                      | Description                                                  |
-|------------------------|-------------------------------|--------------------------------------------------------------|
-| diagram                | diagram/table.html            | Template for generate table                                  |
-| go-sql-migrate         | go-sql-migrate/migration.sql  | Template for generate migration                              |
-| go-entities            | go-entities/entity.go.tpl     | Template for generate entity                                 |
-| go-entity-repository   | go-entities/repository.go.tpl | Template for generate repository                             |
-| goose                  | goose/migration.sql           | Template for generate migration                              |
-| goose-fixtures         | goose/migration.sql           | Template for generate migration with fixtures                |
-| grpc-crud              | grpc-crud/gprc.proto          | Template for generate protobuf                               |
-| laravel-migrations-raw | laravel/migration-raw.php     | Template for generate migration                              |
-| laravel-models         | laravel/model.php             | Template for generate model                                  |
-| md                     | md/single-tables.md           | Template for generate single markdown file                   |
-| md                     | md/per-index.md               | Template for generate index markdown file (--table-per-file) |
-| md                     | md/per-table.tmd              | Template for generate table markdown file (--table-per-file) |
-
-You can download templates from [/templates](./templates)
-
-In order for the db-exporter to use **your** templates, you need to place them in the `./db-exporter-templates` folder

@@ -55,7 +55,7 @@ func (e *Exporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, pagesCap)
 	preparedTables := make([]*markdownPreparedTable, 0, params.Schema.Tables.Len())
 
-	mdPage := e.pager.Of("md/pet-table.md")
+	mdPage := e.pager.Of("@embed/md/pet-table.md")
 
 	for _, table := range params.Schema.Tables.List() {
 		fileName := fmt.Sprintf("%s.md", table.Name.Value)
@@ -75,7 +75,7 @@ func (e *Exporter) ExportPerFile(
 		})
 	}
 
-	indexPage, err := e.pager.Of("md/per-index.md").Export("index.md", map[string]stick.Value{
+	indexPage, err := e.pager.Of("@embed/md/per-index.md").Export("index.md", map[string]stick.Value{
 		"tables":  preparedTables,
 		"diagram": diag,
 	})
@@ -112,7 +112,7 @@ func (e *Exporter) Export(
 		}
 	}
 
-	page, err := e.pager.Of("md/single-tables.md").Export(
+	page, err := e.pager.Of("@embed/md/single-tables.md").Export(
 		e.createIndexPageName(params.Schema),
 		map[string]stick.Value{
 			"schema":        params.Schema,

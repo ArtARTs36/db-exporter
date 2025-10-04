@@ -47,7 +47,7 @@ func (e *Exporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
 
-	grpcPage := e.pager.Of("grpc-crud/grpc.proto")
+	grpcPage := e.pager.Of("@embed/grpc-crud/grpc.proto")
 	enumPages := map[string]*exporter.ExportedPage{}
 
 	for _, enum := range params.Schema.Enums {
@@ -140,7 +140,7 @@ func (e *Exporter) Export(
 		prfile.Messages = append(prfile.Messages, messages...)
 	}
 
-	expPage, err := e.pager.Of("grpc-crud/grpc.proto").Export("services.proto", map[string]stick.Value{
+	expPage, err := e.pager.Of("@embed/grpc-crud/grpc.proto").Export("services.proto", map[string]stick.Value{
 		"file": prfile,
 	})
 	if err != nil {
