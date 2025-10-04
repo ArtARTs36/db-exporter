@@ -164,7 +164,6 @@ You can inject environment variables to config:
 
 | Exporter               | Template                      | Description                                                  |
 |------------------------|-------------------------------|--------------------------------------------------------------|
-| csv                    | csv/export_single.csv         | Template for generate single csv file                        |
 | diagram                | diagram/table.html            | Template for generate table                                  |
 | go-sql-migrate         | go-sql-migrate/migration.sql  | Template for generate migration                              |
 | go-entities            | go-entities/entity.go.tpl     | Template for generate entity                                 |

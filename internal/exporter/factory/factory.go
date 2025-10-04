@@ -57,7 +57,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, data.NewInserter()),
-		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),
+		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(
 			pager,
 			goModFinder,
