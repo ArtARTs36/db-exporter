@@ -23,36 +23,37 @@ const (
 	ExporterNameJSONSchema           ExporterName = "json-schema"
 	ExporterNameGraphql              ExporterName = "graphql"
 	ExporterNameDBML                 ExporterName = "dbml"
+	ExporterNameCustom               ExporterName = "custom"
 )
 
 type GoEntitiesExportSpec struct {
-	GoModule string `yaml:"go_module"`
-	Package  string `yaml:"package"` // default: entities
+	GoModule string `yaml:"go_module" json:"go_module"`
+	Package  string `yaml:"package" json:"package"` // default: entities
 }
 
 type GRPCCrudExportSpec struct {
-	Package string                                     `yaml:"package"`
-	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options"`
+	Package string                                     `yaml:"package" json:"package"`
+	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
 }
 
 type MarkdownExportSpec struct {
-	WithDiagram bool `yaml:"with_diagram"`
+	WithDiagram bool `yaml:"with_diagram" json:"with_diagram"`
 }
 
 type CSVExportSpec struct {
-	Delimiter string                           `yaml:"delimiter"`
-	Transform map[string][]ExportSpecTransform `yaml:"transform"`
+	Delimiter string                           `yaml:"delimiter" json:"delimiter"`
+	Transform map[string][]ExportSpecTransform `yaml:"transform" json:"transform"`
 }
 
 type ExportSpecTransform struct {
-	OnlyColumns   []string          `yaml:"only_columns"`
-	SkipColumns   []string          `yaml:"skip_columns"`
-	RenameColumns map[string]string `yaml:"rename_columns"`
+	OnlyColumns   []string          `yaml:"only_columns" json:"only_columns"`
+	SkipColumns   []string          `yaml:"skip_columns" json:"skip_columns"`
+	RenameColumns map[string]string `yaml:"rename_columns" json:"rename_columns"`
 }
 
 type LaravelModelsExportSpec struct {
-	Namespace string `yaml:"namespace"`
-	TimeAs    string `yaml:"time_as"` // datetime, carbon
+	Namespace string `yaml:"namespace" json:"namespace"`
+	TimeAs    string `yaml:"time_as" json:"time_as"` // datetime, carbon
 }
 
 type GoEntityRepositorySpecRepoInterfacesPlace string
@@ -91,10 +92,25 @@ type JSONSchemaExportSpec struct {
 
 type MigrationsSpec struct {
 	Use struct {
-		IfNotExists bool `yaml:"if_not_exists"`
-		IfExists    bool `yaml:"if_exists"`
+		IfNotExists bool `yaml:"if_not_exists" json:"if_not_exists"`
+		IfExists    bool `yaml:"if_exists" json:"if_exists"`
 	} `yaml:"use"`
 	Target DatabaseDriver
+}
+
+type CustomExportSpec struct {
+	Template string `yaml:"template" json:"template"`
+	Output   struct {
+		Extension string `yaml:"extension" json:"extension"`
+	} `yaml:"output" json:"output"`
+}
+
+func (s *CustomExportSpec) Validate() error {
+	if s.Template == "" {
+		return fmt.Errorf("custom export template is required")
+	}
+
+	return nil
 }
 
 func (m *MigrationsSpec) Validate() error {

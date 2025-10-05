@@ -90,6 +90,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(GoEntityRepositorySpec)
 		case ExporterNameJSONSchema:
 			exportActivity.Spec = new(JSONSchemaExportSpec)
+		case ExporterNameCustom:
+			exportActivity.Spec = new(CustomExportSpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

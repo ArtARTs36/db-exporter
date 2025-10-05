@@ -18,6 +18,7 @@
 * JSON Schema `json-schema`
 * GraphQL `graphql`
 * DBML `dbml`: export db schema (table, ref, enum) to dbml
+* Custom `custom`: export db schema by your template with [Twig](https://twig.symfony.com) syntax
 
 Supported database schemas:
 - PostgreSQL: full-support
@@ -40,8 +41,9 @@ Usage examples
 Config file declared in [JSON Schema](db-exporter-json-schema.json)
 
 ▷ Usage examples:
-- [🚀Use with GitHub Actions](./docs/usage_examples.md#use-with-github-actions)
-- [Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)
+- [🚀 Use with GitHub Actions](./docs/usage_examples.md#use-with-github-actions)
+- [⚙️ Custom template](./docs/usage_examples.md#custom-template)
+- [⌗ Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)
 - [Export/import data to YAML](./docs/usage_examples.md#exportimport-data-to-yaml)
 - [Export schema to Go entities and repositories](./docs/usage_examples.md#export-schema-to-go-entities-and-repositories)
 

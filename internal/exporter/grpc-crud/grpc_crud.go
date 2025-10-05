@@ -111,7 +111,7 @@ func (e *Exporter) Export(
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec")
+		return nil, fmt.Errorf("invalid spec, expected GRPCCrudExportSpec, got %T", params.Spec)
 	}
 
 	options := proto.PrepareOptions(spec.Options)

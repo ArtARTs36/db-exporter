@@ -4,6 +4,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
+	"github.com/artarts36/db-exporter/internal/exporter/custom"
 	"github.com/artarts36/db-exporter/internal/exporter/dbml"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
@@ -68,6 +69,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameJSONSchema: jsonschema.NewExporter(),
 		config.ExporterNameGraphql:    graphql.NewExporter(),
 		config.ExporterNameDBML:       dbml.NewExporter(),
+		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
 	}
 }
 

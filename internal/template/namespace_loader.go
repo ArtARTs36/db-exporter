@@ -12,6 +12,8 @@ type NamespaceLoader struct {
 	namespaces map[string]stick.Loader
 }
 
+var errNameNotContainsNamespace = errors.New("name not contains namespace")
+
 func NewNamespaceLoader(namespaces map[string]stick.Loader) *NamespaceLoader {
 	return &NamespaceLoader{
 		namespaces: namespaces,
@@ -38,7 +40,7 @@ func (*NamespaceLoader) splitName(fullName string) (namespace string, name strin
 	}
 
 	if !strings.HasPrefix(fullName, "@") {
-		return "", "", errors.New("name not contains namespace")
+		return "", "", errNameNotContainsNamespace
 	}
 
 	fullName = fullName[1:]
