@@ -113,7 +113,7 @@
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
-            "go-entity-repository", "json-schema", "graphql", "dbml"
+            "go-entity-repository", "json-schema", "graphql", "dbml", "custom"
           ]
         },
         "database": {
@@ -209,6 +209,9 @@
             },
             {
               "$ref": "#/definitions/spec_migrations_export"
+            },
+            {
+              "$ref": "#/definitions/spec_custom_export"
             }
           ]
         }
@@ -538,6 +541,27 @@
           "type": "string",
           "enum": ["postgres", "mysql"],
           "default": "postgres"
+        }
+      },
+      "additionalProperties": false
+    },
+    "spec_custom_export": {
+      "type": "object",
+      "required": ["template"],
+      "properties": {
+        "template": {
+          "type": "string",
+          "description": "Template or path to template starts with `@local/`"
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "extension": {
+              "type": "string",
+              "description": "file extension",
+              "default": ""
+            }
+          }
         }
       },
       "additionalProperties": false
