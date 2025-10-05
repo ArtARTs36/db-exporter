@@ -62,30 +62,6 @@ jobs:
           tasks: gen_docs
 ````
 
-## Custom template
-
-Add config file as `.db-exporter.yaml`
-```yaml
-databases:
-  default:
-    driver: postgres
-    dsn: $PG_DSN
-
-tasks:
-  export:
-    activities:
-      - export: custom
-        spec:
-          template: '{% for table in schema.Tables %}{{ table.Name.Value }},{% endfor %}'
-          #template: '@local/path/to/file.txt'
-          output:
-            extension: "txt"
-        out:
-          dir: ./data
-```
-
-Run export: `$PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" db-exporter --tasks=export`
-
 ## Export schema from PostgreSQL to Markdown
 
 Add config file as `.db-exporter.yaml`

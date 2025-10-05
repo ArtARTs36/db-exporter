@@ -3,22 +3,29 @@
 ![Docker Image Version](https://img.shields.io/docker/v/artarts36/db-exporter?style=for-the-badge&logo=docker&label=Image%20Version&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fartarts36%2Fdb-exporter)
 ![Docker Image Size](https://img.shields.io/docker/image-size/artarts36/db-exporter?style=for-the-badge&logo=docker&label=Image%20Size&link=https%3A%2F%2Fhub.docker.com%2Fr%2Fartarts36%2Fdb-exporter)
 
-**db-exporter** - application for export db schema and data to formats:
-* CSV: export table data `csv`
-* Markdown: export table structure `md`
-* Class diagram: export table structure `diagram`
-* Go structures with db tags `go-entities`
-* Goose migrations `goose`
-* Goose Fixtures: Goose migrations with inserts `goose-fixtures`
-* Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate) `go-sql-migrate`
-* Raw SQL Laravel migrations `laravel-migrations-raw`
-* Laravel models `laravel-models`
-* YAML fixtures `yaml-fixtures`
-* Go Entity Repository `go-entity-repository`
-* JSON Schema `json-schema`
-* GraphQL `graphql`
-* DBML `dbml`: export db schema (table, ref, enum) to dbml
-* Custom `custom`: export db schema by your template with [Twig](https://twig.symfony.com) syntax
+**db-exporter** - application for export db schema and data to formats
+
+[🚀 Use with GitHub Actions](./docs/usage_examples.md#use-with-github-actions)
+
+**Exporters**
+
+| Exporter                 | Description                                                                    | Usage example                                                                                                           |
+|--------------------------|--------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `csv`                    | Exports data from tables                                                       |                                                                                                                         |
+| `md`                     | Exports database schema to Markdown                                            | [⌗ Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)       |
+| `diagram`                | Exports database schema as image of Class Diagram                              |                                                                                                                         |
+| `go-entities`            | Go structures with db tags                                                     | [Export schema to Go entities and repositories](./docs/usage_examples.md#export-schema-to-go-entities-and-repositories) |
+| `go-entity-repository`   | Go structures with db tags and repositories                                    |                                                                                                                         |
+| `goose`                  | Goose migrations                                                               |                                                                                                                         |
+| `goose-fixtures`         | Exports data from tables as inserts to Goose migrations                        |                                                                                                                         |
+| `go-sql-migrate`         | Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate)            |                                                                                                                         |
+| `laravel-migrations-raw` | Raw SQL Laravel migrations                                                     |                                                                                                                         |
+| `laravel-models`         | Exports database schema as Laravel models                                      |                                                                                                                         |
+| `yaml-fixtures`          | Exports data from tables                                                       | [Export/import data to YAML](./docs/usage_examples.md#exportimport-data-to-yaml)                                        |
+| `json-schema`            | Exports database schema to [JSON Schema](https://json-schema.org)              |                                                                                                                         |
+| `graphql`                | Exports database schema to [GraphQL](https://graphql.org/learn/schema) types   |                                                                                                                         |
+| `dbml`                   | Exports database schema to DBML (table, ref, enum)                             |                                                                                                                         |
+| `custom`                 | export db schema by your template with [Twig](https://twig.symfony.com) syntax | [Generating .txt files from a template built into the configuration](./docs/usage_custom.md)                            |
 
 Supported database schemas:
 - PostgreSQL: full-support
@@ -38,16 +45,31 @@ Usage examples
   db-exporter --config db.yaml  Run db-exporter with custom config path
 ```
 
+## Configuration
+
+The exporter operates on tasks that have activities.
+
+![](./docs/configuration.drawio.png)
+
+For example, to describe the export of a database schema to a GraphQL, the following configuration is required.
+
+```yaml
+databases:
+  default:
+    driver: postgres
+    dsn: ${PG_DSN}
+
+tasks:
+  gen_graphql:
+    activities:
+      - export: graphql
+        out:
+          dir: ./out/graphql
+```
+
 Config file declared in [JSON Schema](db-exporter-json-schema.json)
 
-▷ Usage examples:
-- [🚀 Use with GitHub Actions](./docs/usage_examples.md#use-with-github-actions)
-- [⚙️ Custom template](./docs/usage_examples.md#custom-template)
-- [⌗ Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)
-- [Export/import data to YAML](./docs/usage_examples.md#exportimport-data-to-yaml)
-- [Export schema to Go entities and repositories](./docs/usage_examples.md#export-schema-to-go-entities-and-repositories)
-
-## Environment variables
+### Environment variables
 You can inject environment variables to config:
 
 - **DSN** to database in `databases`:
