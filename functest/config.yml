@@ -4,6 +4,16 @@ databases:
     dsn: $PG_DSN
 
 tasks:
+  pg_custom:
+    activities:
+      - export: custom
+        spec:
+          template: '{% for table in schema.Tables %}{{ table.Name.Value }},{% endfor %}'
+          output:
+            extension: txt
+        out:
+          dir: ./out
+
   pg_csv_export:
     activities:
       - export: csv

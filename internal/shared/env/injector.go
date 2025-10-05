@@ -15,14 +15,24 @@ func NewInjector() *Injector {
 	}
 }
 
-func (i *Injector) Inject(expression string) (string, error) {
+type InjectOpts struct {
+	AllowEmptyVars bool
+}
+
+func (i *Injector) Inject(expression string, opts *InjectOpts) (string, error) {
 	val, err := i.inject(expression)
 	if err != nil {
 		return "", err
 	}
+
 	if val == "" {
+		if opts != nil && opts.AllowEmptyVars {
+			return "", nil
+		}
+
 		return "", fmt.Errorf("failed to interpolate expression %q", expression)
 	}
+
 	return val, nil
 }
 

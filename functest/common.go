@@ -80,7 +80,7 @@ func mustExecQueries(db *sqlx.DB, queries []string) {
 	for _, query := range queries {
 		_, err := db.Exec(query)
 		if err != nil {
-			panic(err)
+			panic(fmt.Sprintf("failed to execute query %q: %s", query, err))
 		}
 	}
 }

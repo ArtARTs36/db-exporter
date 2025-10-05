@@ -30,19 +30,22 @@ func (g *Git) Commit(ctx context.Context, commit *Commit) error {
 	author := commit.Author
 	if author == nil {
 		var err error
-		author, err = g.authorFinder()
+		author, err = g.authorFinder(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to find author: %w", err)
 		}
 	}
 
 	slog.
-		With(slog.Any("commit", commit)).
+		With(slog.Any("commit", map[string]interface{}{
+			"message": commit.Message,
+			"author":  author,
+		})).
 		InfoContext(ctx, "[git] committing changes")
 
 	args := make([]string, 0)
 
-	if commit.Author != nil {
+	if author != nil {
 		args = append(args, "-c")
 		args = append(args, fmt.Sprintf("user.name=%s", author.Name))
 		args = append(args, "-c")

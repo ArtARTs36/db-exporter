@@ -16,7 +16,7 @@ func NewSQLMigrateExporter(
 	return migrations.NewExporter(
 		"go-sql-migrate-exporter",
 		pager,
-		"go-sql-migrate/migration.sql",
+		"@embed/go-sql-migrate/migration.sql",
 		ddlBuilder,
 		migrations.NewFuncMigrationMaker(
 			func(i int, tableName gds.String) *migrations.MigrationMeta {

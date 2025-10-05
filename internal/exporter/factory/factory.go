@@ -4,6 +4,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
+	"github.com/artarts36/db-exporter/internal/exporter/custom"
 	"github.com/artarts36/db-exporter/internal/exporter/dbml"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
@@ -57,7 +58,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
 		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, data.NewInserter()),
-		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, pager, dataTransformers),
+		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(
 			pager,
 			goModFinder,
@@ -68,6 +69,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameJSONSchema: jsonschema.NewExporter(),
 		config.ExporterNameGraphql:    graphql.NewExporter(),
 		config.ExporterNameDBML:       dbml.NewExporter(),
+		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
 	}
 }
 

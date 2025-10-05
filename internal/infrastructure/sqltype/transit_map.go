@@ -23,6 +23,22 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			DBMLFloat:  PGDoublePrecision,
 			DBMLFloat8: PGFloat8,
 		},
+		config.DatabaseDriverMySQL: {
+			DBMLChar:    MySQLChar,
+			DBMLVarchar: MySQLLongText,
+			DBMLBinary:  MySQLLongBlob,
+			DBMLText:    MySQLText,
+
+			DBMLInt:     MySQLInt,
+			DBMLInteger: MySQLInteger,
+
+			DBMLTimestamp: MySQLDateTime,
+
+			DBMLUUID: MySQLPseudoUUID,
+
+			DBMLFloat:  MySQLDouble,
+			DBMLFloat8: PGFloat8,
+		},
 	},
 	config.DatabaseDriverPostgres: {
 		config.DatabaseDriverDBML: {
@@ -39,7 +55,7 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			PGUUID: DBMLUUID,
 
 			PGDoublePrecision: DBMLFloat,
-			PGFloat8:          PGFloat8,
+			PGFloat8:          DBMLFloat,
 		},
 
 		// https://dev.mysql.com/doc/workbench/en/wb-migration-database-postgresql-typemapping.html
@@ -54,6 +70,7 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			PGBoolean:            MySQLTinyint.WithLength("1"),
 			PGReal:               MySQLFloat,
 			PGDoublePrecision:    MySQLDouble,
+			PGFloat8:             MySQLFloat,
 			PGNumeric:            MySQLDecimal,
 			PGDecimal:            MySQLDecimal,
 			PGMoney:              MySQLDecimal.WithLength("19,2"),

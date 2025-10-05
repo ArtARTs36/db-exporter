@@ -15,8 +15,9 @@ type Activity struct {
 }
 
 type ActivityTables struct {
-	List   []string `yaml:"list" json:"list"`
-	Prefix string   `yaml:"prefix" json:"prefix"`
+	List        stringOrStringSlice `yaml:"list" json:"list"`
+	ListFromEnv string              `yaml:"from_env" json:"from_env"`
+	Prefix      string              `yaml:"prefix" json:"prefix"`
 }
 
 type ExportActivity struct {
@@ -89,6 +90,8 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 			exportActivity.Spec = new(GoEntityRepositorySpec)
 		case ExporterNameJSONSchema:
 			exportActivity.Spec = new(JSONSchemaExportSpec)
+		case ExporterNameCustom:
+			exportActivity.Spec = new(CustomExportSpec)
 		default:
 			return fmt.Errorf("format %q unsupported", exportActivity.Format)
 		}

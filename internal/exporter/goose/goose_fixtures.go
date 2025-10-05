@@ -27,7 +27,7 @@ func NewFixturesExporter(
 	insertBuilder *sql.QueryBuilder,
 ) *FixturesExporter {
 	return &FixturesExporter{
-		page:         pager.Of("goose/migration.sql"),
+		page:         pager.Of("@embed/goose/migration.sql"),
 		dataLoader:   dataLoader,
 		queryBuilder: insertBuilder,
 	}

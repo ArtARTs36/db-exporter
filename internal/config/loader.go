@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/artarts36/gds"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Loader struct {
@@ -62,7 +64,7 @@ func (l *Loader) Load(path string) (*Config, error) {
 
 func (l *Loader) injectEnvVars(cfg *Config) error {
 	for dbName, database := range cfg.Databases {
-		val, err := l.envInjector.Inject(database.DSN)
+		val, err := l.envInjector.Inject(database.DSN, nil)
 		if err != nil {
 			return fmt.Errorf("database[%s]: failed to inject environment variable: %w", dbName, err)
 		}
@@ -71,17 +73,49 @@ func (l *Loader) injectEnvVars(cfg *Config) error {
 		cfg.Databases[dbName] = database
 	}
 
+	err := l.injectEnvVarsToTasks(cfg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l *Loader) injectEnvVarsToTasks(cfg *Config) error {
 	for taskName, task := range cfg.Tasks {
-		if task.Commit.Author == "" {
-			continue
+		if task.Commit.Author != "" {
+			val, err := l.envInjector.Inject(task.Commit.Author, nil)
+			if err != nil {
+				return fmt.Errorf("tasks[%s]: failed to inject environment variable into author: %w", taskName, err)
+			}
+
+			task.Commit.Author = val
 		}
 
-		val, err := l.envInjector.Inject(task.Commit.Author)
-		if err != nil {
-			return fmt.Errorf("tasks[%s]: failed to inject environment variable into author: %w", taskName, err)
-		}
+		for actID, activity := range task.Activities {
+			if activity.Tables.List.IsNotEmpty() && activity.Tables.List.IsString() {
+				val, err := l.envInjector.Inject(activity.Tables.List.First(), &env.InjectOpts{
+					AllowEmptyVars: true,
+				})
+				if err != nil {
+					return fmt.Errorf(
+						"tasks[%s]: failed to inject environment variable into activity tables list: %w",
+						taskName,
+						err,
+					)
+				}
 
-		task.Commit.Author = val
+				envTablesSet := gds.NewSet[string]()
+
+				if val != "" {
+					for _, table := range strings.Split(val, ",") {
+						envTablesSet.Add(strings.Trim(table, " "))
+					}
+				}
+
+				cfg.Tasks[taskName].Activities[actID].Tables.List.Set = *envTablesSet
+			}
+		}
 	}
 
 	return nil

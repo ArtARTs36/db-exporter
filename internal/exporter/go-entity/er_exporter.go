@@ -43,11 +43,11 @@ func NewRepositoryExporter(
 		propertyMapper:  propertyMapper,
 	}
 
-	exp.page.repo = pager.Of("go-entities/repository.go.tpl")
-	exp.page.entityRepo = pager.Of("go-entities/entity_repos.go.tpl")
-	exp.page.container = pager.Of("go-entities/repository_container.go.tpl")
-	exp.page.containerInterface = pager.Of("go-entities/repository_container_interface.go.tpl")
-	exp.page.enumString = pager.Of("go-entities/enum_string.go.tpl")
+	exp.page.repo = pager.Of("@embed/go-entities/repository.go.tpl")
+	exp.page.entityRepo = pager.Of("@embed/go-entities/entity_repos.go.tpl")
+	exp.page.container = pager.Of("@embed/go-entities/repository_container.go.tpl")
+	exp.page.containerInterface = pager.Of("@embed/go-entities/repository_container_interface.go.tpl")
+	exp.page.enumString = pager.Of("@embed/go-entities/enum_string.go.tpl")
 
 	return exp
 }

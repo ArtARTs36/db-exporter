@@ -16,7 +16,7 @@ func NewLaravelMigrationsRawExporter(
 	return migrations.NewExporter(
 		"laravel-raw-migrations-exporter",
 		pager,
-		"laravel/migration-raw.php",
+		"@embed/laravel/migration-raw.php",
 		ddlBuilder,
 		migrations.NewFuncMigrationMaker(
 			func(i int, tableName gds.String) *migrations.MigrationMeta {

@@ -4,29 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/exporter/common"
-	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"github.com/artarts36/db-exporter/internal/infrastructure/data"
-
-	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 )
 
 type Exporter struct {
 	dataLoader       *data.Loader
-	pager            *common.Pager
 	dataTransformers []DataTransformer
+	generator        *generator
 }
 
 func NewExporter(
 	dataLoader *data.Loader,
-	pager *common.Pager,
 	dataTransformers []DataTransformer,
 ) *Exporter {
 	return &Exporter{
 		dataLoader:       dataLoader,
-		pager:            pager,
 		dataTransformers: dataTransformers,
 	}
 }
@@ -44,20 +39,18 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 		delimiter = ","
 	}
 
-	csvPage := c.pager.Of("csv/export_single.csv")
-
 	for _, table := range params.Schema.Tables.List() {
-		data, err := c.dataLoader.Load(ctx, params.Conn, table.Name.Value)
+		tableData, err := c.dataLoader.Load(ctx, params.Conn, table.Name.Value)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("load data from table %q: %w", table.Name.Value, err)
 		}
-		if len(data) == 0 {
+		if len(tableData) == 0 {
 			continue
 		}
 
 		trData := &transformingData{
 			cols: table.ColumnsNames(),
-			rows: data,
+			rows: tableData,
 		}
 
 		if len(spec.Transform) > 0 {
@@ -65,19 +58,20 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 				for _, transformSpec := range spec.Transform[table.Name.Value] {
 					trData, err = transformer(trData, transformSpec)
 					if err != nil {
-						return nil, fmt.Errorf("failed to transform data: %w", err)
+						return nil, fmt.Errorf("failed to transform tableData: %w", err)
 					}
 				}
 			}
 		}
 
-		p, err := csvPage.Export(fmt.Sprintf("%s.csv", table.Name.String()), map[string]stick.Value{
-			"rows":          trData.rows,
-			"columns":       trData.cols,
-			"col_delimiter": delimiter,
-		})
+		pageContent, err := c.generator.generate(trData, delimiter)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("generate page content: %w", err)
+		}
+
+		p := &exporter.ExportedPage{
+			FileName: fmt.Sprintf("%s.csv", table.Name.String()),
+			Content:  []byte(pageContent),
 		}
 
 		pages = append(pages, p)

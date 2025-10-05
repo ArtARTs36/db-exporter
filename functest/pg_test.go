@@ -318,6 +318,32 @@ func TestPGExport(t *testing.T) {
 			ConfigPath: "config.yml",
 			TaskName:   "pg_grpc-crud",
 		},
+		{
+			Title: "test pg with custom",
+			InitQueries: []string{
+				`CREATE TABLE users
+		(
+		    id   integer NOT NULL,
+		    name character varying NOT NULL
+		);`,
+				"INSERT INTO users (id, name) VALUES (1, 'a')",
+				`CREATE TABLE phones
+		(
+		    id   integer NOT NULL,
+		    number character varying NOT NULL
+		);`,
+				`INSERT INTO phones (id, number) VALUES
+		(1, 'a'),
+		(2, 'b')
+		`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+				"DROP TABLE phones",
+			},
+			ConfigPath: "config.yml",
+			TaskName:   "pg_custom",
+		},
 	}
 
 	for _, tCase := range cases {
