@@ -171,19 +171,21 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 	}
 
 	for name, database := range cfg.Databases {
-		if database.Schema == "" {
-			if database.Driver == DatabaseDriverMySQL {
-				dsn, err := mysql.ParseDSN(database.DSN)
-				if err != nil {
-					return fmt.Errorf("parse dsn %q: %w", database.DSN, err)
-				}
-				database.Schema = dsn.DBName
-			} else {
-				database.Schema = DefaultDatabaseSchema
-			}
-
-			cfg.Databases[name] = database
+		if database.Schema != "" {
+			continue
 		}
+
+		if database.Driver == DatabaseDriverMySQL {
+			dsn, err := mysql.ParseDSN(database.DSN)
+			if err != nil {
+				return fmt.Errorf("parse dsn %q: %w", database.DSN, err)
+			}
+			database.Schema = dsn.DBName
+		} else {
+			database.Schema = DefaultDatabaseSchema
+		}
+
+		cfg.Databases[name] = database
 	}
 
 	for tid, task := range cfg.Tasks {
