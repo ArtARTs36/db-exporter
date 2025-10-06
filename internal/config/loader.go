@@ -47,12 +47,12 @@ func (l *Loader) Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to parse %s config: %w", pathExt, err)
 	}
 
-	err = l.fillDefaults(cfg)
+	err = l.injectEnvVars(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	err = l.injectEnvVars(cfg)
+	err = l.fillDefaults(cfg)
 	if err != nil {
 		return nil, err
 	}
