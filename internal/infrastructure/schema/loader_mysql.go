@@ -52,9 +52,24 @@ func (l *MySQLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Sc
 			UsingSequences: make(map[string]*schema.Sequence),
 		}
 
+		if col.IsPrimaryKey {
+			schemaColumn.PrimaryKey = schema.CreatePrimaryKeyForColumn(schemaColumn) // @todo get real key name
+			table.PrimaryKey = schemaColumn.PrimaryKey
+		}
+		if col.IsUniqueKey {
+			schemaColumn.UniqueKey = schema.CreateUniqueKeyForColumn(schemaColumn)
+			table.UniqueKeys[schemaColumn.UniqueKey.Name.Value] = schemaColumn.UniqueKey
+		}
+
 		schemaColumn.Type = sqltype.MapMySQLType(col.DataType.Value)
 		if col.DataTypeLength.Valid {
 			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
+		}
+		if col.AutoIncrement {
+			schemaColumn.IsAutoincrement = col.AutoIncrement
+		}
+		if col.DefaultValue.Valid {
+			schemaColumn.DefaultRaw = col.DefaultValue
 		}
 
 		table.AddColumn(schemaColumn)
@@ -76,7 +91,8 @@ func (l *MySQLLoader) selectColumns(
        IF(EXTRA = 'auto_increment', true, false) as auto_increment,
        COLUMN_COMMENT as comment,
        IF(COLUMN_KEY = 'PRI', true, false) as is_primary_key,
-       IF(COLUMN_KEY = 'UNI', true, false) as is_unique_key
+       IF(COLUMN_KEY = 'UNI', true, false) as is_unique_key,
+       COLUMN_DEFAULT as default_value
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = ?
 order by ORDINAL_POSITION
@@ -105,8 +121,9 @@ type mysqlColumn struct {
 
 	Comment gds.String `db:"comment"`
 
-	Nullable      bool `db:"nullable"`
-	AutoIncrement bool `db:"auto_increment"`
-	IsPrimaryKey  bool `db:"is_primary_key"`
-	IsUniqueKey   bool `db:"is_unique_key"`
+	Nullable      bool           `db:"nullable"`
+	AutoIncrement bool           `db:"auto_increment"`
+	IsPrimaryKey  bool           `db:"is_primary_key"`
+	IsUniqueKey   bool           `db:"is_unique_key"`
+	DefaultValue  sql.NullString `db:"default_value"`
 }

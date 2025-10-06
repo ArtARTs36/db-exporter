@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
@@ -96,7 +97,7 @@ type MigrationsSpec struct {
 		IfNotExists bool `yaml:"if_not_exists" json:"if_not_exists"`
 		IfExists    bool `yaml:"if_exists" json:"if_exists"`
 	} `yaml:"use"`
-	Target DatabaseDriver
+	Target DatabaseDriver `yaml:"target" json:"target"`
 }
 
 type CustomExportSpec struct {
@@ -114,10 +115,17 @@ func (s *CustomExportSpec) Validate() error {
 	return nil
 }
 
+func (m *MigrationsSpec) InjectDatabaseDriver(driver DatabaseDriver) {
+	if m.Target != "" {
+		return
+	}
+
+	m.Target = driver
+}
+
 func (m *MigrationsSpec) Validate() error {
 	if m.Target == "" {
-		m.Target = DatabaseDriverPostgres
-		return nil
+		return errors.New("target is required")
 	}
 
 	if !m.Target.Valid() {

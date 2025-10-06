@@ -18,6 +18,12 @@ tasks:
         out:
           dir: ./out
 
+  mysql/ddl:
+    activities:
+      - export: ddl
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

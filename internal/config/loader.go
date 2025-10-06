@@ -150,6 +150,11 @@ func (l *Loader) validate(cfg *Config) error {
 			}
 
 			if activity.Export.Spec != nil {
+				expectingDatabaseDriver, isExpectingDatabaseDriver := activity.Export.Spec.(ExpectingDatabaseDriver)
+				if isExpectingDatabaseDriver {
+					expectingDatabaseDriver.InjectDatabaseDriver(db.Driver)
+				}
+
 				validatableSpec, isValidatableSpec := activity.Export.Spec.(ValidatableSpec)
 				if isValidatableSpec {
 					err := validatableSpec.Validate()
