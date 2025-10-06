@@ -25,6 +25,7 @@ var DatabaseDrivers = []DatabaseDriver{
 var readableDatabaseDrivers = []DatabaseDriver{
 	DatabaseDriverPostgres,
 	DatabaseDriverDBML,
+	DatabaseDriverMySQL,
 }
 
 var writeableDatabaseDrivers = []DatabaseDriver{

@@ -1,0 +1,24 @@
+databases:
+  default:
+    driver: mysql
+    dsn: $MYSQL_DSN
+    schema: users
+
+tasks:
+  mysql/custom_export:
+    activities:
+      - export: custom
+        spec:
+          template: |
+            {% for table in schema.Tables %}{{ table.Name.Value }}
+            -
+            {% for column in table.Columns %}{{ column.Name.String }} - {{ column.Type.Name }} ({{ column.Type.Length }})
+            {% endfor %}---{% endfor %}
+          output:
+            extension: txt
+        out:
+          dir: ./out
+
+options:
+  print_stat: true
+  debug: true

@@ -20,6 +20,16 @@ type Table struct {
 	Comment string
 }
 
+func NewTable(name gds.String) *Table {
+	return &Table{
+		Name:           name,
+		ForeignKeys:    map[string]*ForeignKey{},
+		UniqueKeys:     map[string]*UniqueKey{},
+		UsingSequences: map[string]*Sequence{},
+		UsingEnums:     map[string]*Enum{},
+	}
+}
+
 func (t *Table) ColumnsNames() []string {
 	if t.columnsNames == nil {
 		t.columnsNames = make([]string, 0, len(t.Columns))
@@ -82,4 +92,8 @@ func (t *Table) GetPKColumns() []*Column {
 	}
 
 	return cols
+}
+
+func (t *Table) AddColumn(col *Column) {
+	t.Columns = append(t.Columns, col)
 }

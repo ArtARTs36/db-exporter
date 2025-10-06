@@ -1,0 +1,8 @@
+users
+-
+id - int ()
+username - varchar (50)
+email - varchar (255)
+password_hash - varchar (255)
+created_at - timestamp ()
+---

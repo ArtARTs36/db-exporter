@@ -46,6 +46,7 @@ func initPgTestEnvironment() *pgTestEnvironment {
 
 func TestPGExport(t *testing.T) {
 	skipIfRunningShortTests(t)
+	skipIfEnvNotFound(t, "PG_DSN")
 
 	env := initPgTestEnvironment()
 
@@ -85,7 +86,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_csv_export",
 		},
 		{
@@ -117,7 +118,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_diagram",
 		},
 		{
@@ -149,7 +150,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_go-entities",
 		},
 		{
@@ -181,7 +182,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_go-entity-repository",
 		},
 		{
@@ -213,7 +214,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_go-entity-repository_interfaces_external",
 		},
 		{
@@ -245,7 +246,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_go-entity-repository_interfaces_internal",
 		},
 		{
@@ -271,7 +272,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE entities",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_laravel-models_export",
 		},
 		{
@@ -292,7 +293,7 @@ func TestPGExport(t *testing.T) {
 			DownQueries: []string{
 				"DROP TABLE users",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_yaml-fixtures_export",
 		},
 		{
@@ -315,7 +316,7 @@ func TestPGExport(t *testing.T) {
 			DownQueries: []string{
 				"DROP TABLE users",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_grpc-crud",
 		},
 		{
@@ -341,7 +342,7 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE phones",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_custom",
 		},
 	}
@@ -382,6 +383,7 @@ func TestPGExport(t *testing.T) {
 
 func TestPGImport(t *testing.T) {
 	skipIfRunningShortTests(t)
+	skipIfEnvNotFound(t, "PG_DSN")
 
 	env := initPgTestEnvironment()
 
@@ -406,7 +408,7 @@ func TestPGImport(t *testing.T) {
 			DownQueries: []string{
 				"DROP TABLE yaml_fixtures_import_users",
 			},
-			ConfigPath: "config.yml",
+			ConfigPath: "pg_test.yml",
 			TaskName:   "pg_yaml-fixtures_import",
 			ExpectedRows: map[string][]map[string]interface{}{
 				"yaml_fixtures_import_users": {

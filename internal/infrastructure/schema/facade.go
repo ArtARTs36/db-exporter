@@ -12,6 +12,7 @@ import (
 var loaders = map[config.DatabaseDriver]Loader{ //nolint:exhaustive // not need
 	config.DatabaseDriverPostgres: NewPGLoader(),
 	config.DatabaseDriverDBML:     NewDBMLLoader(),
+	config.DatabaseDriverMySQL:    NewMySQLLoader(),
 }
 
 func LoadForPool(ctx context.Context, pool *conn.Pool) (map[string]*schema.Schema, error) {

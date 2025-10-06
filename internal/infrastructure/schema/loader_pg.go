@@ -59,7 +59,7 @@ func NewPGLoader() *PGLoader {
 func (l *PGLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
 	db, err := cn.Connect(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed connect to db: %w", err)
+		return nil, fmt.Errorf("connect to db: %w", err)
 	}
 
 	query := `
@@ -165,7 +165,7 @@ order by c.ordinal_position`
 
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
-		table.Columns = append(table.Columns, col)
+		table.AddColumn(col)
 	}
 
 	return sch, nil
