@@ -5,6 +5,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/gds"
+	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // mysql driver
 	"os"
 	"path/filepath"
 	"strings"
@@ -170,7 +172,16 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 
 	for name, database := range cfg.Databases {
 		if database.Schema == "" {
-			database.Schema = DefaultDatabaseSchema
+			if database.Driver == DatabaseDriverMySQL {
+				dsn, err := mysql.ParseDSN(database.DSN)
+				if err != nil {
+					return fmt.Errorf("parse dsn %q: %w", database.DSN, err)
+				}
+				database.Schema = dsn.DBName
+			} else {
+				database.Schema = DefaultDatabaseSchema
+			}
+
 			cfg.Databases[name] = database
 		}
 	}

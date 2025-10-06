@@ -9,7 +9,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-var loaders = map[config.DatabaseDriver]Loader{ //nolint:exhaustive // not need
+var loaders = map[config.DatabaseDriver]Loader{
 	config.DatabaseDriverPostgres: NewPGLoader(),
 	config.DatabaseDriverDBML:     NewDBMLLoader(),
 	config.DatabaseDriverMySQL:    NewMySQLLoader(),
