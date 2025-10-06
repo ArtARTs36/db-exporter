@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/custom"
 	"github.com/artarts36/db-exporter/internal/exporter/dbml"
+	"github.com/artarts36/db-exporter/internal/exporter/ddl"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
@@ -70,6 +71,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameGraphql:    graphql.NewExporter(),
 		config.ExporterNameDBML:       dbml.NewExporter(),
 		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
+		config.ExporterNameDDL:        ddl.NewExporter(pager, ddlBuilderManager),
 	}
 }
 
