@@ -4,7 +4,13 @@ databases:
     dsn: $PG_DSN
 
 tasks:
-  pg_custom:
+  pg/ddl:
+    activities:
+      - export: ddl
+        out:
+          dir: ./out
+
+  pg/custom:
     activities:
       - export: custom
         spec:
@@ -14,7 +20,7 @@ tasks:
         out:
           dir: ./out
 
-  pg_csv_export:
+  pg/csv_export:
     activities:
       - export: csv
         spec:
@@ -28,19 +34,19 @@ tasks:
         out:
           dir: ./out
 
-  pg_diagram:
+  pg/diagram:
     activities:
       - export: diagram
         out:
           dir: ./out
 
-  pg_go-entities:
+  pg/go-entities:
     activities:
       - export: go-entities
         out:
           dir: ./out
 
-  pg_go-entity-repository:
+  pg/go-entity-repository:
     activities:
       - export: go-entity-repository
         spec:
@@ -54,7 +60,7 @@ tasks:
         out:
           dir: ./out
 
-  pg_go-entity-repository_interfaces_external:
+  pg/go-entity-repository_interfaces_external:
     activities:
       - export: go-entity-repository
         spec:
@@ -71,7 +77,7 @@ tasks:
         out:
           dir: ./out
 
-  pg_go-entity-repository_interfaces_internal:
+  pg/go-entity-repository_interfaces_internal:
     activities:
       - export: go-entity-repository
         spec:
@@ -86,7 +92,7 @@ tasks:
         out:
           dir: ./out
 
-  pg_grpc-crud:
+  pg/grpc-crud:
     activities:
       - export: grpc-crud
         spec:
@@ -96,23 +102,23 @@ tasks:
         out:
           dir: ./out
 
-  pg_laravel-models_export:
+  pg/laravel-models_export:
     activities:
       - export: laravel-models
         table_per_file: true
         out:
           dir: ./out
 
-  pg_yaml-fixtures_export:
+  pg/yaml-fixtures_export:
     activities:
       - export: yaml-fixtures
         out:
           dir: ./out
 
-  pg_yaml-fixtures_import:
+  pg/yaml-fixtures_import:
     activities:
       - import: yaml-fixtures
-        from: ./testdata/pg_yaml-fixtures_import
+        from: ./testdata/pg/yaml-fixtures_import
 
 options:
   print_stat: true

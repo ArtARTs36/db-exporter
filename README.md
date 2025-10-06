@@ -11,6 +11,7 @@
 
 | Exporter                 | Description                                                                    | Usage example                                                                                                           |
 |--------------------------|--------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `ddl`                    | Exports DDL from database schema                                               |                                                                                                                         |
 | `csv`                    | Exports data from tables                                                       |                                                                                                                         |
 | `md`                     | Exports database schema to Markdown                                            | [⌗ Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)       |
 | `diagram`                | Exports database schema as image of Class Diagram                              |                                                                                                                         |

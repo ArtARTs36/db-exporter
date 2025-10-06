@@ -85,8 +85,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_csv_export",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/csv_export",
 		},
 		{
 			Title: "test pg with diagram",
@@ -117,8 +117,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_diagram",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/diagram",
 		},
 		{
 			Title: "test pg with go-entities",
@@ -149,8 +149,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_go-entities",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/go-entities",
 		},
 		{
 			Title: "test pg with go-entity-repository",
@@ -181,8 +181,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_go-entity-repository",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/go-entity-repository",
 		},
 		{
 			Title: "test pg with go-entity-repository with external interfaces",
@@ -213,8 +213,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_go-entity-repository_interfaces_external",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/go-entity-repository_interfaces_external",
 		},
 		{
 			Title: "test pg with go-entity-repository with internal interfaces",
@@ -245,8 +245,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_go-entity-repository_interfaces_internal",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/go-entity-repository_interfaces_internal",
 		},
 		{
 			Title: "test pg with laravel-models",
@@ -271,8 +271,8 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE entities",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_laravel-models_export",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/laravel-models_export",
 		},
 		{
 			Title: "test pg with yaml-fixtures",
@@ -292,8 +292,8 @@ func TestPGExport(t *testing.T) {
 			DownQueries: []string{
 				"DROP TABLE users",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_yaml-fixtures_export",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/yaml-fixtures_export",
 		},
 		{
 			Title: "test pg with grpc-crud",
@@ -314,9 +314,10 @@ func TestPGExport(t *testing.T) {
 			},
 			DownQueries: []string{
 				"DROP TABLE users",
+				"DROP TYPE mood",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_grpc-crud",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/grpc-crud",
 		},
 		{
 			Title: "test pg with custom",
@@ -341,8 +342,23 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE phones",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_custom",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/custom",
+		},
+		{
+			Title: "test pg with ddl",
+			InitQueries: []string{
+				`CREATE TABLE users
+		(
+		    id   integer NOT NULL,
+		    name character varying NOT NULL
+		);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+			},
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/ddl",
 		},
 	}
 
@@ -406,8 +422,8 @@ func TestPGImport(t *testing.T) {
 			DownQueries: []string{
 				"DROP TABLE yaml_fixtures_import_users",
 			},
-			ConfigPath: "config.yml",
-			TaskName:   "pg_yaml-fixtures_import",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/yaml-fixtures_import",
 			ExpectedRows: map[string][]map[string]interface{}{
 				"yaml_fixtures_import_users": {
 					{"id": int64(1), "name": "a"},

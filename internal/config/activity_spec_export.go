@@ -15,6 +15,7 @@ const (
 	ExporterNameGoose                ExporterName = "goose"
 	ExporterNameGooseFixtures        ExporterName = "goose-fixtures"
 	ExporterNameGoSQLMigrate         ExporterName = "go-sql-migrate"
+	ExporterNameDDL                  ExporterName = "ddl"
 	ExporterNameLaravelMigrationsRaw ExporterName = "laravel-migrations-raw"
 	ExporterNameLaravelModels        ExporterName = "laravel-models"
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
