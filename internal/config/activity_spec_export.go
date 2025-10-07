@@ -38,8 +38,8 @@ type GRPCCrudExportSpec struct {
 }
 
 type MarkdownExportSpec struct {
-	WithDiagram bool `yaml:"with_diagram" json:"with_diagram"`
-	Diagram DiagramExportSpec `yaml:"diagram" json:"diagram"`
+	WithDiagram bool              `yaml:"with_diagram" json:"with_diagram"`
+	Diagram     DiagramExportSpec `yaml:"diagram" json:"diagram"`
 }
 
 type CSVExportSpec struct {
@@ -108,6 +108,9 @@ type DiagramExportSpec struct {
 				TextColor       string `yaml:"text_color" json:"text_color"`             // #hex
 			} `yaml:"name" json:"name"`
 		} `yaml:"table" json:"table"`
+		Font struct {
+			Family string `yaml:"family" json:"family"`
+		} `yaml:"font" json:"font"`
 	} `yaml:"style" json:"style"`
 }
 

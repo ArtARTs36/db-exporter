@@ -7,10 +7,10 @@
     {% for col in table.Columns %}
     <TR width="100%">
         {% if loop.index % 2 == 0 %}
-        <TD bgcolor="#dfe6e9">{{ col.Name }} </TD>
-        <TD bgcolor="#dfe6e9">{{ col.Type }} </TD>
+        <TD bgcolor="#dfe6e9">{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
+        <TD bgcolor="#dfe6e9">{{ col.Type }}</TD>
         {% else %}
-        <TD>{{ col.Name }} </TD>
+        <TD>{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
         <TD>{{ col.Type }} </TD>
         {% endif %}
     </TR>

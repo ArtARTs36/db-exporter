@@ -15,8 +15,8 @@ tasks:
           style:
             table:
               name:
-                background_color: '#666666'
-                text_color: 'black'
+                background_color: '#3498db'
+                text_color: 'white'
         out:
           dir: ./out/diagram
 
@@ -27,6 +27,8 @@ tasks:
           with_diagram: true
           diagram:
             style:
+              font:
+                family: Lato-ExtraLight
               table:
                 name:
                   background_color: '#3498db'

@@ -4,9 +4,9 @@ on:
   push:
     branches: ['master']
     paths:
-      - ./cmd/**
-      - ./internal/**
-      - ./templates/**
+      - 'cmd/**'
+      - 'internal/**'
+      - 'templates/**'
       - go.mod
       - go.sum
   pull_request:

@@ -356,6 +356,15 @@
         "style": {
           "type": "object",
           "properties": {
+            "font": {
+              "type": "object",
+              "properties": {
+                "family": {
+                  "type": "string",
+                  "default": "Times-Roman"
+                }
+              }
+            },
             "table": {
               "type": "object",
               "properties": {

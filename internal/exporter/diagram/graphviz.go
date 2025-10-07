@@ -91,6 +91,7 @@ func (b *GraphBuilder) buildNodes(
 
 		node.SetShape(cgraph.PlainTextShape)
 		node.SafeSet("class", "db-tables", "")
+		node.SafeSet("fontname", spec.Style.Font.Family, "")
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),

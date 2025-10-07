@@ -10,6 +10,8 @@ type diagramTable struct {
 type diagramColumn struct {
 	Name string
 	Type string
+
+	IsPrimaryKey bool
 }
 
 func mapTable(tbl *schema.Table) *diagramTable {
@@ -27,7 +29,8 @@ func mapTable(tbl *schema.Table) *diagramTable {
 
 func mapColumn(col *schema.Column) *diagramColumn {
 	column := &diagramColumn{
-		Name: col.Name.Value,
+		Name:         col.Name.Value,
+		IsPrimaryKey: col.IsPrimaryKey(),
 	}
 
 	switch {
