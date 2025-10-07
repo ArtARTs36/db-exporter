@@ -3,6 +3,7 @@ package diagram
 import (
 	"bytes"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 	"log/slog"
 
 	"github.com/goccy/go-graphviz"
@@ -21,10 +22,10 @@ func NewGraphBuilder(renderer *template.Renderer) *GraphBuilder {
 	return &GraphBuilder{renderer: renderer}
 }
 
-func (b *GraphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
-	g, graph, err := b.buildGraph(tables)
+func (b *GraphBuilder) BuildSVG(tables *schema.TableMap, spec *config.DiagramExportSpec) ([]byte, error) {
+	g, graph, err := b.buildGraph(tables, spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build graph: %w", err)
+		return nil, fmt.Errorf("build graph: %w", err)
 	}
 
 	defer func() {
@@ -40,13 +41,16 @@ func (b *GraphBuilder) BuildSVG(tables *schema.TableMap) ([]byte, error) {
 
 	var buf bytes.Buffer
 	if err = g.Render(graph, "svg", &buf); err != nil {
-		return nil, fmt.Errorf("failed to render grapgh to svg: %w", err)
+		return nil, fmt.Errorf("to render grapgh to svg: %w", err)
 	}
 
 	return buf.Bytes(), nil
 }
 
-func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, *cgraph.Graph, error) {
+func (b *GraphBuilder) buildGraph(
+	tables *schema.TableMap,
+	spec *config.DiagramExportSpec,
+) (*graphviz.Graphviz, *cgraph.Graph, error) {
 	g := graphviz.New()
 	graph, err := g.Graph()
 	if err != nil {
@@ -55,7 +59,7 @@ func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, 
 
 	slog.Debug("[graphbuilder] mapping graph")
 
-	tablesNodes, err := b.buildNodes(graph, tables)
+	tablesNodes, err := b.buildNodes(graph, tables, spec)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build nodes: %w", err)
 	}
@@ -72,7 +76,11 @@ func (b *GraphBuilder) buildGraph(tables *schema.TableMap) (*graphviz.Graphviz, 
 	return g, graph, nil
 }
 
-func (b *GraphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) (map[string]*cgraph.Node, error) {
+func (b *GraphBuilder) buildNodes(
+	graph *cgraph.Graph,
+	tables *schema.TableMap,
+	spec *config.DiagramExportSpec,
+) (map[string]*cgraph.Node, error) {
 	tablesNodes := map[string]*cgraph.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
@@ -86,6 +94,7 @@ func (b *GraphBuilder) buildNodes(graph *cgraph.Graph, tables *schema.TableMap) 
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
+			"style": spec.Style,
 		})
 		if tableErr != nil {
 			return tableErr

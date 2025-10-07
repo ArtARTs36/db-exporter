@@ -337,8 +337,48 @@
               "$ref": "#/$export-specs/custom"
             }
           }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "diagram"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/diagram"
+            }
+          }
         }
       ]
+    },
+    "diagram": {
+      "type": "object",
+      "properties": {
+        "style": {
+          "type": "object",
+          "properties": {
+            "table": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "object",
+                  "properties": {
+                    "background_color": {
+                      "type": "string",
+                      "title": "Background color for table name",
+                      "default": "#3498db"
+                    },
+                    "text_color": {
+                      "type": "string",
+                      "title": "Text color for table name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
     },
     "go_entities": {
       "type": "object",
@@ -611,6 +651,9 @@
         "with_diagram": {
           "type": "boolean",
           "default": false
+        },
+        "diagram": {
+          "$ref": "#/$export-specs/diagram"
         }
       },
       "additionalProperties": false

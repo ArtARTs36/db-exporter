@@ -2,7 +2,6 @@ package markdown
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
@@ -38,7 +37,7 @@ func (e *Exporter) ExportPerFile(
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.MarkdownExportSpec)
 	if !ok {
-		return nil, errors.New("got invalid spec")
+		return nil, fmt.Errorf("invalid spec, expected MarkdownExportSpec, got %T", params.Spec)
 	}
 
 	var diag *exporter.ExportedPage
@@ -46,7 +45,7 @@ func (e *Exporter) ExportPerFile(
 	if spec.WithDiagram {
 		pagesCap++
 		var err error
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
+		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg", spec.Diagram)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diag: %w", err)
 		}
@@ -96,17 +95,17 @@ func (e *Exporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	var diag *exporter.ExportedPage
-
 	spec, ok := params.Spec.(*config.MarkdownExportSpec)
 	if !ok {
-		return nil, errors.New("got invalid spec")
+		return nil, fmt.Errorf("invalid spec, expected MarkdownExportSpec, got %T", params.Spec)
 	}
+
+	var diag *exporter.ExportedPage
 
 	if spec.WithDiagram {
 		var err error
 
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
+		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg", spec.Diagram)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diag: %w", err)
 		}
@@ -147,8 +146,9 @@ func buildDiagramPage(
 	builder *diagram.GraphBuilder,
 	tables *schema.TableMap,
 	filename string,
+	diagramSpec config.DiagramExportSpec,
 ) (*exporter.ExportedPage, error) {
-	c, err := builder.BuildSVG(tables)
+	c, err := builder.BuildSVG(tables, &diagramSpec)
 	if err != nil {
 		return nil, err
 	}

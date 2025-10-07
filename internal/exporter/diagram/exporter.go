@@ -3,6 +3,7 @@ package diagram
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/config"
 
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -23,10 +24,19 @@ func (e *Exporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
+	spec, ok := params.Spec.(*config.DiagramExportSpec)
+	if !ok {
+		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
+	}
+
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
-		p, err := buildDiagramPage(e.graphBuilder, schema.NewTableMap(table), fmt.Sprintf("diagram_%s.svg", table.Name.Value))
+		p, err := e.buildDiagramPage(
+			schema.NewTableMap(table),
+			fmt.Sprintf("diagram_%s.svg", table.Name.Value),
+			spec,
+		)
 		if err != nil {
 			return err
 		}
@@ -40,7 +50,12 @@ func (e *Exporter) ExportPerFile(
 }
 
 func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
-	diagram, err := buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg")
+	spec, ok := params.Spec.(*config.DiagramExportSpec)
+	if !ok {
+		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
+	}
+
+	diagram, err := e.buildDiagramPage(params.Schema.Tables, "diagram.svg", spec)
 	if err != nil {
 		return nil, err
 	}
@@ -48,12 +63,12 @@ func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*
 	return []*exporter.ExportedPage{diagram}, nil
 }
 
-func buildDiagramPage(
-	builder *GraphBuilder,
+func (e *Exporter) buildDiagramPage(
 	tables *schema.TableMap,
 	filename string,
+	spec *config.DiagramExportSpec,
 ) (*exporter.ExportedPage, error) {
-	c, err := builder.BuildSVG(tables)
+	c, err := e.graphBuilder.BuildSVG(tables, spec)
 	if err != nil {
 		return nil, err
 	}

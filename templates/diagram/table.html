@@ -1,7 +1,7 @@
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" width="100%;">
     <TR width="100%">
-        <TD colspan="2" width="100%" bgcolor="#3498db">
-            {{ table.Name }}
+        <TD colspan="2" width="100%" bgcolor="{{ style.Table.Name.BackgroundColor }}">
+            <font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font>
         </TD>
     </TR>
     {% for col in table.Columns %}

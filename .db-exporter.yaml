@@ -1,13 +1,39 @@
 databases:
   default:
     driver: postgres
-    dsn: ${PG_DSN}
+    dsn: "host=localhost port=5458 user=db password=db dbname=db sslmode=disable"
 
-  dbml:
-    driver: dbml
-    dsn: "./test.dbml"
+#  dbml:
+#    driver: dbml
+#    dsn: "./test.dbml"
 
 tasks:
+  diagram:
+    activities:
+      - format: diagram
+        spec:
+          style:
+            table:
+              name:
+                background_color: '#666666'
+                text_color: 'black'
+        out:
+          dir: ./out/diagram
+
+  md:
+    activities:
+      - format: md
+        spec:
+          with_diagram: true
+          diagram:
+            style:
+              table:
+                name:
+                  background_color: '#3498db'
+                  text_color: 'white'
+        out:
+          dir: ./out/md
+
   dbml:
     activities:
       - format: dbml

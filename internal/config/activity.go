@@ -70,7 +70,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	var spec interface{}
 
 	switch format {
-	case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
+	case ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
 	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
 		spec = new(MigrationsSpec)
 	case ExporterNameGoEntities:
@@ -89,6 +89,8 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 		spec = new(JSONSchemaExportSpec)
 	case ExporterNameCustom:
 		spec = new(CustomExportSpec)
+	case ExporterNameDiagram:
+		spec = new(DiagramExportSpec)
 	default:
 		return nil, fmt.Errorf("format %q unsupported", format)
 	}

@@ -39,6 +39,7 @@ type GRPCCrudExportSpec struct {
 
 type MarkdownExportSpec struct {
 	WithDiagram bool `yaml:"with_diagram" json:"with_diagram"`
+	Diagram DiagramExportSpec `yaml:"diagram" json:"diagram"`
 }
 
 type CSVExportSpec struct {
@@ -99,11 +100,34 @@ type MigrationsSpec struct {
 	Target DatabaseDriver `yaml:"target" json:"target"`
 }
 
+type DiagramExportSpec struct {
+	Style struct {
+		Table struct {
+			Name struct {
+				BackgroundColor string `yaml:"background_color" json:"background_color"` // #hex
+				TextColor       string `yaml:"text_color" json:"text_color"`             // #hex
+			} `yaml:"name" json:"name"`
+		} `yaml:"table" json:"table"`
+	} `yaml:"style" json:"style"`
+}
+
 type CustomExportSpec struct {
 	Template string `yaml:"template" json:"template"`
 	Output   struct {
 		Extension string `yaml:"extension" json:"extension"`
 	} `yaml:"output" json:"output"`
+}
+
+func (s *DiagramExportSpec) Validate() error {
+	if s.Style.Table.Name.BackgroundColor == "" {
+		s.Style.Table.Name.BackgroundColor = "#3498db"
+	}
+
+	if s.Style.Table.Name.TextColor == "" {
+		s.Style.Table.Name.TextColor = "white"
+	}
+
+	return nil
 }
 
 func (s *CustomExportSpec) Validate() error {
