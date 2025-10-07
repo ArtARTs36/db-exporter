@@ -3,8 +3,6 @@ package functest
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
-	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -276,27 +274,6 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg/laravel-models_export",
 		},
 		{
-			Title: "test pg with yaml-fixtures",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`INSERT INTO users (id, name) VALUES
-		(1, 'a'),
-		(2, 'b')
-		`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-			},
-			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/yaml-fixtures_export",
-		},
-		{
 			Title: "test pg with grpc-crud",
 			InitQueries: []string{
 				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
@@ -325,23 +302,19 @@ func TestPGExport(t *testing.T) {
 			InitQueries: []string{
 				`CREATE TABLE users
 		(
-		    id   integer NOT NULL,
+		    id   integer NOT NULL PRIMARY KEY,
 		    name character varying NOT NULL
 		);`,
-				"INSERT INTO users (id, name) VALUES (1, 'a')",
 				`CREATE TABLE phones
 		(
-		    id   integer NOT NULL,
+		    user_id   integer NOT NULL,
 		    number character varying NOT NULL
 		);`,
-				`INSERT INTO phones (id, number) VALUES
-		(1, 'a'),
-		(2, 'b')
-		`,
+				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
 			},
 			DownQueries: []string{
-				"DROP TABLE users",
 				"DROP TABLE phones",
+				"DROP TABLE users",
 			},
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/custom",
@@ -393,84 +366,6 @@ func TestPGExport(t *testing.T) {
 				require.True(t, outFileExists, "file %q: not exists", expFileName)
 				assert.Equal(t, expFileContent, outFileContent, "file %q: not equal expected content", expFileName)
 			}
-		})
-	}
-}
-
-func TestPGImport(t *testing.T) {
-	skipIfRunningShortTests(t)
-	skipIfEnvNotFound(t, "PG_DSN")
-
-	env := initPgTestEnvironment()
-
-	cases := []struct {
-		Title       string
-		InitQueries []string
-		DownQueries []string
-
-		ConfigPath   string
-		TaskName     string
-		ExpectedRows map[string][]map[string]interface{}
-	}{
-		{
-			Title: "test pg import with yaml-fixtures",
-			InitQueries: []string{
-				`CREATE TABLE yaml_fixtures_import_users
-(
-    id   integer NOT NULL,
-    name character varying NOT NULL
-);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE yaml_fixtures_import_users",
-			},
-			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/yaml-fixtures_import",
-			ExpectedRows: map[string][]map[string]interface{}{
-				"yaml_fixtures_import_users": {
-					{"id": int64(1), "name": "a"},
-					{"id": int64(2), "name": "b"},
-				},
-			},
-		},
-	}
-
-	for _, tCase := range cases {
-		t.Run(tCase.Title, func(t *testing.T) {
-			mustExecQueries(env.db, tCase.InitQueries)
-
-			defer func() {
-				mustExecQueries(env.db, tCase.DownQueries)
-			}()
-
-			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
-				context.Background(),
-				fmt.Sprintf("--config=%s", tCase.ConfigPath),
-				fmt.Sprintf("--tasks=%s", tCase.TaskName),
-			)
-			if cmdErr != nil {
-				t.Fatalf("failed to exec command: %s: %s: %s", cmdErr, res.Stdout, res.Stderr)
-			}
-
-			assert.NoError(t, cmdErr)
-
-			dl := data.NewLoader()
-
-			got := map[string][]map[string]interface{}{}
-
-			cn, err := conn.NewOpenedConnection(env.db)
-			require.NoError(t, err)
-
-			for table := range tCase.ExpectedRows {
-				gotTableRows, lerr := dl.Load(context.Background(), cn, table)
-				if lerr != nil {
-					panic(lerr)
-				}
-
-				got[table] = gotTableRows
-			}
-
-			assert.Equal(t, tCase.ExpectedRows, got)
 		})
 	}
 }

@@ -20,7 +20,6 @@ const (
 	ExporterNameLaravelMigrationsRaw ExporterName = "laravel-migrations-raw"
 	ExporterNameLaravelModels        ExporterName = "laravel-models"
 	ExporterNameGrpcCrud             ExporterName = "grpc-crud"
-	ExporterNameYamlFixtures         ExporterName = "yaml-fixtures"
 	ExporterNameCSV                  ExporterName = "csv"
 	ExporterNameJSONSchema           ExporterName = "json-schema"
 	ExporterNameGraphql              ExporterName = "graphql"

@@ -42,9 +42,9 @@ func (r *ExportActivityRunner) Run(ctx context.Context, expParams *ActivityRunPa
 	}
 
 	generatedFiles, err := r.pageStorage.Save(ctx, pages, &savePageParams{
-		Dir:        expParams.Activity.Export.Out.Dir,
-		FilePrefix: expParams.Activity.Export.Out.FilePrefix,
-		SkipExists: expParams.Activity.Export.SkipExists,
+		Dir:        expParams.Activity.Out.Dir,
+		FilePrefix: expParams.Activity.Out.FilePrefix,
+		SkipExists: expParams.Activity.SkipExists,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to save generated pages: %w", err)
@@ -63,22 +63,22 @@ func (r *ExportActivityRunner) export(
 	ctx context.Context,
 	params *ActivityRunParams,
 ) ([]*exporter.ExportedPage, error) {
-	exp, exists := r.exporters[params.Activity.Export.Format]
+	exp, exists := r.exporters[params.Activity.Format]
 	if !exists {
-		return nil, fmt.Errorf("exporter for format %q not found", params.Activity.Export.Format)
+		return nil, fmt.Errorf("exporter for format %q not found", params.Activity.Format)
 	}
 
 	sc := r.filterTables(params.Schema, params)
 
 	exporterParams := &exporter.ExportParams{
 		Schema:    sc,
-		Spec:      params.Activity.Export.Spec,
+		Spec:      params.Activity.Spec,
 		Conn:      params.Conn,
-		Directory: fs.NewDirectory(r.fs, params.Activity.Export.Out.Dir),
+		Directory: fs.NewDirectory(r.fs, params.Activity.Out.Dir),
 	}
 
 	export := func() ([]*exporter.ExportedPage, error) {
-		if params.Activity.Export.TablePerFile {
+		if params.Activity.TablePerFile {
 			return exp.ExportPerFile(ctx, exporterParams)
 		}
 
@@ -87,7 +87,7 @@ func (r *ExportActivityRunner) export(
 
 	pages, err := export()
 	if err != nil {
-		return nil, fmt.Errorf("exporter %q unable to export: %w", params.Activity.Export.Format, err)
+		return nil, fmt.Errorf("exporter %q unable to export: %w", params.Activity.Format, err)
 	}
 
 	return pages, nil
