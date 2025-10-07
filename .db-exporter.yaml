@@ -39,9 +39,9 @@ tasks:
 
   gen_json_schema:
     activities:
-      - format: json-schema
+      - format: laravel-migrations-raw
         spec:
-          pretty: true
+          target: mysql
         out:
           dir: ./out/json-schema
 

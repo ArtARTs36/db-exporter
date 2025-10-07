@@ -18,17 +18,15 @@ func TestExportActivity_UnmarshalYAML(t *testing.T) {
 		{
 			Title: "Parse go-entities spec",
 			Content: `
-export: go-entities
+format: go-entities
 database: db1
 spec:
     package: model
 `,
 			Expected: Activity{
-				Export: ExportActivity{
-					Format: "go-entities",
-					Spec: &GoEntitiesExportSpec{
-						Package: "model",
-					},
+				Format: "go-entities",
+				Spec: &GoEntitiesExportSpec{
+					Package: "model",
 				},
 				Database: "db1",
 			},

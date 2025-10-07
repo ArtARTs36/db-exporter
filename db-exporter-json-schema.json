@@ -172,46 +172,181 @@
           },
           "required": ["dir"],
           "additionalProperties": false
-        },
-        "spec": {
-          "type": "object",
-          "oneOf": [
-            {
-              "$ref": "#/definitions/spec_md_export"
-            },
-            {
-              "$ref": "#/definitions/spec_go_entities_export"
-            },
-            {
-              "$ref": "#/definitions/spec_grpc_crud_export"
-            },
-            {
-              "$ref": "#/definitions/spec_csv_export"
-            },
-            {
-              "$ref": "#/definitions/spec_laravel_models_export"
-            },
-            {
-              "$ref": "#/definitions/spec_go_entity_repository_export"
-            },
-            {
-              "$ref": "#/definitions/spec_json_schema_export"
-            },
-            {
-              "$ref": "#/definitions/spec_migrations_export"
-            },
-            {
-              "$ref": "#/definitions/spec_custom_export"
-            }
-          ]
         }
       },
+      "allOf": [
+        {
+          "$ref": "#/$export-specs/discriminator"
+        }
+      ],
       "required": ["format", "out"],
       "additionalProperties": false
+    }
+  },
+  "$export-specs": {
+    "discriminator": {
+      "type": "object",
+      "oneOf": [
+        {
+          "properties": {
+            "format": {
+              "const": "diagram"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "dbml"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "graphql"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "md"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/md"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "go-entities"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/go_entities"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "grpc-crud"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/grpc_crud"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "csv"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/csv"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "laravel-models"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/laravel_models"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "go-entity-repository"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/go_entity_repository"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "json-schema"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/json_schema"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "go-sql-migrate"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/migrations"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "laravel-migrations-raw"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/migrations"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "goose"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/migrations"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "ddl"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/migrations"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "go-sql-migrations"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/migrations"
+            }
+          }
+        },
+        {
+          "properties": {
+            "format": {
+              "const": "custom"
+            },
+            "spec": {
+              "$ref": "#/$export-specs/custom"
+            }
+          }
+        }
+      ]
     },
-    "spec_go_entities_export": {
+    "go_entities": {
       "type": "object",
       "properties": {
+        "go_module": {
+          "type": "string",
+          "default": "current go module"
+        },
         "package": {
           "type": "string",
           "default": "entities"
@@ -219,7 +354,7 @@
       },
       "additionalProperties": false
     },
-    "spec_grpc_crud_export": {
+    "grpc_crud": {
       "type": "object",
       "properties": {
         "package": {
@@ -308,7 +443,7 @@
       },
       "additionalProperties": false
     },
-    "spec_csv_export": {
+    "csv": {
       "type": "object",
       "properties": {
         "delimiter": {
@@ -366,7 +501,7 @@
       },
       "additionalProperties": false
     },
-    "spec_laravel_models_export": {
+    "laravel_models": {
       "type": "object",
       "properties": {
         "namespace": {
@@ -381,7 +516,7 @@
       },
       "additionalProperties": false
     },
-    "spec_go_entity_repository_export": {
+    "go_entity_repository": {
       "type": "object",
       "properties": {
         "go_module": {
@@ -447,7 +582,7 @@
       },
       "additionalProperties": false
     },
-    "spec_json_schema_export": {
+    "json_schema": {
       "type": "object",
       "properties": {
         "pretty": {
@@ -470,7 +605,7 @@
       },
       "additionalProperties": false
     },
-    "spec_md_export": {
+    "md": {
       "type": "object",
       "properties": {
         "with_diagram": {
@@ -480,7 +615,7 @@
       },
       "additionalProperties": false
     },
-    "spec_migrations_export": {
+    "migrations": {
       "type": "object",
       "properties": {
         "use": {
@@ -507,7 +642,7 @@
       },
       "additionalProperties": false
     },
-    "spec_custom_export": {
+    "custom": {
       "type": "object",
       "required": ["template"],
       "properties": {
