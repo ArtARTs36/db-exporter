@@ -15,6 +15,12 @@ func skipIfRunningShortTests(t *testing.T) {
 	}
 }
 
+func skipIfEnvNotFound(t *testing.T, envName string) {
+	if os.Getenv(envName) == "" {
+		t.Skip()
+	}
+}
+
 func loadExpectedFiles(taskName string) map[string]string {
 	dir := fmt.Sprintf("testdata/%s", taskName)
 

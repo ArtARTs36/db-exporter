@@ -1,4 +1,4 @@
-package schema
+package pg
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/pg"
 )
 
-type PGLoader struct{}
+type Loader struct{}
 
 var (
 	pgColumnDefaultValueStringRegexp   = regexp.MustCompile(`^'(.*)'::character varying$`)
@@ -52,14 +52,14 @@ type squashedConstraint struct {
 	IsInitiallyDeferred bool
 }
 
-func NewPGLoader() *PGLoader {
-	return &PGLoader{}
+func NewLoader() *Loader {
+	return &Loader{}
 }
 
-func (l *PGLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
 	db, err := cn.Connect(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed connect to db: %w", err)
+		return nil, fmt.Errorf("connect to db: %w", err)
 	}
 
 	query := `
@@ -165,13 +165,13 @@ order by c.ordinal_position`
 
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
-		table.Columns = append(table.Columns, col)
+		table.AddColumn(col)
 	}
 
 	return sch, nil
 }
 
-func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
+func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
 	if !col.DefaultRaw.Valid {
 		return nil
 	}
@@ -223,7 +223,7 @@ func (l *PGLoader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault 
 	return nil
 }
 
-func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
+func (l *Loader) applyConstraints(table *schema.Table, col *schema.Column, constraints []*squashedConstraint) {
 	for _, constr := range constraints {
 		switch constr.Type {
 		case pg.ConstraintPKName:
@@ -283,7 +283,7 @@ func (l *PGLoader) applyConstraints(table *schema.Table, col *schema.Column, con
 	}
 }
 
-func (l *PGLoader) loadEnums(ctx context.Context, conn *conn.Connection) (map[string]*schema.Enum, error) {
+func (l *Loader) loadEnums(ctx context.Context, conn *conn.Connection) (map[string]*schema.Enum, error) {
 	query := `select
        t.typname as enum_name,
        e.enumlabel as enum_value
@@ -328,7 +328,7 @@ where n.nspname = $1`
 	return enums, nil
 }
 
-func (l *PGLoader) loadSequences(ctx context.Context, conn *conn.Connection) (
+func (l *Loader) loadSequences(ctx context.Context, conn *conn.Connection) (
 	map[string]*schema.Sequence,
 	error,
 ) {
@@ -360,7 +360,7 @@ where s.sequence_schema = $1`
 	return sequenceMap, nil
 }
 
-func (l *PGLoader) loadConstraints(
+func (l *Loader) loadConstraints(
 	ctx context.Context,
 	cn *conn.Connection,
 ) (map[string]map[string][]*squashedConstraint, int, error) {

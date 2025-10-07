@@ -24,11 +24,6 @@ type ForeignKey struct {
 	IsInitiallyDeferred bool
 }
 
-type UniqueKey struct {
-	Name         gds.String
-	ColumnsNames *gds.Strings
-}
-
 func NewSchema(driver config.DatabaseDriver) *Schema {
 	return &Schema{
 		Tables:    NewTableMap(),

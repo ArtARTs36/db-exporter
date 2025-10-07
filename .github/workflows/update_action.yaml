@@ -11,9 +11,6 @@ jobs:
   update-ga-config:
     runs-on: ubuntu-latest
     steps:
-      - name: install deps
-        run: sudo apt install gcc
-
       - name: Check out code
         uses: actions/checkout@v3
 

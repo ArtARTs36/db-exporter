@@ -46,6 +46,7 @@ func initPgTestEnvironment() *pgTestEnvironment {
 
 func TestPGExport(t *testing.T) {
 	skipIfRunningShortTests(t)
+	skipIfEnvNotFound(t, "PG_DSN")
 
 	env := initPgTestEnvironment()
 
@@ -398,6 +399,7 @@ func TestPGExport(t *testing.T) {
 
 func TestPGImport(t *testing.T) {
 	skipIfRunningShortTests(t)
+	skipIfEnvNotFound(t, "PG_DSN")
 
 	env := initPgTestEnvironment()
 

@@ -207,7 +207,7 @@ func (b *MySQLDDLBuilder) buildPrimaryKey(table *schema.Table, isLast isLastLine
 }
 
 func (b *MySQLDDLBuilder) createPrimaryKey(name string, columns *gds.Strings) string {
-	return fmt.Sprintf("CONSTRAINT %s PRIMARY KEY (%s)", name, columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value)
+	return fmt.Sprintf("CONSTRAINT `%s` PRIMARY KEY (%s)", name, columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value)
 }
 
 func (b *MySQLDDLBuilder) buildForeignKeys(table *schema.Table, isLast isLastLine) []string {
@@ -272,7 +272,7 @@ func (b *MySQLDDLBuilder) buildUniqueKeys(table *schema.Table, isLast isLastLine
 
 func (b *MySQLDDLBuilder) CreateUniqueKey(name string, columns *gds.Strings) string {
 	return fmt.Sprintf(
-		"    CONSTRAINT %s UNIQUE (%s)",
+		"    CONSTRAINT `%s` UNIQUE (%s)",
 		name,
 		columns.Wrap(mySQLColumnNameWrapper).Join(", ").Value,
 	)

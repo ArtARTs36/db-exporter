@@ -33,6 +33,16 @@ functest:
 	docker-compose down
 	rm ./functest/db-exporter
 
+.PHONY: functest/mysql
+functest/mysql:
+	docker-compose down
+	go build -o ./functest/db-exporter cmd/main.go
+	docker-compose up mysql -d
+	sleep 20
+	FUNCTEST=on DB_EXPORTER_BIN=${PWD}/functest/db-exporter MYSQL_DSN="test:test@tcp(localhost:3306)/users" go test ./functest
+	docker-compose down
+	rm ./functest/db-exporter
+
 .PHONY: try
 try:
 	PG_DSN=${PG_DSN} go run ./cmd/main.go --tasks=gen_json_schema

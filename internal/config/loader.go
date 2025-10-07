@@ -2,12 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/env"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
-	"github.com/artarts36/gds"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/artarts36/gds"
+	"github.com/go-sql-driver/mysql"
+
+	"github.com/artarts36/db-exporter/internal/shared/env"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 type Loader struct {
@@ -45,12 +48,12 @@ func (l *Loader) Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to parse %s config: %w", pathExt, err)
 	}
 
-	err = l.fillDefaults(cfg)
+	err = l.injectEnvVars(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	err = l.injectEnvVars(cfg)
+	err = l.fillDefaults(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +124,7 @@ func (l *Loader) injectEnvVarsToTasks(cfg *Config) error {
 	return nil
 }
 
-func (l *Loader) validate(cfg *Config) error {
+func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
 	for tid, task := range cfg.Tasks {
 		for aid, activity := range task.Activities {
 			db, ok := cfg.Databases[activity.Database]
@@ -148,6 +151,11 @@ func (l *Loader) validate(cfg *Config) error {
 			}
 
 			if activity.Export.Spec != nil {
+				expectingDatabaseDriver, isExpectingDatabaseDriver := activity.Export.Spec.(ExpectingDatabaseDriver)
+				if isExpectingDatabaseDriver {
+					expectingDatabaseDriver.InjectDatabaseDriver(db.Driver)
+				}
+
 				validatableSpec, isValidatableSpec := activity.Export.Spec.(ValidatableSpec)
 				if isValidatableSpec {
 					err := validatableSpec.Validate()
@@ -169,10 +177,21 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 	}
 
 	for name, database := range cfg.Databases {
-		if database.Schema == "" {
-			database.Schema = DefaultDatabaseSchema
-			cfg.Databases[name] = database
+		if database.Schema != "" {
+			continue
 		}
+
+		if database.Driver == DatabaseDriverMySQL {
+			dsn, err := mysql.ParseDSN(database.DSN)
+			if err != nil {
+				return fmt.Errorf("parse dsn %q: %w", database.DSN, err)
+			}
+			database.Schema = dsn.DBName
+		} else {
+			database.Schema = DefaultDatabaseSchema
+		}
+
+		cfg.Databases[name] = database
 	}
 
 	for tid, task := range cfg.Tasks {

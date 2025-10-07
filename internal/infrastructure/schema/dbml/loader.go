@@ -1,4 +1,4 @@
-package schema
+package dbml
 
 import (
 	"context"
@@ -16,14 +16,14 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
 )
 
-type DBMLLoader struct {
+type Loader struct {
 }
 
-func NewDBMLLoader() *DBMLLoader {
-	return &DBMLLoader{}
+func NewLoader() *Loader {
+	return &Loader{}
 }
 
-func (l *DBMLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
 	f, err := os.OpenFile(cn.Database().DSN, os.O_RDONLY, 0755)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file %q: %w", cn.Database().DSN, err)
@@ -37,7 +37,7 @@ func (l *DBMLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Sch
 	return l.buildSchema(parsedDBML)
 }
 
-func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) {
+func (l *Loader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) {
 	sch := schema.NewSchema(config.DatabaseDriverDBML)
 	sch.Enums = l.collectEnums(parsedDBML)
 
@@ -139,7 +139,7 @@ func (l *DBMLLoader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) 
 	return sch, nil
 }
 
-func (l *DBMLLoader) parseDefaultValue(raw core.ColumnDefault) *schema.ColumnDefault {
+func (l *Loader) parseDefaultValue(raw core.ColumnDefault) *schema.ColumnDefault {
 	if raw.Raw == "" {
 		return nil
 	}
@@ -165,7 +165,7 @@ func (l *DBMLLoader) parseDefaultValue(raw core.ColumnDefault) *schema.ColumnDef
 	return nil
 }
 
-func (l *DBMLLoader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum {
+func (l *Loader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum {
 	enums := map[string]*schema.Enum{}
 
 	for _, en := range parsedDBML.Enums {
@@ -184,7 +184,7 @@ func (l *DBMLLoader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum
 	return enums
 }
 
-func (l *DBMLLoader) buildForeignKey(from *dbmlRelationSubject, to *dbmlRelationSubject) *schema.ForeignKey {
+func (l *Loader) buildForeignKey(from *dbmlRelationSubject, to *dbmlRelationSubject) *schema.ForeignKey {
 	return &schema.ForeignKey{
 		Name: *from.Table.Name.Append("_").
 			Append(from.Column.Name.Value).
@@ -206,7 +206,7 @@ type dbmlRelationSubject struct {
 	Column *schema.Column
 }
 
-func (l *DBMLLoader) getRelationSubject(sch *schema.Schema, subj string) (*dbmlRelationSubject, error) {
+func (l *Loader) getRelationSubject(sch *schema.Schema, subj string) (*dbmlRelationSubject, error) {
 	rel, err := dbml.ParseRelationSubject(subj)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ref: %w", err)

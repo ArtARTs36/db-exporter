@@ -2,6 +2,13 @@ name: testing
 
 on:
   push:
+    branches: ['master']
+    paths:
+      - ./cmd/**
+      - ./internal/**
+      - ./templates/**
+      - go.mod
+      - go.sum
   pull_request:
 
 permissions:
@@ -55,38 +62,3 @@ jobs:
 
       - name: Run tests
         run: go test ./...
-
-  func-test:
-    services:
-      postgres:
-        image: postgres:12
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: users
-        ports:
-          - 5499:5432
-
-    name: func-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: install deps
-        run: sudo apt install gcc
-
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4 # action page: <https://github.com/actions/setup-go>
-        with:
-          go-version: stable
-
-      - name: Install Go dependencies
-        run: go mod download
-
-      - name: Run functional tests
-        env:
-          FUNCTEST: on
-          PG_DSN: host=localhost port=5499 user=test password=test dbname=users sslmode=disable
-          DB_EXPORTER_BIN: ${{ github.workspace }}/functest/db-exporter
-        run: go build -o ./functest/db-exporter cmd/main.go && go test ./functest

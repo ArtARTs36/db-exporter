@@ -34,3 +34,38 @@ var (
 
 	MySQLPseudoUUID = MySQLVarchar.WithLength("36")
 )
+
+var mysqlTypeMap = map[string]schema.Type{
+	"char":     MySQLChar,
+	"varchar":  MySQLVarchar,
+	"binary":   MySQLBinary,
+	"text":     MySQLText,
+	"longtext": MySQLLongText,
+
+	"int":       MySQLInt,
+	"integer":   MySQLInteger,
+	"smallint":  MySQLSmallInt,
+	"bigint":    MySQLBigInt,
+	"tinyint":   MySQLTinyint,
+	"mediumint": MySQLMediumint,
+
+	"float":   MySQLFloat,
+	"double":  MySQLDouble,
+	"decimal": MySQLDecimal,
+
+	"bit": MySQLBit,
+
+	"timestamp": MySQLTimestamp,
+	"date":      MySQLDate,
+	"time":      MySQLTime,
+	"datetime":  MySQLDateTime,
+
+	"longblob": MySQLLongBlob,
+
+	"linestring": MySQLLineString,
+	"polygon":    MySQLPolygon,
+}
+
+func MapMySQLType(name string) schema.Type {
+	return mapType(mysqlTypeMap, name)
+}

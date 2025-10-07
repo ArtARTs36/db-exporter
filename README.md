@@ -29,9 +29,9 @@
 | `custom`                 | export db schema by your template with [Twig](https://twig.symfony.com) syntax | [Generating .txt files from a template built into the configuration](./docs/usage_custom.md)                            |
 
 Supported database schemas:
-- PostgreSQL: full-support
+- PostgreSQL
 - DBML: only export db schema, without fixtures and import
-- MySQL: only generate migrations from PostgreSQL/DBML
+- MySQL
 
 usage:
 ```text

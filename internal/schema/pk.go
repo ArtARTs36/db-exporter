@@ -13,7 +13,7 @@ type PrimaryKey struct {
 
 func CreatePrimaryKeyForColumn(col *Column) *PrimaryKey {
 	return &PrimaryKey{
-		Name:         *gds.NewString(fmt.Sprintf("%s_%s_pk", col.TableName.Value, col.Name)),
+		Name:         *gds.NewString(fmt.Sprintf("%s_%s_pk", col.TableName.Value, col.Name.Value)),
 		ColumnsNames: gds.NewStrings(col.Name.Value),
 	}
 }
