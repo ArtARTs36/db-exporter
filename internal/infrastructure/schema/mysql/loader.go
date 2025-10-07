@@ -1,28 +1,27 @@
-package schema
+package mysql
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/gds"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"log/slog"
-
-	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
-	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-type MySQLLoader struct {
+type Loader struct {
 }
 
-func NewMySQLLoader() *MySQLLoader {
-	return &MySQLLoader{}
+func NewLoader() *Loader {
+	return &Loader{}
 }
 
-func (l *MySQLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
 	db, err := cn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("connect to db: %w", err)
@@ -31,6 +30,11 @@ func (l *MySQLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Sc
 	columns, err := l.selectColumns(ctx, cn, db)
 	if err != nil {
 		return nil, fmt.Errorf("select columns: %w", err)
+	}
+
+	constraintsMap, err := l.loadConstraints(ctx, cn)
+	if err != nil {
+		return nil, fmt.Errorf("load constraints: %w", err)
 	}
 
 	sch := schema.NewSchema(config.DatabaseDriverMySQL)
@@ -52,15 +56,6 @@ func (l *MySQLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Sc
 			UsingSequences: make(map[string]*schema.Sequence),
 		}
 
-		if col.IsPrimaryKey {
-			schemaColumn.PrimaryKey = schema.CreatePrimaryKeyForColumn(schemaColumn) // @todo get real key name
-			table.PrimaryKey = schemaColumn.PrimaryKey
-		}
-		if col.IsUniqueKey {
-			schemaColumn.UniqueKey = schema.CreateUniqueKeyForColumn(schemaColumn)
-			table.UniqueKeys[schemaColumn.UniqueKey.Name.Value] = schemaColumn.UniqueKey
-		}
-
 		schemaColumn.Type = sqltype.MapMySQLType(col.DataType.Value)
 		if col.DataTypeLength.Valid {
 			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
@@ -73,12 +68,18 @@ func (l *MySQLLoader) Load(ctx context.Context, cn *conn.Connection) (*schema.Sc
 		}
 
 		table.AddColumn(schemaColumn)
+
+		if tcs, ok := constraintsMap[table.Name.Value]; ok {
+			if cs, csok := tcs[schemaColumn.Name.Value]; csok {
+				l.applyConstraints(table, schemaColumn, cs)
+			}
+		}
 	}
 
 	return sch, nil
 }
 
-func (l *MySQLLoader) selectColumns(
+func (l *Loader) selectColumns(
 	ctx context.Context,
 	cn *conn.Connection,
 	db *sqlx.DB,
@@ -90,8 +91,6 @@ func (l *MySQLLoader) selectColumns(
        IF(IS_NULLABLE = 'NO', false, true) as nullable,
        IF(EXTRA = 'auto_increment', true, false) as auto_increment,
        COLUMN_COMMENT as comment,
-       IF(COLUMN_KEY = 'PRI', true, false) as is_primary_key,
-       IF(COLUMN_KEY = 'UNI', true, false) as is_unique_key,
        COLUMN_DEFAULT as default_value
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = ?
@@ -123,7 +122,5 @@ type mysqlColumn struct {
 
 	Nullable      bool           `db:"nullable"`
 	AutoIncrement bool           `db:"auto_increment"`
-	IsPrimaryKey  bool           `db:"is_primary_key"`
-	IsUniqueKey   bool           `db:"is_unique_key"`
 	DefaultValue  sql.NullString `db:"default_value"`
 }

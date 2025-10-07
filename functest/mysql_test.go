@@ -82,8 +82,15 @@ func TestMySQLExport(t *testing.T) {
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`,
+				`CREATE TABLE orders (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    
+    CONSTRAINT orders_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id)
+)`,
 			},
 			DownQueries: []string{
+				"DROP TABLE orders",
 				"DROP TABLE users",
 			},
 			ConfigPath: "mysql_test.yml",

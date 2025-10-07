@@ -3,6 +3,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/infrastructure/schema/mysql"
 
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
@@ -12,7 +13,7 @@ import (
 var loaders = map[config.DatabaseDriver]Loader{
 	config.DatabaseDriverPostgres: NewPGLoader(),
 	config.DatabaseDriverDBML:     NewDBMLLoader(),
-	config.DatabaseDriverMySQL:    NewMySQLLoader(),
+	config.DatabaseDriverMySQL:    mysql.NewLoader(),
 }
 
 func LoadForPool(ctx context.Context, pool *conn.Pool) (map[string]*schema.Schema, error) {
