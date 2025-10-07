@@ -3,6 +3,12 @@ name: testing
 on:
   push:
     branches: ['master']
+    paths:
+      - ./cmd/**
+      - ./internal/**
+      - ./templates/**
+      - go.mod
+      - go.sum
   pull_request:
 
 permissions:
