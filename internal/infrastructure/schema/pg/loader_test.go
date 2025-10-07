@@ -1,4 +1,4 @@
-package schema
+package pg
 
 import (
 	"database/sql"
@@ -109,7 +109,7 @@ func TestPGLoader_parseColumnDefault(t *testing.T) {
 		},
 	}
 
-	loader := &PGLoader{}
+	loader := &Loader{}
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {

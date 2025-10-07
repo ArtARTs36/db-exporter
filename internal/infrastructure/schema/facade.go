@@ -3,7 +3,9 @@ package schema
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/infrastructure/schema/dbml"
 	"github.com/artarts36/db-exporter/internal/infrastructure/schema/mysql"
+	"github.com/artarts36/db-exporter/internal/infrastructure/schema/pg"
 
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
@@ -11,8 +13,8 @@ import (
 )
 
 var loaders = map[config.DatabaseDriver]Loader{
-	config.DatabaseDriverPostgres: NewPGLoader(),
-	config.DatabaseDriverDBML:     NewDBMLLoader(),
+	config.DatabaseDriverPostgres: pg.NewLoader(),
+	config.DatabaseDriverDBML:     dbml.NewLoader(),
 	config.DatabaseDriverMySQL:    mysql.NewLoader(),
 }
 
