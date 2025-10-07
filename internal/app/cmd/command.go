@@ -198,21 +198,5 @@ func (c *Command) printStat(result *task.ActivityResult) {
 		c.tablePrinter([]string{"file", "size"}, rows)
 	}
 
-	printImport := func() {
-		countsList := make([][]string, 0, len(result.Import.GetTableRowCountMap()))
-		for table, count := range result.Import.GetTableRowCountMap() {
-			countsList = append(countsList, []string{
-				table,
-				fmt.Sprintf("%d", count),
-			})
-		}
-
-		c.tablePrinter(
-			[]string{"Table", "Affected Rows"},
-			countsList,
-		)
-	}
-
 	printExport()
-	printImport()
 }

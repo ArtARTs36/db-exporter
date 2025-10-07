@@ -24,7 +24,10 @@ lint:
 	golangci-lint run --fix
 
 .PHONY: functest
-functest:
+functest: functest/pg functest/mysql
+
+.PHONY: functest/pg
+functest/pg:
 	docker-compose down
 	go build -o ./functest/db-exporter cmd/main.go
 	docker-compose up postgres -d

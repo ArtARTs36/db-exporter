@@ -17,7 +17,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
-	"github.com/artarts36/db-exporter/internal/exporter/yaml"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -58,7 +57,6 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
 		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(pager),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
-		config.ExporterNameYamlFixtures:         yaml.NewFixturesExporter(dataLoader, data.NewInserter()),
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(
 			pager,
@@ -72,11 +70,5 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameDBML:       dbml.NewExporter(),
 		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
 		config.ExporterNameDDL:        ddl.NewExporter(pager, ddlBuilderManager),
-	}
-}
-
-func CreateImporters() map[config.ImporterName]exporter.Importer {
-	return map[config.ImporterName]exporter.Importer{
-		config.ImporterNameYamlFixtures: yaml.NewFixturesExporter(data.NewLoader(), data.NewInserter()),
 	}
 }

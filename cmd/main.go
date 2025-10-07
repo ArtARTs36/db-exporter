@@ -82,10 +82,7 @@ func newCommand(ctx *cli.Context, fs fs.Driver) *cmd.Command {
 
 	return cmd.NewCommand(
 		migrations.NewTableDetector(),
-		task.NewCompositeActivityRunner(
-			task.NewExportActivityRunner(fs, renderer, factory.CreateExporters(renderer)),
-			task.NewImportActivityRunner(fs, factory.CreateImporters()),
-		),
+		task.NewExportActivityRunner(fs, renderer, factory.CreateExporters(renderer)),
 		ctx.Output.PrintMarkdownTable,
 		cmd.NewCommit(git.NewGit("git", git.GithubActionsAuthorFinder())),
 	)

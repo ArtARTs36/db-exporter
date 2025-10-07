@@ -109,17 +109,6 @@ tasks:
         out:
           dir: ./out
 
-  pg/yaml-fixtures_export:
-    activities:
-      - export: yaml-fixtures
-        out:
-          dir: ./out
-
-  pg/yaml-fixtures_import:
-    activities:
-      - import: yaml-fixtures
-        from: ./testdata/pg/yaml-fixtures_import
-
 options:
   print_stat: true
   debug: true

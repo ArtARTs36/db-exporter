@@ -7,8 +7,7 @@ import (
 )
 
 type Activity struct {
-	Export ExportActivity // fill export or import
-	Import ImportActivity
+	Export ExportActivity
 
 	Database string         `yaml:"database" json:"database"`
 	Tables   ActivityTables `yaml:"tables" json:"tables"`
@@ -31,20 +30,9 @@ type ExportActivity struct {
 	Spec interface{} `yaml:"-" json:"spec"`
 }
 
-type ImportActivity struct {
-	Format ImporterName
-	Spec   interface{} `yaml:"-"`
-	From   string      `yaml:"from" json:"from"` // path to file or dir
-}
-
-func (s *Activity) IsExport() bool {
-	return s.Export.Format != ""
-}
-
 func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 	type exportOrImport struct {
 		Export ExporterName `yaml:"export" json:"export"`
-		Import ImporterName `yaml:"import" json:"import"`
 		Spec   yaml.Node    `yaml:"spec" json:"spec"`
 
 		Database    string         `yaml:"database" json:"database"`
@@ -61,11 +49,10 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 	s.Tables = exportOrImportObj.Tables
 
 	var exportActivity ExportActivity
-	var importActivity ImportActivity
 
 	var decodingSpec interface{}
 
-	if exportOrImportObj.Export != "" { //nolint:gocritic // no need
+	if exportOrImportObj.Export != "" {
 		if err := n.Decode(&exportActivity); err != nil {
 			return err
 		}
@@ -73,7 +60,7 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		exportActivity.Format = exportOrImportObj.Export
 
 		switch exportActivity.Format {
-		case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameYamlFixtures, ExporterNameGraphql, ExporterNameDBML:
+		case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
 		case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
 			exportActivity.Spec = new(MigrationsSpec)
 		case ExporterNameGoEntities:
@@ -97,26 +84,11 @@ func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
 		}
 
 		decodingSpec = exportActivity.Spec
-	} else if exportOrImportObj.Import != "" {
-		if err := n.Decode(&importActivity); err != nil {
-			return err
-		}
-
-		importActivity.Format = exportOrImportObj.Import
-
-		switch exportOrImportObj.Import {
-		case ImporterNameYamlFixtures:
-		default:
-			return fmt.Errorf("format %q unsupported", importActivity.Format)
-		}
-
-		decodingSpec = importActivity.Spec
 	} else {
 		return fmt.Errorf("invalid activity: must be one of export or import")
 	}
 
 	s.Export = exportActivity
-	s.Import = importActivity
 
 	if decodingSpec != nil {
 		err := exportOrImportObj.Spec.Decode(decodingSpec)

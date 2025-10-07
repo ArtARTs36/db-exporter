@@ -112,7 +112,7 @@
           "type": "string",
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
-            "laravel-migrations-raw", "laravel-models", "grpc-crud", "yaml-fixtures", "csv",
+            "laravel-migrations-raw", "laravel-models", "grpc-crud", "csv",
             "go-entity-repository", "json-schema", "graphql", "dbml", "custom", "ddl"
           ]
         },
@@ -217,34 +217,6 @@
         }
       },
       "required": ["export", "out"],
-      "additionalProperties": false
-    },
-    "task_activity_import": {
-      "properties": {
-        "import": {
-          "type": "string",
-          "enum": [
-            "yaml-fixtures"
-          ]
-        },
-        "from": {
-          "type": "string",
-          "title": "Directory"
-        },
-        "database": {
-          "type": "string",
-          "description": "Database name as shown on the database map",
-          "default": "default"
-        },
-        "tables": {
-          "type": "array",
-          "description": "Tables for import",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": ["import", "from"],
       "additionalProperties": false
     },
     "spec_go_entities_export": {
