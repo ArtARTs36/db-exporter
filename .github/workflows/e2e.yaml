@@ -66,6 +66,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: binary
+          path: ./functest
 
       - name: Run functional tests
         env:
@@ -96,6 +97,7 @@ jobs:
       - uses: actions/download-artifact@v5
         with:
           name: binary
+          path: ./functest
 
       - name: Run functional tests
         env:
