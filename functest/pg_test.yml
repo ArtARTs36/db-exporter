@@ -6,13 +6,13 @@ databases:
 tasks:
   pg/ddl:
     activities:
-      - export: ddl
+      - format: ddl
         out:
           dir: ./out
 
   pg/custom:
     activities:
-      - export: custom
+      - format: custom
         spec:
           template: '{% for table in schema.Tables %}{{ table.Name.Value }},{% endfor %}'
           output:
@@ -22,7 +22,7 @@ tasks:
 
   pg/csv_export:
     activities:
-      - export: csv
+      - format: csv
         spec:
           delimiter: ','
           transform:
@@ -36,19 +36,19 @@ tasks:
 
   pg/diagram:
     activities:
-      - export: diagram
+      - format: diagram
         out:
           dir: ./out
 
   pg/go-entities:
     activities:
-      - export: go-entities
+      - format: go-entities
         out:
           dir: ./out
 
   pg/go-entity-repository:
     activities:
-      - export: go-entity-repository
+      - format: go-entity-repository
         spec:
           go_module: github.com/project
           entities:
@@ -62,7 +62,7 @@ tasks:
 
   pg/go-entity-repository_interfaces_external:
     activities:
-      - export: go-entity-repository
+      - format: go-entity-repository
         spec:
           go_module: github.com/project
           entities:
@@ -79,7 +79,7 @@ tasks:
 
   pg/go-entity-repository_interfaces_internal:
     activities:
-      - export: go-entity-repository
+      - format: go-entity-repository
         spec:
           go_module: github.com/project
           entities:
@@ -94,7 +94,7 @@ tasks:
 
   pg/grpc-crud:
     activities:
-      - export: grpc-crud
+      - format: grpc-crud
         spec:
           package: "org.service"
           options:
@@ -104,7 +104,7 @@ tasks:
 
   pg/laravel-models_export:
     activities:
-      - export: laravel-models
+      - format: laravel-models
         table_per_file: true
         out:
           dir: ./out

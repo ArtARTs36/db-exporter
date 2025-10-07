@@ -97,18 +97,8 @@
     },
     "task_activity": {
       "type": "object",
-      "oneOf": [
-        {
-          "$ref": "#/definitions/task_activity_export"
-        },
-        {
-          "$ref": "#/definitions/task_activity_import"
-        }
-      ]
-    },
-    "task_activity_export": {
       "properties": {
-        "export": {
+        "format": {
           "type": "string",
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
@@ -216,7 +206,7 @@
           ]
         }
       },
-      "required": ["export", "out"],
+      "required": ["format", "out"],
       "additionalProperties": false
     },
     "spec_go_entities_export": {

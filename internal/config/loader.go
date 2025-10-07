@@ -150,13 +150,13 @@ func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
 				)
 			}
 
-			if activity.Export.Spec != nil {
-				expectingDatabaseDriver, isExpectingDatabaseDriver := activity.Export.Spec.(ExpectingDatabaseDriver)
+			if activity.Spec != nil {
+				expectingDatabaseDriver, isExpectingDatabaseDriver := activity.Spec.(ExpectingDatabaseDriver)
 				if isExpectingDatabaseDriver {
 					expectingDatabaseDriver.InjectDatabaseDriver(db.Driver)
 				}
 
-				validatableSpec, isValidatableSpec := activity.Export.Spec.(ValidatableSpec)
+				validatableSpec, isValidatableSpec := activity.Spec.(ValidatableSpec)
 				if isValidatableSpec {
 					err := validatableSpec.Validate()
 					if err != nil {

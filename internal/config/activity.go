@@ -7,10 +7,16 @@ import (
 )
 
 type Activity struct {
-	Export ExportActivity
-
-	Database string         `yaml:"database" json:"database"`
-	Tables   ActivityTables `yaml:"tables" json:"tables"`
+	Database     string         `yaml:"database" json:"database"`
+	Tables       ActivityTables `yaml:"tables" json:"tables"`
+	Format       ExporterName   `yaml:"format" json:"format"`
+	TablePerFile bool           `yaml:"table_per_file" json:"table_per_file"`
+	SkipExists   bool           `yaml:"skip_exists" json:"skip_exists"`
+	Out          struct {
+		Dir        string `yaml:"dir" json:"dir"`
+		FilePrefix string `yaml:"file_prefix" json:"file_prefix"`
+	} `yaml:"out" json:"out"`
+	Spec interface{} `yaml:"-" json:"spec"`
 }
 
 type ActivityTables struct {
@@ -19,83 +25,73 @@ type ActivityTables struct {
 	Prefix      string              `yaml:"prefix" json:"prefix"`
 }
 
-type ExportActivity struct {
-	Format       ExporterName
-	TablePerFile bool `yaml:"table_per_file" json:"table_per_file"`
-	SkipExists   bool `yaml:"skip_exists" json:"skip_exists"`
-	Out          struct {
-		Dir        string `yaml:"dir" json:"dir"`
-		FilePrefix string `yaml:"file_prefix" json:"file_prefix"`
-	} `yaml:"out" json:"out"`
-	Spec interface{} `yaml:"-" json:"spec"`
-}
-
 func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
-	type exportOrImport struct {
-		Export ExporterName `yaml:"export" json:"export"`
-		Spec   yaml.Node    `yaml:"spec" json:"spec"`
-
-		Database    string         `yaml:"database" json:"database"`
-		Tables      ActivityTables `yaml:"tables" json:"tables"`
-		TablePrefix string         `yaml:"table_prefix" json:"table_prefix"`
+	var embeddedActivity struct {
+		Database     string         `yaml:"database" json:"database"`
+		Tables       ActivityTables `yaml:"tables" json:"tables"`
+		Format       ExporterName   `yaml:"format" json:"format"`
+		TablePerFile bool           `yaml:"table_per_file" json:"table_per_file"`
+		SkipExists   bool           `yaml:"skip_exists" json:"skip_exists"`
+		Out          struct {
+			Dir        string `yaml:"dir" json:"dir"`
+			FilePrefix string `yaml:"file_prefix" json:"file_prefix"`
+		} `yaml:"out" json:"out"`
+		Spec yaml.Node `yaml:"spec" json:"spec"`
 	}
 
-	exportOrImportObj := &exportOrImport{}
-	if err := n.Decode(exportOrImportObj); err != nil {
+	if err := n.Decode(&embeddedActivity); err != nil {
 		return err
 	}
 
-	s.Database = exportOrImportObj.Database
-	s.Tables = exportOrImportObj.Tables
+	s.Database = embeddedActivity.Database
+	s.Tables = embeddedActivity.Tables
+	s.Format = embeddedActivity.Format
+	s.TablePerFile = embeddedActivity.TablePerFile
+	s.SkipExists = embeddedActivity.SkipExists
+	s.Out = embeddedActivity.Out
 
-	var exportActivity ExportActivity
-
-	var decodingSpec interface{}
-
-	if exportOrImportObj.Export != "" {
-		if err := n.Decode(&exportActivity); err != nil {
-			return err
-		}
-
-		exportActivity.Format = exportOrImportObj.Export
-
-		switch exportActivity.Format {
-		case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
-		case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
-			exportActivity.Spec = new(MigrationsSpec)
-		case ExporterNameGoEntities:
-			exportActivity.Spec = new(GoEntitiesExportSpec)
-		case ExporterNameMd:
-			exportActivity.Spec = new(MarkdownExportSpec)
-		case ExporterNameGrpcCrud:
-			exportActivity.Spec = new(GRPCCrudExportSpec)
-		case ExporterNameCSV:
-			exportActivity.Spec = new(CSVExportSpec)
-		case ExporterNameLaravelModels:
-			exportActivity.Spec = new(LaravelModelsExportSpec)
-		case ExporterNameGoEntityRepository:
-			exportActivity.Spec = new(GoEntityRepositorySpec)
-		case ExporterNameJSONSchema:
-			exportActivity.Spec = new(JSONSchemaExportSpec)
-		case ExporterNameCustom:
-			exportActivity.Spec = new(CustomExportSpec)
-		default:
-			return fmt.Errorf("format %q unsupported", exportActivity.Format)
-		}
-
-		decodingSpec = exportActivity.Spec
-	} else {
-		return fmt.Errorf("invalid activity: must be one of export or import")
+	var serr error
+	s.Spec, serr = s.newSpec(embeddedActivity.Format)
+	if serr != nil {
+		return fmt.Errorf("select spec: %w", serr)
 	}
 
-	s.Export = exportActivity
-
-	if decodingSpec != nil {
-		err := exportOrImportObj.Spec.Decode(decodingSpec)
+	if s.Spec != nil {
+		err := embeddedActivity.Spec.Decode(s.Spec)
 		if err != nil {
 			return fmt.Errorf("failed to decode activity spec: %w", err)
 		}
 	}
 
 	return nil
+}
+
+func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
+	var spec interface{}
+
+	switch format {
+	case ExporterNameDiagram, ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
+	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
+		spec = new(MigrationsSpec)
+	case ExporterNameGoEntities:
+		spec = new(GoEntitiesExportSpec)
+	case ExporterNameMd:
+		spec = new(MarkdownExportSpec)
+	case ExporterNameGrpcCrud:
+		spec = new(GRPCCrudExportSpec)
+	case ExporterNameCSV:
+		spec = new(CSVExportSpec)
+	case ExporterNameLaravelModels:
+		spec = new(LaravelModelsExportSpec)
+	case ExporterNameGoEntityRepository:
+		spec = new(GoEntityRepositorySpec)
+	case ExporterNameJSONSchema:
+		spec = new(JSONSchemaExportSpec)
+	case ExporterNameCustom:
+		spec = new(CustomExportSpec)
+	default:
+		return nil, fmt.Errorf("format %q unsupported", format)
+	}
+
+	return spec, nil
 }

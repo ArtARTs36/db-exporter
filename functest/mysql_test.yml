@@ -6,7 +6,7 @@ databases:
 tasks:
   mysql/custom_export:
     activities:
-      - export: custom
+      - format: custom
         spec:
           template: |
             {% for table in schema.Tables %}{{ table.Name.Value }}
@@ -20,7 +20,7 @@ tasks:
 
   mysql/ddl:
     activities:
-      - export: ddl
+      - format: ddl
         out:
           dir: ./out
 

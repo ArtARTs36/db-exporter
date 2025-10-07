@@ -274,27 +274,6 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg/laravel-models_export",
 		},
 		{
-			Title: "test pg with yaml-fixtures",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`INSERT INTO users (id, name) VALUES
-		(1, 'a'),
-		(2, 'b')
-		`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-			},
-			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/yaml-fixtures_export",
-		},
-		{
 			Title: "test pg with grpc-crud",
 			InitQueries: []string{
 				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
@@ -323,23 +302,19 @@ func TestPGExport(t *testing.T) {
 			InitQueries: []string{
 				`CREATE TABLE users
 		(
-		    id   integer NOT NULL,
+		    id   integer NOT NULL PRIMARY KEY,
 		    name character varying NOT NULL
 		);`,
-				"INSERT INTO users (id, name) VALUES (1, 'a')",
 				`CREATE TABLE phones
 		(
-		    id   integer NOT NULL,
+		    user_id   integer NOT NULL,
 		    number character varying NOT NULL
 		);`,
-				`INSERT INTO phones (id, number) VALUES
-		(1, 'a'),
-		(2, 'b')
-		`,
+				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
 			},
 			DownQueries: []string{
-				"DROP TABLE users",
 				"DROP TABLE phones",
+				"DROP TABLE users",
 			},
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/custom",

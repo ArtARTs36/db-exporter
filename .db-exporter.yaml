@@ -10,13 +10,13 @@ databases:
 tasks:
   dbml:
     activities:
-      - export: dbml
+      - format: dbml
         out:
           dir: ./out/dbml
 
   go-entities:
     activities:
-      - export: go-entities
+      - format: go-entities
         spec:
           go_module: github.com/artarts36/repo
         out:
@@ -24,7 +24,7 @@ tasks:
 
   go-entities-per-table:
     activities:
-      - export: go-entities
+      - format: go-entities
         table_per_file: true
         spec:
           go_module: github.com/artarts36/repo
@@ -33,13 +33,13 @@ tasks:
 
   go_entity_repository:
     activities:
-      - export: go-entity-repository
+      - format: go-entity-repository
         out:
           dir: ./out/go-entity-repository
 
   gen_json_schema:
     activities:
-      - export: json-schema
+      - format: json-schema
         spec:
           pretty: true
         out:
@@ -47,20 +47,20 @@ tasks:
 
   gen_goose_migrations:
     activities:
-      - export: goose
+      - format: goose
         out:
           dir: ./out/goose/common
 
   gen_goose_migrations_per:
     activities:
-      - export: goose
+      - format: goose
         table_per_file: true
         out:
           dir: ./out/goose/per
 
   gen_goose_migrations_mysql:
     activities:
-      - export: goose
+      - format: goose
         spec:
           target: mysql
         out:
@@ -68,7 +68,7 @@ tasks:
 
   gen_laravel_raw_migrations:
     activities:
-      - export: laravel-migrations-raw
+      - format: laravel-migrations-raw
         table_per_file: true
         spec:
           use:
@@ -79,7 +79,7 @@ tasks:
 
   gen_graphql:
     activities:
-      - export: graphql
+      - format: graphql
         table_per_file: true
         out:
           dir: ./out/graphql
