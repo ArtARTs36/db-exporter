@@ -8,6 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/mysql"
 	"github.com/artarts36/gds"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -57,9 +58,16 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 		}
 
 		schemaColumn.Type = sqltype.MapMySQLType(col.DataType.Value)
-		if col.DataTypeLength.Valid {
+		if col.DataType.Value == "enum" {
+			schemaColumn.Enum = &schema.Enum{
+				Name:   col.Name.Append("_enum"),
+				Values: mysql.ParseEnumType(col.ColumnType.Value),
+				Used:   1,
+			}
+		} else if col.DataTypeLength.Valid {
 			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
 		}
+
 		if col.AutoIncrement {
 			schemaColumn.IsAutoincrement = col.AutoIncrement
 		}
@@ -91,7 +99,8 @@ func (l *Loader) selectColumns(
        IF(IS_NULLABLE = 'NO', false, true) as nullable,
        IF(EXTRA = 'auto_increment', true, false) as auto_increment,
        COLUMN_COMMENT as comment,
-       COLUMN_DEFAULT as default_value
+       COLUMN_DEFAULT as default_value,
+       COLUMN_TYPE as column_type
 FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = ?
 order by ORDINAL_POSITION
@@ -117,6 +126,7 @@ type mysqlColumn struct {
 
 	DataType       gds.String    `db:"data_type"`
 	DataTypeLength sql.NullInt16 `db:"data_type_length"`
+	ColumnType     gds.String    `db:"column_type"`
 
 	Comment gds.String `db:"comment"`
 

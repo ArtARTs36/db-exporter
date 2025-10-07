@@ -4,6 +4,7 @@ CREATE TABLE users
     `username`      varchar(50) NOT NULL,
     `password_hash` varchar(255) NOT NULL,
     `created_at`    timestamp DEFAULT CURRENT_TIMESTAMP,
+    `status`        ENUM('active', 'banned'),
 
     CONSTRAINT `PRIMARY` PRIMARY KEY (`id`),
     CONSTRAINT `username` UNIQUE (`username`)
