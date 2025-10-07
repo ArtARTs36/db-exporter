@@ -13,7 +13,7 @@ databases:
 tasks:
   gen_txt:
     activities:
-      - export: custom
+      - format: custom
         spec:
           template: '{% for table in schema.Tables %}{{ table.Name.Value }},{% endfor %}'
           output:
@@ -37,7 +37,7 @@ databases:
 tasks:
   gen_txt:
     activities:
-      - export: custom
+      - format: custom
         spec:
           template: '@local/path/to/file.txt'
           output:

@@ -62,7 +62,7 @@ databases:
 tasks:
   gen_graphql:
     activities:
-      - export: graphql
+      - format: graphql
         out:
           dir: ./out/graphql
 ```
@@ -93,7 +93,7 @@ You can inject environment variables to config:
   tasks:
     gen_csv:
       activities:
-        - export: csv
+        - format: csv
           tables:
             list: ${MY_TABLES}
     ```

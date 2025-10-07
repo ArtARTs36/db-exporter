@@ -17,7 +17,7 @@ tasks:
       message: "[auto] add documentation for database schema"
       push: true
     activities:
-      - export: md
+      - format: md
         spec:
           with_diagram: true
         out:
@@ -75,7 +75,7 @@ databases:
 tasks:
   gen_md:
     activities:
-      - export: md
+      - format: md
         spec:
           with_diagram: true
         out:
@@ -96,7 +96,7 @@ databases:
 tasks:
   export:
     activities:
-      - export: go-entity-repository
+      - format: go-entity-repository
         skip_exists: true
         spec:
           entities:
