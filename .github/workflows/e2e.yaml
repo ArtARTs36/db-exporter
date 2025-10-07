@@ -73,7 +73,7 @@ jobs:
           FUNCTEST: on
           PG_DSN: host=localhost port=5499 user=test password=test dbname=users sslmode=disable
           DB_EXPORTER_BIN: ${{ github.workspace }}/functest/db-exporter
-        run: go test ./functest
+        run: chmod +x ./functest/db-exporter && go test ./functest
 
   mysql:
     services:
@@ -104,4 +104,4 @@ jobs:
           FUNCTEST: on
           MYSQL_DSN: test:test@tcp(localhost:5499)/users
           DB_EXPORTER_BIN: ${{ github.workspace }}/functest/db-exporter
-        run: go test ./functest
+        run: chmod +x ./functest/db-exporter && go test ./functest

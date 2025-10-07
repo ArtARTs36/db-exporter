@@ -66,6 +66,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 				Values: mysql.ParseEnumType(col.ColumnType.Value),
 				Used:   1,
 			}
+			table.AddEnum(schemaColumn.Enum)
 		} else if col.DataTypeLength.Valid {
 			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
 		}

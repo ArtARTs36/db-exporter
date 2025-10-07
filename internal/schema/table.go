@@ -97,3 +97,7 @@ func (t *Table) GetPKColumns() []*Column {
 func (t *Table) AddColumn(col *Column) {
 	t.Columns = append(t.Columns, col)
 }
+
+func (t *Table) AddEnum(enum *Enum) {
+	t.UsingEnums[enum.Name.Value] = enum
+}
