@@ -66,7 +66,7 @@ func (b *GraphBuilder) buildGraph(
 
 	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
 
-	edgesCount, err := b.buildEdges(graph, tables, tablesNodes)
+	edgesCount, err := b.buildEdges(graph, tables, tablesNodes, spec)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build edges: %w", err)
 	}
@@ -91,7 +91,7 @@ func (b *GraphBuilder) buildNodes(
 
 		node.SetShape(cgraph.PlainTextShape)
 		node.SafeSet("class", "db-tables", "")
-		node.SafeSet("fontname", spec.Style.Font.Family, "")
+		b.setFontName(node, spec)
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
@@ -119,6 +119,7 @@ func (b *GraphBuilder) buildEdges(
 	graph *cgraph.Graph,
 	tables *schema.TableMap,
 	tablesNodes map[string]*cgraph.Node,
+	spec *config.DiagramExportSpec,
 ) (int, error) {
 	edges := 0
 
@@ -152,15 +153,20 @@ func (b *GraphBuilder) buildEdges(
 
 			edges++
 
-			edge.SetLabel(fmt.Sprintf(
-				"  %s:%s",
-				col.Name.Value,
-				col.ForeignKey.ForeignColumn.Value,
-			))
+			edge.SetLabel(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
+			b.setFontName(edge, spec)
 		}
 
 		return nil
 	})
 
 	return edges, err
+}
+
+type safeSettable interface {
+	SafeSet(name, value, def string) int
+}
+
+func (b *GraphBuilder) setFontName(object safeSettable, spec *config.DiagramExportSpec) {
+	object.SafeSet("fontname", spec.Style.Font.Family, "")
 }

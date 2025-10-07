@@ -28,7 +28,7 @@ tasks:
           diagram:
             style:
               font:
-                family: Lato-ExtraLight
+                family: courier
               table:
                 name:
                   background_color: '#3498db'
