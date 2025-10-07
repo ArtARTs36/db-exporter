@@ -3,9 +3,9 @@ databases:
     driver: postgres
     dsn: "host=localhost port=5458 user=db password=db dbname=db sslmode=disable"
 
-#  dbml:
-#    driver: dbml
-#    dsn: "./test.dbml"
+  dbml:
+    driver: dbml
+    dsn: "./test.dbml"
 
 tasks:
   diagram:

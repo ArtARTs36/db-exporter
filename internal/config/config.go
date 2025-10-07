@@ -42,3 +42,17 @@ func (c *Config) GetDefaultDatabaseName() (string, bool) {
 
 	return "", false
 }
+
+func (c *Config) UsingDatabases() map[string]Database {
+	dbs := map[string]Database{}
+
+	for _, task := range c.Tasks {
+		for _, activity := range task.Activities {
+			if _, ok := dbs[activity.Database]; !ok {
+				dbs[activity.Database] = c.Databases[activity.Database]
+			}
+		}
+	}
+
+	return dbs
+}

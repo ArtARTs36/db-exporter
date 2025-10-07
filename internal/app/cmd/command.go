@@ -53,7 +53,7 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 
 	if len(params.TaskNames) == 0 {
 		tasks = params.Config.Tasks
-		dbs = params.Config.Databases
+		dbs = params.Config.UsingDatabases()
 	} else {
 		for _, name := range params.TaskNames {
 			t, ok := params.Config.Tasks[name]
@@ -69,6 +69,8 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 			}
 		}
 	}
+
+	slog.InfoContext(ctx, "[command] use databases", slog.Any("databases", databaseNames(dbs)))
 
 	c.setupLogger(params.Config.Options.Debug)
 
@@ -199,4 +201,12 @@ func (c *Command) printStat(result *task.ActivityResult) {
 	}
 
 	printExport()
+}
+
+func databaseNames(dbs map[string]config.Database) []string {
+	names := make([]string, 0, len(dbs))
+	for name := range dbs {
+		names = append(names, name)
+	}
+	return names
 }
