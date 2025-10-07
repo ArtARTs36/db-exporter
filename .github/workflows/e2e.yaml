@@ -15,6 +15,12 @@ jobs:
     name: build binary
     runs-on: ubuntu-latest
     steps:
+      - name: install deps
+        run: sudo apt install gcc
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v4 # action page: <https://github.com/actions/setup-go>
         with:
