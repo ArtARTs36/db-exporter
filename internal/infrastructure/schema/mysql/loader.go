@@ -4,15 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
+
+	"github.com/artarts36/gds"
+	_ "github.com/go-sql-driver/mysql" // mysql driver
+	"github.com/jmoiron/sqlx"
+
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/mysql"
-	"github.com/artarts36/gds"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
-	"log/slog"
 )
 
 type Loader struct {

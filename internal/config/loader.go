@@ -2,14 +2,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/env"
-	"github.com/artarts36/db-exporter/internal/shared/fs"
-	"github.com/artarts36/gds"
-	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql" // mysql driver
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/artarts36/gds"
+	"github.com/go-sql-driver/mysql"
+
+	"github.com/artarts36/db-exporter/internal/shared/env"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 type Loader struct {
@@ -123,7 +124,7 @@ func (l *Loader) injectEnvVarsToTasks(cfg *Config) error {
 	return nil
 }
 
-func (l *Loader) validate(cfg *Config) error {
+func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
 	for tid, task := range cfg.Tasks {
 		for aid, activity := range task.Activities {
 			db, ok := cfg.Databases[activity.Database]
