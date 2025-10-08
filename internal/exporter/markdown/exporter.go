@@ -50,7 +50,7 @@ func (e *Exporter) ExportPerFile(
 		}
 
 		diag = &exporter.ExportedPage{
-			FileName: "diagram.svg",
+			FileName: fmt.Sprintf("diagram.%s", string(spec.Diagram.Image.Format)),
 			Content:  diagContent,
 		}
 	}
@@ -113,7 +113,7 @@ func (e *Exporter) Export(
 		}
 
 		diag = &exporter.ExportedPage{
-			FileName: "diagram.svg",
+			FileName: fmt.Sprintf("diagram.%s", string(spec.Diagram.Image.Format)),
 			Content:  diagContent,
 		}
 	}
