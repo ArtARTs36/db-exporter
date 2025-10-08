@@ -356,6 +356,14 @@
         "style": {
           "type": "object",
           "properties": {
+            "background": {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "type": "string"
+                }
+              }
+            },
             "font": {
               "type": "object",
               "properties": {

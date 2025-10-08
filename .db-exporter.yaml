@@ -13,6 +13,9 @@ tasks:
       - format: diagram
         spec:
           style:
+            background:
+              color: '#eee'
+
             table:
               name:
                 background_color: '#3498db'

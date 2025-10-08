@@ -102,6 +102,9 @@ type MigrationsSpec struct {
 
 type DiagramExportSpec struct {
 	Style struct {
+		Background struct {
+			Color string `yaml:"color" json:"color"`
+		} `yaml:"background" json:"background"`
 		Table struct {
 			Name struct {
 				BackgroundColor string `yaml:"background_color" json:"background_color"` // #hex

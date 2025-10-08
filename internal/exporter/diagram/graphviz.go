@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"log/slog"
-
+	"github.com/artarts36/db-exporter/internal/shared/webcolor"
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
 	"github.com/tyler-sommer/stick"
+	"log/slog"
 
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -56,6 +56,8 @@ func (b *GraphBuilder) buildGraph(
 	if err != nil {
 		return g, graph, fmt.Errorf("failed to create graph: %w", err)
 	}
+
+	b.setGraphBackground(graph, spec)
 
 	slog.Debug("[graphbuilder] mapping graph")
 
@@ -169,4 +171,10 @@ type safeSettable interface {
 
 func (b *GraphBuilder) setFontName(object safeSettable, spec *config.DiagramExportSpec) {
 	object.SafeSet("fontname", spec.Style.Font.Family, "")
+}
+
+func (b *GraphBuilder) setGraphBackground(graph *cgraph.Graph, spec *config.DiagramExportSpec) {
+	if spec.Style.Background.Color != "" {
+		graph.SetBackgroundColor(webcolor.Fix(spec.Style.Background.Color))
+	}
 }
