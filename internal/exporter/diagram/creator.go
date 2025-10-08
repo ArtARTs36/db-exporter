@@ -50,7 +50,7 @@ func (c *Creator) Create(
 
 	var buf bytes.Buffer
 
-	if err = png.Encode(&buf, img); err != nil {
+	if err = c.encoder.Encode(&buf, img); err != nil {
 		return nil, fmt.Errorf("encode to image: %w", err)
 	}
 
