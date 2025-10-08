@@ -1,6 +1,7 @@
 package imagedraw
 
 import (
+	"errors"
 	"image"
 	"image/color"
 	"image/draw"
@@ -39,12 +40,17 @@ func Grid(
 	return img
 }
 
-func AddBackground(object image.Image, background image.Image) image.Image {
+func AddBackground(object image.Image, background image.Image) (image.Image, error) {
+	drawImage, ok := object.(draw.Image)
+	if !ok {
+		return object, errors.New("object does not implement draw.Image")
+	}
+
 	newImage := image.NewRGBA(image.Rect(0, 0, object.Bounds().Dx(), object.Bounds().Dy()))
 
 	draw.Draw(newImage, object.Bounds(), background, image.Point{}, draw.Src)
 
-	draw.Draw(newImage, object.Bounds(), object.(draw.Image), image.Point{}, draw.Over)
+	draw.Draw(newImage, object.Bounds(), drawImage, image.Point{}, draw.Over)
 
-	return newImage
+	return newImage, nil
 }

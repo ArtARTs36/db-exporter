@@ -37,7 +37,7 @@ func (c *Creator) Create(
 	}
 
 	if spec.Style.Background.Grid != nil {
-		img = imagedraw.AddBackground(
+		img, err = imagedraw.AddBackground(
 			img,
 			imagedraw.GridFor(
 				img,
@@ -46,6 +46,9 @@ func (c *Creator) Create(
 				spec.Style.Background.Color.Color,
 			),
 		)
+		if err != nil {
+			return nil, fmt.Errorf("add background: %w", err)
+		}
 	}
 
 	var buf bytes.Buffer

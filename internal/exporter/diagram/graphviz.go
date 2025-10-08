@@ -52,7 +52,6 @@ func (b *GraphBuilder) buildGraph(
 	}
 
 	if spec.Style.Background.Grid == nil {
-		slog.Info("build graph", slog.Any("spec", spec))
 		graph.SetBackgroundColor(*spec.Style.Background.Color)
 	} else {
 		graph.WithoutBackground()
@@ -62,7 +61,7 @@ func (b *GraphBuilder) buildGraph(
 
 	tablesNodes, err := b.buildNodes(graph, tables, spec)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build nodes: %w", err)
+		return nil, fmt.Errorf("build nodes: %w", err)
 	}
 
 	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
