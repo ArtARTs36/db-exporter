@@ -133,6 +133,10 @@ func (s *DiagramExportSpec) Validate() error {
 		s.Style.Table.Name.TextColor = "white"
 	}
 
+	if s.Style.Background.Color == "" {
+		s.Style.Background.Color = "white"
+	}
+
 	return nil
 }
 

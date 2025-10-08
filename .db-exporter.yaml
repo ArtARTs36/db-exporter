@@ -21,7 +21,7 @@ tasks:
                 background_color: '#3498db'
                 text_color: 'white'
         out:
-          dir: ./out/diagram
+          dir: ./
 
   md:
     activities:
