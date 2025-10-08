@@ -4,13 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/imagedraw"
 	"github.com/artarts36/db-exporter/internal/shared/webcolor"
+	"github.com/artarts36/specw"
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
-	"image/png"
-	"io"
-	"log/slog"
+	"image"
 )
 
 type Graph struct {
@@ -35,8 +33,8 @@ func CreateGraph(ctx context.Context) (*Graph, error) {
 	}, nil
 }
 
-func (g *Graph) SetBackgroundColor(color string) {
-	g.graph.SetBackgroundColor(webcolor.Fix(color))
+func (g *Graph) SetBackgroundColor(color specw.Color) {
+	g.graph.SetBackgroundColor(webcolor.Fix(color.Raw))
 }
 
 func (g *Graph) CreateNode(name string) (*Node, error) {
@@ -78,23 +76,14 @@ func (g *Graph) Close() error {
 }
 
 func (g *Graph) WithoutBackground() {
-	g.SetBackgroundColor("transparent")
+	g.graph.SetBackgroundColor("transparent")
 }
 
-func (g *Graph) Render(ctx context.Context, format string, buf io.Writer) error {
-	g.WithoutBackground()
-
+func (g *Graph) Build(ctx context.Context) (image.Image, error) {
 	img, err := g.graphviz.RenderImage(ctx, g.graph)
 	if err != nil {
-		return fmt.Errorf("render graphviz image: %w", err)
+		return nil, fmt.Errorf("render graphviz image: %w", err)
 	}
 
-	slog.InfoContext(ctx, "rendering graphviz image", slog.Any("image.min", img.Bounds().Min), slog.Any("image.max", img.Bounds().Max))
-
-	img = imagedraw.AddBackground(
-		img,
-		imagedraw.GridFor(img, 30, webcolor.Hex("#eeeeee")),
-	)
-
-	return png.Encode(buf, img)
+	return img, nil
 }

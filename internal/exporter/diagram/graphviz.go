@@ -1,7 +1,6 @@
 package diagram
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
@@ -9,6 +8,7 @@ import (
 	graphviz2 "github.com/artarts36/db-exporter/internal/shared/graphviz"
 	"github.com/artarts36/db-exporter/internal/template"
 	"github.com/tyler-sommer/stick"
+	"image"
 	"log/slog"
 )
 
@@ -20,8 +20,12 @@ func NewGraphBuilder(renderer *template.Renderer) *GraphBuilder {
 	return &GraphBuilder{renderer: renderer}
 }
 
-func (b *GraphBuilder) BuildSVG(tables *schema.TableMap, spec *config.DiagramExportSpec) ([]byte, error) {
-	graph, err := b.buildGraph(tables, spec)
+func (b *GraphBuilder) Build(
+	ctx context.Context,
+	tables *schema.TableMap,
+	spec *config.DiagramExportSpec,
+) (image.Image, error) {
+	graph, err := b.buildGraph(ctx, tables, spec)
 	if err != nil {
 		return nil, fmt.Errorf("build graph: %w", err)
 	}
@@ -34,24 +38,25 @@ func (b *GraphBuilder) BuildSVG(tables *schema.TableMap, spec *config.DiagramExp
 
 	slog.Debug("[diagram] generating svg diagram")
 
-	var buf bytes.Buffer
-	if err = graph.Render(context.Background(), "svg", &buf); err != nil {
-		return nil, fmt.Errorf("to render grapgh to svg: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	return graph.Build(ctx)
 }
 
 func (b *GraphBuilder) buildGraph(
+	ctx context.Context,
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
 ) (*graphviz2.Graph, error) {
-	graph, err := graphviz2.CreateGraph(context.Background())
+	graph, err := graphviz2.CreateGraph(ctx)
 	if err != nil {
 		return graph, fmt.Errorf("failed to create graph: %w", err)
 	}
 
-	// graph.SetBackgroundColor(spec.Style.Background.Color)
+	if spec.Style.Background.Grid == nil {
+		slog.Info("build graph", slog.Any("spec", spec))
+		graph.SetBackgroundColor(*spec.Style.Background.Color)
+	} else {
+		graph.WithoutBackground()
+	}
 
 	slog.Debug("[graphbuilder] mapping graph")
 

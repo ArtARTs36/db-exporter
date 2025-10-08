@@ -7,21 +7,20 @@ import (
 
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/template"
 )
 
 type Exporter struct {
-	graphBuilder *GraphBuilder
+	creator *Creator
 }
 
-func NewDiagramExporter(renderer *template.Renderer) exporter.Exporter {
+func NewDiagramExporter(creator *Creator) exporter.Exporter {
 	return &Exporter{
-		graphBuilder: &GraphBuilder{renderer: renderer},
+		creator: creator,
 	}
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.DiagramExportSpec)
@@ -33,6 +32,7 @@ func (e *Exporter) ExportPerFile(
 
 	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
 		p, err := e.buildDiagramPage(
+			ctx,
 			schema.NewTableMap(table),
 			fmt.Sprintf("diagram_%s.svg", table.Name.Value),
 			spec,
@@ -49,13 +49,13 @@ func (e *Exporter) ExportPerFile(
 	return pages, err
 }
 
-func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
+func (e *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.DiagramExportSpec)
 	if !ok {
 		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
 	}
 
-	diagram, err := e.buildDiagramPage(params.Schema.Tables, "diagram.png", spec)
+	diagram, err := e.buildDiagramPage(ctx, params.Schema.Tables, "diagram.png", spec)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +64,12 @@ func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*
 }
 
 func (e *Exporter) buildDiagramPage(
+	ctx context.Context,
 	tables *schema.TableMap,
 	filename string,
 	spec *config.DiagramExportSpec,
 ) (*exporter.ExportedPage, error) {
-	c, err := e.graphBuilder.BuildSVG(tables, spec)
+	c, err := e.creator.Create(ctx, tables, spec)
 	if err != nil {
 		return nil, err
 	}

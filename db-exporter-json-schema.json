@@ -361,6 +361,16 @@
               "properties": {
                 "color": {
                   "type": "string"
+                },
+                "grid": {
+                  "line_color": {
+                    "type": "string",
+                    "default": "#eee"
+                  },
+                  "cell_size": {
+                    "type": "number",
+                    "default": 30
+                  }
                 }
               }
             },

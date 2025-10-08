@@ -3,7 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/webcolor"
+	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
+	"golang.org/x/image/colornames"
 )
 
 type ExporterName string
@@ -103,7 +106,11 @@ type MigrationsSpec struct {
 type DiagramExportSpec struct {
 	Style struct {
 		Background struct {
-			Color string `yaml:"color" json:"color"`
+			Grid *struct {
+				LineColor *specw.Color `yaml:"line_color" json:"line_color"`
+				CellSize  int          `yaml:"cell_size" json:"cell_size"`
+			} `yaml:"grid" json:"grid"`
+			Color *specw.Color `yaml:"color" json:"color"`
 		} `yaml:"background" json:"background"`
 		Table struct {
 			Name struct {
@@ -125,6 +132,8 @@ type CustomExportSpec struct {
 }
 
 func (s *DiagramExportSpec) Validate() error {
+	const defaultGridCellSize = 30
+
 	if s.Style.Table.Name.BackgroundColor == "" {
 		s.Style.Table.Name.BackgroundColor = "#3498db"
 	}
@@ -133,8 +142,22 @@ func (s *DiagramExportSpec) Validate() error {
 		s.Style.Table.Name.TextColor = "white"
 	}
 
-	if s.Style.Background.Color == "" {
-		s.Style.Background.Color = "white"
+	if s.Style.Background.Color == nil {
+		s.Style.Background.Color = &specw.Color{
+			Color: colornames.White,
+			Raw:   "white",
+		}
+	}
+
+	if s.Style.Background.Grid != nil {
+		if s.Style.Background.Grid.LineColor == nil {
+			s.Style.Background.Grid.LineColor = &specw.Color{
+				Color: webcolor.ColorEEE,
+			}
+		}
+		if s.Style.Background.Grid.CellSize == 0 {
+			s.Style.Background.Grid.CellSize = defaultGridCellSize
+		}
 	}
 
 	return nil
@@ -173,5 +196,12 @@ func (m *MigrationsSpec) Validate() error {
 		return fmt.Errorf("target have driver %q, which unsupported migrate queries", m.Target)
 	}
 
+	return nil
+}
+
+func (s *MarkdownExportSpec) Validate() error {
+	if err := s.Diagram.Validate(); err != nil {
+		return fmt.Errorf("diagram: %w", err)
+	}
 	return nil
 }

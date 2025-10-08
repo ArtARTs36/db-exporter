@@ -13,8 +13,11 @@ tasks:
       - format: diagram
         spec:
           style:
+            font:
+              family: roboto
+
             background:
-              color: '#eee'
+              grid: {}
 
             table:
               name:
