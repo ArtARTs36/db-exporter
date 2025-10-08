@@ -363,13 +363,16 @@
                   "type": "string"
                 },
                 "grid": {
-                  "line_color": {
-                    "type": "string",
-                    "default": "#eee"
-                  },
-                  "cell_size": {
-                    "type": "number",
-                    "default": 30
+                  "type": "object",
+                  "properties": {
+                    "line_color": {
+                      "type": "string",
+                      "default": "#eee"
+                    },
+                    "cell_size": {
+                      "type": "number",
+                      "default": 30
+                    }
                   }
                 }
               }
@@ -380,6 +383,10 @@
                 "family": {
                   "type": "string",
                   "default": "Times-Roman"
+                },
+                "size": {
+                  "type": "number",
+                  "default": 32
                 }
               }
             },

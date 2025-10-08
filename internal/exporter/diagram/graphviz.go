@@ -90,6 +90,8 @@ func (b *GraphBuilder) buildNodes(
 			return fmt.Errorf("failed to create node for table %q: %w", table.Name.Value, graphErr)
 		}
 
+		node.SetFontSize(spec.Style.Font.Size)
+
 		if err := node.SetFontName(spec.Style.Font.Family); err != nil {
 			return fmt.Errorf("set font name: %w", err)
 		}
@@ -155,6 +157,8 @@ func (b *GraphBuilder) buildEdges(
 			}
 
 			edges++
+
+			edge.SetFontSize(spec.Style.Font.Size)
 
 			edge.WriteText(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
 

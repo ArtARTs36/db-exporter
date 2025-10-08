@@ -10,6 +10,10 @@ type Node struct {
 	graph *graphviz.Graph
 }
 
+func (g *Node) SetFontSize(size float64) {
+	g.node.SetFontSize(size)
+}
+
 func (g *Node) SetFontName(fontName string) error {
 	return g.node.SafeSet("fontname", fontName, "")
 }

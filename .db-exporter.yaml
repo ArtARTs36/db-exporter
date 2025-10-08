@@ -17,7 +17,8 @@ tasks:
               family: roboto
 
             background:
-              grid: {}
+              grid:
+                cell_size: 100
 
             table:
               name:

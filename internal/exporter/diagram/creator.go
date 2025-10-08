@@ -21,7 +21,7 @@ func NewCreator(
 	return &Creator{
 		graphBuilder: graphBuilder,
 		encoder: &png.Encoder{
-			CompressionLevel: png.NoCompression,
+			CompressionLevel: png.DefaultCompression,
 		},
 	}
 }

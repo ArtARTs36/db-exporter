@@ -119,7 +119,8 @@ type DiagramExportSpec struct {
 			} `yaml:"name" json:"name"`
 		} `yaml:"table" json:"table"`
 		Font struct {
-			Family string `yaml:"family" json:"family"`
+			Family string  `yaml:"family" json:"family"`
+			Size   float64 `yaml:"size" json:"size"`
 		} `yaml:"font" json:"font"`
 	} `yaml:"style" json:"style"`
 }
@@ -132,7 +133,10 @@ type CustomExportSpec struct {
 }
 
 func (s *DiagramExportSpec) Validate() error {
-	const defaultGridCellSize = 30
+	const (
+		defaultGridCellSize = 30
+		defaultFontSize     = 32
+	)
 
 	if s.Style.Table.Name.BackgroundColor == "" {
 		s.Style.Table.Name.BackgroundColor = "#3498db"
@@ -158,6 +162,10 @@ func (s *DiagramExportSpec) Validate() error {
 		if s.Style.Background.Grid.CellSize == 0 {
 			s.Style.Background.Grid.CellSize = defaultGridCellSize
 		}
+	}
+
+	if s.Style.Font.Size == 0 {
+		s.Style.Font.Size = defaultFontSize
 	}
 
 	return nil
