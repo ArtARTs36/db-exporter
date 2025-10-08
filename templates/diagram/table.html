@@ -10,8 +10,8 @@
         <TD bgcolor="#dfe6e9">{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
         <TD bgcolor="#dfe6e9">{{ col.Type }}</TD>
         {% else %}
-        <TD>{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
-        <TD>{{ col.Type }} </TD>
+        <TD bgcolor="#ffffff">{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
+        <TD bgcolor="#ffffff">{{ col.Type }} </TD>
         {% endif %}
     </TR>
     {% endfor %}

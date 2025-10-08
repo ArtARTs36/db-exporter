@@ -55,7 +55,7 @@ func (e *Exporter) Export(_ context.Context, params *exporter.ExportParams) ([]*
 		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
 	}
 
-	diagram, err := e.buildDiagramPage(params.Schema.Tables, "diagram.svg", spec)
+	diagram, err := e.buildDiagramPage(params.Schema.Tables, "diagram.png", spec)
 	if err != nil {
 		return nil, err
 	}

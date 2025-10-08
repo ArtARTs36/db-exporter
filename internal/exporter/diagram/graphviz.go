@@ -51,7 +51,7 @@ func (b *GraphBuilder) buildGraph(
 		return graph, fmt.Errorf("failed to create graph: %w", err)
 	}
 
-	graph.SetBackgroundColor(spec.Style.Background.Color)
+	// graph.SetBackgroundColor(spec.Style.Background.Color)
 
 	slog.Debug("[graphbuilder] mapping graph")
 
