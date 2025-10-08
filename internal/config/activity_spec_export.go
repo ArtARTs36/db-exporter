@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/imageencoder"
 	"github.com/artarts36/db-exporter/internal/shared/webcolor"
 	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -104,6 +105,10 @@ type MigrationsSpec struct {
 }
 
 type DiagramExportSpec struct {
+	Image struct {
+		Format      imageencoder.Format           `yaml:"format" json:"format"`
+		Compression imageencoder.CompressionLevel `yaml:"compression" json:"compression"`
+	} `yaml:"image" json:"image"`
 	Style struct {
 		Background struct {
 			Grid *struct {
@@ -137,6 +142,18 @@ func (s *DiagramExportSpec) Validate() error {
 		defaultGridCellSize = 30
 		defaultFontSize     = 32
 	)
+
+	if !s.Image.Format.Valid() {
+		return fmt.Errorf("unknown image format: %s", s.Image.Format)
+	}
+
+	if s.Image.Format == imageencoder.FormatUnspecified {
+		s.Image.Format = imageencoder.FormatPNG
+	}
+
+	if s.Image.Compression == imageencoder.CompressionLevelUnspecified {
+		s.Image.Compression = imageencoder.CompressionLevelLow
+	}
 
 	if s.Style.Table.Name.BackgroundColor == "" {
 		s.Style.Table.Name.BackgroundColor = "#3498db"

@@ -7,22 +7,21 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/imagedraw"
-	"image/png"
+	"github.com/artarts36/db-exporter/internal/shared/imageencoder"
 )
 
 type Creator struct {
-	graphBuilder *GraphBuilder
-	encoder      *png.Encoder
+	graphBuilder   *GraphBuilder
+	encoderManager *imageencoder.Manager
 }
 
 func NewCreator(
 	graphBuilder *GraphBuilder,
+	encoderManager *imageencoder.Manager,
 ) *Creator {
 	return &Creator{
-		graphBuilder: graphBuilder,
-		encoder: &png.Encoder{
-			CompressionLevel: png.DefaultCompression,
-		},
+		graphBuilder:   graphBuilder,
+		encoderManager: encoderManager,
 	}
 }
 
@@ -53,7 +52,14 @@ func (c *Creator) Create(
 
 	var buf bytes.Buffer
 
-	if err = c.encoder.Encode(&buf, img); err != nil {
+	encoder, err := c.encoderManager.For(spec.Image.Format)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = encoder.Encode(&buf, img, imageencoder.Options{
+		CompressionLevel: spec.Image.Compression,
+	}); err != nil {
 		return nil, fmt.Errorf("encode to image: %w", err)
 	}
 

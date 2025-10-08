@@ -353,6 +353,20 @@
     "diagram": {
       "type": "object",
       "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "string",
+              "enum": ["png", "jpeg"],
+              "default": "png"
+            },
+            "compression": {
+              "type": "string",
+              "enum": ["none", "low", "medium", "high"]
+            }
+          }
+        },
         "style": {
           "type": "object",
           "properties": {

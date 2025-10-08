@@ -34,7 +34,7 @@ func (e *Exporter) ExportPerFile(
 		p, err := e.buildDiagramPage(
 			ctx,
 			schema.NewTableMap(table),
-			fmt.Sprintf("diagram_%s.svg", table.Name.Value),
+			fmt.Sprintf("diagram_%s.%s", table.Name.Value, string(spec.Image.Format)),
 			spec,
 		)
 		if err != nil {
@@ -55,7 +55,12 @@ func (e *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([
 		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
 	}
 
-	diagram, err := e.buildDiagramPage(ctx, params.Schema.Tables, "diagram.png", spec)
+	diagram, err := e.buildDiagramPage(
+		ctx,
+		params.Schema.Tables,
+		fmt.Sprintf("diagram.%s", string(spec.Image.Format)),
+		spec,
+	)
 	if err != nil {
 		return nil, err
 	}

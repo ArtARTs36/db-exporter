@@ -20,6 +20,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
+	"github.com/artarts36/db-exporter/internal/shared/imageencoder"
 
 	"github.com/artarts36/db-exporter/internal/template"
 )
@@ -37,7 +38,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 	goModFinder := golang.NewModFinder()
 	goPropertyMapper := goentity.NewGoPropertyMapper()
 	ddlBuilderManager := sql.NewDDLBuilderManager()
-	diagramCreator := diagram.NewCreator(diagram.NewGraphBuilder(renderer))
+	diagramCreator := diagram.NewCreator(diagram.NewGraphBuilder(renderer), imageencoder.NewManager())
 
 	return map[config.ExporterName]exporter.Exporter{
 		config.ExporterNameMd:      markdown.NewMarkdownExporter(pager, diagramCreator),
