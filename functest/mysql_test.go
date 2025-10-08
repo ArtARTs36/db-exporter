@@ -1,7 +1,6 @@
 package functest
 
 import (
-	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"github.com/stretchr/testify/assert"
@@ -109,7 +108,7 @@ func TestMySQLExport(t *testing.T) {
 			}()
 
 			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
-				context.Background(),
+				t.Context(),
 				fmt.Sprintf("--config=%s", tCase.ConfigPath),
 				fmt.Sprintf("--tasks=%s", tCase.TaskName),
 			)

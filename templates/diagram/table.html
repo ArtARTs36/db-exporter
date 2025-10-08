@@ -1,17 +1,17 @@
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" width="100%;">
     <TR width="100%">
-        <TD colspan="2" width="100%" bgcolor="{{ style.Table.Name.BackgroundColor }}">
+        <TD colspan="2" width="100%" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER">
             <font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font>
         </TD>
     </TR>
     {% for col in table.Columns %}
     <TR width="100%">
         {% if loop.index % 2 == 0 %}
-        <TD bgcolor="#dfe6e9">{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
+        <TD bgcolor="#dfe6e9">{{ col.Name }}{% if col.IsPrimaryKey %} (PK){% endif %}</TD>
         <TD bgcolor="#dfe6e9">{{ col.Type }}</TD>
         {% else %}
-        <TD>{% if col.IsPrimaryKey %}🔑 {% endif %}{{ col.Name }} </TD>
-        <TD>{{ col.Type }} </TD>
+        <TD bgcolor="#ffffff">{{ col.Name }}{% if col.IsPrimaryKey %} (PK){% endif %}</TD>
+        <TD bgcolor="#ffffff">{{ col.Type }} </TD>
         {% endif %}
     </TR>
     {% endfor %}

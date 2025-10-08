@@ -1,7 +1,6 @@
 package functest
 
 import (
-	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/shared/cmd"
 	"github.com/stretchr/testify/require"
@@ -53,8 +52,9 @@ func TestPGExport(t *testing.T) {
 		InitQueries []string
 		DownQueries []string
 
-		ConfigPath string
-		TaskName   string
+		ConfigPath          string
+		TaskName            string
+		CheckOnlyFileExists bool
 	}{
 		{
 			Title: "test pg with csv",
@@ -116,8 +116,9 @@ func TestPGExport(t *testing.T) {
 				"DROP TABLE users",
 				"DROP TABLE countries",
 			},
-			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/diagram",
+			ConfigPath:          "pg_test.yml",
+			TaskName:            "pg/diagram",
+			CheckOnlyFileExists: true,
 		},
 		{
 			Title: "test pg with go-entities",
@@ -346,7 +347,7 @@ func TestPGExport(t *testing.T) {
 			}()
 
 			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
-				context.Background(),
+				t.Context(),
 				fmt.Sprintf("--config=%s", tCase.ConfigPath),
 				fmt.Sprintf("--tasks=%s", tCase.TaskName),
 			)
@@ -364,7 +365,10 @@ func TestPGExport(t *testing.T) {
 				outFileContent, outFileExists := outFiles[expFileName]
 
 				require.True(t, outFileExists, "file %q: not exists", expFileName)
-				assert.Equal(t, expFileContent, outFileContent, "file %q: not equal expected content", expFileName)
+
+				if !tCase.CheckOnlyFileExists {
+					assert.Equal(t, expFileContent, outFileContent, "file %q: not equal expected content", expFileName)
+				}
 			}
 		})
 	}

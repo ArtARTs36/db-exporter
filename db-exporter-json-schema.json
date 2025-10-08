@@ -356,12 +356,37 @@
         "style": {
           "type": "object",
           "properties": {
+            "background": {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "grid": {
+                  "type": "object",
+                  "properties": {
+                    "line_color": {
+                      "type": "string",
+                      "default": "#eee"
+                    },
+                    "cell_size": {
+                      "type": "number",
+                      "default": 30
+                    }
+                  }
+                }
+              }
+            },
             "font": {
               "type": "object",
               "properties": {
                 "family": {
                   "type": "string",
                   "default": "Times-Roman"
+                },
+                "size": {
+                  "type": "number",
+                  "default": 32
                 }
               }
             },

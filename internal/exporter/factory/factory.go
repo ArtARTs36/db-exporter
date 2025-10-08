@@ -36,12 +36,12 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 	goEntityGenerator := goentity.NewEntityGenerator(pager)
 	goModFinder := golang.NewModFinder()
 	goPropertyMapper := goentity.NewGoPropertyMapper()
-	graphBuilder := diagram.NewGraphBuilder(renderer)
 	ddlBuilderManager := sql.NewDDLBuilderManager()
+	diagramCreator := diagram.NewCreator(diagram.NewGraphBuilder(renderer))
 
 	return map[config.ExporterName]exporter.Exporter{
-		config.ExporterNameMd:      markdown.NewMarkdownExporter(pager, graphBuilder),
-		config.ExporterNameDiagram: diagram.NewDiagramExporter(renderer),
+		config.ExporterNameMd:      markdown.NewMarkdownExporter(pager, diagramCreator),
+		config.ExporterNameDiagram: diagram.NewDiagramExporter(diagramCreator),
 		config.ExporterNameGoEntities: goentity.NewEntitiesExporter(
 			pager,
 			goEntityMapper,

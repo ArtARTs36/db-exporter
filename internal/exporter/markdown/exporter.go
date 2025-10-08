@@ -15,8 +15,8 @@ import (
 )
 
 type Exporter struct {
-	pager        *common.Pager
-	graphBuilder *diagram.GraphBuilder
+	pager          *common.Pager
+	diagramCreator *diagram.Creator
 }
 
 type markdownPreparedTable struct {
@@ -24,15 +24,15 @@ type markdownPreparedTable struct {
 	FileName string
 }
 
-func NewMarkdownExporter(pager *common.Pager, graphBuilder *diagram.GraphBuilder) exporter.Exporter {
+func NewMarkdownExporter(pager *common.Pager, diagramCreator *diagram.Creator) exporter.Exporter {
 	return &Exporter{
-		pager:        pager,
-		graphBuilder: graphBuilder,
+		pager:          pager,
+		diagramCreator: diagramCreator,
 	}
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.MarkdownExportSpec)
@@ -44,10 +44,14 @@ func (e *Exporter) ExportPerFile(
 	pagesCap := params.Schema.Tables.Len() + 1
 	if spec.WithDiagram {
 		pagesCap++
-		var err error
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg", spec.Diagram)
+		diagContent, err := e.diagramCreator.Create(ctx, params.Schema.Tables, &spec.Diagram)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build diag: %w", err)
+		}
+
+		diag = &exporter.ExportedPage{
+			FileName: "diagram.svg",
+			Content:  diagContent,
 		}
 	}
 
@@ -79,7 +83,7 @@ func (e *Exporter) ExportPerFile(
 		"diagram": diag,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to generateEntity index file: %w", err)
+		return nil, fmt.Errorf("unable to generate index file: %w", err)
 	}
 
 	pages = append(pages, indexPage)
@@ -92,7 +96,7 @@ func (e *Exporter) ExportPerFile(
 }
 
 func (e *Exporter) Export(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.MarkdownExportSpec)
@@ -103,11 +107,14 @@ func (e *Exporter) Export(
 	var diag *exporter.ExportedPage
 
 	if spec.WithDiagram {
-		var err error
-
-		diag, err = buildDiagramPage(e.graphBuilder, params.Schema.Tables, "diagram.svg", spec.Diagram)
+		diagContent, err := e.diagramCreator.Create(ctx, params.Schema.Tables, &spec.Diagram)
 		if err != nil {
-			return nil, fmt.Errorf("failed to build diag: %w", err)
+			return nil, fmt.Errorf("build diagram: %w", err)
+		}
+
+		diag = &exporter.ExportedPage{
+			FileName: "diagram.svg",
+			Content:  diagContent,
 		}
 	}
 
@@ -140,21 +147,4 @@ func (e *Exporter) createIndexPageName(sch *schema.Schema) string {
 	}
 
 	return "INDEX.md"
-}
-
-func buildDiagramPage(
-	builder *diagram.GraphBuilder,
-	tables *schema.TableMap,
-	filename string,
-	diagramSpec config.DiagramExportSpec,
-) (*exporter.ExportedPage, error) {
-	c, err := builder.BuildSVG(tables, &diagramSpec)
-	if err != nil {
-		return nil, err
-	}
-
-	return &exporter.ExportedPage{
-		FileName: filename,
-		Content:  c,
-	}, nil
 }

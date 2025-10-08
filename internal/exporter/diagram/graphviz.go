@@ -1,17 +1,15 @@
 package diagram
 
 import (
-	"bytes"
+	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"log/slog"
-
-	"github.com/goccy/go-graphviz"
-	"github.com/goccy/go-graphviz/cgraph"
-	"github.com/tyler-sommer/stick"
-
 	"github.com/artarts36/db-exporter/internal/schema"
+	graphviz2 "github.com/artarts36/db-exporter/internal/shared/graphviz"
 	"github.com/artarts36/db-exporter/internal/template"
+	"github.com/tyler-sommer/stick"
+	"image"
+	"log/slog"
 )
 
 type GraphBuilder struct {
@@ -22,8 +20,12 @@ func NewGraphBuilder(renderer *template.Renderer) *GraphBuilder {
 	return &GraphBuilder{renderer: renderer}
 }
 
-func (b *GraphBuilder) BuildSVG(tables *schema.TableMap, spec *config.DiagramExportSpec) ([]byte, error) {
-	g, graph, err := b.buildGraph(tables, spec)
+func (b *GraphBuilder) Build(
+	ctx context.Context,
+	tables *schema.TableMap,
+	spec *config.DiagramExportSpec,
+) (image.Image, error) {
+	graph, err := b.buildGraph(ctx, tables, spec)
 	if err != nil {
 		return nil, fmt.Errorf("build graph: %w", err)
 	}
@@ -32,56 +34,54 @@ func (b *GraphBuilder) BuildSVG(tables *schema.TableMap, spec *config.DiagramExp
 		if err = graph.Close(); err != nil {
 			slog.Warn("failed to close graph", slog.String("err", err.Error()))
 		}
-		if err = g.Close(); err != nil {
-			slog.Warn("failed to close graph", slog.String("err", err.Error()))
-		}
 	}()
 
 	slog.Debug("[diagram] generating svg diagram")
 
-	var buf bytes.Buffer
-	if err = g.Render(graph, "svg", &buf); err != nil {
-		return nil, fmt.Errorf("to render grapgh to svg: %w", err)
-	}
-
-	return buf.Bytes(), nil
+	return graph.Build(ctx)
 }
 
 func (b *GraphBuilder) buildGraph(
+	ctx context.Context,
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
-) (*graphviz.Graphviz, *cgraph.Graph, error) {
-	g := graphviz.New()
-	graph, err := g.Graph()
+) (*graphviz2.Graph, error) {
+	graph, err := graphviz2.CreateGraph(ctx)
 	if err != nil {
-		return g, graph, fmt.Errorf("failed to create graph: %w", err)
+		return graph, fmt.Errorf("failed to create graph: %w", err)
+	}
+
+	if spec.Style.Background.Grid == nil {
+		graph.SetBackgroundColor(*spec.Style.Background.Color)
+	} else {
+		graph.WithoutBackground()
 	}
 
 	slog.Debug("[graphbuilder] mapping graph")
 
 	tablesNodes, err := b.buildNodes(graph, tables, spec)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to build nodes: %w", err)
+		return nil, fmt.Errorf("build nodes: %w", err)
 	}
 
 	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
 
 	edgesCount, err := b.buildEdges(graph, tables, tablesNodes, spec)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to build edges: %w", err)
+		return nil, fmt.Errorf("failed to build edges: %w", err)
 	}
 
 	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
 
-	return g, graph, nil
+	return graph, nil
 }
 
 func (b *GraphBuilder) buildNodes(
-	graph *cgraph.Graph,
+	graph *graphviz2.Graph,
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
-) (map[string]*cgraph.Node, error) {
-	tablesNodes := map[string]*cgraph.Node{}
+) (map[string]*graphviz2.Node, error) {
+	tablesNodes := map[string]*graphviz2.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
 		node, graphErr := graph.CreateNode(table.Name.Value)
@@ -89,9 +89,11 @@ func (b *GraphBuilder) buildNodes(
 			return fmt.Errorf("failed to create node for table %q: %w", table.Name.Value, graphErr)
 		}
 
-		node.SetShape(cgraph.PlainTextShape)
-		node.SafeSet("class", "db-tables", "")
-		b.setFontName(node, spec)
+		node.SetFontSize(spec.Style.Font.Size)
+
+		if err := node.SetFontName(spec.Style.Font.Family); err != nil {
+			return fmt.Errorf("set font name: %w", err)
+		}
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
@@ -101,7 +103,9 @@ func (b *GraphBuilder) buildNodes(
 			return tableErr
 		}
 
-		node.SetLabel(graph.StrdupHTML(string(ht)))
+		if err := node.WriteHTML(string(ht)); err != nil {
+			return fmt.Errorf("write html to node: %w", err)
+		}
 
 		tablesNodes[table.Name.Value] = node
 
@@ -116,9 +120,9 @@ func (b *GraphBuilder) buildNodes(
 }
 
 func (b *GraphBuilder) buildEdges(
-	graph *cgraph.Graph,
+	graph *graphviz2.Graph,
 	tables *schema.TableMap,
-	tablesNodes map[string]*cgraph.Node,
+	tablesNodes map[string]*graphviz2.Node,
 	spec *config.DiagramExportSpec,
 ) (int, error) {
 	edges := 0
@@ -153,20 +157,17 @@ func (b *GraphBuilder) buildEdges(
 
 			edges++
 
-			edge.SetLabel(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
-			b.setFontName(edge, spec)
+			edge.SetFontSize(spec.Style.Font.Size)
+
+			edge.WriteText(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
+
+			if err := edge.SetFontName(spec.Style.Font.Family); err != nil {
+				return fmt.Errorf("set font name for edge: %w", err)
+			}
 		}
 
 		return nil
 	})
 
 	return edges, err
-}
-
-type safeSettable interface {
-	SafeSet(name, value, def string) int
-}
-
-func (b *GraphBuilder) setFontName(object safeSettable, spec *config.DiagramExportSpec) {
-	object.SafeSet("fontname", spec.Style.Font.Family, "")
 }
