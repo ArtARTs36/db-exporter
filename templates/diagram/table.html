@@ -1,17 +1,35 @@
 <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5" width="100%;">
     <TR width="100%">
-        <TD colspan="2" width="100%" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER">
+        <TD colspan="3" width="100%" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER">
             <font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font>
         </TD>
     </TR>
     {% for col in table.Columns %}
     <TR width="100%">
         {% if loop.index % 2 == 0 %}
-        <TD bgcolor="#dfe6e9">{{ col.Name }}{% if col.IsPrimaryKey %} (PK){% endif %}</TD>
-        <TD bgcolor="#dfe6e9">{{ col.Type }}</TD>
+            {% if col.IsPrimaryKey %}
+            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
+            {% elseif col.HasForeignKey %}
+            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
+            {% elseif col.IsUniqueKey %}
+            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
+            {% else %}
+            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
+            {% endif %}
+        <TD bgcolor="#dfe6e9" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
+        <TD bgcolor="#dfe6e9" width="45%" ALIGN="CENTER">{{ col.Type }}</TD>
         {% else %}
-        <TD bgcolor="#ffffff">{{ col.Name }}{% if col.IsPrimaryKey %} (PK){% endif %}</TD>
-        <TD bgcolor="#ffffff">{{ col.Type }} </TD>
+            {% if col.IsPrimaryKey %}
+            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
+            {% elseif col.HasForeignKey %}
+            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
+            {% elseif col.IsUniqueKey %}
+            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
+            {% else %}
+            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
+            {% endif %}
+        <TD bgcolor="#ffffff" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
+        <TD bgcolor="#ffffff" width="45%" ALIGN="CENTER">{{ col.Type }} </TD>
         {% endif %}
     </TR>
     {% endfor %}

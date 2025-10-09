@@ -18,7 +18,7 @@ tasks:
 
             background:
               grid:
-                cell_size: 100
+                cell_size: 10
 
             table:
               name:
