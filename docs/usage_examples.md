@@ -104,7 +104,13 @@ tasks:
     activities:
       - format: md
         spec:
-          with_diagram: true
+          style:
+            font:
+              family: courier
+
+            background:
+              grid:
+                cell_size: 20
         out:
           dir: ./out
 ```
