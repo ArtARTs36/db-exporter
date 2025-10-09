@@ -9,7 +9,7 @@
         {% set column_bg = "#ffffff" %}
         {% if col.IsPrimaryKey %}
         {% set column_bg = "#fcebc7" %}
-        {% elseif loop.index % 2 == 0 %}
+        {% elseif (loop.index - table.PrimaryKeyColumnsCount) % 2 == 0 %}
         {% set column_bg = "#dfe6e9" %}
         {% endif %}
 

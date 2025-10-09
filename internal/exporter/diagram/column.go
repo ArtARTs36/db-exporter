@@ -3,8 +3,9 @@ package diagram
 import "github.com/artarts36/db-exporter/internal/schema"
 
 type diagramTable struct {
-	Name    string
-	Columns []*diagramColumn
+	Name                   string
+	Columns                []*diagramColumn
+	PrimaryKeyColumnsCount int
 }
 
 type diagramColumn struct {
@@ -20,6 +21,9 @@ func mapTable(tbl *schema.Table) *diagramTable {
 	table := &diagramTable{
 		Name:    tbl.Name.Value,
 		Columns: make([]*diagramColumn, 0, len(tbl.Columns)),
+	}
+	if tbl.PrimaryKey != nil {
+		table.PrimaryKeyColumnsCount = tbl.PrimaryKey.ColumnsNames.Len()
 	}
 
 	for _, col := range tbl.Columns {
