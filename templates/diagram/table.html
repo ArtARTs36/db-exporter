@@ -1,26 +1,18 @@
 <TABLE BORDER="0" CELLBORDER="1" BORDERCOLOR="red" CELLSPACING="0" CELLPADDING="5">
     <TH>
-        <TD colspan="3" width="100px;" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER">
+        <TD colspan="2" width="100px;" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER">
             <font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font>
         </TD>
     </TH>
     {% for col in table.Columns %}
     <TR width="100%;">
         {% set column_bg = "#ffffff" %}
-        {% if loop.index % 2 == 0 %}
+        {% if col.IsPrimaryKey %}
+        {% set column_bg = "#fcebc7" %}
+        {% elseif loop.index % 2 == 0 %}
         {% set column_bg = "#dfe6e9" %}
         {% endif %}
 
-        {% set column_key_img = "data" %}
-        {% if col.IsPrimaryKey %}
-        {% set column_key_img = "pk" %}
-        {% elseif col.HasForeignKey %}
-        {% set column_key_img = "fk" %}
-        {% elseif col.IsUniqueKey %}
-        {% set column_key_img = "uk" %}
-        {% endif %}
-
-        <TD bgcolor="{{ column_bg }}" ALIGN="CENTER"><IMG SRC="./templates/diagram/{{ column_key_img }}.png" SCALE="false"/></TD>
         <TD bgcolor="{{ column_bg }}" ALIGN="CENTER">{{ col.Name }}</TD>
         <TD bgcolor="{{ column_bg }}" ALIGN="CENTER">{{ col.Type }}</TD>
     </TR>
