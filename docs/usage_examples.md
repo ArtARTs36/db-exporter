@@ -64,6 +64,33 @@ jobs:
 
 ## Export schema from PostgreSQL to Markdown
 
+Our schema for users and countries:
+```sql
+CREATE TABLE users
+(
+    id   integer NOT NULL,
+    name character varying NOT NULL,
+    country_id integer,
+    balance real NOT NULL,
+    prev_balance real,
+    phone character varying,
+    created_at timestamp NOT NULL,
+    updated_at timestamp,
+
+    CONSTRAINT users_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE countries
+(
+    id integer NOT NULL,
+    name character varying NOT NULL,
+
+    CONSTRAINT countries_pk PRIMARY KEY (id)
+);
+
+ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);
+```
+
 Add config file as `.db-exporter.yaml`
 
 ```yaml
@@ -83,6 +110,10 @@ tasks:
 ```
 
 Run: `PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" db-exporter`
+
+**Result**
+
+![](usage_example.diagram.png)
 
 ## Export schema to Go entities and repositories
 

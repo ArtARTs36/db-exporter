@@ -9,23 +9,23 @@
 
 **Exporters**
 
-| Exporter                 | Description                                                                    | Usage example                                                                                                           |
-|--------------------------|--------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `ddl`                    | Exports DDL from database schema                                               |                                                                                                                         |
-| `csv`                    | Exports data from tables                                                       |                                                                                                                         |
-| `md`                     | Exports database schema to Markdown                                            | [⌗ Export schema from PostgreSQL to Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)       |
-| `diagram`                | Exports database schema as image of Class Diagram                              |                                                                                                                         |
-| `go-entities`            | Go structures with db tags                                                     | [Export schema to Go entities and repositories](./docs/usage_examples.md#export-schema-to-go-entities-and-repositories) |
-| `go-entity-repository`   | Go structures with db tags and repositories                                    |                                                                                                                         |
-| `goose`                  | Goose migrations                                                               |                                                                                                                         |
-| `goose-fixtures`         | Exports data from tables as inserts to Goose migrations                        |                                                                                                                         |
-| `go-sql-migrate`         | Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate)            |                                                                                                                         |
-| `laravel-migrations-raw` | Raw SQL Laravel migrations                                                     |                                                                                                                         |
-| `laravel-models`         | Exports database schema as Laravel models                                      |                                                                                                                         |
-| `json-schema`            | Exports database schema to [JSON Schema](https://json-schema.org)              |                                                                                                                         |
-| `graphql`                | Exports database schema to [GraphQL](https://graphql.org/learn/schema) types   |                                                                                                                         |
-| `dbml`                   | Exports database schema to DBML (table, ref, enum)                             |                                                                                                                         |
-| `custom`                 | export db schema by your template with [Twig](https://twig.symfony.com) syntax | [Generating .txt files from a template built into the configuration](./docs/usage_custom.md)                            |
+| Exporter                 | Description                                                                    | Usage example                                                                                                 |
+|--------------------------|--------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `ddl`                    | Exports DDL from database schema                                               |                                                                                                               |
+| `csv`                    | Exports data from tables                                                       |                                                                                                               |
+| `md`                     | Exports database schema to Markdown                                            | [Schema ➡️ Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)                      |
+| `diagram`                | Exports database schema as image of Class Diagram                              |                                                                                                               |
+| `go-entities`            | Go structures with db tags                                                     | [Schema ➡️ Go entities, repositories](./docs/usage_examples.md#export-schema-to-go-entities-and-repositories) |
+| `go-entity-repository`   | Go structures with db tags and repositories                                    |                                                                                                               |
+| `goose`                  | Goose migrations                                                               |                                                                                                               |
+| `goose-fixtures`         | Exports data from tables as inserts to Goose migrations                        |                                                                                                               |
+| `go-sql-migrate`         | Migrations for [sql-migrate](https://github.com/rubenv/sql-migrate)            |                                                                                                               |
+| `laravel-migrations-raw` | Raw SQL Laravel migrations                                                     |                                                                                                               |
+| `laravel-models`         | Exports database schema as Laravel models                                      |                                                                                                               |
+| `json-schema`            | Exports database schema to [JSON Schema](https://json-schema.org)              |                                                                                                               |
+| `graphql`                | Exports database schema to [GraphQL](https://graphql.org/learn/schema) types   |                                                                                                               |
+| `dbml`                   | Exports database schema to DBML (table, ref, enum)                             |                                                                                                               |
+| `custom`                 | export db schema by your template with [Twig](https://twig.symfony.com) syntax | [Generating .txt files from a template built into the configuration](./docs/usage_custom.md)                  |
 
 Supported database schemas:
 - PostgreSQL

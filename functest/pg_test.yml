@@ -37,6 +37,14 @@ tasks:
   pg/diagram:
     activities:
       - format: diagram
+        spec:
+          style:
+            font:
+              family: courier
+
+            background:
+              grid:
+                cell_size: 20
         out:
           dir: ./out
 
