@@ -123,4 +123,5 @@ jobs:
         with:
           artifacts: "dist/*.zip"
           generateReleaseNotes: false
+          omitBodyDuringUpdate: true
           allowUpdates: true
