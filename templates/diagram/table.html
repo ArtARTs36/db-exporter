@@ -6,31 +6,22 @@
     </TR>
     {% for col in table.Columns %}
     <TR width="100%">
+        {% set column_bg = "#ffffff" %}
         {% if loop.index % 2 == 0 %}
-            {% if col.IsPrimaryKey %}
-            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
-            {% elseif col.HasForeignKey %}
-            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
-            {% elseif col.IsUniqueKey %}
-            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
-            {% else %}
-            <td bgcolor="#dfe6e9" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
-            {% endif %}
-        <TD bgcolor="#dfe6e9" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
-        <TD bgcolor="#dfe6e9" width="45%" ALIGN="CENTER">{{ col.Type }}</TD>
-        {% else %}
-            {% if col.IsPrimaryKey %}
-            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
-            {% elseif col.HasForeignKey %}
-            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
-            {% elseif col.IsUniqueKey %}
-            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
-            {% else %}
-            <td bgcolor="#ffffff" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
-            {% endif %}
-        <TD bgcolor="#ffffff" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
-        <TD bgcolor="#ffffff" width="45%" ALIGN="CENTER">{{ col.Type }} </TD>
+        {% set column_bg = "#dfe6e9" %}
         {% endif %}
+
+        {% if col.IsPrimaryKey %}
+        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
+        {% elseif col.HasForeignKey %}
+        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
+        {% elseif col.IsUniqueKey %}
+        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
+        {% else %}
+        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
+        {% endif %}
+        <TD bgcolor="{{ column_bg }}" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
+        <TD bgcolor="{{ column_bg }}" width="45%" ALIGN="CENTER">{{ col.Type }}</TD>
     </TR>
     {% endfor %}
 </TABLE>
