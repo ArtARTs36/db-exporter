@@ -44,6 +44,9 @@ func (g *Graph) CreateNode(name string) (*Node, error) {
 	}
 
 	node.SetShape(cgraph.PlainTextShape)
+	if err = node.SafeSet("labeljust", "c", ""); err != nil {
+		return nil, fmt.Errorf("set labeljust: %w", err)
+	}
 
 	return &Node{node: node, graph: g.graph}, nil
 }

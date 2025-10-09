@@ -11,15 +11,16 @@
         {% set column_bg = "#dfe6e9" %}
         {% endif %}
 
+        {% set column_key_img = "data" %}
         {% if col.IsPrimaryKey %}
-        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/pk.png" SCALE="false"/></td>
+        {% set column_key_img = "pk" %}
         {% elseif col.HasForeignKey %}
-        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/fk.png" SCALE="false"/></td>
+        {% set column_key_img = "fk" %}
         {% elseif col.IsUniqueKey %}
-        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/uk.png" SCALE="false"/></td>
-        {% else %}
-        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/data.png" SCALE="false"/></td>
+        {% set column_key_img = "uk" %}
         {% endif %}
+
+        <td bgcolor="{{ column_bg }}" width="10%" ALIGN="CENTER"><IMG SRC="./templates/diagram/{{ column_key_img }}.png" SCALE="false"/></td>
         <TD bgcolor="{{ column_bg }}" width="45%" ALIGN="CENTER">{{ col.Name }}{% if col.IsPrimaryKey %}{% endif %}</TD>
         <TD bgcolor="{{ column_bg }}" width="45%" ALIGN="CENTER">{{ col.Type }}</TD>
     </TR>
