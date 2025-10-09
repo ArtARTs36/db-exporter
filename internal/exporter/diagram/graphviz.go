@@ -30,15 +30,22 @@ func (b *GraphBuilder) Build(
 		return nil, fmt.Errorf("build graph: %w", err)
 	}
 
-	defer func() {
-		if err = graph.Close(); err != nil {
-			slog.Warn("failed to close graph", slog.String("err", err.Error()))
+	slog.Debug("[diagram] generating diagram")
+
+	img, err := graph.Build(ctx)
+	if err != nil {
+		if cerr := graph.Close(); cerr != nil {
+			slog.Warn("failed to close graph", slog.Any("err", cerr))
 		}
-	}()
 
-	slog.Debug("[diagram] generating svg diagram")
+		return nil, fmt.Errorf("build graph: %w", err)
+	}
 
-	return graph.Build(ctx)
+	if err = graph.Close(); err != nil {
+		return nil, fmt.Errorf("close graph: %w", err)
+	}
+
+	return img, nil
 }
 
 func (b *GraphBuilder) buildGraph(
