@@ -2,7 +2,7 @@ package sqltype
 
 import "github.com/artarts36/db-exporter/internal/schema"
 
-// PG([a-zA-Z1-9]+)\s+= schema.Type\{Name: "(.*)"
+// PG([a-zA-Z1-9]+)\s+= schema.DataType\{Name: "(.*)"
 
 var (
 	PGText             = schema.Type{Name: "text", IsStringable: false}

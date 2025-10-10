@@ -2,6 +2,15 @@ package mermaid
 
 import "strings"
 
+type KeyType string
+
+const (
+	KeyTypeUnspecified KeyType = ""
+	KeyTypePK          KeyType = "PK"
+	KeyTypeFK          KeyType = "FK"
+	KeyTypeUK          KeyType = "UK"
+)
+
 type ErDiagram struct {
 	entities  []*Entity
 	relations []*Relation
@@ -20,8 +29,9 @@ type Entity struct {
 }
 
 type EntityField struct {
-	Name string
-	Type string
+	Name     string
+	DataType string
+	KeyType  KeyType
 }
 
 type Relation struct {
@@ -79,17 +89,22 @@ func (e *Entity) build(builder *strings.Builder, indent string) {
 
 func (f *EntityField) build(builder *strings.Builder, indent string) {
 	write(builder, indent)
-	write(builder, f.Type)
+	write(builder, f.DataType)
 	write(builder, " ")
 	write(builder, f.Name)
+
+	if f.KeyType != KeyTypeUnspecified {
+		write(builder, " ")
+		write(builder, string(f.KeyType))
+	}
 }
 
 func (r *Relation) build(builder *strings.Builder, indent string) {
 	builder.WriteString(indent)
-	write(builder, r.Owner)
-	write(builder, " ")
-	write(builder, "||--|{ ")
 	write(builder, r.Related)
+	write(builder, " ")
+	write(builder, "||--o{ ")
+	write(builder, r.Owner)
 	write(builder, " : ")
 	write(builder, r.Action)
 }

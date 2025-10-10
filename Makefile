@@ -49,3 +49,6 @@ functest/mysql:
 .PHONY: try
 try:
 	PG_DSN=${PG_DSN} go run ./cmd/main.go --tasks=gen_json_schema
+
+.PHONY: check
+check: lint test functest

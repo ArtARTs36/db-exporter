@@ -5,7 +5,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
 
-// DBML([a-zA-Z1-9]+)\s+= schema.Type\{Name: "(.*)"(.*)
+// DBML([a-zA-Z1-9]+)\s+= schema.DataType\{Name: "(.*)"(.*)
 
 var (
 	DBMLChar    = schema.Type{Name: "char", IsStringable: true}

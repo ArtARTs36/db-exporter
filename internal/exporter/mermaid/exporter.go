@@ -63,8 +63,9 @@ func (e *Exporter) addTableToDiagram(diagram *mermaid.ErDiagram, table *schema.T
 
 	for i, column := range table.Columns {
 		fields[i] = &mermaid.EntityField{
-			Name: column.Name.Pascal().Singular().Value,
-			Type: e.mapFieldType(column.Type),
+			Name:     column.Name.Pascal().Singular().Value,
+			DataType: e.mapFieldType(column.Type),
+			KeyType:  e.mapKeyType(column),
 		}
 	}
 
@@ -76,7 +77,7 @@ func (e *Exporter) addTableToDiagram(diagram *mermaid.ErDiagram, table *schema.T
 		diagram.AddRelation(&mermaid.Relation{
 			Owner:   entityName,
 			Related: fk.ForeignTable.Pascal().Singular().Value,
-			Action:  "includes",
+			Action:  "has",
 		})
 	}
 }
@@ -95,4 +96,17 @@ func (e *Exporter) mapFieldType(typ schema.Type) string {
 		return "string"
 	}
 	return typ.Name
+}
+
+func (*Exporter) mapKeyType(col *schema.Column) mermaid.KeyType {
+	switch {
+	case col.IsPrimaryKey():
+		return mermaid.KeyTypePK
+	case col.HasForeignKey():
+		return mermaid.KeyTypeFK
+	case col.IsUniqueKey():
+		return mermaid.KeyTypeUK
+	default:
+		return mermaid.KeyTypeUnspecified
+	}
 }

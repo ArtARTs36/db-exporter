@@ -13,12 +13,13 @@ func TestErDiagram_Build(t *testing.T) {
 		Name: "Customer",
 		Fields: []*EntityField{
 			{
-				Name: "id",
-				Type: "string",
+				Name:     "id",
+				DataType: "string",
+				KeyType:  KeyTypePK,
 			},
 			{
-				Name: "name",
-				Type: "string",
+				Name:     "name",
+				DataType: "string",
 			},
 		},
 	})
@@ -27,16 +28,18 @@ func TestErDiagram_Build(t *testing.T) {
 		Name: "Order",
 		Fields: []*EntityField{
 			{
-				Name: "id",
-				Type: "string",
+				Name:     "id",
+				DataType: "string",
+				KeyType:  KeyTypePK,
 			},
 			{
-				Name: "date",
-				Type: "date",
+				Name:     "date",
+				DataType: "date",
 			},
 			{
-				Name: "customer_id",
-				Type: "string",
+				Name:     "customer_id",
+				DataType: "string",
+				KeyType:  KeyTypeFK,
 			},
 		},
 	})
@@ -48,15 +51,15 @@ func TestErDiagram_Build(t *testing.T) {
 	})
 
 	expected := `erDiagram
-  Order ||--|{ Customer : includes
+  Customer ||--o{ Order : includes
   Customer {
-    string id
+    string id PK
     string name
   }
   Order {
-    string id
+    string id PK
     date date
-    string customer_id
+    string customer_id FK
   }
 `
 
