@@ -29,6 +29,7 @@ const (
 	ExporterNameGraphql              ExporterName = "graphql"
 	ExporterNameDBML                 ExporterName = "dbml"
 	ExporterNameCustom               ExporterName = "custom"
+	ExporterNameMermaid              ExporterName = "mermaid"
 )
 
 type GoEntitiesExportSpec struct {
@@ -166,7 +167,6 @@ func (s *DiagramExportSpec) Validate() error {
 	if s.Style.Background.Color == nil {
 		s.Style.Background.Color = &specw.Color{
 			Color: colornames.White,
-			Raw:   "white",
 		}
 	}
 

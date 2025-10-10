@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/webcolor"
 	"github.com/artarts36/specw"
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
@@ -34,7 +33,7 @@ func CreateGraph(ctx context.Context) (*Graph, error) {
 }
 
 func (g *Graph) SetBackgroundColor(color specw.Color) {
-	g.graph.SetBackgroundColor(webcolor.Fix(color.Raw))
+	g.graph.SetBackgroundColor(color.Hex())
 }
 
 func (g *Graph) CreateNode(name string) (*Node, error) {

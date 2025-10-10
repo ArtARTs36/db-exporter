@@ -8,6 +8,12 @@ databases:
     dsn: "./test.dbml"
 
 tasks:
+  gen_mmd:
+    activities:
+      - format: mermaid
+        out:
+          dir: ./
+
   diagram:
     activities:
       - format: diagram

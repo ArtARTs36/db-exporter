@@ -13,6 +13,8 @@ github.com/artarts36/specw v0.0.0-20251008193116-762495efd002 h1:qQ6cESrM0jX2LHC
 github.com/artarts36/specw v0.0.0-20251008193116-762495efd002/go.mod h1:3KYcrWB3VEydbzpmggqcjEGjhgCBVIXAS6qD3arq91s=
 github.com/artarts36/specw v0.0.0-20251008201303-7a3a3e0572d3 h1:p6qbjq2Efpj6zkAJnVVwsNji0Xv0AGtHe9U8iyG3iVk=
 github.com/artarts36/specw v0.0.0-20251008201303-7a3a3e0572d3/go.mod h1:3KYcrWB3VEydbzpmggqcjEGjhgCBVIXAS6qD3arq91s=
+github.com/artarts36/specw v0.0.0-20251009150226-695f7e6cabe1 h1:Ma9BOm7Z2PCt8bEuygrGSK2eD5WIycilqhZ+ZCddMgs=
+github.com/artarts36/specw v0.0.0-20251009150226-695f7e6cabe1/go.mod h1:3KYcrWB3VEydbzpmggqcjEGjhgCBVIXAS6qD3arq91s=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6 h1:aLd6YRH0sAW5ev/Y4EZ6e1s9ZvhAJEoWZNvDTt9760E=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6/go.mod h1:00Cif8xUIQfAtpQ5cuPt9T9dDNJ9bGcY9ev/JpcR0tc=
 github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc6/go.mod h1:WkB+h0Fx4qiLAgeFw1xLc1gGwqhOdtndUUmHC6Cww/M=

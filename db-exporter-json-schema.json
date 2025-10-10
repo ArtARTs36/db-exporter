@@ -103,7 +103,7 @@
           "enum": [
             "md", "diagram", "go-entities", "goose", "goose-fixtures", "go-sql-migrate",
             "laravel-migrations-raw", "laravel-models", "grpc-crud", "csv",
-            "go-entity-repository", "json-schema", "graphql", "dbml", "custom", "ddl"
+            "go-entity-repository", "json-schema", "graphql", "dbml", "custom", "ddl", "mermaid"
           ]
         },
         "database": {
@@ -187,6 +187,13 @@
     "discriminator": {
       "type": "object",
       "oneOf": [
+        {
+          "properties": {
+            "format": {
+              "const": "mermaid"
+            }
+          }
+        },
         {
           "properties": {
             "format": {

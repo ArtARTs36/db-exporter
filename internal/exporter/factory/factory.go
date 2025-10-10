@@ -17,6 +17,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
+	"github.com/artarts36/db-exporter/internal/exporter/mermaid"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -71,5 +72,6 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameDBML:       dbml.NewExporter(),
 		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
 		config.ExporterNameDDL:        ddl.NewExporter(pager, ddlBuilderManager),
+		config.ExporterNameMermaid:    mermaid.NewExporter(),
 	}
 }

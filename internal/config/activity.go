@@ -70,7 +70,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	var spec interface{}
 
 	switch format {
-	case ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML:
+	case ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML, ExporterNameMermaid:
 	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
 		spec = new(MigrationsSpec)
 	case ExporterNameGoEntities:
