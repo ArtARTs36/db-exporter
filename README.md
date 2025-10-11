@@ -46,6 +46,8 @@ Usage examples
   db-exporter --config db.yaml  Run db-exporter with custom config path
 ```
 
+<center><img src="./docs/principle.png"></center>
+
 ## Configuration
 
 The exporter operates on tasks that have activities.

@@ -12,6 +12,8 @@ import (
 	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
 	"os"
+	"runtime"
+	"time"
 )
 
 type Command struct {
@@ -48,6 +50,7 @@ type CommandRunParams struct {
 }
 
 func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
+	start := time.Now()
 	tasks := make(map[string]config.Task, 0)
 	dbs := make(map[string]config.Database, 0)
 
@@ -85,6 +88,10 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	if err != nil {
 		return err
 	}
+
+	slog.DebugContext(ctx, "[command] db-exporter finished",
+		slog.String("execution_time", time.Since(start).String()),
+	)
 
 	if params.Config.Options.PrintStat {
 		c.printStat(result)
@@ -201,6 +208,13 @@ func (c *Command) printStat(result *task.ActivityResult) {
 	}
 
 	printExport()
+}
+
+func getTotalUsedMemory() string {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	return fmt.Sprintf("%v MiB", m.TotalAlloc/1024/1024)
 }
 
 func databaseNames(dbs map[string]config.Database) []string {
