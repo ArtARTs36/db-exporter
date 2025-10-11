@@ -66,21 +66,21 @@ func (b *GraphBuilder) buildGraph(
 
 	graph.SetFontName(spec.Style.Font.Family)
 
-	slog.Debug("[graphbuilder] mapping graph")
+	slog.DebugContext(ctx, "[graphbuilder] mapping graph")
 
 	tablesNodes, err := b.buildNodes(graph, tables, spec)
 	if err != nil {
 		return nil, fmt.Errorf("build nodes: %w", err)
 	}
 
-	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
+	slog.DebugContext(ctx, fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
 
 	edgesCount, err := b.buildEdges(graph, tables, tablesNodes, spec)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build edges: %w", err)
 	}
 
-	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
+	slog.DebugContext(ctx, fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
 
 	return graph, nil
 }

@@ -19,7 +19,7 @@ func (s *stringOrStringSlice) IsString() bool {
 }
 
 func (s *stringOrStringSlice) UnmarshalYAML(n *yaml.Node) error {
-	if n.Kind == yaml.ScalarNode {
+	if n.Kind == yaml.ScalarNode { //nolint:staticcheck // not need
 		s.Set = *gds.NewSet[string](n.Value)
 
 		s.isString = true
