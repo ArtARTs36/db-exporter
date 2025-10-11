@@ -6,6 +6,9 @@ on:
       - released
       - prereleased
 
+env:
+  GO_VERSION: 1.24
+
 jobs:
   release-docker:
     name: Release docker image
@@ -71,7 +74,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v3
         with:
           xgo_version: latest
-          go_version: 1.22
+          go_version: $GO_VERSION
           dest: dist
           pkg: ./cmd
           prefix: db-exporter

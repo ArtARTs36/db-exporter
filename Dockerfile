@@ -19,6 +19,8 @@ RUN GOOS=linux CGO_ENABLED=1 go build -trimpath -ldflags="-s -w -extldflags=-sta
 
 FROM alpine
 
+WORKDIR /app
+
 RUN apk add tini git
 
 COPY --from=builder /go/bin/db-exporter /go/bin/db-exporter
