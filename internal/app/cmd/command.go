@@ -12,7 +12,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -208,13 +207,6 @@ func (c *Command) printStat(result *task.ActivityResult) {
 	}
 
 	printExport()
-}
-
-func getTotalUsedMemory() string {
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-
-	return fmt.Sprintf("%v MiB", m.TotalAlloc/1024/1024)
 }
 
 func databaseNames(dbs map[string]config.Database) []string {
