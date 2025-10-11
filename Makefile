@@ -52,3 +52,11 @@ try:
 
 .PHONY: check
 check: lint test functest
+
+.PHONY: build/docker
+build/docker:
+	docker buildx build --platform linux/amd64 -t artarts36/db-exporter:local .
+
+.PHONY: try/docker
+try/docker:
+	docker run --platform linux/amd64 -v ./:/app artarts36/db-exporter:local --config=/app/.db-exporter.yaml

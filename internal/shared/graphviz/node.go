@@ -1,13 +1,12 @@
 package graphviz
 
 import (
-	"fmt"
-	"github.com/goccy/go-graphviz"
+	"github.com/goccy/go-graphviz/cgraph"
 )
 
 type Node struct {
-	node  *graphviz.Node
-	graph *graphviz.Graph
+	node  *cgraph.Node
+	graph *cgraph.Graph
 }
 
 func (g *Node) SetFontSize(size float64) {
@@ -15,14 +14,12 @@ func (g *Node) SetFontSize(size float64) {
 }
 
 func (g *Node) SetFontName(fontName string) error {
-	return g.node.SafeSet("fontname", fontName, "")
+	g.node.SafeSet("fontname", fontName, "")
+	return nil
 }
 
 func (g *Node) WriteHTML(plainHTML string) error {
-	preparedHTML, err := g.graph.StrdupHTML(plainHTML)
-	if err != nil {
-		return fmt.Errorf("prepare HTML: %w", err)
-	}
+	preparedHTML := g.graph.StrdupHTML(plainHTML)
 
 	g.node.SetLabel(preparedHTML)
 

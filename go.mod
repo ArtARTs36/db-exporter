@@ -14,7 +14,7 @@ require (
 	github.com/buildkite/interpolate v0.1.4
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/goccy/go-graphviz v0.2.9
+	github.com/goccy/go-graphviz v0.1.3
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.9
 	github.com/stretchr/testify v1.10.0
@@ -37,6 +37,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
 	github.com/tetratelabs/wazero v1.8.1 // indirect

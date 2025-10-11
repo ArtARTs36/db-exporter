@@ -1,9 +1,11 @@
 package graphviz
 
-import "github.com/goccy/go-graphviz"
+import (
+	"github.com/goccy/go-graphviz/cgraph"
+)
 
 type Edge struct {
-	edge *graphviz.Edge
+	edge *cgraph.Edge
 }
 
 func (e *Edge) WriteText(txt string) {
@@ -15,5 +17,6 @@ func (e *Edge) SetFontSize(size float64) {
 }
 
 func (e *Edge) SetFontName(fontName string) error {
-	return e.edge.SafeSet("fontname", fontName, "")
+	e.edge.SafeSet("fontname", fontName, "")
+	return nil
 }

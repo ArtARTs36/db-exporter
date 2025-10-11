@@ -64,6 +64,8 @@ func (b *GraphBuilder) buildGraph(
 		graph.WithoutBackground()
 	}
 
+	graph.SetFontName(spec.Style.Font.Family)
+
 	slog.Debug("[graphbuilder] mapping graph")
 
 	tablesNodes, err := b.buildNodes(graph, tables, spec)
