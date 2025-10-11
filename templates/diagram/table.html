@@ -1,6 +1,6 @@
-<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="5">
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" width="100%">
     <TH width="100%;">
-        <TD colspan="2" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER"><font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font></TD>
+        <TD colspan="2" bgcolor="{{ style.Table.Name.BackgroundColor }}" ALIGN="CENTER" width="100%"><font color="{{ style.Table.Name.TextColor }}">{{ table.Name }}</font></TD>
     </TH>
     {% for col in table.Columns %}
     {% set column_bg = "#ffffff" %}
@@ -9,9 +9,13 @@
     {% elseif (loop.index - table.PrimaryKeyColumnsCount) % 2 == 0 %}
     {% set column_bg = "#dfe6e9" %}
     {% endif %}
+    {% set td_spaces = "" %}
+    {% if style.Font.Family != "courier" %}
+    {% set td_spaces = "   " %}
+    {% endif %}
     <TR width="100%;">
-        <TD bgcolor="{{ column_bg }}" ALIGN="LEFT">{{ col.Name }}</TD>
-        <TD bgcolor="{{ column_bg }}" ALIGN="LEFT">{{ col.Type }}</TD>
+        <TD bgcolor="{{ column_bg }}" ALIGN="LEFT" width="100%">{{ col.Name }}{{ td_spaces }}</TD>
+        <TD bgcolor="{{ column_bg }}" ALIGN="LEFT" width="100%">{{ col.Type }}{{ td_spaces }}</TD>
     </TR>
     {% endfor %}
 </TABLE>

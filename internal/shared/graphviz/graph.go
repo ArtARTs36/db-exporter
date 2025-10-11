@@ -1,7 +1,6 @@
 package graphviz
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/artarts36/specw"
@@ -15,7 +14,7 @@ type Graph struct {
 	graphviz *graphviz.Graphviz
 }
 
-func CreateGraph(ctx context.Context) (*Graph, error) {
+func CreateGraph() (*Graph, error) {
 	gv := graphviz.New()
 
 	gvGraph, err := gv.Graph()
@@ -42,13 +41,14 @@ func (g *Graph) CreateNode(name string) (*Node, error) {
 	node.SafeSet("labeljust", "c", "")
 
 	node.SetShape(cgraph.PlainTextShape)
+	node.SafeSet("margin", "0.0", "")
+	node.SafeSet("pad", "5", "")
 
 	return &Node{node: node, graph: g.graph}, nil
 }
 
-func (g *Graph) SetFontName(fontName string) error {
+func (g *Graph) SetFontName(fontName string) {
 	g.graph.SafeSet("fontname", fontName, "")
-	return nil
 }
 
 func (g *Graph) CreateEdge(edgeName string, startNode *Node, endNode *Node) (*Edge, error) {
@@ -78,7 +78,7 @@ func (g *Graph) WithoutBackground() {
 	g.graph.SetBackgroundColor("transparent")
 }
 
-func (g *Graph) Build(ctx context.Context) (image.Image, error) {
+func (g *Graph) Build() (image.Image, error) {
 	img, err := g.graphviz.RenderImage(g.graph)
 	if err != nil {
 		return nil, fmt.Errorf("render graphviz image: %w", err)

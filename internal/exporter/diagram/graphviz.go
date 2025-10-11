@@ -32,7 +32,7 @@ func (b *GraphBuilder) Build(
 
 	slog.Debug("[diagram] generating diagram")
 
-	img, err := graph.Build(ctx)
+	img, err := graph.Build()
 	if err != nil {
 		if cerr := graph.Close(); cerr != nil {
 			slog.Warn("failed to close graph", slog.Any("err", cerr))
@@ -53,7 +53,7 @@ func (b *GraphBuilder) buildGraph(
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
 ) (*graphviz2.Graph, error) {
-	graph, err := graphviz2.CreateGraph(ctx)
+	graph, err := graphviz2.CreateGraph()
 	if err != nil {
 		return graph, fmt.Errorf("failed to create graph: %w", err)
 	}

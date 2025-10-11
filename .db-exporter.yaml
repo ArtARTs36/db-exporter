@@ -1,7 +1,7 @@
 databases:
   default:
     driver: postgres
-    dsn: "host=localhost port=5458 user=db password=db dbname=db sslmode=disable"
+    dsn: "host=localhost port=5419 user=test password=test dbname=users sslmode=disable"
 
   dbml:
     driver: dbml
@@ -20,7 +20,7 @@ tasks:
         spec:
           style:
             font:
-              family: roboto
+              size: 32
 
             background:
               grid:
