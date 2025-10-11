@@ -12,6 +12,7 @@ require (
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
 	github.com/buildkite/interpolate v0.1.4
+	github.com/bzick/tokenizer v1.4.10
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-graphviz v0.2.9
@@ -20,6 +21,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tyler-sommer/stick v1.0.6
 	github.com/wk8/go-ordered-map/v2 v2.1.8
+	golang.org/x/image v0.32.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -42,6 +44,5 @@ require (
 	github.com/tetratelabs/wazero v1.8.1 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/image v0.32.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 )
