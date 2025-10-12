@@ -74,7 +74,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v3
         with:
           xgo_version: latest
-          go_version: $GO_VERSION
+          go_version: ${{ env.GO_VERSION }}
           dest: dist
           pkg: ./cmd
           prefix: db-exporter
