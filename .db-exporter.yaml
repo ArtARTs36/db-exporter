@@ -16,7 +16,7 @@ tasks:
             background:
               color: 'green'
               grid:
-                cell_size: 10
+                cell_size: 30
                 line_color: red
 
             table:

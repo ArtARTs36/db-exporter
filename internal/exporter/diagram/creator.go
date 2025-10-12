@@ -80,18 +80,36 @@ func (c *Creator) injectGrid(content []byte, grid string) []byte {
 
 func (c *Creator) buildGridString(spec *config.DiagramExportSpec) string {
 	return fmt.Sprintf(`<defs>
-    <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+    <pattern id="gridPattern" width="%d" height="%d" patternUnits="userSpaceOnUse">
       <!-- Horizontal lines -->
-      <path d="M 0 0 L 20 0 M 0 20 L 20 20" stroke="%s" stroke-width="0.5"/>
+      <path d="M 0 0 L %d 0 M 0 %d L %d %d" stroke="%s" stroke-width="0.5"/>
       <!-- Vertical lines -->
-      <path d="M 0 0 L 0 20 M 20 0 L 20 20" stroke="%s" stroke-width="0.5"/>
+      <path d="M 0 0 L 0 %d M %d 0 L %d %d" stroke="%s" stroke-width="0.5"/>
     </pattern>
   </defs>
 <rect x="0" y="0" width="100%%" height="100%%" fill="%s"/>
 <rect x="0" y="0" width="100%%" height="100%%" fill="url(#gridPattern)"/>
 `,
+		// pattern width and height
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+
+		// horizontal path
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+
 		spec.Style.Background.Grid.LineColor.Hex(),
+
+		// vertical path
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
+		spec.Style.Background.Grid.CellSize,
 		spec.Style.Background.Grid.LineColor.Hex(),
+
+		// background color
 		spec.Style.Background.Color.Hex(),
 	)
 }
