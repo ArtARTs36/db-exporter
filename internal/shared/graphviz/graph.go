@@ -7,7 +7,7 @@ import (
 	"github.com/artarts36/specw"
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
-	"image"
+	"io"
 )
 
 type Graph struct {
@@ -24,6 +24,10 @@ func CreateGraph(ctx context.Context) (*Graph, error) {
 	gvGraph, err := gv.Graph()
 	if err != nil {
 		return nil, fmt.Errorf("create graphviz graphv: %w", err)
+	}
+
+	if err = gvGraph.Set("_background", "c 7 -#cccccc p 4 0 0 100 0 100 100 0 100"); err != nil {
+		return nil, fmt.Errorf("create graphviz background: %w", err)
 	}
 
 	return &Graph{
@@ -81,11 +85,6 @@ func (g *Graph) WithoutBackground() {
 	g.graph.SetBackgroundColor("transparent")
 }
 
-func (g *Graph) Build(ctx context.Context) (image.Image, error) {
-	img, err := g.graphviz.RenderImage(ctx, g.graph)
-	if err != nil {
-		return nil, fmt.Errorf("render graphviz image: %w", err)
-	}
-
-	return img, nil
+func (g *Graph) RenderSVG(ctx context.Context, w io.Writer) error {
+	return g.graphviz.Render(ctx, g.graph, "svg", w)
 }

@@ -1,30 +1,23 @@
 databases:
   default:
     driver: postgres
-    dsn: "host=localhost port=5458 user=db password=db dbname=db sslmode=disable"
+    dsn: "host=localhost port=5419 user=test password=test dbname=users sslmode=disable"
 
   dbml:
     driver: dbml
     dsn: "./test.dbml"
 
 tasks:
-  gen_mmd:
-    activities:
-      - format: mermaid
-        out:
-          dir: ./
-
   diagram:
     activities:
       - format: diagram
         spec:
           style:
-            font:
-              family: roboto
-
             background:
+              color: 'green'
               grid:
                 cell_size: 10
+                line_color: red
 
             table:
               name:
@@ -32,98 +25,6 @@ tasks:
                 text_color: 'white'
         out:
           dir: ./
-
-  md:
-    activities:
-      - format: md
-        spec:
-          with_diagram: true
-          diagram:
-            style:
-              font:
-                family: courier
-              table:
-                name:
-                  background_color: '#3498db'
-                  text_color: 'white'
-        out:
-          dir: ./out/md
-
-  dbml:
-    activities:
-      - format: dbml
-        out:
-          dir: ./out/dbml
-
-  go-entities:
-    activities:
-      - format: go-entities
-        spec:
-          go_module: github.com/artarts36/repo
-        out:
-          dir: ./out/go-entities
-
-  go-entities-per-table:
-    activities:
-      - format: go-entities
-        table_per_file: true
-        spec:
-          go_module: github.com/artarts36/repo
-        out:
-          dir: ./out/go-entities-per-table
-
-  go_entity_repository:
-    activities:
-      - format: go-entity-repository
-        out:
-          dir: ./out/go-entity-repository
-
-  gen_json_schema:
-    activities:
-      - format: laravel-migrations-raw
-        spec:
-          target: mysql
-        out:
-          dir: ./out/json-schema
-
-  gen_goose_migrations:
-    activities:
-      - format: goose
-        out:
-          dir: ./out/goose/common
-
-  gen_goose_migrations_per:
-    activities:
-      - format: goose
-        table_per_file: true
-        out:
-          dir: ./out/goose/per
-
-  gen_goose_migrations_mysql:
-    activities:
-      - format: goose
-        spec:
-          target: mysql
-        out:
-          dir: ./out/goose_mysql
-
-  gen_laravel_raw_migrations:
-    activities:
-      - format: laravel-migrations-raw
-        table_per_file: true
-        spec:
-          use:
-            if_not_exists: true
-            if_exists: true
-        out:
-          dir: ./out/laravel-migrations-raw
-
-  gen_graphql:
-    activities:
-      - format: graphql
-        table_per_file: true
-        out:
-          dir: ./out/graphql
 
 options:
   print_stat: true
