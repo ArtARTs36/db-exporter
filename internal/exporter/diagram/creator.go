@@ -69,7 +69,7 @@ func (c *Creator) injectGrid(content []byte, grid string) []byte {
 			buf.WriteRune('\n')
 			buf.WriteString(grid)
 
-			injector = func(i int, char byte) {
+			injector = func(_ int, char byte) {
 				buf.WriteByte(char)
 			}
 

@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+const pngDPI = 96.0
+
 type PNGRenderer struct {
 }
 
@@ -46,7 +48,7 @@ func (r *PNGRenderer) Render(
 	}
 
 	tree, err := worker.NewTreeFromData(svg, &resvg.Options{
-		Dpi: 96.0,
+		Dpi: pngDPI,
 
 		// Set rendering modes
 		ShapeRenderingMode: resvg.ShapeRenderingModeGeometricPrecision,
