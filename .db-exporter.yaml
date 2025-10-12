@@ -12,12 +12,16 @@ tasks:
     activities:
       - format: diagram
         spec:
+          image:
+            format: png
+
           style:
+            font:
+              family: Jetb
+
             background:
-              color: 'green'
               grid:
-                cell_size: 30
-                line_color: red
+                line_color: '#ccc'
 
             table:
               name:

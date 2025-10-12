@@ -54,7 +54,7 @@ func (b *GraphBuilder) buildGraph(
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
 ) (*graphviz2.Graph, error) {
-	graph, err := graphviz2.CreateGraph(ctx)
+	graph, err := graphviz2.CreateGraph(ctx, spec.Style.Font.Family)
 	if err != nil {
 		return graph, fmt.Errorf("failed to create graph: %w", err)
 	}
@@ -98,10 +98,6 @@ func (b *GraphBuilder) buildNodes(
 		}
 
 		node.SetFontSize(spec.Style.Font.Size)
-
-		if err := node.SetFontName(spec.Style.Font.Family); err != nil {
-			return fmt.Errorf("set font name: %w", err)
-		}
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
@@ -168,10 +164,6 @@ func (b *GraphBuilder) buildEdges(
 			edge.SetFontSize(spec.Style.Font.Size)
 
 			edge.WriteText(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
-
-			if err := edge.SetFontName(spec.Style.Font.Family); err != nil {
-				return fmt.Errorf("set font name for edge: %w", err)
-			}
 		}
 
 		return nil

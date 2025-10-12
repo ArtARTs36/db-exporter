@@ -13,9 +13,10 @@ import (
 type Graph struct {
 	graph    *graphviz.Graph
 	graphviz *graphviz.Graphviz
+	font     string
 }
 
-func CreateGraph(ctx context.Context) (*Graph, error) {
+func CreateGraph(ctx context.Context, font string) (*Graph, error) {
 	gv, err := graphviz.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("create graphviz: %w", err)
@@ -26,13 +27,10 @@ func CreateGraph(ctx context.Context) (*Graph, error) {
 		return nil, fmt.Errorf("create graphviz graphv: %w", err)
 	}
 
-	if err = gvGraph.Set("_background", "c 7 -#cccccc p 4 0 0 100 0 100 100 0 100"); err != nil {
-		return nil, fmt.Errorf("create graphviz background: %w", err)
-	}
-
 	return &Graph{
 		graph:    gvGraph,
 		graphviz: gv,
+		font:     font,
 	}, nil
 }
 
@@ -51,11 +49,9 @@ func (g *Graph) CreateNode(name string) (*Node, error) {
 		return nil, fmt.Errorf("set labeljust: %w", err)
 	}
 
-	return &Node{node: node, graph: g.graph}, nil
-}
+	node.SetFontName(g.font)
 
-func (g *Graph) SetFontName(fontName string) error {
-	return g.graph.SafeSet("fontname", fontName, "")
+	return &Node{node: node, graph: g.graph}, nil
 }
 
 func (g *Graph) CreateEdge(edgeName string, startNode *Node, endNode *Node) (*Edge, error) {
@@ -63,6 +59,8 @@ func (g *Graph) CreateEdge(edgeName string, startNode *Node, endNode *Node) (*Ed
 	if err != nil {
 		return nil, fmt.Errorf("create graphviz edge %s: %w", edgeName, err)
 	}
+
+	edge.SetFontName(g.font)
 
 	return &Edge{edge: edge}, nil
 }

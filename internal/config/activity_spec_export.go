@@ -185,6 +185,10 @@ func (s *DiagramExportSpec) Validate() error {
 		s.Style.Font.Size = defaultFontSize
 	}
 
+	if s.Style.Font.Family == "" {
+		s.Style.Font.Family = "Arial"
+	}
+
 	return nil
 }
 
