@@ -12,12 +12,9 @@ tasks:
     activities:
       - format: diagram
         spec:
-          image:
-            format: png
-
           style:
             font:
-              family: Jetb
+              family: Courier
 
             background:
               grid:
