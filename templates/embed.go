@@ -1,6 +1,8 @@
 package templates
 
-import "embed"
+import (
+	"embed"
+)
 
 //go:embed *
 var FS embed.FS

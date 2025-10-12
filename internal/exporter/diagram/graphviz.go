@@ -8,7 +8,7 @@ import (
 	graphviz2 "github.com/artarts36/db-exporter/internal/shared/graphviz"
 	"github.com/artarts36/db-exporter/internal/template"
 	"github.com/tyler-sommer/stick"
-	"image"
+	"io"
 	"log/slog"
 )
 
@@ -24,28 +24,29 @@ func (b *GraphBuilder) Build(
 	ctx context.Context,
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
-) (image.Image, error) {
+	w io.Writer,
+) error {
 	graph, err := b.buildGraph(ctx, tables, spec)
 	if err != nil {
-		return nil, fmt.Errorf("build graph: %w", err)
+		return fmt.Errorf("build graph: %w", err)
 	}
 
 	slog.Debug("[diagram] generating diagram")
 
-	img, err := graph.Build(ctx)
+	err = graph.RenderSVG(ctx, w)
 	if err != nil {
 		if cerr := graph.Close(); cerr != nil {
 			slog.Warn("failed to close graph", slog.Any("err", cerr))
 		}
 
-		return nil, fmt.Errorf("build graph: %w", err)
+		return fmt.Errorf("build graph: %w", err)
 	}
 
 	if err = graph.Close(); err != nil {
-		return nil, fmt.Errorf("close graph: %w", err)
+		return fmt.Errorf("close graph: %w", err)
 	}
 
-	return img, nil
+	return nil
 }
 
 func (b *GraphBuilder) buildGraph(
@@ -53,15 +54,15 @@ func (b *GraphBuilder) buildGraph(
 	tables *schema.TableMap,
 	spec *config.DiagramExportSpec,
 ) (*graphviz2.Graph, error) {
-	graph, err := graphviz2.CreateGraph(ctx)
+	graph, err := graphviz2.CreateGraph(ctx, spec.Style.Font.Family)
 	if err != nil {
 		return graph, fmt.Errorf("failed to create graph: %w", err)
 	}
 
-	if spec.Style.Background.Grid == nil {
-		graph.SetBackgroundColor(*spec.Style.Background.Color)
-	} else {
+	if spec.Style.Background.Grid != nil {
 		graph.WithoutBackground()
+	} else {
+		graph.SetBackgroundColor(*spec.Style.Background.Color)
 	}
 
 	slog.Debug("[graphbuilder] mapping graph")
@@ -97,10 +98,6 @@ func (b *GraphBuilder) buildNodes(
 		}
 
 		node.SetFontSize(spec.Style.Font.Size)
-
-		if err := node.SetFontName(spec.Style.Font.Family); err != nil {
-			return fmt.Errorf("set font name: %w", err)
-		}
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
@@ -167,10 +164,6 @@ func (b *GraphBuilder) buildEdges(
 			edge.SetFontSize(spec.Style.Font.Size)
 
 			edge.WriteText(fmt.Sprintf("  %s:%s", col.Name.Value, col.ForeignKey.ForeignColumn.Value))
-
-			if err := edge.SetFontName(spec.Style.Font.Family); err != nil {
-				return fmt.Errorf("set font name for edge: %w", err)
-			}
 		}
 
 		return nil

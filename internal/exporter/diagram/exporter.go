@@ -58,7 +58,7 @@ func (e *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([
 	diagram, err := e.buildDiagramPage(
 		ctx,
 		params.Schema.Tables,
-		fmt.Sprintf("diagram.%s", string(spec.Image.Format)),
+		fmt.Sprintf("diagram.%s", spec.Image.Format),
 		spec,
 	)
 	if err != nil {

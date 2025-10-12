@@ -19,13 +19,14 @@ func (s *stringOrStringSlice) IsString() bool {
 }
 
 func (s *stringOrStringSlice) UnmarshalYAML(n *yaml.Node) error {
-	if n.Kind == yaml.ScalarNode {
+	switch n.Kind { //nolint:exhaustive//not need
+	case yaml.ScalarNode:
 		s.Set = *gds.NewSet[string](n.Value)
 
 		s.isString = true
 
 		return nil
-	} else if n.Kind == yaml.SequenceNode {
+	case yaml.SequenceNode:
 		err := n.Decode(&s.Set)
 		if err != nil {
 			return err
