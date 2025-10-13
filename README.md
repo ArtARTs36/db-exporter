@@ -7,6 +7,8 @@
 
 [🚀 Use with GitHub Actions](./docs/usage_examples.md#use-with-github-actions)
 
+[🚀 Use with Gitlab CI](./docs/usage_examples.md#use-with-gitlab-ci)
+
 **Exporters**
 
 | Exporter                 | Description                                                                     | Usage example                                                                                                 |
