@@ -83,12 +83,12 @@ func (c *Committer) resolveBranch() string {
 		return ""
 	}
 
-	b, bok := ci.CurrentBranch()
-	if !bok {
+	branch, ok := ci.CurrentBranch()
+	if !ok {
 		return ""
 	}
 
-	return fmt.Sprintf("HEAD:%s", b)
+	return fmt.Sprintf("HEAD:%s", branch)
 }
 
 func (c *Committer) addFilesToGIt(ctx context.Context, params commitParams) error {
