@@ -62,6 +62,64 @@ jobs:
           tasks: gen_docs
 ````
 
+## 🚀Use with Gitlab CI
+
+You can run `db-exporter` in Gitlab CI.
+
+Add config file `.db-exporter.yaml`:
+```yaml
+databases:
+  default:
+    driver: postgres
+    dsn: $GOOSE_DBSTRING
+
+tasks:
+  gen_docs:
+    commit:
+      message: "[auto] add documentation for database schema"
+      author: 'username <your@mail.ru>'
+      push: true
+    activities:
+      - format: md
+        spec:
+          with_diagram: true
+        out:
+          dir: ./docs
+```
+
+Add `.gitlab-ci.yml`
+```yaml
+variables:
+  # Configure postgres service (https://hub.docker.com/_/postgres/)
+  POSTGRES_DB: users
+  POSTGRES_USER: test
+  POSTGRES_PASSWORD: test
+
+.use-postgres: &use-postgres
+  services:
+    - postgres:17.6-alpine
+
+stages:
+  - db_docs
+
+gen-diagram:
+  <<: *use-postgres
+  stage: db_docs
+  variables:
+    GOOSE_DRIVER: postgres
+    GOOSE_DBSTRING: "host=postgres port=5432 user=test password=test dbname=users sslmode=disable"
+    GOOSE_MIGRATION_DIR: './migrations'
+  script:
+    - echo "download goose"
+    - curl https://github.com/pressly/goose/releases/download/v3.26.0/goose_linux_x86_64 -L -o goose && chmod +x goose
+    - echo "download db-exporter"
+    - curl https://github.com/ArtARTs36/db-exporter/releases/download/v0.5.4/db-exporter-linux-amd64.zip -L -o db-exporter.zip && unzip db-exporter.zip db-exporter && chmod +x db-exporter
+    - echo "run migrations"
+    - ./goose up
+    - echo "run db-exporter"
+    - ./db-exporter --tasks=gen_diagram
+````
+
 ## Export schema from PostgreSQL to Markdown
 
 Our schema for users and countries:
