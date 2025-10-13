@@ -79,10 +79,18 @@ func (g *Git) AddFile(ctx context.Context, filename string) error {
 	return nil
 }
 
-func (g *Git) Push(ctx context.Context) error {
+func (g *Git) Push(ctx context.Context, branch string) error {
 	slog.InfoContext(ctx, "[git] pushing")
 
-	if res, err := g.bin.Run(ctx, "push"); err != nil {
+	args := []string{
+		"push",
+	}
+
+	if branch != "" {
+		args = append(args, "origin", branch)
+	}
+
+	if res, err := g.bin.Run(ctx, args...); err != nil {
 		return fmt.Errorf("failed to execute %q: %w: %s", res.CommandLine, err, res.Stderr)
 	}
 

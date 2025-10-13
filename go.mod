@@ -1,8 +1,6 @@
 module github.com/artarts36/db-exporter
 
-go 1.24.0
-
-toolchain go1.24.7
+go 1.24.7
 
 require (
 	github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18
@@ -12,6 +10,7 @@ require (
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
 	github.com/buildkite/interpolate v0.1.4
+	github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5
 	github.com/flopp/go-findfont v0.1.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-graphviz v0.2.9

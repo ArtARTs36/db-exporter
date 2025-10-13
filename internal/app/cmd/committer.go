@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
+	"github.com/ci-space/cienv"
 	"log/slog"
 	"path"
 
@@ -67,13 +68,27 @@ func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 	}
 
 	if params.Commit.Push {
-		err = c.git.Push(ctx)
+		err = c.git.Push(ctx, c.resolveBranch())
 		if err != nil {
 			return fmt.Errorf("failed to push: %w", err)
 		}
 	}
 
 	return nil
+}
+
+func (c *Committer) resolveBranch() string {
+	ci, ok := cienv.Resolve()
+	if !ok {
+		return ""
+	}
+
+	branch, ok := ci.CurrentBranch()
+	if !ok {
+		return ""
+	}
+
+	return fmt.Sprintf("HEAD:%s", branch)
 }
 
 func (c *Committer) addFilesToGIt(ctx context.Context, params commitParams) error {
