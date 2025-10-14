@@ -10,6 +10,12 @@ github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745 h1:uBS2P11cIO9
 github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745/go.mod h1:fHZ8rEyl67LbKgG7bJqhNK7w0sed4GTp83FLu2IMmBU=
 github.com/artarts36/specw v0.0.0-20251009150226-695f7e6cabe1 h1:Ma9BOm7Z2PCt8bEuygrGSK2eD5WIycilqhZ+ZCddMgs=
 github.com/artarts36/specw v0.0.0-20251009150226-695f7e6cabe1/go.mod h1:3KYcrWB3VEydbzpmggqcjEGjhgCBVIXAS6qD3arq91s=
+github.com/artarts36/specw v0.0.0-20251014004016-748a98a8ea80 h1:rCpmQx8S0qlc3T1tmDdb3VQIg1TcmSrnGrZdZYeluf0=
+github.com/artarts36/specw v0.0.0-20251014004016-748a98a8ea80/go.mod h1:3KYcrWB3VEydbzpmggqcjEGjhgCBVIXAS6qD3arq91s=
+github.com/artarts36/specw v0.0.0-20251014171447-bb50fd6b32e2 h1:J9kDYXfSldytoUFQaWmxmSHoArzwu+byxSFZvGJP3T4=
+github.com/artarts36/specw v0.0.0-20251014171447-bb50fd6b32e2/go.mod h1:6dtnh2tg3D1nUdNEcTQfFTjRMVyreObkgO3JmfEeehg=
+github.com/artarts36/specw v0.0.0-20251014171829-e8b28149c757 h1:ddxpA328ek22h/gLdrY/ZF/AUeKov8ZxvAy6y9UT5AI=
+github.com/artarts36/specw v0.0.0-20251014171829-e8b28149c757/go.mod h1:6dtnh2tg3D1nUdNEcTQfFTjRMVyreObkgO3JmfEeehg=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6 h1:aLd6YRH0sAW5ev/Y4EZ6e1s9ZvhAJEoWZNvDTt9760E=
 github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6/go.mod h1:00Cif8xUIQfAtpQ5cuPt9T9dDNJ9bGcY9ev/JpcR0tc=
 github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc6/go.mod h1:WkB+h0Fx4qiLAgeFw1xLc1gGwqhOdtndUUmHC6Cww/M=
@@ -24,6 +30,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/buildkite/interpolate v0.1.4 h1:qacB5WR+7+Ol1xiJ4xZajHh/CGDdhcMesXR+V3thZPA=
 github.com/buildkite/interpolate v0.1.4/go.mod h1:dHnrwHew5O8VNOAgMDpwRlFnhL5VSN6M1bHVmRZ9Ccc=
+github.com/buildkite/interpolate v0.1.5 h1:v2Ji3voik69UZlbfoqzx+qfcsOKLA61nHdU79VV+tPU=
+github.com/buildkite/interpolate v0.1.5/go.mod h1:dHnrwHew5O8VNOAgMDpwRlFnhL5VSN6M1bHVmRZ9Ccc=
 github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5 h1:yZ5Sz0f1PJEBMQDZE18o/2WHY2cIRolf/lPveMPqT5U=
 github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5/go.mod h1:o+oxOy7xV9q0YLm4q/ylL622QZYZdezh/1zGf6cY3L8=
 github.com/corona10/goimagehash v1.1.0 h1:teNMX/1e+Wn/AYSbLHX8mj+mF9r60R1kBeqE9MkoYwI=

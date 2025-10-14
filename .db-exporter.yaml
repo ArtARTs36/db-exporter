@@ -9,6 +9,8 @@ databases:
 
 tasks:
   diagram:
+    commit:
+      author: 'aaaaa <s>'
     activities:
       - format: diagram
         spec:

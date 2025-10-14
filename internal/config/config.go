@@ -1,28 +1,30 @@
 package config
 
+import "github.com/artarts36/specw"
+
 type Config struct {
-	Databases map[string]Database `yaml:"databases"`
-	Tasks     map[string]Task     `yaml:"tasks"`
+	Databases map[string]Database `yaml:"databases" json:"databases"`
+	Tasks     map[string]Task     `yaml:"tasks" json:"tasks"`
 	Options   struct {
-		WithMigrationsTable bool `yaml:"with_migrations_table"`
-		PrintStat           bool `yaml:"print_stat"`
-		Debug               bool `yaml:"debug"`
+		WithMigrationsTable bool `yaml:"with_migrations_table" json:"with_migrations_table"`
+		PrintStat           bool `yaml:"print_stat" json:"print_stat"`
+		Debug               bool `yaml:"debug" json:"debug"`
 	} `yaml:"options"`
 }
 
 type Task struct {
-	Activities []Activity `yaml:"activities"`
-	Commit     Commit     `yaml:"commit"`
+	Activities []Activity `yaml:"activities" json:"activities"`
+	Commit     Commit     `yaml:"commit" json:"commit"`
 }
 
 type Commit struct {
-	Message string `yaml:"message"`
-	Author  string `yaml:"author"`
-	Push    bool   `yaml:"push"`
+	Message string                         `yaml:"message" json:"message"`
+	Author  *specw.Env[specw.GitCommitter] `yaml:"author" json:"author"`
+	Push    bool                           `yaml:"push" json:"push"`
 }
 
 func (c *Commit) Valid() bool {
-	return c.Message != "" || c.Author != "" || c.Push
+	return c.Message != "" || c.Author != nil || c.Push
 }
 
 func (c *Config) GetDefaultDatabaseName() (string, bool) {

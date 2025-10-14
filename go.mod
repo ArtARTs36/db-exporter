@@ -6,10 +6,10 @@ require (
 	github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18
 	github.com/artarts36/gds v0.2.4
 	github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745
-	github.com/artarts36/specw v0.0.0-20251009150226-695f7e6cabe1
+	github.com/artarts36/specw v0.0.0-20251014171829-e8b28149c757
 	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
 	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
-	github.com/buildkite/interpolate v0.1.4
+	github.com/buildkite/interpolate v0.1.5
 	github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5
 	github.com/flopp/go-findfont v0.1.0
 	github.com/go-sql-driver/mysql v1.9.3

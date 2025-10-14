@@ -86,15 +86,6 @@ func (l *Loader) injectEnvVars(cfg *Config) error {
 
 func (l *Loader) injectEnvVarsToTasks(cfg *Config) error {
 	for taskName, task := range cfg.Tasks {
-		if task.Commit.Author != "" {
-			val, err := l.envInjector.Inject(task.Commit.Author, nil)
-			if err != nil {
-				return fmt.Errorf("tasks[%s]: failed to inject environment variable into author: %w", taskName, err)
-			}
-
-			task.Commit.Author = val
-		}
-
 		for actID, activity := range task.Activities {
 			if activity.Tables.List.IsNotEmpty() && activity.Tables.List.IsString() {
 				val, err := l.envInjector.Inject(activity.Tables.List.First(), &env.InjectOpts{

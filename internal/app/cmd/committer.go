@@ -52,10 +52,11 @@ func (c *Committer) Commit(ctx context.Context, params commitParams) error {
 	}
 
 	var gitAuthor *git.Author
-	if params.Commit.Author != "" {
-		gitAuthor, err = git.NewAuthor(params.Commit.Author)
-		if err != nil {
-			return fmt.Errorf("failed to create git author: %w", err)
+	if params.Commit.Author != nil {
+		gitAuthor = &git.Author{
+			Name:     params.Commit.Author.Value.Name,
+			Email:    params.Commit.Author.Value.Email,
+			Identity: params.Commit.Author.Value.String(),
 		}
 	}
 
