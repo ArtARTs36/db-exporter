@@ -66,16 +66,6 @@ func (l *Loader) Load(path string) (*Config, error) {
 }
 
 func (l *Loader) injectEnvVars(cfg *Config) error {
-	for dbName, database := range cfg.Databases {
-		val, err := l.envInjector.Inject(database.DSN, nil)
-		if err != nil {
-			return fmt.Errorf("database[%s]: failed to inject environment variable: %w", dbName, err)
-		}
-
-		database.DSN = val
-		cfg.Databases[dbName] = database
-	}
-
 	err := l.injectEnvVarsToTasks(cfg)
 	if err != nil {
 		return err
@@ -173,9 +163,9 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 		}
 
 		if database.Driver == DatabaseDriverMySQL {
-			dsn, err := mysql.ParseDSN(database.DSN)
+			dsn, err := mysql.ParseDSN(database.DSN.Value)
 			if err != nil {
-				return fmt.Errorf("parse dsn %q: %w", database.DSN, err)
+				return fmt.Errorf("parse dsn %q: %w", database.DSN.Value, err)
 			}
 			database.Schema = dsn.DBName
 		} else {

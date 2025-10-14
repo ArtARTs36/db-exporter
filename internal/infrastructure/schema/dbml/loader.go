@@ -24,9 +24,9 @@ func NewLoader() *Loader {
 }
 
 func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) {
-	f, err := os.OpenFile(cn.Database().DSN, os.O_RDONLY, 0755)
+	f, err := os.OpenFile(cn.Database().DSN.Value, os.O_RDONLY, 0755)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file %q: %w", cn.Database().DSN, err)
+		return nil, fmt.Errorf("failed to read file %q: %w", cn.Database().DSN.Value, err)
 	}
 
 	parsedDBML, err := parser.Parse(ctx, f)

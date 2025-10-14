@@ -39,7 +39,7 @@ func (c *Connection) Connect(ctx context.Context) (*sqlx.DB, error) {
 	if c.db == nil {
 		slog.DebugContext(ctx, "[db-connection] connecting to database")
 
-		db, err := sqlx.Connect(string(c.cfg.Driver), c.cfg.DSN)
+		db, err := sqlx.Connect(string(c.cfg.Driver), c.cfg.DSN.Value)
 		if err != nil {
 			return nil, err
 		}

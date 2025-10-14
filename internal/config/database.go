@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/artarts36/specw"
 	"slices"
 )
 
@@ -38,9 +39,9 @@ var migrateableDatabaseDrivers = []DatabaseDriver{
 }
 
 type Database struct {
-	Driver DatabaseDriver `yaml:"driver"`
-	DSN    string         `yaml:"dsn"`
-	Schema string         `yaml:"schema"`
+	Driver DatabaseDriver    `yaml:"driver"`
+	DSN    specw.Env[string] `yaml:"dsn"`
+	Schema string            `yaml:"schema"`
 }
 
 func (d DatabaseDriver) Valid() bool {
