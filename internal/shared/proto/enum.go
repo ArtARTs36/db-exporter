@@ -1,6 +1,9 @@
 package proto
 
-import "github.com/artarts36/gds"
+import (
+	"github.com/artarts36/gds"
+	"strconv"
+)
 
 type Enum struct {
 	Name        *gds.String
@@ -30,4 +33,17 @@ func (e *Enum) AddValue(value ...string) {
 	for _, v := range value {
 		e.Values = append(e.Values, e.valuePrefix.Append(gds.NewString(v).Upper().Value).Value)
 	}
+}
+
+func (e *Enum) write(buf stringsBuffer) {
+	buf.WriteString(e.Name.Prepend("enum ").Append(" {").Value)
+
+	buf.WriteString("\n")
+
+	for i, v := range e.Values {
+		buf.WriteString("    " + v + " = " + strconv.Itoa(i) + ";")
+		buf.WriteString("\n")
+	}
+
+	buf.WriteString("}")
 }

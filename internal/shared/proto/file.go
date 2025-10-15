@@ -55,3 +55,75 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 
 	return opts
 }
+
+func (f *File) Render() string {
+	buf := &stringsBuff{}
+
+	f.writeSyntax(buf)
+	f.writePackage(buf)
+	f.writeOptions(buf)
+	f.writeServices(buf)
+	f.writeMessages(buf)
+	f.writeEnums(buf)
+
+	return buf.String()
+}
+
+func (f *File) writeSyntax(buf stringsBuffer) {
+	buf.WriteString("syntax = \"proto3\";\n")
+}
+
+func (f *File) writeImports(buf stringsBuffer) {
+	for _, im := range f.Imports.List() {
+		buf.WriteString("import \"" + im + "\";\n")
+	}
+}
+
+func (f *File) writeOptions(buf stringsBuffer) {
+	for optName, opt := range f.Options {
+		if opt.Quotes {
+			buf.WriteString("option \"" + optName + "\" = \"" + opt.Value + "\";\n")
+		} else {
+			buf.WriteString("option \"" + optName + "\" = " + opt.Value + ";\n")
+		}
+	}
+}
+
+func (f *File) writeServices(buf stringsBuffer) {
+	for _, service := range f.Services {
+		buf.WriteString("\n")
+		service.write(buf)
+	}
+}
+
+func (f *File) writePackage(buf stringsBuffer) {
+	if f.Package == "" {
+		return
+	}
+
+	buf.WriteString("\npackage " + f.Package + ";\n")
+}
+
+func (f *File) writeMessages(buf stringsBuffer) {
+	for i, message := range f.Messages {
+		buf.WriteString("\n")
+		message.write(buf)
+
+		if i < len(f.Messages)-1 {
+			buf.WriteString("\n")
+		}
+	}
+}
+
+func (f *File) writeEnums(buf stringsBuffer) {
+	if len(f.Enums) == 0 {
+		return
+	}
+
+	buf.WriteString("\n")
+
+	for _, enum := range f.Enums {
+		buf.WriteString("\n")
+		enum.write(buf)
+	}
+}
