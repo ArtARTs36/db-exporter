@@ -14,7 +14,7 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
-	return func(srv *service, table *schema.Table) func(proc *procedure) {
+	return func(file *proto.File, srv *service, table *schema.Table) procedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, table.Name.Snake().Lower())
 
 		return func(proc *procedure) {
@@ -34,6 +34,8 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 			default:
 				return
 			}
+
+			file.Imports.Add("google/api/annotations.proto")
 
 			proc.Options = append(proc.Options, opt)
 		}

@@ -171,7 +171,7 @@ func (e *Exporter) buildService(
 
 	srv.Messages = append(srv.Messages, buildCtx.tableMsg.Proto)
 
-	procModifier := createProcModifier(srv, table)
+	procModifier := createProcModifier(prfile, srv, table)
 
 	for procType, builder := range procedureBuilders {
 		proc, err := builder(buildCtx)
