@@ -12,7 +12,7 @@ type Field struct {
 }
 
 func (f *Field) write(buf stringsBuffer) {
-	buf.WriteString("    ")
+	buf.WriteString("  ")
 
 	if f.Repeated {
 		buf.WriteString("repeated ")

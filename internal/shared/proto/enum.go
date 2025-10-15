@@ -35,13 +35,13 @@ func (e *Enum) AddValue(value ...string) {
 	}
 }
 
-func (e *Enum) write(buf stringsBuffer) {
+func (e *Enum) write(buf stringsBuffer, indent *Indent) {
 	buf.WriteString(e.Name.Prepend("enum ").Append(" {").Value)
 
 	buf.WriteString("\n")
 
 	for i, v := range e.Values {
-		buf.WriteString("    " + v + " = " + strconv.Itoa(i) + ";")
+		buf.WriteString(indent.curr + v + " = " + strconv.Itoa(i) + ";")
 		buf.WriteString("\n")
 	}
 

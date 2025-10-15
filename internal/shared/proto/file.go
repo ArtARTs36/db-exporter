@@ -56,15 +56,15 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 	return opts
 }
 
-func (f *File) Render() string {
+func (f *File) Render(indent *Indent) string {
 	buf := &stringsBuff{}
 
 	f.writeSyntax(buf)
 	f.writePackage(buf)
 	f.writeOptions(buf)
-	f.writeServices(buf)
+	f.writeServices(buf, indent)
 	f.writeMessages(buf)
-	f.writeEnums(buf)
+	f.writeEnums(buf, indent)
 
 	return buf.String()
 }
@@ -89,10 +89,10 @@ func (f *File) writeOptions(buf stringsBuffer) {
 	}
 }
 
-func (f *File) writeServices(buf stringsBuffer) {
+func (f *File) writeServices(buf stringsBuffer, indent *Indent) {
 	for _, service := range f.Services {
 		buf.WriteString("\n")
-		service.write(buf)
+		service.write(buf, indent)
 	}
 }
 
@@ -115,7 +115,7 @@ func (f *File) writeMessages(buf stringsBuffer) {
 	}
 }
 
-func (f *File) writeEnums(buf stringsBuffer) {
+func (f *File) writeEnums(buf stringsBuffer, indent *Indent) {
 	if len(f.Enums) == 0 {
 		return
 	}
@@ -124,6 +124,6 @@ func (f *File) writeEnums(buf stringsBuffer) {
 
 	for _, enum := range f.Enums {
 		buf.WriteString("\n")
-		enum.write(buf)
+		enum.write(buf, indent.Next())
 	}
 }

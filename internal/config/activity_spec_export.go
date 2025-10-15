@@ -35,6 +35,7 @@ type GoEntitiesExportSpec struct {
 
 type GRPCCrudExportSpec struct {
 	Package string                                     `yaml:"package" json:"package"`
+	Indent  int                                        `yaml:"indent" json:"indent"`
 	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
 }
 
@@ -148,5 +149,13 @@ func (s *MarkdownExportSpec) Validate() error {
 	if err := s.Diagram.Validate(); err != nil {
 		return fmt.Errorf("diagram: %w", err)
 	}
+	return nil
+}
+
+func (s *GRPCCrudExportSpec) Validate() error {
+	if s.Indent == 0 {
+		s.Indent = 2 //nolint:mnd // is default value
+	}
+
 	return nil
 }

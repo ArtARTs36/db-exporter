@@ -41,6 +41,7 @@ func (e *Exporter) ExportPerFile(
 	options := proto.PrepareOptions(spec.Options)
 
 	enumPages := map[string]*exporter.ExportedPage{}
+	indent := proto.NewIndent(spec.Indent)
 
 	for _, enum := range params.Schema.Enums {
 		prfile := &proto.File{
@@ -51,7 +52,7 @@ func (e *Exporter) ExportPerFile(
 
 		expPage := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s_enum.proto", enum.Name.Value),
-			Content:  []byte(prfile.Render()),
+			Content:  []byte(prfile.Render(indent)),
 		}
 
 		enumPages[enum.Name.Value] = expPage
@@ -78,7 +79,7 @@ func (e *Exporter) ExportPerFile(
 
 		expPage := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
-			Content:  []byte(prfile.Render()),
+			Content:  []byte(prfile.Render(indent)),
 		}
 
 		pages = append(pages, expPage)
@@ -124,7 +125,7 @@ func (e *Exporter) Export(
 
 	expPage := &exporter.ExportedPage{
 		FileName: "services.proto",
-		Content:  []byte(prfile.Render()),
+		Content:  []byte(prfile.Render(proto.NewIndent(spec.Indent))),
 	}
 
 	return []*exporter.ExportedPage{

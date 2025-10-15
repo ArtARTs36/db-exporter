@@ -18,6 +18,14 @@ func TestFile_Render(t *testing.T) {
 						Name:    "Get",
 						Param:   "GetUserRequest",
 						Returns: "GetUserResponse",
+						Options: []*ServiceProcedureOption{
+							{
+								Name: "google.api.http",
+								Params: map[string]interface{}{
+									"get": "/v1/users/{id}",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -62,24 +70,28 @@ func TestFile_Render(t *testing.T) {
 package my-super-package;
 
 service UserService {
-    rpc Get(GetUserRequest) returns (GetUserResponse) {}
+  rpc Get(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  }
 }
 
 message GetUserRequest {
-    int64 id = 1;
+  int64 id = 1;
 }
 
 message GetUserResponse {
-    int64 id = 1;
-    string name = 2;
+  int64 id = 1;
+  string name = 2;
 }
 
 enum UserStatus {
-    USERSTATUS_UNDEFINED = 0;
-    USERSTATUS_ACTIVE = 1;
-    USERSTATUS_BANNED = 2;
+  USERSTATUS_UNDEFINED = 0;
+  USERSTATUS_ACTIVE = 1;
+  USERSTATUS_BANNED = 2;
 }`
-	got := f.Render()
+	got := f.Render(NewIndent(2))
 
 	assert.Equal(t, expected, got)
 }
