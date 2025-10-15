@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapihttp"
 )
@@ -14,8 +13,8 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, table *schema.Table, tableMessage *tableMessage) procedureModifier {
-		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, table.Name.Snake().Lower())
+	return func(file *proto.File, srv *service, tbl *tableMessage) procedureModifier {
+		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, tbl.Table.Name.Snake().Lower())
 
 		return func(proc *procedure) {
 			var opt *proto.ServiceProcedureOption
@@ -24,13 +23,13 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 			case procedureTypeList:
 				opt = googleapihttp.Get(basePath)
 			case procedureTypeGet:
-				opt = googleapihttp.Get(m.pathTo(basePath, tableMessage))
+				opt = googleapihttp.Get(m.pathTo(basePath, tbl))
 			case procedureTypeCreate:
 				opt = googleapihttp.Post(basePath)
 			case procedureTypePatch:
-				opt = googleapihttp.Patch(m.pathTo(basePath, tableMessage))
+				opt = googleapihttp.Patch(m.pathTo(basePath, tbl))
 			case procedureTypeDelete:
-				opt = googleapihttp.Delete(m.pathTo(basePath, tableMessage))
+				opt = googleapihttp.Delete(m.pathTo(basePath, tbl))
 			default:
 				return
 			}
