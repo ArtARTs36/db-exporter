@@ -68,14 +68,13 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv, messages := e.buildService(params.Schema.Driver, prfile, table, enumPages)
-
+		srv := e.buildService(params.Schema.Driver, prfile, table, enumPages)
 		if len(srv.Procedures) == 0 {
 			continue
 		}
 
-		prfile.Services = append(prfile.Services, srv)
-		prfile.Messages = append(prfile.Messages, messages...)
+		prfile.Services = append(prfile.Services, srv.ToProto())
+		prfile.Messages = append(prfile.Messages, srv.Messages...)
 
 		expPage := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
@@ -113,14 +112,13 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		srv, messages := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
-
+		srv := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
 		if len(srv.Procedures) == 0 {
 			continue
 		}
 
-		prfile.Services = append(prfile.Services, srv)
-		prfile.Messages = append(prfile.Messages, messages...)
+		prfile.Services = append(prfile.Services, srv.ToProto())
+		prfile.Messages = append(prfile.Messages, srv.Messages...)
 	}
 
 	expPage := &exporter.ExportedPage{
@@ -138,7 +136,7 @@ func (e *Exporter) buildService(
 	prfile *proto.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
-) (*proto.Service, []*proto.Message) {
+) *service {
 	procedureBuilders := []func(buildCtx *buildProcedureContext) *procedure{
 		e.buildListProcedure,
 		e.buildGetProcedure,
@@ -149,7 +147,7 @@ func (e *Exporter) buildService(
 
 	messages := make([]*proto.Message, 0, 1)
 
-	srv := &proto.Service{
+	srv := &service{
 		Name: fmt.Sprintf("%sService", table.Name.Pascal()),
 	}
 
@@ -179,17 +177,19 @@ func (e *Exporter) buildService(
 		id++
 	}
 
+	srv.Messages = append(srv.Messages, buildCtx.tableMsg)
+
 	for _, builder := range procedureBuilders {
 		proc := builder(buildCtx)
 		if proc == nil {
 			continue
 		}
 
-		srv.Procedures = append(srv.Procedures, proc.ToProto())
-		messages = append(messages, proc.Request, proc.Response)
+		srv.Procedures = append(srv.Procedures, proc)
+		srv.Messages = append(srv.Messages, proc.Request, proc.Response)
 	}
 
-	return srv, messages
+	return srv
 }
 
 func (e *Exporter) buildGetProcedure(
