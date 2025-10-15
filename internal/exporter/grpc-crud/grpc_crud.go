@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -20,7 +21,7 @@ type buildProcedureContext struct {
 
 	prfile            *proto.File
 	table             *schema.Table
-	tableMsg          *tableMessage
+	tableMsg          *tablemsg.Message
 	tableSingularName string
 	enumPages         map[string]*exporter.ExportedPage
 }
@@ -163,7 +164,7 @@ func (e *Exporter) buildService(
 		sourceDriver: sourceDriver,
 		prfile:       prfile,
 		table:        table,
-		tableMsg: newTableMessage(table, func(col *schema.Column) string {
+		tableMsg: tablemsg.Map(table, func(col *schema.Column) string {
 			return e.mapType(sourceDriver, col, prfile.Imports, enumPages)
 		}),
 		enumPages: enumPages,

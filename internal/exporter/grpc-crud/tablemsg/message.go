@@ -1,12 +1,13 @@
-package grpccrud
+package tablemsg
 
 import (
 	"fmt"
+
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 )
 
-type tableMessage struct {
+type Message struct {
 	Table *schema.Table
 
 	Proto      *proto.Message
@@ -14,7 +15,7 @@ type tableMessage struct {
 	PrimaryKey []*proto.Field
 }
 
-func (m *tableMessage) CloneField(columnName string) (*proto.Field, error) {
+func (m *Message) CloneField(columnName string) (*proto.Field, error) {
 	field, ok := m.Fields[columnName]
 	if !ok {
 		return nil, fmt.Errorf("field %s not found", columnName)
@@ -23,8 +24,8 @@ func (m *tableMessage) CloneField(columnName string) (*proto.Field, error) {
 	return field.Clone(), nil
 }
 
-func newTableMessage(table *schema.Table, fieldTypeMapper func(col *schema.Column) string) *tableMessage {
-	msg := &tableMessage{
+func Map(table *schema.Table, fieldTypeMapper func(col *schema.Column) string) *Message {
+	msg := &Message{
 		Table: table,
 		Proto: &proto.Message{
 			Name:   table.Name.Pascal().Singular().Value,

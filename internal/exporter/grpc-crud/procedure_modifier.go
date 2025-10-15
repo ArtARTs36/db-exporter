@@ -2,6 +2,7 @@ package grpccrud
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 )
 
@@ -9,7 +10,7 @@ type (
 	procedureModifierFactory func(
 		file *proto.File,
 		srv *service,
-		tableMessage *tableMessage,
+		tableMessage *tablemsg.Message,
 	) procedureModifier
 
 	procedureModifier func(proc *procedure)
@@ -24,7 +25,7 @@ func compositeProcedureModifier(modifiers []procedureModifier) procedureModifier
 }
 
 func compositeProcedureModifierFactory(factories []procedureModifierFactory) procedureModifierFactory {
-	return func(file *proto.File, srv *service, tableMessage *tableMessage) procedureModifier {
+	return func(file *proto.File, srv *service, tableMessage *tablemsg.Message) procedureModifier {
 		modifiers := make([]procedureModifier, len(factories))
 
 		for i, f := range factories {

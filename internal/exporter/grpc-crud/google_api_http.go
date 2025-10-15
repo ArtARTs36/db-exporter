@@ -2,6 +2,7 @@ package grpccrud
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
 	"strings"
 
@@ -13,7 +14,7 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, tbl *tableMessage) procedureModifier {
+	return func(file *proto.File, srv *service, tbl *tablemsg.Message) procedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, tbl.Table.Name.Snake().Lower())
 
 		return func(proc *procedure) {
@@ -41,11 +42,11 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 	}
 }
 
-func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *tableMessage) string {
+func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *tablemsg.Message) string {
 	return fmt.Sprintf("%s/%s", basePath, m.fieldsToPath(msg))
 }
 
-func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *tableMessage) string {
+func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *tablemsg.Message) string {
 	path := strings.Builder{}
 
 	for i, field := range msg.PrimaryKey {

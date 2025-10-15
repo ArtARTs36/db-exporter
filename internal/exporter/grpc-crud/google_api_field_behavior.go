@@ -1,6 +1,7 @@
 package grpccrud
 
 import (
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
 )
@@ -8,7 +9,7 @@ import (
 type googleApiFieldBehaviorModifier struct{}
 
 func (m *googleApiFieldBehaviorModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, tbl *tableMessage) procedureModifier {
+	return func(file *proto.File, srv *service, tbl *tablemsg.Message) procedureModifier {
 		return func(proc *procedure) {
 			switch proc.Type {
 			case procedureTypeGet:
