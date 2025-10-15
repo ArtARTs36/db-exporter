@@ -37,6 +37,9 @@ type GRPCCrudExportSpec struct {
 	Package string                                     `yaml:"package" json:"package"`
 	Indent  int                                        `yaml:"indent" json:"indent"`
 	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
+	With    struct {
+		GoogleApiHTTP *struct{} `yaml:"google.api.http" json:"google.api.http"`
+	}
 }
 
 type MarkdownExportSpec struct {

@@ -139,10 +139,7 @@ func (e *Exporter) buildService(
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
 ) (*proto.Service, []*proto.Message) {
-	procedureBuilders := []func(buildCtx *buildProcedureContext) (
-		*proto.ServiceProcedure,
-		[]*proto.Message,
-	){
+	procedureBuilders := []func(buildCtx *buildProcedureContext) *procedure{
 		e.buildListProcedure,
 		e.buildGetProcedure,
 		e.buildDeleteProcedure,
@@ -183,13 +180,13 @@ func (e *Exporter) buildService(
 	}
 
 	for _, builder := range procedureBuilders {
-		procedure, msgs := builder(buildCtx)
-		if procedure == nil {
+		proc := builder(buildCtx)
+		if proc == nil {
 			continue
 		}
 
-		srv.Procedures = append(srv.Procedures, procedure)
-		messages = append(messages, msgs...)
+		srv.Procedures = append(srv.Procedures, proc.ToProto())
+		messages = append(messages, proc.Request, proc.Response)
 	}
 
 	return srv, messages
@@ -197,9 +194,9 @@ func (e *Exporter) buildService(
 
 func (e *Exporter) buildGetProcedure(
 	buildCtx *buildProcedureContext,
-) (*proto.ServiceProcedure, []*proto.Message) {
+) *procedure {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil, nil
+		return nil
 	}
 
 	getReqMsg := &proto.Message{
@@ -223,29 +220,28 @@ func (e *Exporter) buildGetProcedure(
 		id++
 	}
 
-	getRespMsg := &proto.Message{
-		Name: fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName),
-		Fields: []*proto.Field{
-			{
-				Name: buildCtx.table.Name.Pascal().Singular().Value,
-				Type: buildCtx.tableMsg.Name,
-				ID:   1,
+	return &procedure{
+		Name:    "Get",
+		Type:    procedureTypeGet,
+		Request: getReqMsg,
+		Response: &proto.Message{
+			Name: fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName),
+			Fields: []*proto.Field{
+				{
+					Name: buildCtx.table.Name.Pascal().Singular().Value,
+					Type: buildCtx.tableMsg.Name,
+					ID:   1,
+				},
 			},
 		},
 	}
-
-	return &proto.ServiceProcedure{
-		Name:    "Get",
-		Param:   getReqMsg.Name,
-		Returns: getRespMsg.Name,
-	}, []*proto.Message{getReqMsg, getRespMsg}
 }
 
 func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
-) (*proto.ServiceProcedure, []*proto.Message) {
+) *procedure {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil, nil
+		return nil
 	}
 
 	getReqMsg := &proto.Message{
@@ -265,27 +261,24 @@ func (e *Exporter) buildListProcedure(
 		},
 	}
 
-	return &proto.ServiceProcedure{
-		Name:    "List",
-		Param:   getReqMsg.Name,
-		Returns: respMsg.Name,
-	}, []*proto.Message{getReqMsg, respMsg}
+	return &procedure{
+		Name:     "List",
+		Type:     procedureTypeList,
+		Request:  getReqMsg,
+		Response: respMsg,
+	}
 }
 
 func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
-) (*proto.ServiceProcedure, []*proto.Message) {
+) *procedure {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil, nil
+		return nil
 	}
 
 	deleteReqMsg := &proto.Message{
 		Name:   fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName),
 		Fields: make([]*proto.Field, 0),
-	}
-
-	deleteRespMsg := &proto.Message{
-		Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
 	}
 
 	id := 1
@@ -304,34 +297,26 @@ func (e *Exporter) buildDeleteProcedure(
 		id++
 	}
 
-	return &proto.ServiceProcedure{
+	return &procedure{
 		Name:    "Delete",
-		Param:   deleteReqMsg.Name,
-		Returns: deleteRespMsg.Name,
-	}, []*proto.Message{deleteReqMsg, deleteRespMsg}
+		Type:    procedureTypeDelete,
+		Request: deleteReqMsg,
+		Response: &proto.Message{
+			Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
+		},
+	}
 }
 
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
-) (*proto.ServiceProcedure, []*proto.Message) {
+) *procedure {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil, nil
+		return nil
 	}
 
 	createReqMsg := &proto.Message{
 		Name:   fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName),
 		Fields: make([]*proto.Field, 0, len(buildCtx.table.Columns)),
-	}
-
-	createRespMsg := &proto.Message{
-		Name: fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName),
-		Fields: []*proto.Field{
-			{
-				Name: buildCtx.table.Name.Pascal().Singular().Value,
-				Type: buildCtx.tableMsg.Name,
-				ID:   1,
-			},
-		},
 	}
 
 	id := 1
@@ -350,18 +335,28 @@ func (e *Exporter) buildCreateProcedure(
 		id++
 	}
 
-	return &proto.ServiceProcedure{
+	return &procedure{
 		Name:    "Create",
-		Param:   createReqMsg.Name,
-		Returns: createRespMsg.Name,
-	}, []*proto.Message{createReqMsg, createRespMsg}
+		Type:    procedureTypeCreate,
+		Request: createReqMsg,
+		Response: &proto.Message{
+			Name: fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName),
+			Fields: []*proto.Field{
+				{
+					Name: buildCtx.table.Name.Pascal().Singular().Value,
+					Type: buildCtx.tableMsg.Name,
+					ID:   1,
+				},
+			},
+		},
+	}
 }
 
 func (e *Exporter) buildPatchProcedure(
 	buildCtx *buildProcedureContext,
-) (*proto.ServiceProcedure, []*proto.Message) {
+) *procedure {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil, nil
+		return nil
 	}
 
 	patchReqMsg := &proto.Message{
@@ -396,11 +391,12 @@ func (e *Exporter) buildPatchProcedure(
 		id++
 	}
 
-	return &proto.ServiceProcedure{
-		Name:    "Patch",
-		Param:   patchReqMsg.Name,
-		Returns: patchRespMsg.Name,
-	}, []*proto.Message{patchReqMsg, patchRespMsg}
+	return &procedure{
+		Name:     "Patch",
+		Type:     procedureTypePatch,
+		Request:  patchReqMsg,
+		Response: patchRespMsg,
+	}
 }
 
 func (e *Exporter) mapType(
