@@ -24,7 +24,7 @@ type buildProcedureContext struct {
 	enumPages         map[string]*exporter.ExportedPage
 }
 
-func NewCrudExporter() *Exporter {
+func NewExporter() *Exporter {
 	return &Exporter{}
 }
 
@@ -39,6 +39,7 @@ func (e *Exporter) ExportPerFile(
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
+	procModifier := selectProcedureModifier(spec)
 
 	enumPages := map[string]*exporter.ExportedPage{}
 	indent := proto.NewIndent(spec.Indent)
@@ -68,7 +69,7 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv := e.buildService(params.Schema.Driver, prfile, table, enumPages)
+		srv := e.buildService(params.Schema.Driver, prfile, table, enumPages, procModifier)
 		if len(srv.Procedures) == 0 {
 			continue
 		}
@@ -97,6 +98,7 @@ func (e *Exporter) Export(
 	}
 
 	options := proto.PrepareOptions(spec.Options)
+	procModifier := selectProcedureModifier(spec)
 
 	prfile := &proto.File{
 		Package:  spec.Package,
@@ -112,7 +114,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		srv := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
+		srv := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
 		if len(srv.Procedures) == 0 {
 			continue
 		}
@@ -136,6 +138,7 @@ func (e *Exporter) buildService(
 	prfile *proto.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
+	createProcModifier procedureModifierFactory,
 ) *service {
 	procedureBuilders := []func(buildCtx *buildProcedureContext) *procedure{
 		e.buildListProcedure,
@@ -179,11 +182,15 @@ func (e *Exporter) buildService(
 
 	srv.Messages = append(srv.Messages, buildCtx.tableMsg)
 
+	procModifier := createProcModifier(srv, table)
+
 	for _, builder := range procedureBuilders {
 		proc := builder(buildCtx)
 		if proc == nil {
 			continue
 		}
+
+		procModifier(proc)
 
 		srv.Procedures = append(srv.Procedures, proc)
 		srv.Messages = append(srv.Messages, proc.Request, proc.Response)

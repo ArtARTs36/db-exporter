@@ -10,7 +10,7 @@ func Post(url string) *proto.ServiceProcedureOption {
 	return opt("post", url)
 }
 
-func Put(url string) *proto.ServiceProcedureOption {
+func Patch(url string) *proto.ServiceProcedureOption {
 	return opt("put", url)
 }
 

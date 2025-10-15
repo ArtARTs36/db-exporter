@@ -10,10 +10,24 @@ import (
 func TestFile_Render(t *testing.T) {
 	f := &File{
 		Package: "my-super-package",
+		Imports: gds.NewSet[string]("google/protobuf/timestamp.proto"),
 		Services: []*Service{
 			{
 				Name: "UserService",
 				Procedures: []*ServiceProcedure{
+					{
+						Name:    "List",
+						Param:   "GetUserRequest",
+						Returns: "GetUserResponse",
+						Options: []*ServiceProcedureOption{
+							{
+								Name: "google.api.http",
+								Params: map[string]interface{}{
+									"get": "/v1/users",
+								},
+							},
+						},
+					},
 					{
 						Name:    "Get",
 						Param:   "GetUserRequest",
@@ -69,7 +83,15 @@ func TestFile_Render(t *testing.T) {
 
 package my-super-package;
 
+import "google/protobuf/timestamp.proto";
+
 service UserService {
+  rpc List(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  }
+
   rpc Get(GetUserRequest) returns (GetUserResponse) {
     option (google.api.http) = {
       get: "/v1/users/{id}"

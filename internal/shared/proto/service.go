@@ -20,9 +20,15 @@ type ServiceProcedureOption struct {
 }
 
 func (s *Service) write(buf stringsBuffer, indent *Indent) {
-	buf.WriteString("service " + s.Name + " {\n")
+	buf.WriteString("service " + s.Name + " {")
+
+	if len(s.Procedures) == 0 {
+		buf.WriteString("}" + "\n")
+		return
+	}
 
 	for _, procedure := range s.Procedures {
+		buf.WriteString("\n")
 		procedure.write(buf, indent.Next())
 	}
 

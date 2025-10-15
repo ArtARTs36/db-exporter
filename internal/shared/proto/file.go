@@ -61,6 +61,7 @@ func (f *File) Render(indent *Indent) string {
 
 	f.writeSyntax(buf)
 	f.writePackage(buf)
+	f.writeImports(buf)
 	f.writeOptions(buf)
 	f.writeServices(buf, indent)
 	f.writeMessages(buf, indent)
@@ -74,6 +75,12 @@ func (f *File) writeSyntax(buf stringsBuffer) {
 }
 
 func (f *File) writeImports(buf stringsBuffer) {
+	if f.Imports == nil || f.Imports.Len() == 0 {
+		return
+	}
+
+	buf.WriteString("\n")
+
 	for _, im := range f.Imports.List() {
 		buf.WriteString("import \"" + im + "\";\n")
 	}

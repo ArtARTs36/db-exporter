@@ -55,7 +55,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		),
 		config.ExporterNameLaravelMigrationsRaw: laravel.NewLaravelMigrationsRawExporter(pager, ddlBuilderManager),
 		config.ExporterNameLaravelModels:        laravel.NewLaravelModelsExporter(pager),
-		config.ExporterNameGrpcCrud:             grpccrud.NewCrudExporter(),
+		config.ExporterNameGrpcCrud:             grpccrud.NewExporter(),
 		config.ExporterNameGooseFixtures:        goose.NewFixturesExporter(pager, dataLoader, sql.NewInsertBuilder()),
 		config.ExporterNameCSV:                  csv.NewExporter(dataLoader, dataTransformers),
 		config.ExporterNameGoEntityRepository: goentity.NewRepositoryExporter(

@@ -5,11 +5,11 @@ import "github.com/artarts36/db-exporter/internal/shared/proto"
 type procedureType string
 
 const (
-	procedureTypeCreate procedureType = "Create"
+	procedureTypeList   procedureType = "List"
 	procedureTypeGet    procedureType = "Get"
+	procedureTypeCreate procedureType = "Create"
 	procedureTypePatch  procedureType = "Patch"
 	procedureTypeDelete procedureType = "Delete"
-	procedureTypeList   procedureType = "List"
 )
 
 type procedure struct {

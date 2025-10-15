@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
@@ -37,9 +38,11 @@ type GRPCCrudExportSpec struct {
 	Package string                                     `yaml:"package" json:"package"`
 	Indent  int                                        `yaml:"indent" json:"indent"`
 	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
-	With    struct {
-		GoogleApiHTTP *struct{} `yaml:"google.api.http" json:"google.api.http"`
-	}
+	With    specw.BoolObject[struct {
+		GoogleApiHTTP specw.BoolObject[struct {
+			PathPrefix string `yaml:"path_prefix" json:"path_prefix"`
+		}] `yaml:"google.api.http" json:"google.api.http"`
+	}] `yaml:"with" json:"with"`
 }
 
 type MarkdownExportSpec struct {
@@ -157,7 +160,7 @@ func (s *MarkdownExportSpec) Validate() error {
 
 func (s *GRPCCrudExportSpec) Validate() error {
 	if s.Indent == 0 {
-		s.Indent = 2 //nolint:mnd // is default value
+		s.Indent = 2
 	}
 
 	return nil

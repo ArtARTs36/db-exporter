@@ -1,6 +1,8 @@
 package grpccrud
 
-import "github.com/artarts36/db-exporter/internal/shared/proto"
+import (
+	"github.com/artarts36/db-exporter/internal/shared/proto"
+)
 
 type service struct {
 	Name string
