@@ -33,13 +33,16 @@ func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 		if len(f.Options) == 1 {
 			f.Options[0].write(buf, indentx.Zero())
 		} else {
+			buf.WriteString("\n")
 			for i, opt := range f.Options {
-				opt.write(buf, indent)
+				opt.write(buf, indent.Next())
 
 				if i < len(f.Options)-1 {
 					buf.WriteString(",")
 				}
+				buf.WriteString("\n")
 			}
+			buf.WriteString(indent.Curr())
 		}
 
 		buf.WriteString("]")

@@ -6,13 +6,24 @@ import (
 )
 
 type Mapper struct {
+	fieldModifier fieldModifier
 }
 
-func NewMapper() *Mapper {
-	return &Mapper{}
+type fieldModifier interface {
+	ModifyTableField(file *proto.File, col *schema.Column, field *proto.Field)
 }
 
-func (m *Mapper) Map(table *schema.Table, fieldTypeMapper func(col *schema.Column) string) *Message {
+func NewMapper(fieldmod fieldModifier) *Mapper {
+	return &Mapper{
+		fieldModifier: fieldmod,
+	}
+}
+
+func (m *Mapper) MapTable(
+	file *proto.File,
+	table *schema.Table,
+	fieldTypeMapper func(col *schema.Column) string,
+) *Message {
 	msg := &Message{
 		Table: table,
 		Proto: &proto.Message{
@@ -32,6 +43,8 @@ func (m *Mapper) Map(table *schema.Table, fieldTypeMapper func(col *schema.Colum
 			Type: fieldTypeMapper(column),
 			ID:   i + 1,
 		}
+
+		m.fieldModifier.ModifyTableField(file, column, field)
 
 		msg.Proto.Fields = append(msg.Proto.Fields, field)
 		msg.Fields[column.Name.Value] = field

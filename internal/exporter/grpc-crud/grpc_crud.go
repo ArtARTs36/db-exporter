@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/fieldmap"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -28,6 +29,26 @@ type buildProcedureContext struct {
 
 func NewExporter() *Exporter {
 	return &Exporter{}
+}
+
+func (e *Exporter) newTableMapper(spec *config.GRPCCrudExportSpec) *tablemsg.Mapper {
+	modifiers := []fieldmap.Modifier{}
+
+	if spec.With.Object != nil {
+		if spec.With.Object.GoogleAPIFieldBehavior.Object != nil {
+			modifiers = append(modifiers, &fieldmap.GoogleAPIFieldBehaviorModifier{})
+		}
+	}
+
+	if len(modifiers) == 0 {
+		return tablemsg.NewMapper(fieldmap.Nop{})
+	}
+
+	if len(modifiers) == 1 {
+		return tablemsg.NewMapper(modifiers[0])
+	}
+
+	return tablemsg.NewMapper(fieldmap.Compose(modifiers))
 }
 
 func (e *Exporter) ExportPerFile(
@@ -62,7 +83,7 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
-	tablemsgMapper := tablemsg.NewMapper()
+	tablemsgMapper := e.newTableMapper(spec)
 
 	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
@@ -120,7 +141,7 @@ func (e *Exporter) Export(
 		prfile.Enums = append(prfile.Enums, proto.NewEnumWithValues(enum.Name, enum.Values))
 	}
 
-	tablemsgMapper := tablemsg.NewMapper()
+	tablemsgMapper := e.newTableMapper(spec)
 
 	for _, table := range params.Schema.Tables.List() {
 		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
@@ -169,7 +190,7 @@ func (e *Exporter) buildService(
 		sourceDriver: sourceDriver,
 		prfile:       prfile,
 		table:        table,
-		tableMsg: tablemsgMapper.Map(table, func(col *schema.Column) string {
+		tableMsg: tablemsgMapper.MapTable(prfile, table, func(col *schema.Column) string {
 			return e.mapType(sourceDriver, col, prfile.Imports, enumPages)
 		}),
 		enumPages: enumPages,

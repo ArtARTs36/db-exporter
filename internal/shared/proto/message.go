@@ -14,9 +14,13 @@ func (m *Message) write(buf stringsBuffer, indent *indentx.Indent) {
 		buf.WriteString("\n")
 	}
 
-	for _, field := range m.Fields {
+	for i, field := range m.Fields {
 		field.write(buf, indent.Next())
 		buf.WriteString("\n")
+
+		if len(field.Options) > 1 && i < len(m.Fields)-1 {
+			buf.WriteString("\n")
+		}
 	}
 
 	buf.WriteString("}")
