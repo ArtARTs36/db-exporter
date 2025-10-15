@@ -20,3 +20,12 @@ func (f *Field) write(buf stringsBuffer, indent *Indent) {
 
 	buf.WriteString(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID) + ";")
 }
+
+func (f *Field) Clone() *Field {
+	return &Field{
+		Repeated: f.Repeated,
+		Type:     f.Type,
+		Name:     f.Name,
+		ID:       f.ID,
+	}
+}

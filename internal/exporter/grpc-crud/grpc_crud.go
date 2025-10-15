@@ -19,7 +19,7 @@ type buildProcedureContext struct {
 
 	prfile            *proto.File
 	table             *schema.Table
-	tableMsg          *proto.Message
+	tableMsg          *tableMessage
 	tableSingularName string
 	enumPages         map[string]*exporter.ExportedPage
 }
@@ -69,7 +69,10 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv := e.buildService(params.Schema.Driver, prfile, table, enumPages, procModifier)
+		srv, err := e.buildService(params.Schema.Driver, prfile, table, enumPages, procModifier)
+		if err != nil {
+			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
+		}
 		if len(srv.Procedures) == 0 {
 			continue
 		}
@@ -78,7 +81,7 @@ func (e *Exporter) ExportPerFile(
 		prfile.Messages = append(prfile.Messages, srv.Messages...)
 
 		expPage := &exporter.ExportedPage{
-			FileName: fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
+			FileName: fmt.Sprintf("%s.proto", table.Name.Snake().Lower()),
 			Content:  []byte(prfile.Render(indent)),
 		}
 
@@ -114,7 +117,10 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		srv := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
+		srv, err := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
+		if err != nil {
+			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
+		}
 		if len(srv.Procedures) == 0 {
 			continue
 		}
@@ -139,16 +145,14 @@ func (e *Exporter) buildService(
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
 	createProcModifier procedureModifierFactory,
-) *service {
-	procedureBuilders := []func(buildCtx *buildProcedureContext) *procedure{
-		e.buildListProcedure,
-		e.buildGetProcedure,
-		e.buildDeleteProcedure,
-		e.buildCreateProcedure,
-		e.buildPatchProcedure,
+) (*service, error) {
+	procedureBuilders := map[procedureType]func(buildCtx *buildProcedureContext) (*procedure, error){
+		procedureTypeList:   e.buildListProcedure,
+		procedureTypeGet:    e.buildGetProcedure,
+		procedureTypeDelete: e.buildDeleteProcedure,
+		procedureTypeCreate: e.buildCreateProcedure,
+		procedureTypePatch:  e.buildPatchProcedure,
 	}
-
-	messages := make([]*proto.Message, 0, 1)
 
 	srv := &service{
 		Name: fmt.Sprintf("%sService", table.Name.Pascal()),
@@ -158,34 +162,22 @@ func (e *Exporter) buildService(
 		sourceDriver: sourceDriver,
 		prfile:       prfile,
 		table:        table,
-		tableMsg: &proto.Message{
-			Name:   table.Name.Pascal().Singular().Value,
-			Fields: make([]*proto.Field, 0, len(table.Columns)),
-		},
+		tableMsg: newTableMessage(table, func(col *schema.Column) string {
+			return e.mapType(sourceDriver, col, prfile.Imports, enumPages)
+		}),
 		enumPages: enumPages,
 	}
-	buildCtx.tableSingularName = buildCtx.tableMsg.Name
+	buildCtx.tableSingularName = buildCtx.tableMsg.Proto.Name
 
-	messages = append(messages, buildCtx.tableMsg)
-
-	id := 1
-
-	for _, column := range table.Columns {
-		buildCtx.tableMsg.Fields = append(buildCtx.tableMsg.Fields, &proto.Field{
-			Name: column.Name.Lower().Value,
-			Type: e.mapType(buildCtx.sourceDriver, column, prfile.Imports, buildCtx.enumPages),
-			ID:   id,
-		})
-
-		id++
-	}
-
-	srv.Messages = append(srv.Messages, buildCtx.tableMsg)
+	srv.Messages = append(srv.Messages, buildCtx.tableMsg.Proto)
 
 	procModifier := createProcModifier(srv, table)
 
-	for _, builder := range procedureBuilders {
-		proc := builder(buildCtx)
+	for procType, builder := range procedureBuilders {
+		proc, err := builder(buildCtx)
+		if err != nil {
+			return nil, fmt.Errorf("build procedure of %s: %w", string(procType), err)
+		}
 		if proc == nil {
 			continue
 		}
@@ -196,14 +188,14 @@ func (e *Exporter) buildService(
 		srv.Messages = append(srv.Messages, proc.Request, proc.Response)
 	}
 
-	return srv
+	return srv, nil
 }
 
 func (e *Exporter) buildGetProcedure(
 	buildCtx *buildProcedureContext,
-) *procedure {
+) (*procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil
+		return nil, nil
 	}
 
 	getReqMsg := &proto.Message{
@@ -218,11 +210,12 @@ func (e *Exporter) buildGetProcedure(
 			continue
 		}
 
-		getReqMsg.Fields = append(getReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Value,
-			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
-			ID:   id,
-		})
+		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		getReqMsg.Fields = append(getReqMsg.Fields, field)
 
 		id++
 	}
@@ -236,19 +229,19 @@ func (e *Exporter) buildGetProcedure(
 			Fields: []*proto.Field{
 				{
 					Name: buildCtx.table.Name.Pascal().Singular().Value,
-					Type: buildCtx.tableMsg.Name,
+					Type: buildCtx.tableMsg.Proto.Name,
 					ID:   1,
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
-) *procedure {
+) (*procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil
+		return nil, nil
 	}
 
 	getReqMsg := &proto.Message{
@@ -261,7 +254,7 @@ func (e *Exporter) buildListProcedure(
 		Fields: []*proto.Field{
 			{
 				Repeated: true,
-				Type:     buildCtx.tableMsg.Name,
+				Type:     buildCtx.tableMsg.Proto.Name,
 				Name:     "items",
 				ID:       1,
 			},
@@ -273,14 +266,14 @@ func (e *Exporter) buildListProcedure(
 		Type:     procedureTypeList,
 		Request:  getReqMsg,
 		Response: respMsg,
-	}
+	}, nil
 }
 
 func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
-) *procedure {
+) (*procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil
+		return nil, nil
 	}
 
 	deleteReqMsg := &proto.Message{
@@ -295,11 +288,12 @@ func (e *Exporter) buildDeleteProcedure(
 			continue
 		}
 
-		deleteReqMsg.Fields = append(deleteReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Value,
-			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
-			ID:   id,
-		})
+		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		deleteReqMsg.Fields = append(deleteReqMsg.Fields, field)
 
 		id++
 	}
@@ -311,14 +305,14 @@ func (e *Exporter) buildDeleteProcedure(
 		Response: &proto.Message{
 			Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
 		},
-	}
+	}, nil
 }
 
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
-) *procedure {
+) (*procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil
+		return nil, nil
 	}
 
 	createReqMsg := &proto.Message{
@@ -333,11 +327,12 @@ func (e *Exporter) buildCreateProcedure(
 			continue
 		}
 
-		createReqMsg.Fields = append(createReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Value,
-			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
-			ID:   id,
-		})
+		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		createReqMsg.Fields = append(createReqMsg.Fields, field)
 
 		id++
 	}
@@ -351,19 +346,19 @@ func (e *Exporter) buildCreateProcedure(
 			Fields: []*proto.Field{
 				{
 					Name: buildCtx.table.Name.Pascal().Singular().Value,
-					Type: buildCtx.tableMsg.Name,
+					Type: buildCtx.tableMsg.Proto.Name,
 					ID:   1,
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func (e *Exporter) buildPatchProcedure(
 	buildCtx *buildProcedureContext,
-) *procedure {
+) (*procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
-		return nil
+		return nil, nil
 	}
 
 	patchReqMsg := &proto.Message{
@@ -376,7 +371,7 @@ func (e *Exporter) buildPatchProcedure(
 		Fields: []*proto.Field{
 			{
 				Name: buildCtx.table.Name.Pascal().Singular().Value,
-				Type: buildCtx.tableMsg.Name,
+				Type: buildCtx.tableMsg.Proto.Name,
 				ID:   1,
 			},
 		},
@@ -389,11 +384,12 @@ func (e *Exporter) buildPatchProcedure(
 			continue
 		}
 
-		patchReqMsg.Fields = append(patchReqMsg.Fields, &proto.Field{
-			Name: col.Name.Lower().Value,
-			Type: e.mapType(buildCtx.sourceDriver, col, buildCtx.prfile.Imports, buildCtx.enumPages),
-			ID:   id,
-		})
+		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		patchReqMsg.Fields = append(patchReqMsg.Fields, field)
 
 		id++
 	}
@@ -403,7 +399,7 @@ func (e *Exporter) buildPatchProcedure(
 		Type:     procedureTypePatch,
 		Request:  patchReqMsg,
 		Response: patchRespMsg,
-	}
+	}, nil
 }
 
 func (e *Exporter) mapType(
