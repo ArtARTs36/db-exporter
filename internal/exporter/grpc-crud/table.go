@@ -7,8 +7,9 @@ import (
 )
 
 type tableMessage struct {
-	Proto  *proto.Message
-	Fields map[string]*proto.Field
+	Proto      *proto.Message
+	Fields     map[string]*proto.Field
+	PrimaryKey []*proto.Field
 }
 
 func (m *tableMessage) CloneField(columnName string) (*proto.Field, error) {
@@ -26,7 +27,8 @@ func newTableMessage(table *schema.Table, fieldTypeMapper func(col *schema.Colum
 			Name:   table.Name.Pascal().Singular().Value,
 			Fields: make([]*proto.Field, 0, len(table.Columns)),
 		},
-		Fields: make(map[string]*proto.Field),
+		Fields:     make(map[string]*proto.Field),
+		PrimaryKey: make([]*proto.Field, 0, len(table.Columns)),
 	}
 
 	for i, column := range table.Columns {
@@ -38,6 +40,10 @@ func newTableMessage(table *schema.Table, fieldTypeMapper func(col *schema.Colum
 
 		msg.Proto.Fields = append(msg.Proto.Fields, field)
 		msg.Fields[column.Name.Value] = field
+
+		if column.PrimaryKey != nil {
+			msg.PrimaryKey = append(msg.PrimaryKey, field)
+		}
 	}
 
 	return msg

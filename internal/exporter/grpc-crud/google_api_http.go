@@ -14,7 +14,7 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, table *schema.Table) procedureModifier {
+	return func(file *proto.File, srv *service, table *schema.Table, tableMessage *tableMessage) procedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, table.Name.Snake().Lower())
 
 		return func(proc *procedure) {
@@ -24,13 +24,13 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 			case procedureTypeList:
 				opt = googleapihttp.Get(basePath)
 			case procedureTypeGet:
-				opt = googleapihttp.Get(m.pathTo(basePath, proc.Request))
+				opt = googleapihttp.Get(m.pathTo(basePath, tableMessage))
 			case procedureTypeCreate:
 				opt = googleapihttp.Post(basePath)
 			case procedureTypePatch:
-				opt = googleapihttp.Patch(m.pathTo(basePath, proc.Request))
+				opt = googleapihttp.Patch(m.pathTo(basePath, tableMessage))
 			case procedureTypeDelete:
-				opt = googleapihttp.Delete(m.pathTo(basePath, proc.Request))
+				opt = googleapihttp.Delete(m.pathTo(basePath, tableMessage))
 			default:
 				return
 			}
@@ -42,17 +42,17 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 	}
 }
 
-func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *proto.Message) string {
+func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *tableMessage) string {
 	return fmt.Sprintf("%s/%s", basePath, m.fieldsToPath(msg))
 }
 
-func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *proto.Message) string {
+func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *tableMessage) string {
 	path := strings.Builder{}
 
-	for i, field := range msg.Fields {
+	for i, field := range msg.PrimaryKey {
 		path.WriteString("{" + field.Name + "}")
 
-		if i < len(msg.Fields)-1 {
+		if i < len(msg.PrimaryKey)-1 {
 			path.WriteString("/")
 		}
 	}

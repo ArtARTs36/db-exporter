@@ -7,7 +7,12 @@ import (
 )
 
 type (
-	procedureModifierFactory func(file *proto.File, srv *service, table *schema.Table) procedureModifier
+	procedureModifierFactory func(
+		file *proto.File,
+		srv *service,
+		table *schema.Table,
+		tableMessage *tableMessage,
+	) procedureModifier
 
 	procedureModifier func(proc *procedure)
 )
