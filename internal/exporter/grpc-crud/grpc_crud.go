@@ -8,6 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
+	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/gds"
 )
@@ -42,7 +43,7 @@ func (e *Exporter) ExportPerFile(
 	procModifier := selectProcedureModifier(spec)
 
 	enumPages := map[string]*exporter.ExportedPage{}
-	indent := proto.NewIndent(spec.Indent)
+	indent := indentx.NewIndent(spec.Indent)
 
 	for _, enum := range params.Schema.Enums {
 		prfile := &proto.File{
@@ -131,7 +132,7 @@ func (e *Exporter) Export(
 
 	expPage := &exporter.ExportedPage{
 		FileName: "services.proto",
-		Content:  []byte(prfile.Render(proto.NewIndent(spec.Indent))),
+		Content:  []byte(prfile.Render(indentx.NewIndent(spec.Indent))),
 	}
 
 	return []*exporter.ExportedPage{

@@ -42,6 +42,7 @@ type GRPCCrudExportSpec struct {
 		GoogleApiHTTP specw.BoolObject[struct {
 			PathPrefix string `yaml:"path_prefix" json:"path_prefix"`
 		}] `yaml:"google.api.http" json:"google.api.http"`
+		GoogleAPIFieldBehavior specw.BoolObject[struct{}] `yaml:"google.api.field_behavior" json:"google.api.field_behavior"`
 	}] `yaml:"with" json:"with"`
 }
 

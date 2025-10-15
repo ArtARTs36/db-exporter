@@ -2,10 +2,10 @@ package grpccrud
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
 	"strings"
 
 	"github.com/artarts36/db-exporter/internal/shared/proto"
-	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapihttp"
 )
 
 type googleApiHTTPProcedureModifier struct {
@@ -21,15 +21,15 @@ func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
 
 			switch proc.Type {
 			case procedureTypeList:
-				opt = googleapihttp.Get(basePath)
+				opt = googleapi.Get(basePath)
 			case procedureTypeGet:
-				opt = googleapihttp.Get(m.pathTo(basePath, tbl))
+				opt = googleapi.Get(m.pathTo(basePath, tbl))
 			case procedureTypeCreate:
-				opt = googleapihttp.Post(basePath)
+				opt = googleapi.Post(basePath)
 			case procedureTypePatch:
-				opt = googleapihttp.Patch(m.pathTo(basePath, tbl))
+				opt = googleapi.Patch(m.pathTo(basePath, tbl))
 			case procedureTypeDelete:
-				opt = googleapihttp.Delete(m.pathTo(basePath, tbl))
+				opt = googleapi.Delete(m.pathTo(basePath, tbl))
 			default:
 				return
 			}

@@ -1,4 +1,4 @@
-package googleapihttp
+package googleapi
 
 import "github.com/artarts36/db-exporter/internal/shared/proto"
 
