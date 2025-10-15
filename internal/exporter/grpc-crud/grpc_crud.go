@@ -4,20 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
-	"github.com/artarts36/db-exporter/internal/shared/golang"
-	"github.com/artarts36/gds"
-	"github.com/tyler-sommer/stick"
-
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
+	"github.com/artarts36/gds"
 )
 
-type Exporter struct {
-	pager *common.Pager
-}
+type Exporter struct{}
 
 type buildProcedureContext struct {
 	sourceDriver config.DatabaseDriver
@@ -29,10 +24,8 @@ type buildProcedureContext struct {
 	enumPages         map[string]*exporter.ExportedPage
 }
 
-func NewCrudExporter(pager *common.Pager) *Exporter {
-	return &Exporter{
-		pager: pager,
-	}
+func NewCrudExporter() *Exporter {
+	return &Exporter{}
 }
 
 func (e *Exporter) ExportPerFile(
@@ -47,7 +40,6 @@ func (e *Exporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
 
-	grpcPage := e.pager.Of("@embed/grpc-crud/grpc.proto")
 	enumPages := map[string]*exporter.ExportedPage{}
 
 	for _, enum := range params.Schema.Enums {
@@ -57,14 +49,9 @@ func (e *Exporter) ExportPerFile(
 			Enums:   []*proto.Enum{proto.NewEnumWithValues(enum.Name, enum.Values)},
 		}
 
-		expPage, err := grpcPage.Export(
-			fmt.Sprintf("%s_enum.proto", enum.Name.Value),
-			map[string]stick.Value{
-				"file": prfile,
-			},
-		)
-		if err != nil {
-			return nil, err
+		expPage := &exporter.ExportedPage{
+			FileName: fmt.Sprintf("%s_enum.proto", enum.Name.Value),
+			Content:  []byte(prfile.Render()),
 		}
 
 		enumPages[enum.Name.Value] = expPage
@@ -89,14 +76,9 @@ func (e *Exporter) ExportPerFile(
 		prfile.Services = append(prfile.Services, srv)
 		prfile.Messages = append(prfile.Messages, messages...)
 
-		expPage, err := grpcPage.Export(
-			fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
-			map[string]stick.Value{
-				"file": prfile,
-			},
-		)
-		if err != nil {
-			return nil, err
+		expPage := &exporter.ExportedPage{
+			FileName: fmt.Sprintf("%s.proto", table.Name.Lower().Lower()),
+			Content:  []byte(prfile.Render()),
 		}
 
 		pages = append(pages, expPage)
@@ -140,11 +122,9 @@ func (e *Exporter) Export(
 		prfile.Messages = append(prfile.Messages, messages...)
 	}
 
-	expPage, err := e.pager.Of("@embed/grpc-crud/grpc.proto").Export("services.proto", map[string]stick.Value{
-		"file": prfile,
-	})
-	if err != nil {
-		return nil, err
+	expPage := &exporter.ExportedPage{
+		FileName: "services.proto",
+		Content:  []byte(prfile.Render()),
 	}
 
 	return []*exporter.ExportedPage{
