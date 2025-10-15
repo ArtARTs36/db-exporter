@@ -32,7 +32,7 @@ func Map(table *schema.Table, fieldTypeMapper func(col *schema.Column) string) *
 			Fields: make([]*proto.Field, 0, len(table.Columns)),
 		},
 		Fields:     make(map[string]*proto.Field),
-		PrimaryKey: make([]*proto.Field, 0, len(table.Columns)),
+		PrimaryKey: make([]*proto.Field, 0, table.PrimaryKey.ColumnsNames.Len()),
 	}
 
 	for i, column := range table.Columns {
