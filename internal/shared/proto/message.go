@@ -1,11 +1,13 @@
 package proto
 
+import "github.com/artarts36/db-exporter/internal/shared/indentx"
+
 type Message struct {
 	Name   string
 	Fields []*Field
 }
 
-func (m *Message) write(buf stringsBuffer, indent *Indent) {
+func (m *Message) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString("message " + m.Name + " {")
 
 	if len(m.Fields) > 0 {

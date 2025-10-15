@@ -1,4 +1,4 @@
-package proto
+package indentx
 
 import "strings"
 
@@ -9,11 +9,21 @@ type Indent struct {
 	next *Indent
 }
 
+var zero = &Indent{}
+
+func Zero() *Indent {
+	return zero
+}
+
 func NewIndent(step int) *Indent {
 	return &Indent{
 		step: strings.Repeat(" ", step),
 		curr: "",
 	}
+}
+
+func (i *Indent) Curr() string {
+	return i.curr
 }
 
 func (i *Indent) Next() *Indent {

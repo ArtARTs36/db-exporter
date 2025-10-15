@@ -1,6 +1,10 @@
 package proto
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/artarts36/db-exporter/internal/shared/indentx"
+)
 
 type Service struct {
 	Name       string
@@ -19,7 +23,7 @@ type ServiceProcedureOption struct {
 	Params map[string]interface{}
 }
 
-func (s *Service) write(buf stringsBuffer, indent *Indent) {
+func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString("service " + s.Name + " {")
 
 	if len(s.Procedures) == 0 {
@@ -35,7 +39,7 @@ func (s *Service) write(buf stringsBuffer, indent *Indent) {
 	buf.WriteString("}" + "\n")
 }
 
-func (s *ServiceProcedure) write(buf stringsBuffer, indent *Indent) {
+func (s *ServiceProcedure) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString("  rpc " + s.Name + "(" + s.Param + ") returns (" + s.Returns + ") {")
 
 	if len(s.Options) == 0 {
@@ -48,12 +52,12 @@ func (s *ServiceProcedure) write(buf stringsBuffer, indent *Indent) {
 		option.write(buf, indent.Next())
 	}
 
-	buf.WriteString(indent.curr)
+	buf.WriteString(indent.Curr())
 	buf.WriteString("}\n")
 }
 
-func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *Indent) {
-	buf.WriteString(indent.curr)
+func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *indentx.Indent) {
+	buf.WriteString(indent.Curr())
 	buf.WriteString("option (" + opt.Name + ") = {")
 
 	if len(opt.Params) > 0 {
@@ -62,7 +66,7 @@ func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *Indent) {
 		paramsIndent := indent.Next()
 
 		for k, v := range opt.Params {
-			buf.WriteString(paramsIndent.curr)
+			buf.WriteString(paramsIndent.Curr())
 			buf.WriteString("" + k + ": ")
 			buf.WriteString(strconv.Quote(v.(string)))
 		}
@@ -70,6 +74,6 @@ func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *Indent) {
 		buf.WriteString("\n")
 	}
 
-	buf.WriteString(indent.curr)
+	buf.WriteString(indent.Curr())
 	buf.WriteString("};\n")
 }

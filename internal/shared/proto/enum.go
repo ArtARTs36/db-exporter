@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/gds"
 	"strconv"
 )
@@ -35,13 +36,13 @@ func (e *Enum) AddValue(value ...string) {
 	}
 }
 
-func (e *Enum) write(buf stringsBuffer, indent *Indent) {
+func (e *Enum) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString(e.Name.Prepend("enum ").Append(" {").Value)
 
 	buf.WriteString("\n")
 
 	for i, v := range e.Values {
-		buf.WriteString(indent.curr + v + " = " + strconv.Itoa(i) + ";")
+		buf.WriteString(indent.Curr() + v + " = " + strconv.Itoa(i) + ";")
 		buf.WriteString("\n")
 	}
 

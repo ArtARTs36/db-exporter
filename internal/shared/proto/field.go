@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"strconv"
 )
 
@@ -9,16 +10,47 @@ type Field struct {
 	Type     string
 	Name     string
 	ID       int
+	Options  []*FieldOption
 }
 
-func (f *Field) write(buf stringsBuffer, indent *Indent) {
-	buf.WriteString(indent.curr)
+type FieldOption struct {
+	Name  string
+	Value string
+}
+
+func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
+	buf.WriteString(indent.Curr())
 
 	if f.Repeated {
 		buf.WriteString("repeated ")
 	}
 
-	buf.WriteString(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID) + ";")
+	buf.WriteString(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID))
+
+	if len(f.Options) > 0 {
+		buf.WriteString(" [")
+
+		if len(f.Options) == 1 {
+			f.Options[0].write(buf, indentx.Zero())
+		} else {
+			for i, opt := range f.Options {
+				opt.write(buf, indent)
+
+				if i < len(f.Options)-1 {
+					buf.WriteString(",")
+				}
+			}
+		}
+
+		buf.WriteString("]")
+	}
+
+	buf.WriteString(";")
+}
+
+func (f *FieldOption) write(buf stringsBuffer, indent *indentx.Indent) {
+	buf.WriteString(indent.Curr())
+	buf.WriteString("(" + f.Name + ") = " + f.Value)
 }
 
 func (f *Field) Clone() *Field {

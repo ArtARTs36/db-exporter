@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/gds"
 	"testing"
 
@@ -52,6 +53,12 @@ func TestFile_Render(t *testing.T) {
 						Type: "int64",
 						Name: "id",
 						ID:   1,
+						Options: []*FieldOption{
+							{
+								Name:  "google.api.field_behavior",
+								Value: "REQUIRED",
+							},
+						},
 					},
 				},
 			},
@@ -100,7 +107,7 @@ service UserService {
 }
 
 message GetUserRequest {
-  int64 id = 1;
+  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message GetUserResponse {
@@ -113,7 +120,7 @@ enum UserStatus {
   USERSTATUS_ACTIVE = 1;
   USERSTATUS_BANNED = 2;
 }`
-	got := f.Render(NewIndent(2))
+	got := f.Render(indentx.NewIndent(2))
 
 	assert.Equal(t, expected, got)
 }
