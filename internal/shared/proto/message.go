@@ -5,7 +5,7 @@ type Message struct {
 	Fields []*Field
 }
 
-func (m *Message) write(buf stringsBuffer) {
+func (m *Message) write(buf stringsBuffer, indent *Indent) {
 	buf.WriteString("message " + m.Name + " {")
 
 	if len(m.Fields) > 0 {
@@ -13,7 +13,7 @@ func (m *Message) write(buf stringsBuffer) {
 	}
 
 	for _, field := range m.Fields {
-		field.write(buf)
+		field.write(buf, indent.Next())
 		buf.WriteString("\n")
 	}
 

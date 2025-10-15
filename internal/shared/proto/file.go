@@ -63,7 +63,7 @@ func (f *File) Render(indent *Indent) string {
 	f.writePackage(buf)
 	f.writeOptions(buf)
 	f.writeServices(buf, indent)
-	f.writeMessages(buf)
+	f.writeMessages(buf, indent)
 	f.writeEnums(buf, indent)
 
 	return buf.String()
@@ -104,10 +104,10 @@ func (f *File) writePackage(buf stringsBuffer) {
 	buf.WriteString("\npackage " + f.Package + ";\n")
 }
 
-func (f *File) writeMessages(buf stringsBuffer) {
+func (f *File) writeMessages(buf stringsBuffer, indent *Indent) {
 	for i, message := range f.Messages {
 		buf.WriteString("\n")
-		message.write(buf)
+		message.write(buf, indent)
 
 		if i < len(f.Messages)-1 {
 			buf.WriteString("\n")

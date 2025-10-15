@@ -11,8 +11,8 @@ type Field struct {
 	ID       int
 }
 
-func (f *Field) write(buf stringsBuffer) {
-	buf.WriteString("  ")
+func (f *Field) write(buf stringsBuffer, indent *Indent) {
+	buf.WriteString(indent.curr)
 
 	if f.Repeated {
 		buf.WriteString("repeated ")
