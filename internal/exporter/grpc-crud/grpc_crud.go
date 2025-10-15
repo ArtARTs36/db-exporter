@@ -62,6 +62,8 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
+	tablemsgMapper := tablemsg.NewMapper()
+
 	for _, table := range params.Schema.Tables.List() {
 		prfile := &proto.File{
 			Package:  spec.Package,
@@ -71,7 +73,7 @@ func (e *Exporter) ExportPerFile(
 			Options:  options,
 		}
 
-		srv, err := e.buildService(params.Schema.Driver, prfile, table, enumPages, procModifier)
+		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, enumPages, procModifier)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
@@ -118,8 +120,10 @@ func (e *Exporter) Export(
 		prfile.Enums = append(prfile.Enums, proto.NewEnumWithValues(enum.Name, enum.Values))
 	}
 
+	tablemsgMapper := tablemsg.NewMapper()
+
 	for _, table := range params.Schema.Tables.List() {
-		srv, err := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
+		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{}, procModifier)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
@@ -142,6 +146,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
+	tablemsgMapper *tablemsg.Mapper,
 	sourceDriver config.DatabaseDriver,
 	prfile *proto.File,
 	table *schema.Table,
@@ -164,7 +169,7 @@ func (e *Exporter) buildService(
 		sourceDriver: sourceDriver,
 		prfile:       prfile,
 		table:        table,
-		tableMsg: tablemsg.Map(table, func(col *schema.Column) string {
+		tableMsg: tablemsgMapper.Map(table, func(col *schema.Column) string {
 			return e.mapType(sourceDriver, col, prfile.Imports, enumPages)
 		}),
 		enumPages: enumPages,
