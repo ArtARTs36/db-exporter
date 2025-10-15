@@ -80,11 +80,15 @@ func (f *File) writeImports(buf stringsBuffer) {
 }
 
 func (f *File) writeOptions(buf stringsBuffer) {
+	if len(f.Options) > 0 {
+		buf.WriteString("\n")
+	}
+
 	for optName, opt := range f.Options {
 		if opt.Quotes {
-			buf.WriteString("option \"" + optName + "\" = \"" + opt.Value + "\";\n")
+			buf.WriteString("option " + optName + " = \"" + opt.Value + "\";\n")
 		} else {
-			buf.WriteString("option \"" + optName + "\" = " + opt.Value + ";\n")
+			buf.WriteString("option " + optName + " = " + opt.Value + ";\n")
 		}
 	}
 }

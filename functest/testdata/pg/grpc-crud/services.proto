@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 package org.service;
-option "optimize_for" = SPEED;
+
+option optimize_for = SPEED;
 
 service UsersService {
   rpc List(ListUserRequest) returns (ListUserResponse) {};
