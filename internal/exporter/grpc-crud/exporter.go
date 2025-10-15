@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/fieldmap"
+	service "github.com/artarts36/db-exporter/internal/exporter/grpc-crud/service"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -62,7 +63,7 @@ func (e *Exporter) ExportPerFile(
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
-	procModifier := selectProcedureModifier(spec)
+	procModifier := service.SelectProcedureModifier(spec)
 
 	enumPages := map[string]*exporter.ExportedPage{}
 	indent := indentx.NewIndent(spec.Indent)
@@ -126,7 +127,7 @@ func (e *Exporter) Export(
 	}
 
 	options := proto.PrepareOptions(spec.Options)
-	procModifier := selectProcedureModifier(spec)
+	procModifier := service.SelectProcedureModifier(spec)
 
 	prfile := &proto.File{
 		Package:  spec.Package,
@@ -172,17 +173,17 @@ func (e *Exporter) buildService(
 	prfile *proto.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
-	createProcModifier procedureModifierFactory,
-) (*service, error) {
-	procedureBuilders := map[procedureType]func(buildCtx *buildProcedureContext) (*procedure, error){
-		procedureTypeList:   e.buildListProcedure,
-		procedureTypeGet:    e.buildGetProcedure,
-		procedureTypeDelete: e.buildDeleteProcedure,
-		procedureTypeCreate: e.buildCreateProcedure,
-		procedureTypePatch:  e.buildPatchProcedure,
+	createProcModifier service.ProcedureModifierFactory,
+) (*service.Service, error) {
+	procedureBuilders := map[service.ProcedureType]func(buildCtx *buildProcedureContext) (*service.Procedure, error){
+		service.ProcedureTypeList:   e.buildListProcedure,
+		service.ProcedureTypeGet:    e.buildGetProcedure,
+		service.ProcedureTypeDelete: e.buildDeleteProcedure,
+		service.ProcedureTypeCreate: e.buildCreateProcedure,
+		service.ProcedureTypePatch:  e.buildPatchProcedure,
 	}
 
-	srv := &service{
+	srv := &service.Service{
 		Name: fmt.Sprintf("%sService", table.Name.Pascal()),
 	}
 
@@ -221,7 +222,7 @@ func (e *Exporter) buildService(
 
 func (e *Exporter) buildGetProcedure(
 	buildCtx *buildProcedureContext,
-) (*procedure, error) {
+) (*service.Procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
@@ -248,9 +249,9 @@ func (e *Exporter) buildGetProcedure(
 		id++
 	}
 
-	return &procedure{
+	return &service.Procedure{
 		Name:    "Get",
-		Type:    procedureTypeGet,
+		Type:    service.ProcedureTypeGet,
 		Request: getReqMsg,
 		Response: &proto.Message{
 			Name: fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName),
@@ -267,7 +268,7 @@ func (e *Exporter) buildGetProcedure(
 
 func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
-) (*procedure, error) {
+) (*service.Procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
@@ -289,9 +290,9 @@ func (e *Exporter) buildListProcedure(
 		},
 	}
 
-	return &procedure{
+	return &service.Procedure{
 		Name:     "List",
-		Type:     procedureTypeList,
+		Type:     service.ProcedureTypeList,
 		Request:  getReqMsg,
 		Response: respMsg,
 	}, nil
@@ -299,7 +300,7 @@ func (e *Exporter) buildListProcedure(
 
 func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
-) (*procedure, error) {
+) (*service.Procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
@@ -326,9 +327,9 @@ func (e *Exporter) buildDeleteProcedure(
 		id++
 	}
 
-	return &procedure{
+	return &service.Procedure{
 		Name:    "Delete",
-		Type:    procedureTypeDelete,
+		Type:    service.ProcedureTypeDelete,
 		Request: deleteReqMsg,
 		Response: &proto.Message{
 			Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
@@ -338,7 +339,7 @@ func (e *Exporter) buildDeleteProcedure(
 
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
-) (*procedure, error) {
+) (*service.Procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
@@ -365,9 +366,9 @@ func (e *Exporter) buildCreateProcedure(
 		id++
 	}
 
-	return &procedure{
+	return &service.Procedure{
 		Name:    "Create",
-		Type:    procedureTypeCreate,
+		Type:    service.ProcedureTypeCreate,
 		Request: createReqMsg,
 		Response: &proto.Message{
 			Name: fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName),
@@ -384,7 +385,7 @@ func (e *Exporter) buildCreateProcedure(
 
 func (e *Exporter) buildPatchProcedure(
 	buildCtx *buildProcedureContext,
-) (*procedure, error) {
+) (*service.Procedure, error) {
 	if buildCtx.table.PrimaryKey == nil {
 		return nil, nil
 	}
@@ -422,9 +423,9 @@ func (e *Exporter) buildPatchProcedure(
 		id++
 	}
 
-	return &procedure{
+	return &service.Procedure{
 		Name:     "Patch",
-		Type:     procedureTypePatch,
+		Type:     service.ProcedureTypePatch,
 		Request:  patchReqMsg,
 		Response: patchRespMsg,
 	}, nil

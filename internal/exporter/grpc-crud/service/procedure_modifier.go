@@ -1,4 +1,4 @@
-package grpccrud
+package service
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"
@@ -7,41 +7,41 @@ import (
 )
 
 type (
-	procedureModifierFactory func(
+	ProcedureModifierFactory func(
 		file *proto.File,
-		srv *service,
+		srv *Service,
 		tableMessage *tablemsg.Message,
-	) procedureModifier
+	) ProcedureModifier
 
-	procedureModifier func(proc *procedure)
+	ProcedureModifier func(proc *Procedure)
 )
 
-func compositeProcedureModifier(modifiers []procedureModifier) procedureModifier {
-	return func(proc *procedure) {
+func CompositeProcedureModifier(modifiers []ProcedureModifier) ProcedureModifier {
+	return func(proc *Procedure) {
 		for _, modifier := range modifiers {
 			modifier(proc)
 		}
 	}
 }
 
-func compositeProcedureModifierFactory(factories []procedureModifierFactory) procedureModifierFactory {
-	return func(file *proto.File, srv *service, tableMessage *tablemsg.Message) procedureModifier {
-		modifiers := make([]procedureModifier, len(factories))
+func CompositeProcedureModifierFactory(factories []ProcedureModifierFactory) ProcedureModifierFactory {
+	return func(file *proto.File, srv *Service, tableMessage *tablemsg.Message) ProcedureModifier {
+		modifiers := make([]ProcedureModifier, len(factories))
 
 		for i, f := range factories {
 			modifiers[i] = f(file, srv, tableMessage)
 		}
 
-		return compositeProcedureModifier(modifiers)
+		return CompositeProcedureModifier(modifiers)
 	}
 }
 
-func selectProcedureModifier(spec *config.GRPCCrudExportSpec) procedureModifierFactory {
+func SelectProcedureModifier(spec *config.GRPCCrudExportSpec) ProcedureModifierFactory {
 	if spec.With.Object == nil {
 		return nil
 	}
 
-	modifierFactories := []procedureModifierFactory{}
+	modifierFactories := []ProcedureModifierFactory{}
 
 	if spec.With.Object.GoogleApiHTTP.Object != nil {
 		m := &googleApiHTTPProcedureModifier{}
@@ -61,9 +61,9 @@ func selectProcedureModifier(spec *config.GRPCCrudExportSpec) procedureModifierF
 		return modifierFactories[0]
 	}
 
-	return compositeProcedureModifierFactory(modifierFactories)
+	return CompositeProcedureModifierFactory(modifierFactories)
 }
 
-func nopProcedureModifier() procedureModifierFactory {
-	return procedureModifierFactory(nil)
+func nopProcedureModifier() ProcedureModifierFactory {
+	return ProcedureModifierFactory(nil)
 }

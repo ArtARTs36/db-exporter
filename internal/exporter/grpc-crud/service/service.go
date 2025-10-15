@@ -1,17 +1,15 @@
-package grpccrud
+package service
 
-import (
-	"github.com/artarts36/db-exporter/internal/shared/proto"
-)
+import "github.com/artarts36/db-exporter/internal/shared/proto"
 
-type service struct {
+type Service struct {
 	Name string
 
-	Procedures []*procedure
+	Procedures []*Procedure
 	Messages   []*proto.Message
 }
 
-func (s *service) ToProto() *proto.Service {
+func (s *Service) ToProto() *proto.Service {
 	procs := make([]*proto.ServiceProcedure, len(s.Procedures))
 	for i, proc := range s.Procedures {
 		procs[i] = proc.ToProto() // @todo need to optimize

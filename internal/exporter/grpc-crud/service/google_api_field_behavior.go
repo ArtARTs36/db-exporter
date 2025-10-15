@@ -1,4 +1,4 @@
-package grpccrud
+package service
 
 import (
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
@@ -8,23 +8,23 @@ import (
 
 type googleApiFieldBehaviorModifier struct{}
 
-func (m *googleApiFieldBehaviorModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, tbl *tablemsg.Message) procedureModifier {
-		return func(proc *procedure) {
+func (m *googleApiFieldBehaviorModifier) create() ProcedureModifierFactory {
+	return func(file *proto.File, srv *Service, tbl *tablemsg.Message) ProcedureModifier {
+		return func(proc *Procedure) {
 			switch proc.Type {
-			case procedureTypeGet:
+			case ProcedureTypeGet:
 				for _, field := range proc.Request.Fields {
 					field.Options = append(field.Options, googleapi.FieldRequired())
 				}
-			case procedureTypeDelete:
+			case ProcedureTypeDelete:
 				for _, field := range proc.Request.Fields {
 					field.Options = append(field.Options, googleapi.FieldRequired())
 				}
-			case procedureTypeList:
+			case ProcedureTypeList:
 				for _, field := range proc.Response.Fields {
 					field.Options = append(field.Options, googleapi.FieldOutputOnly())
 				}
-			case procedureTypeCreate:
+			case ProcedureTypeCreate:
 				for _, field := range proc.Request.Fields {
 					col := tbl.Table.GetColumn(field.Name)
 					if col == nil {

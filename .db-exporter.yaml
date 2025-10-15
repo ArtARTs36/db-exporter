@@ -8,9 +8,18 @@ databases:
     dsn: "./test.dbml"
 
 tasks:
+  grpc:
+    activities:
+      - format: grpc-crud
+        spec:
+          package: ''
+          with:
+            google.api.http: { }
+            google.api.field_behavior: { }
+        out:
+          dir: './'
+
   diagram:
-    commit:
-      author: 'aaaaa <s>'
     activities:
       - format: diagram
         spec:

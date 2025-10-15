@@ -1,4 +1,4 @@
-package grpccrud
+package service
 
 import (
 	"fmt"
@@ -13,23 +13,23 @@ type googleApiHTTPProcedureModifier struct {
 	pathPrefix string
 }
 
-func (m *googleApiHTTPProcedureModifier) create() procedureModifierFactory {
-	return func(file *proto.File, srv *service, tbl *tablemsg.Message) procedureModifier {
+func (m *googleApiHTTPProcedureModifier) create() ProcedureModifierFactory {
+	return func(file *proto.File, srv *Service, tbl *tablemsg.Message) ProcedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, tbl.Table.Name.Snake().Lower())
 
-		return func(proc *procedure) {
+		return func(proc *Procedure) {
 			var opt *proto.ServiceProcedureOption
 
 			switch proc.Type {
-			case procedureTypeList:
+			case ProcedureTypeList:
 				opt = googleapi.Get(basePath)
-			case procedureTypeGet:
+			case ProcedureTypeGet:
 				opt = googleapi.Get(m.pathTo(basePath, tbl))
-			case procedureTypeCreate:
+			case ProcedureTypeCreate:
 				opt = googleapi.Post(basePath)
-			case procedureTypePatch:
+			case ProcedureTypePatch:
 				opt = googleapi.Patch(m.pathTo(basePath, tbl))
-			case procedureTypeDelete:
+			case ProcedureTypeDelete:
 				opt = googleapi.Delete(m.pathTo(basePath, tbl))
 			default:
 				return
