@@ -2,7 +2,7 @@ package service
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
 	"strings"
 
@@ -14,22 +14,22 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() ProcedureModifierFactory {
-	return func(file *proto.File, srv *Service, tbl *tablemsg.Message) ProcedureModifier {
+	return func(file *proto.File, srv *presentation.Service, tbl *presentation.TableMessage) ProcedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, tbl.Table.Name.Snake().Lower())
 
-		return func(proc *Procedure) {
+		return func(proc *presentation.Procedure) {
 			var opt *proto.ServiceProcedureOption
 
 			switch proc.Type {
-			case ProcedureTypeList:
+			case presentation.ProcedureTypeList:
 				opt = googleapi.Get(basePath)
-			case ProcedureTypeGet:
+			case presentation.ProcedureTypeGet:
 				opt = googleapi.Get(m.pathTo(basePath, tbl))
-			case ProcedureTypeCreate:
+			case presentation.ProcedureTypeCreate:
 				opt = googleapi.Post(basePath)
-			case ProcedureTypePatch:
+			case presentation.ProcedureTypePatch:
 				opt = googleapi.Patch(m.pathTo(basePath, tbl))
-			case ProcedureTypeDelete:
+			case presentation.ProcedureTypeDelete:
 				opt = googleapi.Delete(m.pathTo(basePath, tbl))
 			default:
 				return
@@ -42,11 +42,11 @@ func (m *googleApiHTTPProcedureModifier) create() ProcedureModifierFactory {
 	}
 }
 
-func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *tablemsg.Message) string {
+func (m *googleApiHTTPProcedureModifier) pathTo(basePath string, msg *presentation.TableMessage) string {
 	return fmt.Sprintf("%s/%s", basePath, m.fieldsToPath(msg))
 }
 
-func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *tablemsg.Message) string {
+func (m *googleApiHTTPProcedureModifier) fieldsToPath(msg *presentation.TableMessage) string {
 	path := strings.Builder{}
 
 	for i, field := range msg.PrimaryKey {

@@ -1,6 +1,7 @@
 package tablemsg
 
 import (
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 )
@@ -23,8 +24,8 @@ func (m *Mapper) MapTable(
 	file *proto.File,
 	table *schema.Table,
 	fieldTypeMapper func(col *schema.Column) string,
-) *Message {
-	msg := &Message{
+) *presentation.TableMessage {
+	msg := &presentation.TableMessage{
 		Table: table,
 		Proto: &proto.Message{
 			Name:   table.Name.Pascal().Singular().Value,
