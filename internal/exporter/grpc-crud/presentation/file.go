@@ -10,10 +10,12 @@ type File struct {
 	proto.File
 
 	services []*Service
+
+	cfg *config
 }
 
-func NewFile(pkg string) *File {
-	return &File{
+func NewFile(pkg string, configurators ...Configurator) *File {
+	f := &File{
 		File: proto.File{
 			Package:  pkg,
 			Imports:  gds.NewSet[string](),
@@ -22,10 +24,13 @@ func NewFile(pkg string) *File {
 			Enums:    make([]*proto.Enum, 0),
 		},
 		services: make([]*Service, 0), // @todo
+		cfg:      newConfig(configurators),
 	}
+
+	return f
 }
 
-func AllocateFile(pkg string, enumsLength int) *File {
+func AllocateFile(pkg string, enumsLength int, configurators ...Configurator) *File {
 	return &File{
 		File: proto.File{
 			Package:  pkg,
@@ -35,6 +40,7 @@ func AllocateFile(pkg string, enumsLength int) *File {
 			Enums:    make([]*proto.Enum, 0, enumsLength),
 		},
 		services: make([]*Service, 0),
+		cfg:      newConfig(configurators),
 	}
 }
 
@@ -55,11 +61,25 @@ func (f *File) Render(indent *indentx.Indent) string {
 	return f.File.Render(indent)
 }
 
-func (f *File) AddService(name string, procedures int) *Service {
+func (f *File) AddService(
+	name string,
+	tableMsg *TableMessage,
+	procedures int,
+) *Service {
 	srv := &Service{
-		Name:       name,
-		Procedures: make([]*Procedure, 0, procedures),
+		Name:         name,
+		TableMessage: tableMsg,
+		Procedures:   make([]*Procedure, 0, procedures),
+		file:         f,
 	}
 
+	srv.file.AddMessage(tableMsg.Proto)
+
+	f.services = append(f.services, srv)
+
 	return srv
+}
+
+func (f *File) AddMessage(msg *proto.Message) {
+	f.Messages = append(f.Messages, msg)
 }

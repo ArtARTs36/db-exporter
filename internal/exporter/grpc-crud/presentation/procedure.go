@@ -21,6 +21,8 @@ type Procedure struct {
 	Response *proto.Message
 
 	Options []*proto.ServiceProcedureOption
+
+	service *Service
 }
 
 func (p *Procedure) ToProto() *proto.ServiceProcedure {
@@ -30,4 +32,12 @@ func (p *Procedure) ToProto() *proto.ServiceProcedure {
 		Returns: p.Response.Name,
 		Options: p.Options,
 	}
+}
+
+func (p *Procedure) AddOption(option *proto.ServiceProcedureOption) {
+	p.Options = append(p.Options, option)
+}
+
+func (p *Procedure) Service() *Service {
+	return p.service
 }
