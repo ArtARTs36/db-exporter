@@ -168,9 +168,7 @@ func (e *Exporter) buildService(
 		presentation.ProcedureTypePatch:  e.buildPatchProcedure,
 	}
 
-	srv := &presentation.Service{
-		Name: fmt.Sprintf("%sService", table.Name.Pascal()),
-	}
+	srv := prfile.AddService(fmt.Sprintf("%sService", table.Name.Pascal()), 5)
 
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
