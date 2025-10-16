@@ -88,15 +88,7 @@ func (e *Exporter) ExportPerFile(
 	tablemsgMapper := e.newTableMapper(spec)
 
 	for _, table := range params.Schema.Tables.List() {
-		prfile := &presentation.File{
-			File: proto.File{
-				Package:  spec.Package,
-				Services: make([]*proto.Service, 0, 1),
-				Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-				Imports:  gds.NewSet[string](),
-				Options:  options,
-			},
-		}
+		prfile := presentation.NewFile(spec.Package).SetOptions(options)
 
 		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, enumPages, procModifier)
 		if err != nil {
@@ -132,16 +124,7 @@ func (e *Exporter) Export(
 	options := proto.PrepareOptions(spec.Options)
 	procModifier := service.SelectProcedureModifier(spec)
 
-	prfile := &presentation.File{
-		File: proto.File{
-			Package:  spec.Package,
-			Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
-			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-			Imports:  gds.NewSet[string](),
-			Options:  options,
-			Enums:    make([]*proto.Enum, 0, len(params.Schema.Enums)),
-		},
-	}
+	prfile := presentation.NewFile(spec.Package).SetOptions(options)
 
 	for _, enum := range params.Schema.Enums {
 		prfile.Enums = append(prfile.Enums, proto.NewEnumWithValues(enum.Name, enum.Values))
