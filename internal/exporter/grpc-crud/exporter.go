@@ -70,11 +70,8 @@ func (e *Exporter) ExportPerFile(
 	indent := indentx.NewIndent(spec.Indent)
 
 	for _, enum := range params.Schema.Enums {
-		prfile := &proto.File{
-			Package: spec.Package,
-			Options: options,
-			Enums:   []*proto.Enum{proto.NewEnumWithValues(enum.Name, enum.Values)},
-		}
+		prfile := presentation.AllocateFile(spec.Package, 1).SetOptions(options)
+		prfile.AddEnum(*enum.Name, enum.Values)
 
 		expPage := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s_enum.proto", enum.Name.Value),
@@ -124,10 +121,10 @@ func (e *Exporter) Export(
 	options := proto.PrepareOptions(spec.Options)
 	procModifier := service.SelectProcedureModifier(spec)
 
-	prfile := presentation.NewFile(spec.Package).SetOptions(options)
+	prfile := presentation.AllocateFile(spec.Package, len(params.Schema.Enums)).SetOptions(options)
 
 	for _, enum := range params.Schema.Enums {
-		prfile.Enums = append(prfile.Enums, proto.NewEnumWithValues(enum.Name, enum.Values))
+		prfile.AddEnum(*enum.Name, enum.Values)
 	}
 
 	tablemsgMapper := e.newTableMapper(spec)
