@@ -27,6 +27,37 @@ func (s *Service) ToProto() *proto.Service {
 	}
 }
 
+func (s *Service) AddProcedureFn(
+	name string,
+	typ ProcedureType,
+	reqBuild func(message *Message),
+	respBuild func(message *Message),
+) *Procedure {
+	req := newMessage()
+	resp := newMessage()
+
+	reqBuild(req)
+	respBuild(resp)
+
+	p := &Procedure{
+		Name:     name,
+		Type:     typ,
+		Request:  req.proto,
+		Response: resp.proto,
+		Options:  make([]*proto.ServiceProcedureOption, 0),
+		service:  s,
+	}
+
+	s.Procedures = append(s.Procedures, p)
+	s.Messages = append(s.Messages, req.proto, resp.proto)
+	//s.file.AddMessage(req)
+	//s.file.AddMessage(resp)
+
+	s.file.cfg.modifyProcedure(p)
+
+	return p
+}
+
 func (s *Service) AddProcedure(
 	name string,
 	typ ProcedureType,

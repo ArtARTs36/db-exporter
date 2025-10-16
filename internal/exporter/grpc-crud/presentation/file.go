@@ -73,7 +73,7 @@ func (f *File) AddService(
 		file:         f,
 	}
 
-	srv.file.AddMessage(tableMsg.Proto)
+	f.AddMessage(tableMsg.Proto)
 
 	f.services = append(f.services, srv)
 
@@ -81,5 +81,5 @@ func (f *File) AddService(
 }
 
 func (f *File) AddMessage(msg *proto.Message) {
-	f.Messages = append(f.Messages, msg)
+	f.File.Messages = append(f.Messages, msg)
 }

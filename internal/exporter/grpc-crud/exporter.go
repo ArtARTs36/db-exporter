@@ -204,41 +204,30 @@ func (e *Exporter) buildGetProcedure(
 		return nil
 	}
 
-	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Get%sRequest", buildCtx.tableSingularName),
-		Fields: make([]*proto.Field, 0),
-	}
-
-	id := 1
-
-	for _, col := range buildCtx.table.Columns {
-		if !col.IsPrimaryKey() {
-			continue
-		}
-
-		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
-		if err != nil {
-			return err
-		}
-
-		getReqMsg.Fields = append(getReqMsg.Fields, field)
-
-		id++
-	}
-
-	buildCtx.service.AddProcedure(
+	buildCtx.service.AddProcedureFn(
 		"Get",
 		presentation.ProcedureTypeGet,
-		getReqMsg,
-		&proto.Message{
-			Name: fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName),
-			Fields: []*proto.Field{
-				{
-					Name: buildCtx.table.Name.Pascal().Singular().Value,
-					Type: buildCtx.tableMsg.Proto.Name,
-					ID:   1,
-				},
-			},
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Get%sRequest", buildCtx.tableSingularName))
+
+			for _, pkField := range buildCtx.tableMsg.PrimaryKey {
+				message.CreateField(pkField.Name, func(field *presentation.Field) {
+					if pkField.Repeated {
+						field.AsRepeated()
+					}
+					field.SetType(pkField.Type)
+				})
+			}
+		},
+		func(message *presentation.Message) {
+			message.
+				SetName(fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName)).
+				CreateField(
+					buildCtx.tableSingularName,
+					func(field *presentation.Field) {
+						field.SetType(buildCtx.tableMsg.Proto.Name)
+					},
+				)
 		},
 	)
 
@@ -248,24 +237,18 @@ func (e *Exporter) buildGetProcedure(
 func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	getReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("List%sRequest", buildCtx.tableSingularName),
-		Fields: make([]*proto.Field, 0),
-	}
-
-	respMsg := &proto.Message{
-		Name: fmt.Sprintf("List%sResponse", buildCtx.tableSingularName),
-		Fields: []*proto.Field{
-			{
-				Repeated: true,
-				Type:     buildCtx.tableMsg.Proto.Name,
-				Name:     "items",
-				ID:       1,
-			},
+	buildCtx.service.AddProcedureFn("List", presentation.ProcedureTypeList,
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("List%sRequest", buildCtx.tableSingularName))
 		},
-	}
-
-	buildCtx.service.AddProcedure("List", presentation.ProcedureTypeList, getReqMsg, respMsg)
+		func(message *presentation.Message) {
+			message.
+				SetName(fmt.Sprintf("List%sResponse", buildCtx.tableSingularName)).
+				CreateField("items", func(field *presentation.Field) {
+					field.AsRepeated().SetType(buildCtx.tableMsg.Proto.Name)
+				})
+		},
+	)
 
 	return nil
 }
@@ -277,33 +260,29 @@ func (e *Exporter) buildDeleteProcedure(
 		return nil
 	}
 
-	deleteReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName),
-		Fields: make([]*proto.Field, 0),
-	}
+	var err error
 
-	id := 1
+	buildCtx.service.AddProcedureFn(
+		"Delete",
+		presentation.ProcedureTypeDelete,
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
 
-	for _, col := range buildCtx.table.Columns {
-		if !col.IsPrimaryKey() {
-			continue
-		}
+			for _, pkField := range buildCtx.tableMsg.PrimaryKey {
+				message.CreateField(pkField.Name, func(field *presentation.Field) {
+					if pkField.Repeated {
+						field.AsRepeated()
+					}
+					field.SetType(pkField.Type)
+				})
+			}
+		},
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName))
+		},
+	)
 
-		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
-		if err != nil {
-			return err
-		}
-
-		deleteReqMsg.Fields = append(deleteReqMsg.Fields, field)
-
-		id++
-	}
-
-	buildCtx.service.AddProcedure("Delete", presentation.ProcedureTypeDelete, deleteReqMsg, &proto.Message{
-		Name: fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName),
-	})
-
-	return nil
+	return err
 }
 
 func (e *Exporter) buildCreateProcedure(
