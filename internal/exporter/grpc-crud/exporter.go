@@ -22,7 +22,7 @@ type Exporter struct{}
 type buildProcedureContext struct {
 	sourceDriver config.DatabaseDriver
 
-	prfile            *proto.File
+	prfile            *presentation.File
 	table             *schema.Table
 	tableMsg          *presentation.TableMessage
 	tableSingularName string
@@ -88,12 +88,14 @@ func (e *Exporter) ExportPerFile(
 	tablemsgMapper := e.newTableMapper(spec)
 
 	for _, table := range params.Schema.Tables.List() {
-		prfile := &proto.File{
-			Package:  spec.Package,
-			Services: make([]*proto.Service, 0, 1),
-			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-			Imports:  gds.NewSet[string](),
-			Options:  options,
+		prfile := &presentation.File{
+			File: proto.File{
+				Package:  spec.Package,
+				Services: make([]*proto.Service, 0, 1),
+				Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
+				Imports:  gds.NewSet[string](),
+				Options:  options,
+			},
 		}
 
 		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, enumPages, procModifier)
@@ -130,13 +132,15 @@ func (e *Exporter) Export(
 	options := proto.PrepareOptions(spec.Options)
 	procModifier := service.SelectProcedureModifier(spec)
 
-	prfile := &proto.File{
-		Package:  spec.Package,
-		Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
-		Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
-		Imports:  gds.NewSet[string](),
-		Options:  options,
-		Enums:    make([]*proto.Enum, 0, len(params.Schema.Enums)),
+	prfile := &presentation.File{
+		File: proto.File{
+			Package:  spec.Package,
+			Services: make([]*proto.Service, 0, params.Schema.Tables.Len()),
+			Messages: make([]*proto.Message, 0, params.Schema.Tables.Len()),
+			Imports:  gds.NewSet[string](),
+			Options:  options,
+			Enums:    make([]*proto.Enum, 0, len(params.Schema.Enums)),
+		},
 	}
 
 	for _, enum := range params.Schema.Enums {
@@ -171,7 +175,7 @@ func (e *Exporter) Export(
 func (e *Exporter) buildService(
 	tablemsgMapper *tablemsg.Mapper,
 	sourceDriver config.DatabaseDriver,
-	prfile *proto.File,
+	prfile *presentation.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
 	createProcModifier service.ProcedureModifierFactory,

@@ -1,6 +1,7 @@
 package fieldmap
 
 import (
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
@@ -9,7 +10,7 @@ import (
 type GoogleAPIFieldBehaviorModifier struct{}
 
 func (m *GoogleAPIFieldBehaviorModifier) ModifyTableField(
-	file *proto.File,
+	file *presentation.File,
 	col *schema.Column,
 	field *proto.Field,
 ) {

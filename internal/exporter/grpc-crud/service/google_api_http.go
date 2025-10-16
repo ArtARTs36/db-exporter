@@ -14,7 +14,7 @@ type googleApiHTTPProcedureModifier struct {
 }
 
 func (m *googleApiHTTPProcedureModifier) create() ProcedureModifierFactory {
-	return func(file *proto.File, srv *presentation.Service, tbl *presentation.TableMessage) ProcedureModifier {
+	return func(file *presentation.File, srv *presentation.Service, tbl *presentation.TableMessage) ProcedureModifier {
 		basePath := fmt.Sprintf("%s/%s", m.pathPrefix, tbl.Table.Name.Snake().Lower())
 
 		return func(proc *presentation.Procedure) {

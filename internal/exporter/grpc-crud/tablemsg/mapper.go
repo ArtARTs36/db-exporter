@@ -11,7 +11,7 @@ type Mapper struct {
 }
 
 type fieldModifier interface {
-	ModifyTableField(file *proto.File, col *schema.Column, field *proto.Field)
+	ModifyTableField(file *presentation.File, col *schema.Column, field *proto.Field)
 }
 
 func NewMapper(fieldmod fieldModifier) *Mapper {
@@ -21,7 +21,7 @@ func NewMapper(fieldmod fieldModifier) *Mapper {
 }
 
 func (m *Mapper) MapTable(
-	file *proto.File,
+	file *presentation.File,
 	table *schema.Table,
 	fieldTypeMapper func(col *schema.Column) string,
 ) *presentation.TableMessage {

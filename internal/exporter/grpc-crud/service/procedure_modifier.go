@@ -3,12 +3,11 @@ package service
 import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
-	"github.com/artarts36/db-exporter/internal/shared/proto"
 )
 
 type (
 	ProcedureModifierFactory func(
-		file *proto.File,
+		file *presentation.File,
 		srv *presentation.Service,
 		tableMessage *presentation.TableMessage,
 	) ProcedureModifier
@@ -25,7 +24,7 @@ func CompositeProcedureModifier(modifiers []ProcedureModifier) ProcedureModifier
 }
 
 func CompositeProcedureModifierFactory(factories []ProcedureModifierFactory) ProcedureModifierFactory {
-	return func(file *proto.File, srv *presentation.Service, tableMessage *presentation.TableMessage) ProcedureModifier {
+	return func(file *presentation.File, srv *presentation.Service, tableMessage *presentation.TableMessage) ProcedureModifier {
 		modifiers := make([]ProcedureModifier, len(factories))
 
 		for i, f := range factories {

@@ -2,14 +2,13 @@ package service
 
 import (
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
-	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/googleapi"
 )
 
 type googleApiFieldBehaviorModifier struct{}
 
 func (m *googleApiFieldBehaviorModifier) create() ProcedureModifierFactory {
-	return func(file *proto.File, srv *presentation.Service, tbl *presentation.TableMessage) ProcedureModifier {
+	return func(file *presentation.File, srv *presentation.Service, tbl *presentation.TableMessage) ProcedureModifier {
 		return func(proc *presentation.Procedure) {
 			switch proc.Type {
 			case presentation.ProcedureTypeGet:
