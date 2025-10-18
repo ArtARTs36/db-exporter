@@ -155,12 +155,30 @@ func (e *Exporter) buildService(
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
 ) error {
-	procedureBuilders := map[presentation.ProcedureType]func(buildCtx *buildProcedureContext) error{
-		presentation.ProcedureTypeList:   e.buildListProcedure,
-		presentation.ProcedureTypeGet:    e.buildGetProcedure,
-		presentation.ProcedureTypeDelete: e.buildDeleteProcedure,
-		presentation.ProcedureTypeCreate: e.buildCreateProcedure,
-		presentation.ProcedureTypePatch:  e.buildPatchProcedure,
+	procedureBuilders := []struct {
+		Type  presentation.ProcedureType
+		Build func(buildCtx *buildProcedureContext) error
+	}{
+		{
+			Type:  presentation.ProcedureTypeList,
+			Build: e.buildListProcedure,
+		},
+		{
+			Type:  presentation.ProcedureTypeGet,
+			Build: e.buildGetProcedure,
+		},
+		{
+			Type:  presentation.ProcedureTypeDelete,
+			Build: e.buildDeleteProcedure,
+		},
+		{
+			Type:  presentation.ProcedureTypeCreate,
+			Build: e.buildCreateProcedure,
+		},
+		{
+			Type:  presentation.ProcedureTypePatch,
+			Build: e.buildPatchProcedure,
+		},
 	}
 
 	mapColumnType := func(col *schema.Column) string {
@@ -197,10 +215,10 @@ func (e *Exporter) buildService(
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
 
-	for procType, builder := range procedureBuilders {
-		err := builder(buildCtx)
+	for _, builder := range procedureBuilders {
+		err := builder.Build(buildCtx)
 		if err != nil {
-			return fmt.Errorf("build procedure of %s: %w", string(procType), err)
+			return fmt.Errorf("build procedure of %s: %w", string(builder.Type), err)
 		}
 	}
 
@@ -222,7 +240,7 @@ func (e *Exporter) buildGetProcedure(
 
 			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
 				message.CreateField(pkField.Name(), func(field *presentation.Field) {
-					field.CopyType(field).AsRequired()
+					field.CopyType(pkField).AsRequired()
 				})
 			}
 		},
@@ -318,7 +336,11 @@ func (e *Exporter) buildCreateProcedure(
 			}
 		},
 		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName))
+			message.
+				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
+				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
+					field.SetType(buildCtx.service.TableMessage().Name())
+				})
 		},
 	)
 
