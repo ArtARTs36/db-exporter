@@ -19,8 +19,6 @@ type buildProcedureContext struct {
 
 	service *presentation.Service
 
-	table             *schema.Table
-	tableMsg          *presentation.TableMessage
 	tableSingularName string
 	enumPages         map[string]*exporter.ExportedPage
 }
@@ -161,7 +159,6 @@ func (e *Exporter) buildService(
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
 		service:      srv,
-		table:        table,
 		enumPages:    enumPages,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
@@ -179,7 +176,7 @@ func (e *Exporter) buildService(
 func (e *Exporter) buildGetProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.table.PrimaryKey == nil {
+	if buildCtx.service.TableMessage().PrimaryKey == nil {
 		return nil
 	}
 
@@ -232,7 +229,7 @@ func (e *Exporter) buildListProcedure(
 func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.table.PrimaryKey == nil {
+	if buildCtx.service.TableMessage().Table.PrimaryKey == nil {
 		return nil
 	}
 
@@ -262,7 +259,7 @@ func (e *Exporter) buildDeleteProcedure(
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.table.PrimaryKey == nil {
+	if buildCtx.service.TableMessage().Table.PrimaryKey == nil {
 		return nil
 	}
 
@@ -316,7 +313,7 @@ func (e *Exporter) buildPatchProcedure(
 		func(message *presentation.Message) {
 			message.
 				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
-				CreateField(buildCtx.table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
+				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
 					field.SetType(buildCtx.service.TableMessage().Name())
 				})
 		},
