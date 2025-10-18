@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 option optimize_for = SPEED;
 
 service UsersService {
-  rpc List(ListUserRequest) returns (ListUserResponse) {};
+  rpc List(ListUsersRequest) returns (ListUsersResponse) {};
 
   rpc Get(GetUserRequest) returns (GetUserResponse) {};
 
@@ -25,9 +25,9 @@ message User {
   google.protobuf.Timestamp created_at = 4;
 }
 
-message ListUserRequest {}
+message ListUsersRequest {}
 
-message ListUserResponse {
+message ListUsersResponse {
   repeated User items = 1;
 }
 

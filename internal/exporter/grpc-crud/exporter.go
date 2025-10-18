@@ -20,6 +20,7 @@ type buildProcedureContext struct {
 	service *presentation.Service
 
 	tableSingularName string
+	tablePluralName   string
 	enumPages         map[string]*exporter.ExportedPage
 }
 
@@ -214,6 +215,7 @@ func (e *Exporter) buildService(
 		enumPages:    enumPages,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
+	buildCtx.tablePluralName = buildCtx.service.TableMessage().Table.Name.Pascal().Plural().Value
 
 	for _, builder := range procedureBuilders {
 		err := builder.Build(buildCtx)
@@ -264,11 +266,11 @@ func (e *Exporter) buildListProcedure(
 ) error {
 	buildCtx.service.AddProcedureFn("List", presentation.ProcedureTypeList,
 		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("List%sRequest", buildCtx.tableSingularName))
+			message.SetName(fmt.Sprintf("List%sRequest", buildCtx.tablePluralName))
 		},
 		func(message *presentation.Message) {
 			message.
-				SetName(fmt.Sprintf("List%sResponse", buildCtx.tableSingularName)).
+				SetName(fmt.Sprintf("List%sResponse", buildCtx.tablePluralName)).
 				CreateField("items", func(field *presentation.Field) {
 					field.AsRepeated().SetType(buildCtx.service.TableMessage().Name())
 				})
