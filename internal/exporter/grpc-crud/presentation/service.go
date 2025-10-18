@@ -33,8 +33,8 @@ func (s *Service) AddProcedureFn(
 	reqBuild func(message *Message),
 	respBuild func(message *Message),
 ) *Procedure {
-	req := newMessage()
-	resp := newMessage()
+	req := newMessage(s)
+	resp := newMessage(s)
 
 	reqBuild(req)
 	respBuild(resp)

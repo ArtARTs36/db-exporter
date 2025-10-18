@@ -1,14 +1,18 @@
 package presentation
 
-import "github.com/artarts36/db-exporter/internal/shared/proto"
+import (
+	"github.com/artarts36/db-exporter/internal/shared/proto"
+)
 
 type Message struct {
 	proto *proto.Message
+	srv   *Service
 }
 
-func newMessage() *Message {
+func newMessage(srv *Service) *Message {
 	return &Message{
 		proto: &proto.Message{},
+		srv:   srv,
 	}
 }
 
@@ -26,11 +30,18 @@ func (msg *Message) CreateField(name string, creator func(*Field)) *Message {
 			ID:      len(msg.proto.Fields) + 1,
 			Type:    "string",
 		},
+		message: msg,
 	}
 
 	creator(field)
 
+	msg.srv.file.cfg.modifyField(field)
+
 	msg.proto.Fields = append(msg.proto.Fields, field.proto)
 
 	return msg
+}
+
+func (msg *Message) Service() *Service {
+	return msg.srv
 }

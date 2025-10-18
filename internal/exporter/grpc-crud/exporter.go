@@ -119,12 +119,14 @@ func (e *Exporter) Export(
 
 	options := proto.PrepareOptions(spec.Options)
 
-	ga := modifiers.GoogleApiHttp{}
+	gaHTTP := modifiers.GoogleApiHttp{}
+	gaFH := modifiers.GoogleAPIFieldBehavior{}
 
 	prfile := presentation.AllocateFile(
 		spec.Package,
 		len(params.Schema.Enums),
-		presentation.WithModifyProcedure(ga.ModifyProcedure),
+		presentation.WithModifyProcedure(gaHTTP.ModifyProcedure),
+		presentation.WithModifyField(gaFH.ModifyField),
 	).SetOptions(options)
 
 	for _, enum := range params.Schema.Enums {
@@ -215,7 +217,7 @@ func (e *Exporter) buildGetProcedure(
 					if pkField.Repeated {
 						field.AsRepeated()
 					}
-					field.SetType(pkField.Type)
+					field.SetType(pkField.Type).AsRequired()
 				})
 			}
 		},
@@ -225,7 +227,7 @@ func (e *Exporter) buildGetProcedure(
 				CreateField(
 					buildCtx.tableSingularName,
 					func(field *presentation.Field) {
-						field.SetType(buildCtx.tableMsg.Proto.Name)
+						field.SetType(buildCtx.tableMsg.Proto.Name).AsRequired()
 					},
 				)
 		},
@@ -274,6 +276,7 @@ func (e *Exporter) buildDeleteProcedure(
 						field.AsRepeated()
 					}
 					field.SetType(pkField.Type)
+					field.AsRequired()
 				})
 			}
 		},
@@ -292,38 +295,30 @@ func (e *Exporter) buildCreateProcedure(
 		return nil
 	}
 
-	createReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName),
-		Fields: make([]*proto.Field, 0, len(buildCtx.table.Columns)),
-	}
+	buildCtx.service.AddProcedureFn("Create", presentation.ProcedureTypeCreate,
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
-	id := 1
+			for _, col := range buildCtx.table.Columns {
+				if col.IsAutoincrement {
+					continue
+				}
 
-	for _, col := range buildCtx.table.Columns {
-		if col.IsAutoincrement {
-			continue
-		}
+				tableField, _ := message.Service().TableMessage.Fields[col.Name.Value]
 
-		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
-		if err != nil {
-			return err
-		}
+				message.CreateField(tableField.Name, func(field *presentation.Field) {
+					field.SetType(tableField.Type)
 
-		createReqMsg.Fields = append(createReqMsg.Fields, field)
-
-		id++
-	}
-
-	buildCtx.service.AddProcedure("Create", presentation.ProcedureTypeCreate, createReqMsg, &proto.Message{
-		Name: fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName),
-		Fields: []*proto.Field{
-			{
-				Name: buildCtx.table.Name.Pascal().Singular().Value,
-				Type: buildCtx.tableMsg.Proto.Name,
-				ID:   1,
-			},
+					if !col.Nullable {
+						field.AsRequired()
+					}
+				})
+			}
 		},
-	})
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName))
+		},
+	)
 
 	return nil
 }
