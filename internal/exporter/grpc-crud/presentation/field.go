@@ -39,3 +39,14 @@ func (f *Field) IsRequired() bool {
 func (f *Field) Message() *Message {
 	return f.message
 }
+
+func (f *Field) Name() string {
+	return f.proto.Name
+}
+
+func (f *Field) CopyType(b *Field) *Field {
+	f.proto.Type = b.proto.Type
+	f.proto.Repeated = b.proto.Repeated
+
+	return f
+}

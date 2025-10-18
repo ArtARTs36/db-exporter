@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
-	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/fieldmap"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
-	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/tablemsg"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -31,26 +29,6 @@ type buildProcedureContext struct {
 
 func NewExporter() *Exporter {
 	return &Exporter{}
-}
-
-func (e *Exporter) newTableMapper(spec *config.GRPCCrudExportSpec) *tablemsg.Mapper {
-	modifiers := []fieldmap.Modifier{}
-
-	if spec.With.Object != nil {
-		if spec.With.Object.GoogleAPIFieldBehavior.Object != nil {
-			modifiers = append(modifiers, &fieldmap.GoogleAPIFieldBehaviorModifier{})
-		}
-	}
-
-	if len(modifiers) == 0 {
-		return tablemsg.NewMapper(fieldmap.Nop{})
-	}
-
-	if len(modifiers) == 1 {
-		return tablemsg.NewMapper(modifiers[0])
-	}
-
-	return tablemsg.NewMapper(fieldmap.Compose(modifiers))
 }
 
 func (e *Exporter) ExportPerFile(
@@ -80,17 +58,12 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
-	tablemsgMapper := e.newTableMapper(spec)
-
 	for _, table := range params.Schema.Tables.List() {
 		prfile := presentation.NewFile(spec.Package).SetOptions(options)
 
-		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, enumPages)
+		err := e.buildService(params.Schema.Driver, prfile, table, enumPages)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
-		}
-		if !srv.HasProcedures() {
-			continue
 		}
 
 		expPage := &exporter.ExportedPage{
@@ -129,15 +102,10 @@ func (e *Exporter) Export(
 		prfile.AddEnum(*enum.Name, enum.Values)
 	}
 
-	tablemsgMapper := e.newTableMapper(spec)
-
 	for _, table := range params.Schema.Tables.List() {
-		srv, err := e.buildService(tablemsgMapper, params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
+		err := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
-		}
-		if !srv.HasProcedures() {
-			continue
 		}
 	}
 
@@ -152,12 +120,11 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
-	tablemsgMapper *tablemsg.Mapper,
 	sourceDriver config.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
 	enumPages map[string]*exporter.ExportedPage,
-) (*presentation.Service, error) {
+) error {
 	procedureBuilders := map[presentation.ProcedureType]func(buildCtx *buildProcedureContext) error{
 		presentation.ProcedureTypeList:   e.buildListProcedure,
 		presentation.ProcedureTypeGet:    e.buildGetProcedure,
@@ -166,17 +133,37 @@ func (e *Exporter) buildService(
 		presentation.ProcedureTypePatch:  e.buildPatchProcedure,
 	}
 
-	tblmsg := tablemsgMapper.MapTable(prfile, table, func(col *schema.Column) string {
+	mapColumnType := func(col *schema.Column) string {
 		return e.mapType(sourceDriver, col, prfile, enumPages)
-	})
+	}
 
-	srv := prfile.AddService(fmt.Sprintf("%sService", table.Name.Pascal()), tblmsg, 5)
+	srv := prfile.AddService(
+		table,
+		func(message *presentation.TableMessage) {
+			for _, column := range table.Columns {
+				creator := func(field *presentation.Field) {
+					field.SetType(mapColumnType(column))
+
+					if !column.Nullable {
+						field.AsRequired()
+					}
+				}
+
+				fieldName := column.Name.Snake().Lower().Value
+
+				if column.IsPrimaryKey() {
+					message.CreatePrimaryKeyField(fieldName, column.Name.Value, creator)
+				} else {
+					message.CreateField(fieldName, column.Name.Value, creator)
+				}
+			}
+		},
+	)
 
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
 		service:      srv,
 		table:        table,
-		tableMsg:     tblmsg,
 		enumPages:    enumPages,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
@@ -184,11 +171,11 @@ func (e *Exporter) buildService(
 	for procType, builder := range procedureBuilders {
 		err := builder(buildCtx)
 		if err != nil {
-			return nil, fmt.Errorf("build procedure of %s: %w", string(procType), err)
+			return fmt.Errorf("build procedure of %s: %w", string(procType), err)
 		}
 	}
 
-	return srv, nil
+	return nil
 }
 
 func (e *Exporter) buildGetProcedure(
@@ -204,12 +191,9 @@ func (e *Exporter) buildGetProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Get%sRequest", buildCtx.tableSingularName))
 
-			for _, pkField := range buildCtx.tableMsg.PrimaryKey {
-				message.CreateField(pkField.Name, func(field *presentation.Field) {
-					if pkField.Repeated {
-						field.AsRepeated()
-					}
-					field.SetType(pkField.Type).AsRequired()
+			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+				message.CreateField(pkField.Name(), func(field *presentation.Field) {
+					field.CopyType(field).AsRequired()
 				})
 			}
 		},
@@ -262,12 +246,9 @@ func (e *Exporter) buildDeleteProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
 
-			for _, pkField := range buildCtx.tableMsg.PrimaryKey {
-				message.CreateField(pkField.Name, func(field *presentation.Field) {
-					if pkField.Repeated {
-						field.AsRepeated()
-					}
-					field.SetType(pkField.Type)
+			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+				message.CreateField(pkField.Name(), func(field *presentation.Field) {
+					field.CopyType(pkField)
 					field.AsRequired()
 				})
 			}
@@ -291,15 +272,15 @@ func (e *Exporter) buildCreateProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.table.Columns {
+			for _, col := range buildCtx.service.TableMessage().Table.Columns {
 				if col.IsAutoincrement {
 					continue
 				}
 
 				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
 
-				message.CreateField(tableField.Name, func(field *presentation.Field) {
-					field.SetType(tableField.Type)
+				message.CreateField(tableField.Name(), func(field *presentation.Field) {
+					field.CopyType(tableField)
 
 					if !col.Nullable {
 						field.AsRequired()
@@ -322,11 +303,11 @@ func (e *Exporter) buildPatchProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.table.Columns {
+			for _, col := range buildCtx.service.TableMessage().Table.Columns {
 				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
 
-				message.CreateField(tableField.Name, func(field *presentation.Field) {
-					field.SetType(tableField.Type)
+				message.CreateField(tableField.Name(), func(field *presentation.Field) {
+					field.CopyType(tableField)
 
 					if !col.Nullable {
 						field.AsRequired()

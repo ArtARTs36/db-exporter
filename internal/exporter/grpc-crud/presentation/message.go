@@ -23,6 +23,12 @@ func (msg *Message) SetName(name string) *Message {
 }
 
 func (msg *Message) CreateField(name string, creator func(*Field)) *Message {
+	msg.createField(name, creator)
+
+	return msg
+}
+
+func (msg *Message) createField(name string, creator func(*Field)) *Field {
 	field := &Field{
 		proto: &proto.Field{
 			Name:    name,
@@ -39,7 +45,7 @@ func (msg *Message) CreateField(name string, creator func(*Field)) *Message {
 
 	msg.proto.Fields = append(msg.proto.Fields, field.proto)
 
-	return msg
+	return field
 }
 
 func (msg *Message) Service() *Service {

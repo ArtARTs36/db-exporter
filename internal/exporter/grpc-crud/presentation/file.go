@@ -1,6 +1,8 @@
 package presentation
 
 import (
+	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/gds"
@@ -62,20 +64,23 @@ func (f *File) Render(indent *indentx.Indent) string {
 }
 
 func (f *File) AddService(
-	name string,
-	tableMsg *TableMessage,
-	procedures int,
+	table *schema.Table,
+	createTableMessage func(*TableMessage),
 ) *Service {
 	srv := &Service{
-		table: tableMsg,
-		file:  f,
 		proto: &proto.Service{
-			Name:       name,
-			Procedures: make([]*proto.ServiceProcedure, 0, procedures),
+			Name:       fmt.Sprintf("%sService", table.Name.Pascal()),
+			Procedures: make([]*proto.ServiceProcedure, 0),
 		},
+		file: f,
 	}
 
-	f.AddMessage(tableMsg.Proto)
+	tableMsg := newTableMessage(table, srv)
+	createTableMessage(tableMsg)
+
+	srv.table = tableMsg
+
+	f.AddMessage(tableMsg.message.proto)
 
 	f.proto.Services = append(f.proto.Services, srv.proto)
 

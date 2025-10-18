@@ -49,7 +49,7 @@ func (m *GoogleApiHttp) fieldsToPath(msg *presentation.TableMessage) string {
 	path := strings.Builder{}
 
 	for i, field := range msg.PrimaryKey {
-		path.WriteString("{" + field.Name + "}")
+		path.WriteString("{" + field.Name() + "}")
 
 		if i < len(msg.PrimaryKey)-1 {
 			path.WriteString("/")
