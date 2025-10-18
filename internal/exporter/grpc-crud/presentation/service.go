@@ -51,6 +51,6 @@ func (s *Service) HasProcedures() bool {
 	return len(s.proto.Procedures) > 0
 }
 
-func (s *Service) Table() *TableMessage {
+func (s *Service) TableMessage() *TableMessage {
 	return s.table
 }

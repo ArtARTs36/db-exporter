@@ -179,7 +179,7 @@ func (e *Exporter) buildService(
 		tableMsg:     tblmsg,
 		enumPages:    enumPages,
 	}
-	buildCtx.tableSingularName = buildCtx.tableMsg.Proto.Name
+	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
 
 	for procType, builder := range procedureBuilders {
 		err := builder(buildCtx)
@@ -219,7 +219,7 @@ func (e *Exporter) buildGetProcedure(
 				CreateField(
 					buildCtx.tableSingularName,
 					func(field *presentation.Field) {
-						field.SetType(buildCtx.tableMsg.Proto.Name).AsRequired()
+						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 					},
 				)
 		},
@@ -239,7 +239,7 @@ func (e *Exporter) buildListProcedure(
 			message.
 				SetName(fmt.Sprintf("List%sResponse", buildCtx.tableSingularName)).
 				CreateField("items", func(field *presentation.Field) {
-					field.AsRepeated().SetType(buildCtx.tableMsg.Proto.Name)
+					field.AsRepeated().SetType(buildCtx.service.TableMessage().Name())
 				})
 		},
 	)
@@ -296,7 +296,7 @@ func (e *Exporter) buildCreateProcedure(
 					continue
 				}
 
-				tableField, _ := message.Service().Table().Fields[col.Name.Value]
+				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
 
 				message.CreateField(tableField.Name, func(field *presentation.Field) {
 					field.SetType(tableField.Type)
@@ -323,7 +323,7 @@ func (e *Exporter) buildPatchProcedure(
 			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.table.Columns {
-				tableField, _ := message.Service().Table().Fields[col.Name.Value]
+				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
 
 				message.CreateField(tableField.Name, func(field *presentation.Field) {
 					field.SetType(tableField.Type)
@@ -338,7 +338,7 @@ func (e *Exporter) buildPatchProcedure(
 			message.
 				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
 				CreateField(buildCtx.table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
-					field.SetType(buildCtx.tableMsg.Proto.Name)
+					field.SetType(buildCtx.service.TableMessage().Name())
 				})
 		},
 	)
