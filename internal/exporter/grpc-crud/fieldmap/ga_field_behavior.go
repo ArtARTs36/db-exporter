@@ -14,7 +14,7 @@ func (m *GoogleAPIFieldBehaviorModifier) ModifyTableField(
 	col *schema.Column,
 	field *proto.Field,
 ) {
-	file.Imports.Add("google/api/annotations.proto")
+	file.AddImport("google/api/annotations.proto")
 	field.Options = append(field.Options, m.required(col), googleapi.FieldOutputOnly())
 }
 

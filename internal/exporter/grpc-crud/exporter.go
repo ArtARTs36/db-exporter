@@ -21,7 +21,6 @@ type Exporter struct{}
 type buildProcedureContext struct {
 	sourceDriver config.DatabaseDriver
 
-	prfile  *presentation.File
 	service *presentation.Service
 
 	table             *schema.Table
@@ -90,12 +89,9 @@ func (e *Exporter) ExportPerFile(
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
-		if len(srv.Procedures) == 0 {
+		if !srv.HasProcedures() {
 			continue
 		}
-
-		prfile.Services = append(prfile.Services, srv.ToProto())
-		prfile.Messages = append(prfile.Messages, srv.Messages...)
 
 		expPage := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.proto", table.Name.Snake().Lower()),
@@ -140,12 +136,9 @@ func (e *Exporter) Export(
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
-		if len(srv.Procedures) == 0 {
+		if !srv.HasProcedures() {
 			continue
 		}
-
-		prfile.Services = append(prfile.Services, srv.ToProto())
-		prfile.Messages = append(prfile.Messages, srv.Messages...)
 	}
 
 	expPage := &exporter.ExportedPage{
@@ -181,7 +174,6 @@ func (e *Exporter) buildService(
 
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
-		prfile:       prfile,
 		service:      srv,
 		table:        table,
 		tableMsg:     tblmsg,
@@ -304,7 +296,7 @@ func (e *Exporter) buildCreateProcedure(
 					continue
 				}
 
-				tableField, _ := message.Service().TableMessage.Fields[col.Name.Value]
+				tableField, _ := message.Service().Table().Fields[col.Name.Value]
 
 				message.CreateField(tableField.Name, func(field *presentation.Field) {
 					field.SetType(tableField.Type)
@@ -331,7 +323,7 @@ func (e *Exporter) buildPatchProcedure(
 			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.table.Columns {
-				tableField, _ := message.Service().TableMessage.Fields[col.Name.Value]
+				tableField, _ := message.Service().Table().Fields[col.Name.Value]
 
 				message.CreateField(tableField.Name, func(field *presentation.Field) {
 					field.SetType(tableField.Type)

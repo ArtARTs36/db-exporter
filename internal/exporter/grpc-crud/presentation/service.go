@@ -5,26 +5,11 @@ import (
 )
 
 type Service struct {
-	Name string
-
-	TableMessage *TableMessage
-
-	Procedures []*Procedure
-	Messages   []*proto.Message
+	table *TableMessage
 
 	file *File
-}
 
-func (s *Service) ToProto() *proto.Service {
-	procs := make([]*proto.ServiceProcedure, len(s.Procedures))
-	for i, proc := range s.Procedures {
-		procs[i] = proc.ToProto() // @todo need to optimize
-	}
-
-	return &proto.Service{
-		Name:       s.Name,
-		Procedures: procs,
-	}
+	proto *proto.Service
 }
 
 func (s *Service) AddProcedureFn(
@@ -48,41 +33,24 @@ func (s *Service) AddProcedureFn(
 		service:  s,
 	}
 
-	s.Procedures = append(s.Procedures, p)
-	s.Messages = append(s.Messages, req.proto, resp.proto)
-	//s.file.AddMessage(req)
-	//s.file.AddMessage(resp)
+	s.file.AddMessage(req.proto)
+	s.file.AddMessage(resp.proto)
 
 	s.file.cfg.modifyProcedure(p)
 
-	return p
-}
-
-func (s *Service) AddProcedure(
-	name string,
-	typ ProcedureType,
-	req *proto.Message,
-	resp *proto.Message,
-) *Procedure {
-	p := &Procedure{
-		Name:     name,
-		Type:     typ,
-		Request:  req,
-		Response: resp,
-		Options:  make([]*proto.ServiceProcedureOption, 0),
-		service:  s,
-	}
-
-	s.Procedures = append(s.Procedures, p)
-	s.Messages = append(s.Messages, req, resp)
-	//s.file.AddMessage(req)
-	//s.file.AddMessage(resp)
-
-	s.file.cfg.modifyProcedure(p)
+	s.proto.Procedures = append(s.proto.Procedures, p.ToProto())
 
 	return p
 }
 
 func (s *Service) File() *File {
 	return s.file
+}
+
+func (s *Service) HasProcedures() bool {
+	return len(s.proto.Procedures) > 0
+}
+
+func (s *Service) Table() *TableMessage {
+	return s.table
 }

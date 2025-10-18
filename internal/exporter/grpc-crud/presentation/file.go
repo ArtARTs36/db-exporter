@@ -7,7 +7,7 @@ import (
 )
 
 type File struct {
-	proto.File
+	proto proto.File
 
 	services []*Service
 
@@ -16,7 +16,7 @@ type File struct {
 
 func NewFile(pkg string, configurators ...Configurator) *File {
 	f := &File{
-		File: proto.File{
+		proto: proto.File{
 			Package:  pkg,
 			Imports:  gds.NewSet[string](),
 			Services: make([]*proto.Service, 0),
@@ -32,7 +32,7 @@ func NewFile(pkg string, configurators ...Configurator) *File {
 
 func AllocateFile(pkg string, enumsLength int, configurators ...Configurator) *File {
 	return &File{
-		File: proto.File{
+		proto: proto.File{
 			Package:  pkg,
 			Imports:  gds.NewSet[string](),
 			Services: make([]*proto.Service, 0),
@@ -45,20 +45,20 @@ func AllocateFile(pkg string, enumsLength int, configurators ...Configurator) *F
 }
 
 func (f *File) AddImport(dependency string) {
-	f.File.Imports.Add(dependency)
+	f.proto.Imports.Add(dependency)
 }
 
 func (f *File) SetOptions(options map[string]proto.Option) *File {
-	f.File.Options = options
+	f.proto.Options = options
 	return f
 }
 
 func (f *File) AddEnum(name gds.String, values []string) {
-	f.File.Enums = append(f.Enums, proto.NewEnumWithValues(name, values))
+	f.proto.Enums = append(f.proto.Enums, proto.NewEnumWithValues(name, values))
 }
 
 func (f *File) Render(indent *indentx.Indent) string {
-	return f.File.Render(indent)
+	return f.proto.Render(indent)
 }
 
 func (f *File) AddService(
@@ -67,19 +67,21 @@ func (f *File) AddService(
 	procedures int,
 ) *Service {
 	srv := &Service{
-		Name:         name,
-		TableMessage: tableMsg,
-		Procedures:   make([]*Procedure, 0, procedures),
-		file:         f,
+		table: tableMsg,
+		file:  f,
+		proto: &proto.Service{
+			Name:       name,
+			Procedures: make([]*proto.ServiceProcedure, 0, procedures),
+		},
 	}
 
 	f.AddMessage(tableMsg.Proto)
 
-	f.services = append(f.services, srv)
+	f.proto.Services = append(f.proto.Services, srv.proto)
 
 	return srv
 }
 
 func (f *File) AddMessage(msg *proto.Message) {
-	f.File.Messages = append(f.Messages, msg)
+	f.proto.Messages = append(f.proto.Messages, msg)
 }
