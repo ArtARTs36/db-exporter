@@ -9,6 +9,8 @@ import (
 )
 
 type File struct {
+	name string
+
 	proto proto.File
 
 	services []*Service
@@ -16,17 +18,18 @@ type File struct {
 	cfg *config
 }
 
-func NewFile(pkg string, configurators ...Configurator) *File {
+func NewFile(pkg *Package, name string) *File {
 	f := &File{
+		name: name,
 		proto: proto.File{
-			Package:  pkg,
+			Package:  pkg.name,
 			Imports:  gds.NewSet[string](),
 			Services: make([]*proto.Service, 0),
 			Messages: make([]*proto.Message, 0),
 			Enums:    make([]*proto.Enum, 0),
 		},
 		services: make([]*Service, 0), // @todo
-		cfg:      newConfig(configurators),
+		cfg:      pkg.cfg,
 	}
 
 	return f
@@ -44,6 +47,10 @@ func AllocateFile(pkg string, enumsLength int, configurators ...Configurator) *F
 		services: make([]*Service, 0),
 		cfg:      newConfig(configurators),
 	}
+}
+
+func (f *File) Name() string {
+	return f.name
 }
 
 func (f *File) AddImport(dependency string) {

@@ -54,8 +54,10 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
+	pkg := e.newPackage(spec)
+
 	for _, table := range params.Schema.Tables.List() {
-		prfile := presentation.NewFile(spec.Package).SetOptions(options)
+		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
 		err := e.buildService(params.Schema.Driver, prfile, table, enumPages)
 		if err != nil {
@@ -63,7 +65,7 @@ func (e *Exporter) ExportPerFile(
 		}
 
 		expPage := &exporter.ExportedPage{
-			FileName: fmt.Sprintf("%s.proto", table.Name.Snake().Lower()),
+			FileName: prfile.Name(),
 			Content:  []byte(prfile.Render(indent)),
 		}
 
@@ -71,6 +73,28 @@ func (e *Exporter) ExportPerFile(
 	}
 
 	return pages, nil
+}
+
+func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Package {
+	configurators := []presentation.Configurator{}
+
+	if spec.With.Object != nil {
+		if spec.With.Object.GoogleAPIFieldBehavior.Object != nil {
+			fb := modifiers.GoogleAPIFieldBehavior{}
+
+			configurators = append(configurators, presentation.WithModifyField(fb.ModifyField))
+		}
+
+		if spec.With.Object.GoogleApiHTTP.Object != nil {
+			gh := modifiers.GoogleApiHttp{
+				PathPrefix: spec.With.Object.GoogleApiHTTP.Object.PathPrefix,
+			}
+
+			configurators = append(configurators, presentation.WithModifyProcedure(gh.ModifyProcedure))
+		}
+	}
+
+	return presentation.NewPackage(spec.Package, configurators...)
 }
 
 func (e *Exporter) Export(
@@ -84,15 +108,9 @@ func (e *Exporter) Export(
 
 	options := proto.PrepareOptions(spec.Options)
 
-	gaHTTP := modifiers.GoogleApiHttp{}
-	gaFH := modifiers.GoogleAPIFieldBehavior{}
+	pkg := e.newPackage(spec)
 
-	prfile := presentation.AllocateFile(
-		spec.Package,
-		len(params.Schema.Enums),
-		presentation.WithModifyProcedure(gaHTTP.ModifyProcedure),
-		presentation.WithModifyField(gaFH.ModifyField),
-	).SetOptions(options)
+	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
 	for _, enum := range params.Schema.Enums {
 		prfile.AddEnum(*enum.Name, enum.Values)
