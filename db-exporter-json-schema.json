@@ -86,7 +86,23 @@
           "type": "string"
         },
         "author": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "user <user@mail.ru>"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              }
+            }
+          ],
         },
         "push": {
           "type": "boolean",
@@ -533,6 +549,32 @@
                 "type": "integer"
               }
             ]
+          }
+        },
+        "with": {
+          "type": "object",
+          "properties": {
+            "google.api.http": {
+              "oneOf": [
+                {
+                  "type": "bool",
+                  "default": "false"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "path_prefix": {
+                      "type": "string",
+                      "default": ""
+                    }
+                  },
+                  "additionalProperties": "false"
+                }
+              ]
+            },
+            "google.api.field_behavior": {
+              "type": "bool"
+            }
           }
         }
       },

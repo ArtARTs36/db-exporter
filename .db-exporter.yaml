@@ -8,9 +8,19 @@ databases:
     dsn: "./test.dbml"
 
 tasks:
+  grpc:
+    activities:
+      - format: grpc-crud
+        table_per_file: true
+        spec:
+          package: 'ssss.aaa'
+          with:
+            google.api.http:
+              path_prefix: '/v1'
+        out:
+          dir: './grpc-crud'
+
   diagram:
-    commit:
-      author: 'aaaaa <s>'
     activities:
       - format: diagram
         spec:

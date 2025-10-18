@@ -33,7 +33,7 @@ func (t *Table) Render() string {
 	const minStrsLen = 3
 
 	strs := make([]string, 0, minStrsLen+len(t.Columns))
-	strs = append(strs, fmt.Sprintf("Table %s {", t.Name))
+	strs = append(strs, fmt.Sprintf("TableMessage %s {", t.Name))
 
 	for _, column := range t.Columns {
 		strs = append(strs, fmt.Sprintf(

@@ -2,65 +2,68 @@ syntax = "proto3";
 
 package org.service;
 
+import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
 
 service UsersService {
-    rpc List(ListUserRequest) returns (ListUserResponse) {}
-    rpc Get(GetUserRequest) returns (GetUserResponse) {}
-    rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {}
-    rpc Create(CreateUserRequest) returns (CreateUserResponse) {}
-    rpc Patch(PatchUserRequest) returns (PatchUserResponse) {}
+  rpc List(ListUsersRequest) returns (ListUsersResponse) {};
+
+  rpc Get(GetUserRequest) returns (GetUserResponse) {};
+
+  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
+
+  rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
+
+  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {};
 }
 
-message User { 
+message User {
   int64 id = 1;
   string name = 2;
   Mood current_mood = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
-message ListUserRequest { 
-}
+message ListUsersRequest {}
 
-message ListUserResponse { 
+message ListUsersResponse {
   repeated User items = 1;
 }
 
-message GetUserRequest { 
+message GetUserRequest {
   int64 id = 1;
 }
 
-message GetUserResponse { 
+message GetUserResponse {
   User User = 1;
 }
 
-message DeleteUserRequest { 
+message DeleteUserRequest {
   int64 id = 1;
 }
 
-message DeleteUserResponse { 
-}
+message DeleteUserResponse {}
 
-message CreateUserRequest { 
+message CreateUserRequest {
   int64 id = 1;
   string name = 2;
   Mood current_mood = 3;
 }
 
-message CreateUserResponse { 
+message CreateUserResponse {
   User User = 1;
 }
 
-message PatchUserRequest { 
+message PatchUserRequest {
   int64 id = 1;
   string name = 2;
   Mood current_mood = 3;
 }
 
-message PatchUserResponse { 
+message PatchUserResponse {
   User User = 1;
 }
-
 
 enum Mood {
   MOOD_UNDEFINED = 0;
