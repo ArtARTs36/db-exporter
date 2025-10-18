@@ -41,12 +41,18 @@ func (e *Exporter) ExportPerFile(
 	enumPages := map[string]*exporter.ExportedPage{}
 	indent := indentx.NewIndent(spec.Indent)
 
+	pkg := e.newPackage(spec)
+
 	for _, enum := range params.Schema.Enums {
-		prfile := presentation.AllocateFile(spec.Package, 1).SetOptions(options)
+		if enum.Used == 0 || enum.UsedOnce() {
+			continue
+		}
+
+		prfile := pkg.CreateFile(fmt.Sprintf("%s_enum.proto", enum.Name.Value)).SetOptions(options)
 		prfile.AddEnum(*enum.Name, enum.Values)
 
 		expPage := &exporter.ExportedPage{
-			FileName: fmt.Sprintf("%s_enum.proto", enum.Name.Value),
+			FileName: prfile.Name(),
 			Content:  []byte(prfile.Render(indent)),
 		}
 
@@ -54,14 +60,20 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
-	pkg := e.newPackage(spec)
-
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
 		err := e.buildService(params.Schema.Driver, prfile, table, enumPages)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
+		}
+
+		for _, enum := range table.UsingEnums {
+			if !enum.UsedOnce() {
+				continue
+			}
+
+			prfile.AddEnum(*enum.Name, enum.Values)
 		}
 
 		expPage := &exporter.ExportedPage{
@@ -113,6 +125,10 @@ func (e *Exporter) Export(
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
 	for _, enum := range params.Schema.Enums {
+		if enum.Used == 0 {
+			continue
+		}
+
 		prfile.AddEnum(*enum.Name, enum.Values)
 	}
 
