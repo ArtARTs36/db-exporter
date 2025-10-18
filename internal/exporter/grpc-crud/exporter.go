@@ -44,7 +44,7 @@ func (e *Exporter) ExportPerFile(
 	pkg := e.newPackage(spec)
 
 	for _, enum := range params.Schema.Enums {
-		if enum.Used == 0 || enum.UsedOnce() {
+		if enum.Used == 0 || enum.UsingInSingleTable() {
 			continue
 		}
 
@@ -69,7 +69,7 @@ func (e *Exporter) ExportPerFile(
 		}
 
 		for _, enum := range table.UsingEnums {
-			if !enum.UsedOnce() {
+			if !enum.UsingInSingleTable() {
 				continue
 			}
 

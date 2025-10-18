@@ -306,7 +306,7 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 		ddl := &DDL{}
 
 		for _, enum := range table.UsingEnums {
-			if enum.UsedOnce() {
+			if enum.UsingInSingleTable() {
 				ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
 				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, opts.UseIfExists))
 			}

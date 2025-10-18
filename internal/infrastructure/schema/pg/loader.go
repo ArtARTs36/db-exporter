@@ -137,7 +137,7 @@ order by c.ordinal_position`
 		if enumExists {
 			col.Enum = enum
 			enum.Used++
-
+			enum.UsingInTables = append(enum.UsingInTables, table.Name.Value)
 			table.UsingEnums[enum.Name.Value] = enum
 		}
 
@@ -315,8 +315,9 @@ where n.nspname = $1`
 		enum, ok := enums[value.EnumName]
 		if !ok {
 			enum = &schema.Enum{
-				Name:   gds.NewString(value.EnumName),
-				Values: make([]string, 0),
+				Name:          gds.NewString(value.EnumName),
+				Values:        make([]string, 0),
+				UsingInTables: make([]string, 0),
 			}
 		}
 

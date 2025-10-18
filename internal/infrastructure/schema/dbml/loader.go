@@ -170,8 +170,9 @@ func (l *Loader) collectEnums(parsedDBML *core.DBML) map[string]*schema.Enum {
 
 	for _, en := range parsedDBML.Enums {
 		enum := &schema.Enum{
-			Name:   gds.NewString(en.Name),
-			Values: make([]string, 0, len(en.Values)),
+			Name:          gds.NewString(en.Name),
+			Values:        make([]string, 0, len(en.Values)),
+			UsingInTables: make([]string, 0),
 		}
 
 		enums[en.Name] = enum
