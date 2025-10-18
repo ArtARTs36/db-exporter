@@ -320,7 +320,7 @@ func (e *Exporter) buildCreateProcedure(
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.service.TableMessage().Table.Columns {
-				if col.IsAutoincrement {
+				if e.columnAutofilled(col) {
 					continue
 				}
 
@@ -339,7 +339,7 @@ func (e *Exporter) buildCreateProcedure(
 			message.
 				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
 				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
-					field.SetType(buildCtx.service.TableMessage().Name())
+					field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 				})
 		},
 	)
@@ -355,6 +355,10 @@ func (e *Exporter) buildPatchProcedure(
 			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.service.TableMessage().Table.Columns {
+				if e.columnAutofilled(col) {
+					continue
+				}
+
 				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
 
 				message.CreateField(tableField.Name(), func(field *presentation.Field) {
@@ -370,10 +374,22 @@ func (e *Exporter) buildPatchProcedure(
 			message.
 				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
 				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
-					field.SetType(buildCtx.service.TableMessage().Name())
+					field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 				})
 		},
 	)
 
 	return nil
+}
+
+func (e *Exporter) columnAutofilled(col *schema.Column) bool {
+	if col.IsAutoincrement {
+		return true
+	}
+
+	if !col.DefaultRaw.Valid {
+		return false
+	}
+
+	return col.Name.Equal("id", "created_at", "updated_at", "deleted_at")
 }

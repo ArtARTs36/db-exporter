@@ -190,6 +190,13 @@ func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
 		}
 	}
 
+	if col.DefaultRaw.String == "CURRENT_TIMESTAMP" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeFunc,
+			Value: col.DefaultRaw.String,
+		}
+	}
+
 	if col.Type.IsInteger {
 		if parsedInt, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
 			return &schema.ColumnDefault{

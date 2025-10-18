@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package org.service;
 
+import "google/protobuf/timestamp.proto";
+
 option optimize_for = SPEED;
 
 service UsersService {
@@ -20,6 +22,7 @@ message User {
   int64 id = 1;
   string name = 2;
   Mood current_mood = 3;
+  google.protobuf.Timestamp created_at = 4;
 }
 
 message ListUserRequest {}
