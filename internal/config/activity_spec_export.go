@@ -39,7 +39,7 @@ type GRPCCrudExportSpec struct {
 	Indent  int                                        `yaml:"indent" json:"indent"`
 	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
 	With    specw.BoolObject[struct {
-		GoogleApiHTTP specw.BoolObject[struct {
+		GoogleApiHttp specw.BoolObject[struct { //nolint:revive // <- not readable
 			PathPrefix string `yaml:"path_prefix" json:"path_prefix"`
 		}] `yaml:"google.api.http" json:"google.api.http"`
 		GoogleAPIFieldBehavior specw.BoolObject[struct{}] `yaml:"google.api.field_behavior" json:"google.api.field_behavior"`

@@ -97,9 +97,9 @@ func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Pac
 			configurators = append(configurators, presentation.WithModifyField(fb.ModifyField))
 		}
 
-		if spec.With.Object.GoogleApiHTTP.Object != nil {
+		if spec.With.Object.GoogleApiHttp.Object != nil {
 			gh := modifiers.GoogleApiHttp{
-				PathPrefix: spec.With.Object.GoogleApiHTTP.Object.PathPrefix,
+				PathPrefix: spec.With.Object.GoogleApiHttp.Object.PathPrefix,
 			}
 
 			configurators = append(configurators, presentation.WithModifyProcedure(gh.ModifyProcedure))

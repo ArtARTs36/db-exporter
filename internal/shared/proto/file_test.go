@@ -23,7 +23,7 @@ func TestFile_Render(t *testing.T) {
 						Options: []*ServiceProcedureOption{
 							{
 								Name: "google.api.http",
-								Params: map[string]interface{}{
+								Params: map[string]string{
 									"get": "/v1/users",
 								},
 							},
@@ -36,7 +36,7 @@ func TestFile_Render(t *testing.T) {
 						Options: []*ServiceProcedureOption{
 							{
 								Name: "google.api.http",
-								Params: map[string]interface{}{
+								Params: map[string]string{
 									"get": "/v1/users/{id}",
 								},
 							},
@@ -79,7 +79,7 @@ func TestFile_Render(t *testing.T) {
 			},
 		},
 		Enums: []*Enum{
-			NewEnumWithValues(gds.NewString("UserStatus"), []string{
+			NewEnumWithValues(*gds.NewString("UserStatus"), []string{
 				"ACTIVE",
 				"BANNED",
 			}),

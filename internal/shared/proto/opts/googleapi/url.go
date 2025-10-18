@@ -21,7 +21,7 @@ func Delete(url string) *proto.ServiceProcedureOption {
 func opt(method string, url string) *proto.ServiceProcedureOption {
 	return &proto.ServiceProcedureOption{
 		Name: "google.api.http",
-		Params: map[string]interface{}{
+		Params: map[string]string{
 			method: url,
 		},
 	}

@@ -15,11 +15,11 @@ func newConfig(configurators []Configurator) *config {
 	}
 
 	if cfg.modifyProcedure == nil {
-		cfg.modifyProcedure = func(procedure *Procedure) {}
+		cfg.modifyProcedure = func(*Procedure) {}
 	}
 
 	if cfg.modifyField == nil {
-		cfg.modifyField = func(field *Field) {}
+		cfg.modifyField = func(*Field) {}
 	}
 
 	return cfg

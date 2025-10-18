@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type GoogleApiHttp struct {
+type GoogleApiHttp struct { //nolint:revive // <- not readable
 	PathPrefix string
 }
 

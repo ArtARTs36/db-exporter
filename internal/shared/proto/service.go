@@ -20,7 +20,7 @@ type ServiceProcedure struct {
 
 type ServiceProcedureOption struct {
 	Name   string
-	Params map[string]interface{}
+	Params map[string]string
 }
 
 func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
@@ -68,7 +68,7 @@ func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *indentx.Inde
 		for k, v := range opt.Params {
 			buf.WriteString(paramsIndent.Curr())
 			buf.WriteString("" + k + ": ")
-			buf.WriteString(strconv.Quote(v.(string)))
+			buf.WriteString(strconv.Quote(v))
 		}
 
 		buf.WriteString("\n")
