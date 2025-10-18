@@ -11,13 +11,14 @@ tasks:
   grpc:
     activities:
       - format: grpc-crud
+        table_per_file: true
         spec:
-          package: ''
+          package: 'ssss.aaa'
           with:
-            google.api.http: { }
-            google.api.field_behavior: { }
+            google.api.http:
+              path_prefix: '/v1'
         out:
-          dir: './'
+          dir: './grpc-crud'
 
   diagram:
     activities:
