@@ -326,44 +326,30 @@ func (e *Exporter) buildCreateProcedure(
 func (e *Exporter) buildPatchProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.table.PrimaryKey == nil {
-		return nil
-	}
+	buildCtx.service.AddProcedureFn("Patch", presentation.ProcedureTypePatch,
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
-	patchReqMsg := &proto.Message{
-		Name:   fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName),
-		Fields: make([]*proto.Field, 0, len(buildCtx.tableSingularName)),
-	}
+			for _, col := range buildCtx.table.Columns {
+				tableField, _ := message.Service().TableMessage.Fields[col.Name.Value]
 
-	patchRespMsg := &proto.Message{
-		Name: fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName),
-		Fields: []*proto.Field{
-			{
-				Name: buildCtx.table.Name.Pascal().Singular().Value,
-				Type: buildCtx.tableMsg.Proto.Name,
-				ID:   1,
-			},
+				message.CreateField(tableField.Name, func(field *presentation.Field) {
+					field.SetType(tableField.Type)
+
+					if !col.Nullable {
+						field.AsRequired()
+					}
+				})
+			}
 		},
-	}
-
-	id := 1
-
-	for _, col := range buildCtx.table.Columns {
-		if col.IsAutoincrement {
-			continue
-		}
-
-		field, err := buildCtx.tableMsg.CloneField(col.Name.Value)
-		if err != nil {
-			return err
-		}
-
-		patchReqMsg.Fields = append(patchReqMsg.Fields, field)
-
-		id++
-	}
-
-	buildCtx.service.AddProcedure("Patch", presentation.ProcedureTypePatch, patchReqMsg, patchRespMsg)
+		func(message *presentation.Message) {
+			message.
+				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
+				CreateField(buildCtx.table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
+					field.SetType(buildCtx.tableMsg.Proto.Name)
+				})
+		},
+	)
 
 	return nil
 }
