@@ -300,6 +300,32 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg/grpc-crud",
 		},
 		{
+			Title: "test pg with grpc-crud with all options",
+			InitQueries: []string{
+				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
+				`CREATE TABLE users
+		(
+		    id   integer NOT NULL,
+		    name character varying NOT NULL,
+		    current_mood mood NOT NULL,
+		    pay_period interval,
+		    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		
+		    CONSTRAINT users_pk PRIMARY KEY (id)
+		);`,
+				`INSERT INTO users (id, name, current_mood) VALUES
+		(1, 'a', 'ok'),
+		(2, 'b', 'ok')
+		`,
+			},
+			DownQueries: []string{
+				"DROP TABLE users",
+				"DROP TYPE mood",
+			},
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/grpc-crud-with-all",
+		},
+		{
 			Title: "test pg with custom",
 			InitQueries: []string{
 				`CREATE TABLE users
