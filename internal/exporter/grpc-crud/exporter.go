@@ -21,7 +21,6 @@ type buildProcedureContext struct {
 
 	tableSingularName string
 	tablePluralName   string
-	enumPages         map[string]*exporter.ExportedPage
 }
 
 func NewExporter() *Exporter {
@@ -39,7 +38,6 @@ func (e *Exporter) ExportPerFile(
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
-	enumPages := map[string]*exporter.ExportedPage{}
 	indent := indentx.NewIndent(spec.Indent)
 
 	pkg := e.newPackage(spec)
@@ -57,14 +55,13 @@ func (e *Exporter) ExportPerFile(
 			Content:  []byte(prfile.Render(indent)),
 		}
 
-		enumPages[enum.Name.Value] = expPage
 		pages = append(pages, expPage)
 	}
 
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := e.buildService(params.Schema.Driver, prfile, table, enumPages)
+		err := e.buildService(params.Schema.Driver, prfile, table)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
@@ -134,7 +131,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		err := e.buildService(params.Schema.Driver, prfile, table, map[string]*exporter.ExportedPage{})
+		err := e.buildService(params.Schema.Driver, prfile, table)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
@@ -154,7 +151,6 @@ func (e *Exporter) buildService(
 	sourceDriver config.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
-	enumPages map[string]*exporter.ExportedPage,
 ) error {
 	procedureBuilders := []struct {
 		Type  presentation.ProcedureType
@@ -183,7 +179,7 @@ func (e *Exporter) buildService(
 	}
 
 	mapColumnType := func(col *schema.Column) string {
-		return e.mapType(sourceDriver, col, prfile, enumPages)
+		return e.mapType(sourceDriver, col, prfile)
 	}
 
 	srv := prfile.AddService(
@@ -212,7 +208,6 @@ func (e *Exporter) buildService(
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
 		service:      srv,
-		enumPages:    enumPages,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
 	buildCtx.tablePluralName = buildCtx.service.TableMessage().Table.Name.Pascal().Plural().Value

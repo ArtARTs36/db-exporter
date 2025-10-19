@@ -2,7 +2,6 @@ package grpccrud
 
 import (
 	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -13,12 +12,11 @@ func (e *Exporter) mapType(
 	sourceDriver config.DatabaseDriver,
 	column *schema.Column,
 	file *presentation.File,
-	enumPages map[string]*exporter.ExportedPage,
 ) string {
 	if column.Enum != nil {
-		enumPage, enumPageExists := enumPages[column.Enum.Name.Value]
-		if enumPageExists {
-			file.AddImport(enumPage.FileName)
+		enumFilename, enumPageExists := file.Package().LocateEnum(column.Enum.Name.Value)
+		if enumPageExists && enumFilename != file.Name() {
+			file.AddImport(enumFilename)
 		}
 
 		return column.Enum.Name.Pascal().Value

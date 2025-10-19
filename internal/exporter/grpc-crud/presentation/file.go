@@ -10,6 +10,7 @@ import (
 
 type File struct {
 	name string
+	pkg  *Package
 
 	proto proto.File
 
@@ -21,6 +22,7 @@ type File struct {
 func NewFile(pkg *Package, name string) *File {
 	f := &File{
 		name: name,
+		pkg:  pkg,
 		proto: proto.File{
 			Package:  pkg.name,
 			Imports:  gds.NewSet[string](),
@@ -33,20 +35,6 @@ func NewFile(pkg *Package, name string) *File {
 	}
 
 	return f
-}
-
-func AllocateFile(pkg string, enumsLength int, configurators ...Configurator) *File {
-	return &File{
-		proto: proto.File{
-			Package:  pkg,
-			Imports:  gds.NewSet[string](),
-			Services: make([]*proto.Service, 0),
-			Messages: make([]*proto.Message, 0),
-			Enums:    make([]*proto.Enum, 0, enumsLength),
-		},
-		services: make([]*Service, 0),
-		cfg:      newConfig(configurators),
-	}
 }
 
 func (f *File) Name() string {
@@ -64,6 +52,8 @@ func (f *File) SetOptions(options map[string]proto.Option) *File {
 
 func (f *File) AddEnum(name gds.String, values []string) {
 	f.proto.Enums = append(f.proto.Enums, proto.NewEnumWithValues(name, values))
+
+	f.pkg.registerEnumLocation(name.Value, f.name)
 }
 
 func (f *File) Render(indent *indentx.Indent) string {
@@ -96,4 +86,8 @@ func (f *File) AddService(
 
 func (f *File) AddMessage(msg *proto.Message) {
 	f.proto.Messages = append(f.proto.Messages, msg)
+}
+
+func (f *File) Package() *Package {
+	return f.pkg
 }
