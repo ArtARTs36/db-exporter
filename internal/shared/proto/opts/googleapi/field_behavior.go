@@ -16,7 +16,7 @@ func FieldOptional() *proto.FieldOption {
 
 func fieldBehavior(behavior string) *proto.FieldOption {
 	return &proto.FieldOption{
-		Name:  "google.api.field_behavior",
+		Name:  "(google.api.field_behavior)",
 		Value: behavior,
 	}
 }

@@ -47,7 +47,16 @@ func WithModifyProcedure(modifier func(procedure *Procedure)) Configurator {
 
 func WithModifyField(modifier func(field *Field)) Configurator {
 	return func(cfg *config) {
-		cfg.modifyField = modifier
+		if cfg.modifyField == nil {
+			cfg.modifyField = modifier
+		} else {
+			prevModifier := cfg.modifyField
+
+			cfg.modifyField = func(field *Field) {
+				modifier(field)
+				prevModifier(field)
+			}
+		}
 	}
 }
 
