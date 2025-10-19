@@ -205,13 +205,6 @@ tasks:
             with_mocks: true
         out:
           dir: ./ # is root project path
-
-  import:
-    activities:
-      - import: yaml-fixtures
-        from: ./data
 ```
 
 Run export: `$PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" db-exporter --tasks=export`
-
-Run import: `$PG_DSN="port=5459 user=db password=db dbname=db sslmode=disable" db-exporter --tasks=import`
