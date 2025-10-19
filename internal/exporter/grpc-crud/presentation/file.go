@@ -66,7 +66,7 @@ func (f *File) AddService(
 ) *Service {
 	srv := &Service{
 		proto: &proto.Service{
-			Name:       fmt.Sprintf("%sService", table.Name.Pascal()),
+			Name:       fmt.Sprintf("%sService", table.Name.Pascal().Value),
 			Procedures: make([]*proto.ServiceProcedure, 0),
 		},
 		file: f,
@@ -78,6 +78,8 @@ func (f *File) AddService(
 	srv.table = tableMsg
 
 	f.AddMessage(tableMsg.message.proto)
+
+	f.cfg.modifyService(srv)
 
 	f.proto.Services = append(f.proto.Services, srv.proto)
 

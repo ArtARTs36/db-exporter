@@ -88,6 +88,14 @@ func (e *Exporter) ExportPerFile(
 func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Package {
 	configurators := []presentation.Configurator{}
 
+	commentsModifier := &modifiers.Comments{}
+
+	configurators = append(
+		configurators,
+		presentation.WithModifyProcedure(commentsModifier.ModifyProcedure),
+		presentation.WithModifyService(commentsModifier.ModifyService),
+	)
+
 	if spec.With.Object != nil {
 		if spec.With.Object.GoogleAPIFieldBehavior.Object != nil {
 			fb := modifiers.GoogleAPIFieldBehavior{}
@@ -210,7 +218,7 @@ func (e *Exporter) buildService(
 		service:      srv,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
-	buildCtx.tablePluralName = buildCtx.service.TableMessage().Table.Name.Pascal().Plural().Value
+	buildCtx.tablePluralName = buildCtx.service.TableMessage().Table().Name.Pascal().Plural().Value
 
 	for _, builder := range procedureBuilders {
 		err := builder.Build(buildCtx)
@@ -278,7 +286,7 @@ func (e *Exporter) buildListProcedure(
 func (e *Exporter) buildDeleteProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.service.TableMessage().Table.PrimaryKey == nil {
+	if buildCtx.service.TableMessage().Table().PrimaryKey == nil {
 		return nil
 	}
 
@@ -308,7 +316,7 @@ func (e *Exporter) buildDeleteProcedure(
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.service.TableMessage().Table.PrimaryKey == nil {
+	if buildCtx.service.TableMessage().Table().PrimaryKey == nil {
 		return nil
 	}
 
@@ -316,7 +324,7 @@ func (e *Exporter) buildCreateProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.service.TableMessage().Table.Columns {
+			for _, col := range buildCtx.service.TableMessage().Table().Columns {
 				if e.columnAutofilled(col) {
 					continue
 				}
@@ -335,9 +343,12 @@ func (e *Exporter) buildCreateProcedure(
 		func(message *presentation.Message) {
 			message.
 				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
-				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
-					field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-				})
+				CreateField(
+					buildCtx.service.TableMessage().Table().Name.Pascal().Singular().Value,
+					func(field *presentation.Field) {
+						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
+					},
+				)
 		},
 	)
 
@@ -351,7 +362,7 @@ func (e *Exporter) buildPatchProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.service.TableMessage().Table.Columns {
+			for _, col := range buildCtx.service.TableMessage().Table().Columns {
 				if e.columnAutofilled(col) {
 					continue
 				}
@@ -370,9 +381,12 @@ func (e *Exporter) buildPatchProcedure(
 		func(message *presentation.Message) {
 			message.
 				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
-				CreateField(buildCtx.service.TableMessage().Table.Name.Pascal().Singular().Value, func(field *presentation.Field) {
-					field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-				})
+				CreateField(
+					buildCtx.service.TableMessage().Table().Name.Pascal().Singular().Value,
+					func(field *presentation.Field) {
+						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
+					},
+				)
 		},
 	)
 

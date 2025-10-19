@@ -16,12 +16,12 @@ func (m *GoogleApiHttp) ModifyProcedure(proc *presentation.Procedure) {
 	basePath := fmt.Sprintf(
 		"%s/%s",
 		m.PathPrefix,
-		proc.Service().TableMessage().GetTable().Name.Snake().Lower().Value,
+		proc.Service().TableMessage().Table().Name.Snake().Lower().Value,
 	)
 
 	var opt *proto.ServiceProcedureOption
 
-	switch proc.Type {
+	switch proc.Type() {
 	case presentation.ProcedureTypeList:
 		opt = googleapi.Get(basePath)
 	case presentation.ProcedureTypeGet:
@@ -38,7 +38,7 @@ func (m *GoogleApiHttp) ModifyProcedure(proc *presentation.Procedure) {
 
 	proc.Service().File().AddImport("google/api/annotations.proto")
 
-	proc.Options = append(proc.Options, opt)
+	proc.AddOption(opt)
 }
 
 func (m *GoogleApiHttp) pathTo(basePath string, msg *presentation.TableMessage) string {

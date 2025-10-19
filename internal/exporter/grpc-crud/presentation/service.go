@@ -17,7 +17,7 @@ func (s *Service) AddProcedureFn(
 	typ ProcedureType,
 	reqBuild func(message *Message),
 	respBuild func(message *Message),
-) *Procedure {
+) *Service {
 	req := newMessage(s)
 	resp := newMessage(s)
 
@@ -25,12 +25,14 @@ func (s *Service) AddProcedureFn(
 	respBuild(resp)
 
 	p := &Procedure{
-		Name:     name,
-		Type:     typ,
-		Request:  req.proto,
-		Response: resp.proto,
-		Options:  make([]*proto.ServiceProcedureOption, 0),
-		service:  s,
+		proto: &proto.ServiceProcedure{
+			Name:    name,
+			Param:   req.proto.Name,
+			Returns: resp.proto.Name,
+			Options: make([]*proto.ServiceProcedureOption, 0),
+		},
+		typ:     typ,
+		service: s,
 	}
 
 	s.file.AddMessage(req.proto)
@@ -38,9 +40,9 @@ func (s *Service) AddProcedureFn(
 
 	s.file.cfg.modifyProcedure(p)
 
-	s.proto.Procedures = append(s.proto.Procedures, p.ToProto())
+	s.proto.Procedures = append(s.proto.Procedures, p.proto)
 
-	return p
+	return s
 }
 
 func (s *Service) File() *File {
@@ -53,4 +55,10 @@ func (s *Service) HasProcedures() bool {
 
 func (s *Service) TableMessage() *TableMessage {
 	return s.table
+}
+
+func (s *Service) SetCommentTop(comment string) *Service {
+	s.proto.CommentTop = comment
+
+	return s
 }

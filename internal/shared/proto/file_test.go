@@ -28,6 +28,7 @@ func TestFile_Render(t *testing.T) {
 								},
 							},
 						},
+						CommentTop: "List Users.",
 					},
 					{
 						Name:    "Get",
@@ -93,6 +94,7 @@ package my-super-package;
 import "google/protobuf/timestamp.proto";
 
 service UserService {
+  // List Users.
   rpc List(GetUserRequest) returns (GetUserResponse) {
     option (google.api.http) = {
       get: "/v1/users"

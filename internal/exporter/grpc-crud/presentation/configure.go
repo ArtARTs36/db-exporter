@@ -5,6 +5,7 @@ type Configurator func(cfg *config)
 type config struct {
 	modifyProcedure func(procedure *Procedure)
 	modifyField     func(field *Field)
+	modifyService   func(service *Service)
 }
 
 func newConfig(configurators []Configurator) *config {
@@ -22,17 +23,36 @@ func newConfig(configurators []Configurator) *config {
 		cfg.modifyField = func(*Field) {}
 	}
 
+	if cfg.modifyService == nil {
+		cfg.modifyService = func(*Service) {}
+	}
+
 	return cfg
 }
 
 func WithModifyProcedure(modifier func(procedure *Procedure)) Configurator {
 	return func(cfg *config) {
-		cfg.modifyProcedure = modifier
+		if cfg.modifyProcedure == nil {
+			cfg.modifyProcedure = modifier
+		} else {
+			prevModifier := cfg.modifyProcedure
+
+			cfg.modifyProcedure = func(procedure *Procedure) {
+				modifier(procedure)
+				prevModifier(procedure)
+			}
+		}
 	}
 }
 
 func WithModifyField(modifier func(field *Field)) Configurator {
 	return func(cfg *config) {
 		cfg.modifyField = modifier
+	}
+}
+
+func WithModifyService(modifier func(*Service)) Configurator {
+	return func(cfg *config) {
+		cfg.modifyService = modifier
 	}
 }

@@ -9,6 +9,8 @@ import (
 type Service struct {
 	Name       string
 	Procedures []*ServiceProcedure
+
+	CommentTop string
 }
 
 type ServiceProcedure struct {
@@ -16,6 +18,8 @@ type ServiceProcedure struct {
 	Param   string
 	Returns string
 	Options []*ServiceProcedureOption
+
+	CommentTop string
 }
 
 type ServiceProcedureOption struct {
@@ -24,6 +28,10 @@ type ServiceProcedureOption struct {
 }
 
 func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
+	if s.CommentTop != "" {
+		buf.WriteString("// " + s.CommentTop + "\n")
+	}
+
 	buf.WriteString("service " + s.Name + " {")
 
 	if len(s.Procedures) == 0 {
@@ -40,7 +48,13 @@ func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
 }
 
 func (s *ServiceProcedure) write(buf stringsBuffer, indent *indentx.Indent) {
-	buf.WriteString("  rpc " + s.Name + "(" + s.Param + ") returns (" + s.Returns + ") {")
+	if s.CommentTop != "" {
+		buf.WriteString(indent.Curr())
+		buf.WriteString("// " + s.CommentTop + "\n")
+	}
+
+	buf.WriteString(indent.Curr())
+	buf.WriteString("rpc " + s.Name + "(" + s.Param + ") returns (" + s.Returns + ") {")
 
 	if len(s.Options) == 0 {
 		buf.WriteString("};\n")

@@ -6,7 +6,7 @@ import (
 )
 
 type TableMessage struct {
-	Table *schema.Table
+	table *schema.Table
 
 	// map[column.name]*Field
 	fields     map[string]*Field
@@ -17,7 +17,7 @@ type TableMessage struct {
 
 func newTableMessage(table *schema.Table, srv *Service) *TableMessage {
 	msg := &TableMessage{
-		Table: table,
+		table: table,
 		message: &Message{
 			proto: &proto.Message{
 				Name:   table.Name.Pascal().Singular().Value,
@@ -44,8 +44,8 @@ func (t *TableMessage) GetField(name string) (*Field, bool) {
 	return f, ok
 }
 
-func (t *TableMessage) GetTable() *schema.Table {
-	return t.Table
+func (t *TableMessage) Table() *schema.Table {
+	return t.table
 }
 
 func (t *TableMessage) CreateField(name string, columnName string, creator func(*Field)) *TableMessage {

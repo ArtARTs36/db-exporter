@@ -13,8 +13,9 @@ tasks:
       - format: grpc-crud
         table_per_file: true
         spec:
-          package: 'ssss.aaa'
+          package: 'org.users'
           with:
+            google.api.field_behavior: true
             google.api.http:
               path_prefix: '/v1'
         out:

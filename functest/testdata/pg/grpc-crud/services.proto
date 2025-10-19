@@ -6,15 +6,21 @@ import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
 
+// Service for working with users.
 service UsersService {
+  // Get all users.
   rpc List(ListUsersRequest) returns (ListUsersResponse) {};
 
+  // Get a user.
   rpc Get(GetUserRequest) returns (GetUserResponse) {};
 
+  // Delete a user.
   rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
 
+  // Create a new user.
   rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
 
+  // Patch an existing user.
   rpc Patch(PatchUserRequest) returns (PatchUserResponse) {};
 }
 

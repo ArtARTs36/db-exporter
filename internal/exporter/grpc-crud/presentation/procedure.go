@@ -13,31 +13,30 @@ const (
 )
 
 type Procedure struct {
-	Name string
-
-	Type ProcedureType
-
-	Request  *proto.Message
-	Response *proto.Message
-
-	Options []*proto.ServiceProcedureOption
+	typ ProcedureType
 
 	service *Service
+
+	proto *proto.ServiceProcedure
 }
 
 func (p *Procedure) ToProto() *proto.ServiceProcedure {
-	return &proto.ServiceProcedure{
-		Name:    p.Name,
-		Param:   p.Request.Name,
-		Returns: p.Response.Name,
-		Options: p.Options,
-	}
+	return &proto.ServiceProcedure{}
 }
 
 func (p *Procedure) AddOption(option *proto.ServiceProcedureOption) {
-	p.Options = append(p.Options, option)
+	p.proto.Options = append(p.proto.Options, option)
 }
 
 func (p *Procedure) Service() *Service {
 	return p.service
+}
+
+func (p *Procedure) SetCommentTop(comment string) *Procedure {
+	p.proto.CommentTop = comment
+	return p
+}
+
+func (p *Procedure) Type() ProcedureType {
+	return p.typ
 }
