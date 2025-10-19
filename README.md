@@ -13,6 +13,7 @@
 
 | Exporter                 | Description                                                                     | Usage example                                                                                                 |
 |--------------------------|---------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `grpc-crud`              | Exports CRUD in .proto from database schema                                     |                                                                                                               |
 | `ddl`                    | Exports DDL from database schema                                                |                                                                                                               |
 | `csv`                    | Exports data from tables                                                        |                                                                                                               |
 | `md`                     | Exports database schema to Markdown                                             | [Schema ➡️ Markdown](./docs/usage_examples.md#export-schema-from-postgresql-to-markdown)                      |
