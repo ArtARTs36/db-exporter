@@ -22,7 +22,8 @@ var (
 	TypeInt16     = Type{Name: "int16", Null: &TypeSQLNullInt16}
 	TypeInt64     = Type{Name: "int64", Null: &TypeSQLNullInt64}
 
-	TypeTimeTime = Type{Name: "Time", PackageName: "time", PackagePath: "time", Null: &TypeSQLNullTime}
+	TypeTimeTime     = Type{Name: "Time", PackageName: "time", PackagePath: "time", Null: &TypeSQLNullTime}
+	TypeTimeDuration = Type{Name: "Duration", PackageName: "time", PackagePath: "time"}
 
 	TypeSQLNullInt64   = Type{Name: "NullInt64", PackageName: "sql", PackagePath: "database/sql"}
 	TypeSQLNullInt16   = Type{Name: "NullInt16", PackageName: "sql", PackagePath: "database/sql"}

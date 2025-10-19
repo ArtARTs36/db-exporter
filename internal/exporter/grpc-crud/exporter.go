@@ -110,6 +110,12 @@ func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Pac
 
 			configurators = append(configurators, presentation.WithModifyProcedure(gh.ModifyProcedure))
 		}
+
+		if spec.With.Object.BufValidateField.Object != nil {
+			bufValidateField := modifiers.BufValidate{}
+
+			configurators = append(configurators, presentation.WithModifyField(bufValidateField.ModifyField))
+		}
 	}
 
 	return presentation.NewPackage(spec.Package, configurators...)
@@ -200,6 +206,8 @@ func (e *Exporter) buildService(
 					if !column.Nullable {
 						field.AsRequired()
 					}
+
+					field.SetColumn(column)
 				}
 
 				fieldName := column.Name.Snake().Lower().Value

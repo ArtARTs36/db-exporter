@@ -17,6 +17,7 @@ type Type struct {
 	IsBoolean    bool
 	IsBinary     bool
 	IsJSON       bool
+	IsInterval   bool
 }
 
 func (t *Type) Clone() Type {
@@ -30,6 +31,10 @@ func (t *Type) Clone() Type {
 		IsStringable: t.IsStringable,
 		IsDatetime:   t.IsDatetime,
 		IsDate:       t.IsDate,
+		IsBoolean:    t.IsBoolean,
+		IsBinary:     t.IsBinary,
+		IsJSON:       t.IsJSON,
+		IsInterval:   t.IsInterval,
 	}
 }
 

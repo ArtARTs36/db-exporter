@@ -110,6 +110,21 @@ tasks:
         out:
           dir: ./out
 
+  pg/grpc-crud-with-all:
+    activities:
+      - format: grpc-crud
+        spec:
+          package: "org.service"
+          with:
+            google.api.field_behavior: true
+            google.api.http:
+              path_prefix: '/v1'
+            buf.validate.field: true
+          options:
+            optimize_for: SPEED
+        out:
+          dir: ./out
+
   pg/laravel-models_export:
     activities:
       - format: laravel-models

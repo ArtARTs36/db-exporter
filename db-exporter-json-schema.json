@@ -554,6 +554,9 @@
         "with": {
           "type": "object",
           "properties": {
+            "buf.validate.field": {
+              "type": "bool"
+            },
             "google.api.http": {
               "oneOf": [
                 {

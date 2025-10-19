@@ -24,6 +24,7 @@ func newTableMessage(table *schema.Table, srv *Service) *TableMessage {
 				Fields: make([]*proto.Field, 0, len(table.Columns)),
 			},
 			srv: srv,
+			typ: MessageTypeTable,
 		},
 		fields: make(map[string]*Field),
 	}

@@ -1,6 +1,7 @@
 package proto
 
 import (
+	"fmt"
 	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"strconv"
 )
@@ -15,8 +16,10 @@ type Field struct {
 
 type FieldOption struct {
 	Name  string
-	Value string
+	Value interface{}
 }
+
+type ConstValue string
 
 func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString(indent.Curr())
@@ -53,7 +56,22 @@ func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 
 func (f *FieldOption) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString(indent.Curr())
-	buf.WriteString("(" + f.Name + ") = " + f.Value)
+	buf.WriteString(f.Name + " = " + f.resolveValue())
+}
+
+func (f *FieldOption) resolveValue() string {
+	switch val := f.Value.(type) {
+	case ConstValue:
+		return string(val)
+	case string:
+		return strconv.Quote(val)
+	case int:
+		return strconv.Itoa(val)
+	case bool:
+		return strconv.FormatBool(val)
+	default:
+		return fmt.Sprint(val)
+	}
 }
 
 func (f *Field) Clone() *Field {

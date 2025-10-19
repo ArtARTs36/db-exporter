@@ -17,7 +17,7 @@ var (
 	PGTimeWithoutTZ      = schema.Type{Name: "time without time zone", IsDatetime: true}
 	PGTimeWithTZ         = schema.Type{Name: "time with time zone", IsDatetime: true}
 	PGDate               = schema.Type{Name: "date", IsDate: true}
-	PGInterval           = schema.Type{Name: "interval"}
+	PGInterval           = schema.Type{Name: "interval", IsInterval: true}
 
 	PGBoolean = schema.Type{Name: "boolean", IsBoolean: true}
 	PGBit     = schema.Type{Name: "bit"}

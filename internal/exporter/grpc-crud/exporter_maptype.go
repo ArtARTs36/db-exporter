@@ -37,6 +37,10 @@ func (e *Exporter) mapType(
 		file.AddImport("google/protobuf/timestamp.proto")
 
 		return "google.protobuf.Timestamp"
+	case golang.TypeTimeDuration:
+		file.AddImport("google/protobuf/duration.proto")
+
+		return "google.protobuf.Duration"
 	default:
 		return "string"
 	}

@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package org.service;
+
+import "google/api/annotations.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+option optimize_for = SPEED;
+
+// Service for working with users.
+service UsersService {
+  // Get all users.
+  rpc List(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  }
+
+  // Get a user.
+  rpc Get(GetUserRequest) returns (GetUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  }
+
+  // Delete a user.
+  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (google.api.http) = {
+      delete: "/v1/users/{id}"
+    };
+  }
+
+  // Create a new user.
+  rpc Create(CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/users"
+    };
+  }
+
+  // Patch an existing user.
+  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {
+    option (google.api.http) = {
+      put: "/v1/users/{id}"
+    };
+  }
+}
+
+message User {
+  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+  string name = 2 [(google.api.field_behavior) = REQUIRED];
+  Mood current_mood = 3 [(google.api.field_behavior) = REQUIRED];
+  google.protobuf.Duration pay_period = 4 [(google.api.field_behavior) = OPTIONAL];
+  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListUsersRequest {}
+
+message ListUsersResponse {
+  repeated User items = 1 [(google.api.field_behavior) = OPTIONAL];
+}
+
+message GetUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message GetUserResponse {
+  User User = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message DeleteUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message DeleteUserResponse {}
+
+message CreateUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  Mood current_mood = 3 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Duration pay_period = 4 [(google.api.field_behavior) = OPTIONAL];
+}
+
+message CreateUserResponse {
+  User User = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message PatchUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  Mood current_mood = 3 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Duration pay_period = 4 [(google.api.field_behavior) = OPTIONAL];
+}
+
+message PatchUserResponse {
+  User User = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+enum Mood {
+  MOOD_UNDEFINED = 0;
+  MOOD_OK = 1;
+  MOOD_HAPPY = 2;
+}
