@@ -27,19 +27,20 @@ func TestGenerator_Generate(t *testing.T) {
 		{
 			Title: "single",
 			Data: &transformingData{
-				cols: []string{"id", "name", "email_verified", "phone"},
+				cols: []string{"id", "name", "email_verified", "phone", "weight"},
 				rows: data.TableData{
 					{
 						"id":             "1",
 						"name":           "Artem",
 						"email_verified": true,
 						"phone":          123,
+						"weight":         80.5,
 					},
 				},
 			},
 			Delimiter: ",",
-			Expected: "id,name,email_verified,phone" + "\n" +
-				"\"1\",\"Artem\",true,123",
+			Expected: "id,name,email_verified,phone,weight" + "\n" +
+				"\"1\",\"Artem\",true,123,80.500000",
 		},
 		{
 			Title: "two",
