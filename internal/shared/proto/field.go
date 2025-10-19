@@ -19,6 +19,8 @@ type FieldOption struct {
 	Value interface{}
 }
 
+type ConstValue string
+
 func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString(indent.Curr())
 
@@ -59,6 +61,8 @@ func (f *FieldOption) write(buf stringsBuffer, indent *indentx.Indent) {
 
 func (f *FieldOption) resolveValue() string {
 	switch val := f.Value.(type) {
+	case ConstValue:
+		return string(val)
 	case string:
 		return strconv.Quote(val)
 	case int:

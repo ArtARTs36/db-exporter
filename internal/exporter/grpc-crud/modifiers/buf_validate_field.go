@@ -21,7 +21,7 @@ func (p *BufValidate) ModifyField(field *presentation.Field) {
 
 	colType := field.Column().Type
 
-	switch true {
+	switch {
 	case colType.IsUUID:
 		field.AddOption(bufvalidate.UUID())
 	case colType.IsStringable:

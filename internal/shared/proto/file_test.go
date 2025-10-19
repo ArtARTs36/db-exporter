@@ -56,8 +56,8 @@ func TestFile_Render(t *testing.T) {
 						ID:   1,
 						Options: []*FieldOption{
 							{
-								Name:  "google.api.field_behavior",
-								Value: "REQUIRED",
+								Name:  "(google.api.field_behavior)",
+								Value: ConstValue("REQUIRED"),
 							},
 						},
 					},

@@ -35,6 +35,10 @@ func mapGoTypeFromPG(t schema.Type) golang.Type {
 		return golang.TypeString
 	}
 
+	if t.IsInterval {
+		return golang.TypeTimeDuration
+	}
+
 	if t.IsDatetime {
 		return golang.TypeTimeTime
 	}
