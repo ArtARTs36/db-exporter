@@ -137,7 +137,7 @@ order by c.ordinal_position`
 		if enumExists {
 			col.Enum = enum
 			enum.Used++
-
+			enum.UsingInTables = append(enum.UsingInTables, table.Name.Value)
 			table.UsingEnums[enum.Name.Value] = enum
 		}
 
@@ -187,6 +187,13 @@ func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
 		return &schema.ColumnDefault{
 			Type:  schema.ColumnDefaultTypeValue,
 			Value: true,
+		}
+	}
+
+	if col.DefaultRaw.String == "CURRENT_TIMESTAMP" {
+		return &schema.ColumnDefault{
+			Type:  schema.ColumnDefaultTypeFunc,
+			Value: col.DefaultRaw.String,
 		}
 	}
 
@@ -315,8 +322,9 @@ where n.nspname = $1`
 		enum, ok := enums[value.EnumName]
 		if !ok {
 			enum = &schema.Enum{
-				Name:   gds.NewString(value.EnumName),
-				Values: make([]string, 0),
+				Name:          gds.NewString(value.EnumName),
+				Values:        make([]string, 0),
+				UsingInTables: make([]string, 0),
 			}
 		}
 

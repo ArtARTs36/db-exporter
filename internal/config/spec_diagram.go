@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/webcolor"
 	"github.com/artarts36/specw"
 	"golang.org/x/image/colornames"
 )
@@ -68,9 +67,9 @@ func (s *DiagramExportSpec) Validate() error {
 
 	if s.Style.Background.Grid != nil {
 		if s.Style.Background.Grid.LineColor == nil {
-			s.Style.Background.Grid.LineColor = &specw.Color{
-				Color: webcolor.ColorEEE,
-			}
+			defColor := &specw.Color{}
+			defColor.AsEEE()
+			s.Style.Background.Grid.LineColor = defColor
 		}
 		if s.Style.Background.Grid.CellSize == 0 {
 			s.Style.Background.Grid.CellSize = defaultGridCellSize

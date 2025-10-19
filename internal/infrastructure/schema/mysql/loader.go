@@ -62,9 +62,10 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 		schemaColumn.Type = sqltype.MapMySQLType(col.DataType.Value)
 		if col.DataType.Value == "enum" {
 			schemaColumn.Enum = &schema.Enum{
-				Name:   col.Name.Append("_enum"),
-				Values: mysql.ParseEnumType(col.ColumnType.Value),
-				Used:   1,
+				Name:          col.Name.Append("_enum"),
+				Values:        mysql.ParseEnumType(col.ColumnType.Value),
+				UsingInTables: []string{table.Name.Value},
+				Used:          1,
 			}
 			table.AddEnum(schemaColumn.Enum)
 		} else if col.DataTypeLength.Valid {

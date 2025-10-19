@@ -16,7 +16,7 @@ func TestRender_Build(t *testing.T) {
 			Table: Table{
 				Name: "posts",
 			},
-			Expected: `Table posts {
+			Expected: `TableMessage posts {
 }`,
 		},
 		{
@@ -30,7 +30,7 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `Table posts {
+			Expected: `TableMessage posts {
   id varchar [not null]
 }`,
 		},
@@ -52,7 +52,7 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `Table posts {
+			Expected: `TableMessage posts {
   id integer [primary key, not null]
   title varchar [not null]
 }`,
@@ -82,7 +82,7 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `Table posts {
+			Expected: `TableMessage posts {
   id integer [primary key, not null]
   title varchar [not null]
   body varchar [not null, note: 'Content of the post']
