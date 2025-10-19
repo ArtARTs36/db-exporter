@@ -28,5 +28,9 @@ func (p *BufValidate) ModifyField(field *presentation.Field) {
 		if field.Column().Name.Lower().Ends("email") {
 			field.AddOption(bufvalidate.Email())
 		}
+
+		if field.Column().Type.Length != "" {
+			field.AddOption(bufvalidate.MaxLen(field.Column().Type.Length))
+		}
 	}
 }
