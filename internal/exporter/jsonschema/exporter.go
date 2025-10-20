@@ -10,12 +10,12 @@ import (
 )
 
 type Exporter struct {
-	builder *builder
+	mapper *mapper
 }
 
 func NewExporter() *Exporter {
 	return &Exporter{
-		builder: &builder{},
+		mapper: &mapper{},
 	}
 }
 
@@ -68,7 +68,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildJSONSchema(spec *config.JSONSchemaExportSpec, tables []*schema.Table) ([]byte, error) {
-	sch := e.builder.buildJSONSchema(spec, tables)
+	sch := e.mapper.mapJSONSchema(spec, tables)
 
 	marshaller := sch.Marshal
 	if spec.Pretty {

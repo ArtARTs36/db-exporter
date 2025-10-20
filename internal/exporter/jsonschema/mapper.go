@@ -6,9 +6,9 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/jsonschema"
 )
 
-type builder struct{}
+type mapper struct{}
 
-func (e *builder) buildJSONSchema(
+func (e *mapper) mapJSONSchema(
 	spec *config.JSONSchemaExportSpec,
 	tables []*schema.Table,
 ) *jsonschema.Schema {
@@ -51,7 +51,7 @@ func (e *builder) buildJSONSchema(
 	return sch
 }
 
-func (e *builder) prepareDefaultValue(col *schema.Column) interface{} {
+func (e *mapper) prepareDefaultValue(col *schema.Column) interface{} {
 	if col.Default == nil || col.Default.Type != schema.ColumnDefaultTypeValue {
 		return nil
 	}
@@ -59,7 +59,7 @@ func (e *builder) prepareDefaultValue(col *schema.Column) interface{} {
 	return col.Default.Value
 }
 
-func (e *builder) mapFormat(column *schema.Column) jsonschema.Format {
+func (e *mapper) mapFormat(column *schema.Column) jsonschema.Format {
 	switch {
 	case column.Type.IsDatetime:
 		return jsonschema.FormatDateTime
