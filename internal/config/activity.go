@@ -20,9 +20,8 @@ type Activity struct {
 }
 
 type ActivityTables struct {
-	List        stringOrStringSlice `yaml:"list" json:"list"`
-	ListFromEnv string              `yaml:"from_env" json:"from_env"`
-	Prefix      string              `yaml:"prefix" json:"prefix"`
+	List   stringOrStringSlice `yaml:"list" json:"list"`
+	Prefix string              `yaml:"prefix" json:"prefix"`
 }
 
 func (s *Activity) UnmarshalYAML(n *yaml.Node) error {
