@@ -24,4 +24,16 @@ func TestType_Build(t *testing.T) {
   appearsIn: [Episode!]!
 }`, typ.Build())
 	})
+
+	t.Run("build type with fields and comments", func(t *testing.T) {
+		typ := NewType("Character")
+		typ.AddField("name").Of(TypeString).Require().Comment("name of character")
+		typ.AddField("appearsIn").ListOf(TypeOfName("Episode")).Require()
+
+		assert.Equal(t, `type Character {
+  # name of character
+  name: String!
+  appearsIn: [Episode!]!
+}`, typ.Build())
+	})
 }
