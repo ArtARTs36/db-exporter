@@ -1,14 +1,14 @@
 package template
 
 import (
-	"embed"
 	"io"
+	"io/fs"
 
 	"github.com/tyler-sommer/stick"
 )
 
-type EmbedLoader struct {
-	fs embed.FS
+type FSLoader struct {
+	fs fs.FS
 }
 
 type fileTemplate struct {
@@ -16,9 +16,9 @@ type fileTemplate struct {
 	reader io.Reader
 }
 
-// NewEmbedLoader creates a new EmbedLoader.
-func NewEmbedLoader(fs embed.FS) *EmbedLoader {
-	return &EmbedLoader{fs: fs}
+// NewFSLoader creates a new FSLoader.
+func NewFSLoader(fs fs.FS) *FSLoader {
+	return &FSLoader{fs: fs}
 }
 
 func (t *fileTemplate) Name() string {
@@ -29,7 +29,7 @@ func (t *fileTemplate) Contents() io.Reader {
 	return t.reader
 }
 
-func (l *EmbedLoader) Load(name string) (stick.Template, error) {
+func (l *FSLoader) Load(name string) (stick.Template, error) {
 	f, err := l.fs.Open(name)
 	if err != nil {
 		return nil, err

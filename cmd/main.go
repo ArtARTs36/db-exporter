@@ -109,7 +109,7 @@ func createRenderer() *template.Renderer {
 	return template.NewRenderer(template.NewNamespaceFallbackLoader(
 		template.NewNamespaceLoader(
 			map[string]stick.Loader{
-				"embed":  template.NewEmbedLoader(templates.FS),
+				"embed":  template.NewFSLoader(templates.FS),
 				"local":  stick.NewFilesystemLoader("./"),
 				"string": stringLoader,
 			},
