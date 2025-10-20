@@ -1,6 +1,9 @@
 package graphql
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Field struct {
 	name     string
@@ -32,7 +35,7 @@ func (p *Field) Comment(comment string) *Field {
 	return p
 }
 
-func (p *Field) Build() string {
+func (p *Field) Write(w *strings.Builder) {
 	kind := p.typ.Name()
 	if p.list {
 		kind = fmt.Sprintf("[%s!]", kind)
@@ -43,10 +46,9 @@ func (p *Field) Build() string {
 		required = "!"
 	}
 
-	comment := ""
 	if p.comment != "" {
-		comment = fmt.Sprintf("  # %s\n", p.comment)
+		w.WriteString("  # " + p.comment + "\n")
 	}
 
-	return fmt.Sprintf("%s  %s: %s%s", comment, p.name, kind, required)
+	w.WriteString("  " + p.name + ": " + kind + required + "\n")
 }

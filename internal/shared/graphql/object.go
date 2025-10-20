@@ -1,7 +1,6 @@
 package graphql
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -42,19 +41,17 @@ func (t *Object) AttachField(prop *Field) {
 }
 
 func (t *Object) Build() string {
-	const minObjectLinesCount = 2
+	stringsBuilder := &strings.Builder{}
 
-	strs := make([]string, 0, minObjectLinesCount+len(t.fields))
-
-	strs = append(strs, fmt.Sprintf("%s %s {", t.kind, t.name))
+	stringsBuilder.WriteString(t.kind + " " + t.name + " {\n")
 
 	for _, property := range t.fields {
-		strs = append(strs, property.Build())
+		property.Write(stringsBuilder)
 	}
 
-	strs = append(strs, "}")
+	stringsBuilder.WriteByte('}')
 
-	return strings.Join(strs, "\n")
+	return stringsBuilder.String()
 }
 
 func (t *Object) Name() string {
