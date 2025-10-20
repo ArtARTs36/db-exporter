@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/specw"
 
 	"gopkg.in/yaml.v3"
 )
@@ -20,8 +21,8 @@ type Activity struct {
 }
 
 type ActivityTables struct {
-	List   stringOrStringSlice `yaml:"list" json:"list"`
-	Prefix string              `yaml:"prefix" json:"prefix"`
+	List   specw.EnvStrings `yaml:"list" json:"list"`
+	Prefix string           `yaml:"prefix" json:"prefix"`
 }
 
 func (s *Activity) UnmarshalYAML(n *yaml.Node) error {

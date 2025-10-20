@@ -94,8 +94,8 @@ func (r *ExportActivityRunner) export(
 }
 
 func (r *ExportActivityRunner) filterTables(sc *schema.Schema, params *ActivityRunParams) *schema.Schema {
-	if params.Activity.Tables.List.Len() > 0 {
-		sc = sc.OnlyTables(params.Activity.Tables.List.List())
+	if len(params.Activity.Tables.List.Value) > 0 {
+		sc = sc.OnlyTables(params.Activity.Tables.List.Value)
 	} else if params.Activity.Tables.Prefix != "" {
 		sc = sc.WithoutTable(func(table *schema.Table) bool {
 			return !table.Name.Starts(params.Activity.Tables.Prefix)
