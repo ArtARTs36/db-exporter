@@ -115,6 +115,7 @@ tasks:
       - format: grpc-crud
         spec:
           package: "org.service"
+          pagination: token
           with:
             google.api.field_behavior: true
             google.api.http:
