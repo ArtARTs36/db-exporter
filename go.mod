@@ -5,11 +5,8 @@ go 1.24.7
 require (
 	github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18
 	github.com/artarts36/gds v0.2.4
-	github.com/artarts36/singlecli v0.0.0-20241017172045-f9a31a534745
+	github.com/artarts36/singlecli v0.1.2
 	github.com/artarts36/specw v0.1.2
-	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.0-rc8
-	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.0-rc8
-	github.com/buildkite/interpolate v0.1.5
 	github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5
 	github.com/flopp/go-findfont v0.1.0
 	github.com/go-sql-driver/mysql v1.9.3
@@ -26,9 +23,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.0-rc6 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/buildkite/interpolate v0.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/fatih/camelcase v1.0.0 // indirect
@@ -36,11 +33,14 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
 	github.com/tetratelabs/wazero v1.8.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-	go.uber.org/multierr v1.9.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/term v0.33.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
