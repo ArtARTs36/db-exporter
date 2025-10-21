@@ -58,7 +58,7 @@ func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 		buf.WriteString("]")
 	}
 
-	buf.WriteString(";")
+	buf.WriteString(";\n")
 }
 
 func (f *FieldOption) write(buf stringsBuffer, indent *indentx.Indent) {

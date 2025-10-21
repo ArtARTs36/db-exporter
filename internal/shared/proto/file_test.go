@@ -70,11 +70,22 @@ func TestFile_Render(t *testing.T) {
 						Type: "int64",
 						Name: "id",
 						ID:   1,
+						Options: []*FieldOption{
+							{
+								Name:  "(abc)",
+								Value: true,
+							},
+							{
+								Name:  "(dfg)",
+								Value: false,
+							},
+						},
 					},
 					{
-						Type: "string",
-						Name: "name",
-						ID:   2,
+						Type:       "string",
+						Name:       "name",
+						ID:         2,
+						TopComment: "Name of user.",
 					},
 				},
 			},
@@ -113,7 +124,12 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-  int64 id = 1;
+  int64 id = 1 [
+    (abc) = true,
+    (dfg) = false
+  ];
+
+  // Name of user.
   string name = 2;
 }
 
