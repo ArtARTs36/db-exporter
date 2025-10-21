@@ -31,7 +31,9 @@ message User {
   google.protobuf.Timestamp created_at = 4;
 }
 
-message ListUsersRequest {}
+message ListUsersRequest {
+  repeated string ids = 1;
+}
 
 message ListUsersResponse {
   repeated User items = 1;

@@ -37,6 +37,11 @@ func (f *Field) AsRequired() *Field {
 	return f
 }
 
+func (f *Field) NotRequired() *Field {
+	f.required = false
+	return f
+}
+
 func (f *Field) IsRequired() bool {
 	return f.required
 }

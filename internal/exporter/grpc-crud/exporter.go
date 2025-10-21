@@ -10,6 +10,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
+	"github.com/artarts36/gds"
 )
 
 type Exporter struct{}
@@ -278,6 +279,18 @@ func (e *Exporter) buildListProcedure(
 	buildCtx.service.AddProcedureFn("List", presentation.ProcedureTypeList,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("List%sRequest", buildCtx.tablePluralName))
+
+			if len(message.Service().TableMessage().PrimaryKey) == 1 {
+				message.CreateField(
+					gds.NewString(message.Service().TableMessage().PrimaryKey[0].Name()).Plural().Value,
+					func(field *presentation.Field) {
+						field.
+							CopyType(message.Service().TableMessage().PrimaryKey[0]).
+							AsRepeated().
+							NotRequired()
+					},
+				)
+			}
 		},
 		func(message *presentation.Message) {
 			message.

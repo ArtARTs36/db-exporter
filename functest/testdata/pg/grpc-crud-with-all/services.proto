@@ -55,7 +55,9 @@ message User {
   google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = REQUIRED];
 }
 
-message ListUsersRequest {}
+message ListUsersRequest {
+  repeated string ids = 1;
+}
 
 message ListUsersResponse {
   repeated User items = 1 [(google.api.field_behavior) = OPTIONAL];
