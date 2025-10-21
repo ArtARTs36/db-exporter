@@ -1,6 +1,8 @@
 package dbml
 
-import "fmt"
+import (
+	"strings"
+)
 
 type Ref struct {
 	From string
@@ -8,6 +10,6 @@ type Ref struct {
 	To   string
 }
 
-func (r *Ref) Render() string {
-	return fmt.Sprintf("Ref: %s %s %s", r.From, r.Type, r.To)
+func (r *Ref) Render(w *strings.Builder) {
+	w.WriteString("Ref: " + r.From + " " + r.Type + " " + r.To + "\n")
 }

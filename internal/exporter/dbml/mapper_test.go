@@ -17,6 +17,13 @@ func TestMapper_mapDefault(t *testing.T) {
 		Expected dbml.ColumnDefault
 	}{
 		{
+			Title: "nil",
+			Column: &schema.Column{
+				Default: nil,
+			},
+			Expected: dbml.ColumnDefault{},
+		},
+		{
 			Title: "bool: true",
 			Column: &schema.Column{
 				Default: &schema.ColumnDefault{

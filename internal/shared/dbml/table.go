@@ -29,26 +29,18 @@ type ColumnSettings struct {
 	null bool
 }
 
-func (t *Table) Render() string {
-	const minStrsLen = 3
-
-	strs := make([]string, 0, minStrsLen+len(t.Columns))
-	strs = append(strs, fmt.Sprintf("TableMessage %s {", t.Name))
+func (t *Table) Render(w *strings.Builder) {
+	w.WriteString("Table " + t.Name + " {\n")
 
 	for _, column := range t.Columns {
-		strs = append(strs, fmt.Sprintf(
-			"  %s",
-			column.Render(),
-		))
+		w.WriteString("  " + column.Render())
 	}
 
 	if t.Note != "" {
-		strs = append(strs, fmt.Sprintf("Note: '%s'", t.Note))
+		w.WriteString("Note: '" + t.Note + "'")
 	}
 
-	strs = append(strs, "}")
-
-	return strings.Join(strs, "\n")
+	w.WriteString("}\n")
 }
 
 func (c *Column) Render() string {
@@ -57,7 +49,7 @@ func (c *Column) Render() string {
 		settingsStr = fmt.Sprintf(" [%s]", settingsStr)
 	}
 
-	return fmt.Sprintf("%s %s%s", c.Name, c.Type, settingsStr)
+	return c.Name + " " + c.Type + "" + settingsStr + "\n"
 }
 
 func (c *Column) AsNullable() {

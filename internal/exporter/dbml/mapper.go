@@ -27,36 +27,9 @@ func (e *mapper) mapTable(
 	}
 
 	for _, col := range tbl.Columns {
-		typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type)
+		column, err := e.mapColumn(ctx, source, tbl, col)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
-		}
-
-		column := &dbml.Column{
-			Name: col.Name.Value,
-			Type: typ.Name,
-			Settings: dbml.ColumnSettings{
-				PrimaryKey: col.IsPrimaryKey(),
-				Increment:  col.IsAutoincrement,
-				Note:       col.Comment.Value,
-				Unique:     col.IsUniqueKey(),
-			},
-		}
-
-		if col.Nullable {
-			column.AsNullable()
-		}
-
-		def, err := e.mapDefault(col)
-		if err != nil {
-			slog.
-				With(slog.String("table_name", table.Name)).
-				With(slog.String("column_name", column.Name)).
-				WarnContext(ctx, "[dbml-exporter] failed to map default value of column")
-
-			column.Settings.Default.Value = col.DefaultRaw.String
-		} else {
-			column.Settings.Default = def
+			return nil, nil, fmt.Errorf("map column %q: %w", col.Name.Value, err)
 		}
 
 		table.Columns = append(table.Columns, column)
@@ -73,6 +46,47 @@ func (e *mapper) mapTable(
 	}
 
 	return table, refs, nil
+}
+
+func (e *mapper) mapColumn(
+	ctx context.Context,
+	source config.DatabaseDriver,
+	table *schema.Table,
+	col *schema.Column,
+) (*dbml.Column, error) {
+	typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type)
+	if err != nil {
+		return nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
+	}
+
+	column := &dbml.Column{
+		Name: col.Name.Value,
+		Type: typ.Name,
+		Settings: dbml.ColumnSettings{
+			PrimaryKey: col.IsPrimaryKey(),
+			Increment:  col.IsAutoincrement,
+			Note:       col.Comment.Value,
+			Unique:     col.IsUniqueKey(),
+		},
+	}
+
+	if col.Nullable {
+		column.AsNullable()
+	}
+
+	def, err := e.mapDefault(col)
+	if err != nil {
+		slog.
+			With(slog.String("table_name", table.Name.Value)).
+			With(slog.String("column_name", column.Name)).
+			WarnContext(ctx, "[dbml-exporter] failed to map default value of column")
+
+		column.Settings.Default.Value = col.DefaultRaw.String
+	} else {
+		column.Settings.Default = def
+	}
+
+	return column, nil
 }
 
 func (e *mapper) mapDefault(col *schema.Column) (dbml.ColumnDefault, error) {
