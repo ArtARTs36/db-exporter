@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
+	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/paginator"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/indentx"
@@ -20,12 +21,26 @@ type buildProcedureContext struct {
 
 	service *presentation.Service
 
+	paginator paginator.Paginator
+
 	tableSingularName string
 	tablePluralName   string
 }
 
 func NewExporter() *Exporter {
 	return &Exporter{}
+}
+
+func (e *Exporter) createPaginator(spec *config.GRPCCrudExportSpec) paginator.Paginator {
+	if spec.Pagination == config.PaginationTypeToken {
+		return &paginator.Token{}
+	}
+
+	if spec.Pagination == config.PaginationTypeNone {
+		return &paginator.None{}
+	}
+
+	return &paginator.Offset{}
 }
 
 func (e *Exporter) ExportPerFile(
@@ -59,10 +74,12 @@ func (e *Exporter) ExportPerFile(
 		pages = append(pages, expPage)
 	}
 
+	pager := e.createPaginator(spec)
+
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := e.buildService(params.Schema.Driver, prfile, table)
+		err := e.buildService(params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
@@ -134,6 +151,7 @@ func (e *Exporter) Export(
 	options := proto.PrepareOptions(spec.Options)
 
 	pkg := e.newPackage(spec)
+	pager := e.createPaginator(spec)
 
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
@@ -146,7 +164,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		err := e.buildService(params.Schema.Driver, prfile, table)
+		err := e.buildService(params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
@@ -166,6 +184,7 @@ func (e *Exporter) buildService(
 	sourceDriver config.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
+	pager paginator.Paginator,
 ) error {
 	procedureBuilders := []struct {
 		Type  presentation.ProcedureType
@@ -225,6 +244,7 @@ func (e *Exporter) buildService(
 	buildCtx := &buildProcedureContext{
 		sourceDriver: sourceDriver,
 		service:      srv,
+		paginator:    pager,
 	}
 	buildCtx.tableSingularName = buildCtx.service.TableMessage().Name()
 	buildCtx.tablePluralName = buildCtx.service.TableMessage().Table().Name.Pascal().Plural().Value
@@ -291,6 +311,8 @@ func (e *Exporter) buildListProcedure(
 					},
 				)
 			}
+
+			buildCtx.paginator.AddPaginationToRequest(message)
 		},
 		func(message *presentation.Message) {
 			message.
@@ -298,6 +320,8 @@ func (e *Exporter) buildListProcedure(
 				CreateField("items", func(field *presentation.Field) {
 					field.AsRepeated().SetType(buildCtx.service.TableMessage().Name())
 				})
+
+			buildCtx.paginator.AddPaginationToResponse(message)
 		},
 	)
 

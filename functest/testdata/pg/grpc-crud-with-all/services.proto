@@ -57,10 +57,19 @@ message User {
 
 message ListUsersRequest {
   repeated int64 ids = 1 [(google.api.field_behavior) = OPTIONAL];
+
+  // Maximum number of results per page.
+  uint64 page_size = 2 [(google.api.field_behavior) = OPTIONAL];
+
+  // Token of the requested results page.
+  string page_token = 3 [(google.api.field_behavior) = OPTIONAL];
 }
 
 message ListUsersResponse {
   repeated User items = 1 [(google.api.field_behavior) = OPTIONAL];
+
+  // Next page token.
+  string next_page_token = 2 [(google.api.field_behavior) = OPTIONAL];
 }
 
 message GetUserRequest {

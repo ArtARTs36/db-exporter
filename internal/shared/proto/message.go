@@ -15,6 +15,10 @@ func (m *Message) write(buf stringsBuffer, indent *indentx.Indent) {
 	}
 
 	for i, field := range m.Fields {
+		if field.TopComment != "" {
+			buf.WriteString("\n")
+		}
+
 		field.write(buf, indent.Next())
 		buf.WriteString("\n")
 

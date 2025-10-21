@@ -33,6 +33,12 @@ message User {
 
 message ListUsersRequest {
   repeated int64 ids = 1;
+
+  // Maximum number of results per page.
+  uint64 page_size = 2;
+
+  // The number of records to skip before starting to fetch the records.
+  uint64 offset = 3;
 }
 
 message ListUsersResponse {

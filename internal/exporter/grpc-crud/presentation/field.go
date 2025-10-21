@@ -20,6 +20,12 @@ func (f *Field) AddOption(option *proto.FieldOption) *Field {
 	return f
 }
 
+func (f *Field) SetTopComment(comment string) *Field {
+	f.proto.TopComment = comment
+
+	return f
+}
+
 func (f *Field) AsRepeated() *Field {
 	f.proto.Repeated = true
 
