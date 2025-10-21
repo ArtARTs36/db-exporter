@@ -8,7 +8,7 @@ import (
 
 type generator struct{}
 
-func (c *generator) generate(data *transformingData, columnDelimiter string) (string, error) {
+func (c *generator) generate(data *transformingData, columnDelimiter string) string {
 	sb := strings.Builder{}
 
 	for i, col := range data.cols {
@@ -29,15 +29,12 @@ func (c *generator) generate(data *transformingData, columnDelimiter string) (st
 
 			sb.WriteString(val)
 			if colID < len(data.cols)-1 {
-				_, err := sb.WriteString(columnDelimiter)
-				if err != nil {
-					return "", fmt.Errorf("write string: %w", err)
-				}
+				sb.WriteString(columnDelimiter)
 			}
 		}
 	}
 
-	return sb.String(), nil
+	return sb.String()
 }
 
 func (*generator) mapValue(value interface{}) string {

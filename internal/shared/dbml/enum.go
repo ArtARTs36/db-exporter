@@ -20,29 +20,29 @@ type EnumValueSettings struct {
 	Note string
 }
 
-func (e *Enum) Render() string {
-	const strsMinLen = 2
-
-	strs := make([]string, 0, strsMinLen+len(e.Values))
-
-	strs = append(strs, fmt.Sprintf("Enum %s {", e.Name))
+func (e *Enum) Render(w *strings.Builder) {
+	w.WriteString("Enum " + e.Name + " {\n")
 
 	for _, value := range e.Values {
-		strs = append(strs, fmt.Sprintf("  %s", value.Render()))
+		w.WriteString("  ")
+		value.Render(w)
+		w.WriteString("\n")
 	}
 
-	strs = append(strs, "}")
-
-	return strings.Join(strs, "\n")
+	w.WriteByte('}')
 }
 
-func (v *EnumValue) Render() string {
+func (v *EnumValue) Render(w *strings.Builder) {
+	w.WriteByte('"')
+	w.WriteString(v.Name)
+	w.WriteByte('"')
+
 	st := v.Settings.Render()
 	if st != "" {
 		st = " " + st
 	}
 
-	return fmt.Sprintf("%q%s", v.Name, st)
+	w.WriteString(st)
 }
 
 func (s *EnumValueSettings) Render() string {

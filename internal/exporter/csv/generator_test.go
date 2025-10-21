@@ -3,10 +3,8 @@ package csv
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerator_Generate(t *testing.T) {
@@ -27,19 +25,20 @@ func TestGenerator_Generate(t *testing.T) {
 		{
 			Title: "single",
 			Data: &transformingData{
-				cols: []string{"id", "name", "email_verified", "phone"},
+				cols: []string{"id", "name", "email_verified", "phone", "weight"},
 				rows: data.TableData{
 					{
 						"id":             "1",
 						"name":           "Artem",
 						"email_verified": true,
 						"phone":          123,
+						"weight":         80.5,
 					},
 				},
 			},
 			Delimiter: ",",
-			Expected: "id,name,email_verified,phone" + "\n" +
-				"\"1\",\"Artem\",true,123",
+			Expected: "id,name,email_verified,phone,weight" + "\n" +
+				"\"1\",\"Artem\",true,123,80.500000",
 		},
 		{
 			Title: "two",
@@ -69,8 +68,7 @@ func TestGenerator_Generate(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Title, func(t *testing.T) {
-			value, err := gen.generate(c.Data, c.Delimiter)
-			require.NoError(t, err)
+			value := gen.generate(c.Data, c.Delimiter)
 			assert.Equal(t, c.Expected, value)
 		})
 	}

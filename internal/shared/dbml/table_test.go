@@ -2,6 +2,7 @@ package dbml
 
 import (
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -16,8 +17,9 @@ func TestRender_Build(t *testing.T) {
 			Table: Table{
 				Name: "posts",
 			},
-			Expected: `TableMessage posts {
-}`,
+			Expected: `Table posts {
+}
+`,
 		},
 		{
 			Title: "table with one field",
@@ -30,9 +32,10 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `TableMessage posts {
+			Expected: `Table posts {
   id varchar [not null]
-}`,
+}
+`,
 		},
 		{
 			Title: "table with primary key",
@@ -52,10 +55,11 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `TableMessage posts {
+			Expected: `Table posts {
   id integer [primary key, not null]
   title varchar [not null]
-}`,
+}
+`,
 		},
 		{
 			Title: "table with primary key and note",
@@ -82,19 +86,22 @@ func TestRender_Build(t *testing.T) {
 					},
 				},
 			},
-			Expected: `TableMessage posts {
+			Expected: `Table posts {
   id integer [primary key, not null]
   title varchar [not null]
   body varchar [not null, note: 'Content of the post']
-}`,
+}
+`,
 		},
 	}
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
-			got := tCase.Table.Render()
+			w := &strings.Builder{}
 
-			assert.Equal(t, tCase.Expected, got)
+			tCase.Table.Render(w)
+
+			assert.Equal(t, tCase.Expected, w.String())
 		})
 	}
 }

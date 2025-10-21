@@ -64,10 +64,7 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 			}
 		}
 
-		pageContent, err := c.generator.generate(trData, delimiter)
-		if err != nil {
-			return nil, fmt.Errorf("generate page content: %w", err)
-		}
+		pageContent := c.generator.generate(trData, delimiter)
 
 		p := &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.csv", table.Name.String()),

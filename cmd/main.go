@@ -7,7 +7,6 @@ import (
 	"github.com/artarts36/db-exporter/internal/app/cmd"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/factory"
-	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/git"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
@@ -94,7 +93,7 @@ func loadConfig(ctx *cli.Context, fs fs.Driver) (*config.Config, error) {
 		configPath = "./.db-exporter.yaml"
 	}
 
-	loader := config.NewLoader(fs, env.NewInjector(), map[string]config.Parser{
+	loader := config.NewLoader(fs, map[string]config.Parser{
 		".yaml": config.YAMLParser(),
 		".yml":  config.YAMLParser(),
 		".json": config.JSONParser(),
@@ -109,7 +108,7 @@ func createRenderer() *template.Renderer {
 	return template.NewRenderer(template.NewNamespaceFallbackLoader(
 		template.NewNamespaceLoader(
 			map[string]stick.Loader{
-				"embed":  template.NewEmbedLoader(templates.FS),
+				"embed":  template.NewFSLoader(templates.FS),
 				"local":  stick.NewFilesystemLoader("./"),
 				"string": stringLoader,
 			},

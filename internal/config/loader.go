@@ -2,32 +2,25 @@ package config
 
 import (
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/artarts36/gds"
-	"github.com/go-sql-driver/mysql"
-
-	"github.com/artarts36/db-exporter/internal/shared/env"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
 
 type Loader struct {
-	files       fs.Driver
-	envInjector *env.Injector
-	parsers     map[string]Parser
+	files   fs.Driver
+	parsers map[string]Parser
 }
 
 func NewLoader(
 	files fs.Driver,
-	envInjector *env.Injector,
 	parsers map[string]Parser,
 ) *Loader {
 	return &Loader{
-		files:       files,
-		envInjector: envInjector,
-		parsers:     parsers,
+		files:   files,
+		parsers: parsers,
 	}
 }
 
@@ -48,11 +41,6 @@ func (l *Loader) Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("failed to parse %s config: %w", pathExt, err)
 	}
 
-	err = l.injectEnvVars(cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	err = l.fillDefaults(cfg)
 	if err != nil {
 		return nil, err
@@ -63,46 +51,6 @@ func (l *Loader) Load(path string) (*Config, error) {
 	}
 
 	return cfg, nil
-}
-
-func (l *Loader) injectEnvVars(cfg *Config) error {
-	err := l.injectEnvVarsToTasks(cfg)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (l *Loader) injectEnvVarsToTasks(cfg *Config) error {
-	for taskName, task := range cfg.Tasks {
-		for actID, activity := range task.Activities {
-			if activity.Tables.List.IsNotEmpty() && activity.Tables.List.IsString() {
-				val, err := l.envInjector.Inject(activity.Tables.List.First(), &env.InjectOpts{
-					AllowEmptyVars: true,
-				})
-				if err != nil {
-					return fmt.Errorf(
-						"tasks[%s]: failed to inject environment variable into activity tables list: %w",
-						taskName,
-						err,
-					)
-				}
-
-				envTablesSet := gds.NewSet[string]()
-
-				if val != "" {
-					for _, table := range strings.Split(val, ",") {
-						envTablesSet.Add(strings.Trim(table, " "))
-					}
-				}
-
-				cfg.Tasks[taskName].Activities[actID].Tables.List.Set = *envTablesSet
-			}
-		}
-	}
-
-	return nil
 }
 
 func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
