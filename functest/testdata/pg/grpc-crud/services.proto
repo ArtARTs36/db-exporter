@@ -32,7 +32,7 @@ message User {
 }
 
 message ListUsersRequest {
-  repeated string ids = 1;
+  repeated int64 ids = 1;
 }
 
 message ListUsersResponse {
