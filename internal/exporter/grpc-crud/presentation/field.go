@@ -20,6 +20,12 @@ func (f *Field) AddOption(option *proto.FieldOption) *Field {
 	return f
 }
 
+func (f *Field) SetTopComment(comment string) *Field {
+	f.proto.TopComment = comment
+
+	return f
+}
+
 func (f *Field) AsRepeated() *Field {
 	f.proto.Repeated = true
 
@@ -34,6 +40,11 @@ func (f *Field) SetType(typ string) *Field {
 
 func (f *Field) AsRequired() *Field {
 	f.required = true
+	return f
+}
+
+func (f *Field) NotRequired() *Field {
+	f.required = false
 	return f
 }
 

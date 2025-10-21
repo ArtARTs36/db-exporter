@@ -7,11 +7,12 @@ import (
 )
 
 type Field struct {
-	Repeated bool
-	Type     string
-	Name     string
-	ID       int
-	Options  []*FieldOption
+	Repeated   bool
+	TopComment string
+	Type       string
+	Name       string
+	ID         int
+	Options    []*FieldOption
 }
 
 type FieldOption struct {
@@ -22,6 +23,12 @@ type FieldOption struct {
 type ConstValue string
 
 func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
+	if f.TopComment != "" {
+		buf.WriteString(indent.Curr())
+		buf.WriteString("// " + f.TopComment)
+		buf.WriteString("\n")
+	}
+
 	buf.WriteString(indent.Curr())
 
 	if f.Repeated {

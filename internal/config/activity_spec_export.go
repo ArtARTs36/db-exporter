@@ -34,11 +34,20 @@ type GoEntitiesExportSpec struct {
 	Package  string `yaml:"package" json:"package"` // default: entities
 }
 
+type PaginationType string
+
+const (
+	PaginationTypeOffset PaginationType = "offset"
+	PaginationTypeToken  PaginationType = "token"
+	PaginationTypeNone   PaginationType = "none"
+)
+
 type GRPCCrudExportSpec struct {
-	Package string                                     `yaml:"package" json:"package"`
-	Indent  int                                        `yaml:"indent" json:"indent"`
-	Options orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
-	With    specw.BoolObject[struct {
+	Package    string                                     `yaml:"package" json:"package"`
+	Indent     int                                        `yaml:"indent" json:"indent"`
+	Options    orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
+	Pagination PaginationType                             `yaml:"pagination" json:"pagination"`
+	With       specw.BoolObject[struct {
 		GoogleApiHttp specw.BoolObject[struct { //nolint:revive // <- not readable
 			PathPrefix string `yaml:"path_prefix" json:"path_prefix"`
 		}] `yaml:"google.api.http" json:"google.api.http"`
@@ -163,6 +172,10 @@ func (s *MarkdownExportSpec) Validate() error {
 func (s *GRPCCrudExportSpec) Validate() error {
 	if s.Indent == 0 {
 		s.Indent = 2
+	}
+
+	if s.Pagination == "" {
+		s.Pagination = PaginationTypeOffset
 	}
 
 	return nil

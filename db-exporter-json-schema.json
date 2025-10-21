@@ -551,6 +551,11 @@
             ]
           }
         },
+        "pagination": {
+          "type": "string",
+          "enum": ["offset", "token", "none"],
+          "default": "offset"
+        },
         "with": {
           "type": "object",
           "properties": {

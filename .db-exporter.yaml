@@ -3,24 +3,27 @@ databases:
     driver: postgres
     dsn: "host=localhost port=5419 user=test password=test dbname=users sslmode=disable"
 
-  dbml:
-    driver: dbml
-    dsn: "./test.dbml"
-
 tasks:
-  grpc:
+  grpc-crud-1: # step 1: without options
     activities:
       - format: grpc-crud
         table_per_file: true
         spec:
-          package: 'org.users'
-          with:
-            buf.validate.field: true
-            google.api.field_behavior: true
-            google.api.http:
-              path_prefix: '/v1'
+          package: 'org.user_manager'
         out:
-          dir: './grpc-crud'
+          dir: './out/grpc-crud-1'
+
+  grpc-crud-2: # step 1: with field_behavior
+    activities:
+      - format: grpc-crud
+        table_per_file: true
+        spec:
+          package: 'org.user_manager'
+          pagination: token
+          with:
+            google.api.field_behavior: true
+        out:
+          dir: './out/grpc-crud-2'
 
   diagram:
     activities:
