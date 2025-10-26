@@ -2,7 +2,7 @@ package proto
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"strconv"
 )
 
@@ -22,7 +22,7 @@ type FieldOption struct {
 
 type ConstValue string
 
-func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
+func (f *Field) write(buf stringsBuffer, indent *iox.Indent) {
 	if f.TopComment != "" {
 		buf.WriteString(indent.Curr())
 		buf.WriteString("// " + f.TopComment)
@@ -41,7 +41,7 @@ func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 		buf.WriteString(" [")
 
 		if len(f.Options) == 1 {
-			f.Options[0].write(buf, indentx.Zero())
+			f.Options[0].write(buf, iox.Zero())
 		} else {
 			buf.WriteString("\n")
 			for i, opt := range f.Options {
@@ -61,7 +61,7 @@ func (f *Field) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString(";\n")
 }
 
-func (f *FieldOption) write(buf stringsBuffer, indent *indentx.Indent) {
+func (f *FieldOption) write(buf stringsBuffer, indent *iox.Indent) {
 	buf.WriteString(indent.Curr())
 	buf.WriteString(f.Name + " = " + f.resolveValue())
 }

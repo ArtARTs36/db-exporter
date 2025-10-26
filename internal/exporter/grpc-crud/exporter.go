@@ -10,7 +10,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/gds"
 )
@@ -55,7 +55,7 @@ func (e *Exporter) ExportPerFile(
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
-	indent := indentx.NewIndent(spec.Indent)
+	indent := iox.NewIndent(spec.Indent)
 
 	pkg := e.newPackage(spec)
 
@@ -160,7 +160,7 @@ func (e *Exporter) Export(
 
 	pkg := e.newPackage(spec)
 	pager := e.createPaginator(spec)
-	indent := indentx.NewIndent(spec.Indent)
+	indent := iox.NewIndent(spec.Indent)
 
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 

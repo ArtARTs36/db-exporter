@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/artarts36/gds"
 	"testing"
 
@@ -139,7 +139,7 @@ enum UserStatus {
   USERSTATUS_BANNED = 2;
 }`
 	got := stringsBuff{}
-	f.Render(&got, indentx.NewIndent(2))
+	f.Render(&got, iox.NewIndent(2))
 
 	assert.Equal(t, expected, got.String())
 }

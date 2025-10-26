@@ -1,9 +1,8 @@
 package proto
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"strconv"
-
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
 )
 
 type Service struct {
@@ -27,7 +26,7 @@ type ServiceProcedureOption struct {
 	Params map[string]string
 }
 
-func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
+func (s *Service) write(buf stringsBuffer, indent *iox.Indent) {
 	if s.CommentTop != "" {
 		buf.WriteString("// " + s.CommentTop + "\n")
 	}
@@ -47,7 +46,7 @@ func (s *Service) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString("}" + "\n")
 }
 
-func (s *ServiceProcedure) write(buf stringsBuffer, indent *indentx.Indent) {
+func (s *ServiceProcedure) write(buf stringsBuffer, indent *iox.Indent) {
 	if s.CommentTop != "" {
 		buf.WriteString(indent.Curr())
 		buf.WriteString("// " + s.CommentTop + "\n")
@@ -70,7 +69,7 @@ func (s *ServiceProcedure) write(buf stringsBuffer, indent *indentx.Indent) {
 	buf.WriteString("}\n")
 }
 
-func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *indentx.Indent) {
+func (opt *ServiceProcedureOption) write(buf stringsBuffer, indent *iox.Indent) {
 	buf.WriteString(indent.Curr())
 	buf.WriteString("option (" + opt.Name + ") = {")
 

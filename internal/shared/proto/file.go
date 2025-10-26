@@ -2,7 +2,7 @@ package proto
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/artarts36/gds"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"log/slog"
@@ -57,7 +57,7 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 	return opts
 }
 
-func (f *File) Render(buf stringsBuffer, indent *indentx.Indent) {
+func (f *File) Render(buf stringsBuffer, indent *iox.Indent) {
 	f.writeSyntax(buf)
 	f.writePackage(buf)
 	f.writeImports(buf)
@@ -97,7 +97,7 @@ func (f *File) writeOptions(buf stringsBuffer) {
 	}
 }
 
-func (f *File) writeServices(buf stringsBuffer, indent *indentx.Indent) {
+func (f *File) writeServices(buf stringsBuffer, indent *iox.Indent) {
 	for _, service := range f.Services {
 		buf.WriteString("\n")
 		service.write(buf, indent)
@@ -112,7 +112,7 @@ func (f *File) writePackage(buf stringsBuffer) {
 	buf.WriteString("\npackage " + f.Package + ";\n")
 }
 
-func (f *File) writeMessages(buf stringsBuffer, indent *indentx.Indent) {
+func (f *File) writeMessages(buf stringsBuffer, indent *iox.Indent) {
 	for i, message := range f.Messages {
 		buf.WriteString("\n")
 		message.write(buf, indent)
@@ -123,7 +123,7 @@ func (f *File) writeMessages(buf stringsBuffer, indent *indentx.Indent) {
 	}
 }
 
-func (f *File) writeEnums(buf stringsBuffer, indent *indentx.Indent) {
+func (f *File) writeEnums(buf stringsBuffer, indent *iox.Indent) {
 	if len(f.Enums) == 0 {
 		return
 	}

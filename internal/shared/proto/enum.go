@@ -1,7 +1,7 @@
 package proto
 
 import (
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/artarts36/gds"
 	"strconv"
 )
@@ -36,7 +36,7 @@ func (e *Enum) AddValue(value ...string) {
 	}
 }
 
-func (e *Enum) write(buf stringsBuffer, indent *indentx.Indent) {
+func (e *Enum) write(buf stringsBuffer, indent *iox.Indent) {
 	buf.WriteString(e.Name.Prepend("enum ").Append(" {").Value)
 
 	buf.WriteString("\n")

@@ -3,7 +3,7 @@ package presentation
 import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/db-exporter/internal/shared/indentx"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
 	"github.com/artarts36/gds"
 )
@@ -58,7 +58,7 @@ func (f *File) AddEnum(name gds.String, values []string) {
 
 func (f *File) Render(builder interface {
 	WriteString(s string)
-}, indent *indentx.Indent) {
+}, indent *iox.Indent) {
 	f.proto.Render(builder, indent)
 }
 

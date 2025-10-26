@@ -1,15 +1,20 @@
-package workspace
+package iox
 
-import (
-	"github.com/artarts36/db-exporter/internal/shared/iox"
-	"strings"
-)
+import "strings"
+
+type Writer interface {
+	WriteString(s string)
+	WriteIndent(indent *Indent)
+	Write(p []byte) (n int, err error)
+	WriteByte(b byte)
+	String() string
+}
 
 type fileBuffer struct {
 	buf strings.Builder
 }
 
-func NewBuffer() Buffer {
+func NewBuffer() Writer {
 	return &fileBuffer{}
 }
 
@@ -17,7 +22,7 @@ func (b *fileBuffer) WriteString(s string) {
 	b.buf.WriteString(s)
 }
 
-func (b *fileBuffer) WriteIndent(ind *iox.Indent) {
+func (b *fileBuffer) WriteIndent(ind *Indent) {
 	b.buf.WriteString(ind.Curr())
 }
 
