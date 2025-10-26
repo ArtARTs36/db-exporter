@@ -17,3 +17,7 @@ func (b *fileBuffer) WriteString(s string) {
 func (b *fileBuffer) WriteIndent(ind *indentx.Indent) {
 	b.buf.WriteString(ind.Curr())
 }
+
+func (b *fileBuffer) Write(p []byte) (n int, err error) {
+	return b.buf.Write(p)
+}

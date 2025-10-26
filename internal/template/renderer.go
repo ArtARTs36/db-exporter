@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/tyler-sommer/stick"
 	"github.com/tyler-sommer/stick/twig/filter"
+	"io"
 )
 
 type Renderer struct {
@@ -31,6 +32,17 @@ func (r *Renderer) Render(name string, params map[string]stick.Value) ([]byte, e
 	}
 
 	return buf.Bytes(), err
+}
+
+func (r *Renderer) RenderTo(name string, params map[string]stick.Value, w io.Writer) error {
+	r.extendParams(params)
+
+	err := r.engine.Execute(name, w, params)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (r *Renderer) extendParams(params map[string]stick.Value) {
