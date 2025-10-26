@@ -1,0 +1,5 @@
+Table users {
+  id integer [primary key, not null]
+  name varchar [not null]
+  current_mood mood
+}
