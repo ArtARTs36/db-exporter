@@ -5,18 +5,38 @@ import (
 	"time"
 )
 
-type Country struct {
-	ID   int    `db:"id"`
-	Name string `db:"name"`
+type Mood string
+
+const (
+    MoodUndefined Mood = ""
+    MoodOk Mood = "ok"
+    MoodHappy Mood = "happy"
+)
+
+func (e Mood) Valid() bool {
+    switch e {
+    case MoodUndefined:
+        return true
+    case MoodOk:
+        return true
+    case MoodHappy:
+        return true
+    default:
+        return false
+    }
 }
 
 type User struct {
 	ID          int             `db:"id"`
 	Name        string          `db:"name"`
-	CountryID   sql.NullInt64   `db:"country_id"`
 	Balance     float64         `db:"balance"`
 	PrevBalance sql.NullFloat64 `db:"prev_balance"`
-	Phone       sql.NullString  `db:"phone"`
 	CreatedAt   time.Time       `db:"created_at"`
+	CurrentMood string          `db:"current_mood"`
 	UpdatedAt   sql.NullTime    `db:"updated_at"`
+}
+
+type Phone struct {
+	UserID int    `db:"user_id"`
+	Number string `db:"number"`
 }

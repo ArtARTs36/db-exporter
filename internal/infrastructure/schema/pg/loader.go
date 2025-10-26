@@ -119,13 +119,7 @@ order by c.ordinal_position`
 	for _, col := range cols {
 		table, tableExists := sch.Tables.Get(col.TableName)
 		if !tableExists {
-			table = &schema.Table{
-				Name:           col.TableName,
-				ForeignKeys:    map[string]*schema.ForeignKey{},
-				UniqueKeys:     map[string]*schema.UniqueKey{},
-				UsingSequences: map[string]*schema.Sequence{},
-				UsingEnums:     map[string]*schema.Enum{},
-			}
+			table = schema.NewTable(col.TableName)
 
 			sch.Tables.Add(table)
 		}

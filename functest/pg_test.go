@@ -47,368 +47,109 @@ func TestPGExport(t *testing.T) {
 
 	env := initPgTestEnvironment()
 
-	cases := []struct {
-		Title       string
-		InitQueries []string
-		DownQueries []string
+	mustExecQueries(env.db, []string{
+		`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
+		`CREATE TABLE users
+		(
+		    id   integer NOT NULL,
+		    name character varying NOT NULL,
+		    balance real NOT NULL,
+		    prev_balance real,
+		    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		    current_mood mood NOT NULL,
+		    updated_at timestamp,
+		
+		    CONSTRAINT users_pk PRIMARY KEY (id)
+		);`,
+		`CREATE TABLE phones
+		(
+		    user_id   integer NOT NULL,
+		    number character varying NOT NULL,
+		    
+		    CONSTRAINT phones_pk PRIMARY KEY (user_id, number)
+		);`,
+		`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
+		`INSERT INTO users (id, name, balance, prev_balance, created_at, current_mood) VALUES
+		(1, 'Artem', 999999999, null, '2025-10-26 21:21:27.699806', 'ok'),
+		(2, 'Ivan', 88888888, null, '2025-10-26 21:21:27.699806', 'happy');`,
+	})
 
+	t.Cleanup(func() {
+		mustExecQueries(env.db, []string{
+			`DROP TABLE phones;`,
+			`DROP TABLE users;`,
+			`DROP TYPE mood;`,
+		})
+	})
+
+	cases := []struct {
+		Title               string
 		ConfigPath          string
 		TaskName            string
 		CheckOnlyFileExists bool
 	}{
 		{
-			Title: "test pg with csv",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE countries
-		(
-		    id   integer NOT NULL,
-		    code character varying NOT NULL,
-		    name character varying NOT NULL
-		);`,
-				`INSERT INTO users (id, name) VALUES
-						(1, 'a'),
-						(2, 'b')
-						`,
-				`INSERT INTO countries (id, code, name) VALUES
-						(1, 'RU', 'Russia')
-						`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
+			Title:      "test pg with csv",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/csv_export",
+			TaskName:   "pg/csv",
 		},
 		{
-			Title: "test pg with diagram",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    country_id integer,
-		    balance real NOT NULL,
-		    prev_balance real,
-		    phone character varying,
-		    created_at timestamp NOT NULL,
-		    updated_at timestamp,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE countries
-		(
-		    id integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT countries_pk PRIMARY KEY (id)
-		)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
-			ConfigPath:          "pg_test.yml",
-			TaskName:            "pg/diagram",
-			CheckOnlyFileExists: true,
+			Title:      "test pg with diagram",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/diagram",
 		},
 		{
-			Title: "test pg with go-entities",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    country_id integer,
-		    balance real NOT NULL,
-		    prev_balance real,
-		    phone character varying,
-		    created_at timestamp NOT NULL,
-		    updated_at timestamp,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE countries
-		(
-		    id integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT countries_pk PRIMARY KEY (id)
-		)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
+			Title:      "test pg with go-entities",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/go-entities",
 		},
 		{
-			Title: "test pg with go-entity-repository",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    country_id integer,
-		    balance real NOT NULL,
-		    prev_balance real,
-		    phone character varying,
-		    created_at timestamp NOT NULL,
-		    updated_at timestamp,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE countries
-		(
-		    id integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT countries_pk PRIMARY KEY (id)
-		)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
+			Title:      "test pg with go-entity-repository",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/go-entity-repository",
 		},
 		{
-			Title: "test pg with go-entity-repository with external interfaces",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    country_id integer,
-		    balance real NOT NULL,
-		    prev_balance real,
-		    phone character varying,
-		    created_at timestamp NOT NULL,
-		    updated_at timestamp,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE countries
-		(
-		    id integer NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT countries_pk PRIMARY KEY (id)
-		)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
+			Title:      "test pg with go-entity-repository with external interfaces",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/go-entity-repository_interfaces_external",
 		},
 		{
-			Title: "test pg with go-entity-repository with internal interfaces",
-			InitQueries: []string{
-				`CREATE TABLE users
-(
-    id   integer NOT NULL,
-    name character varying NOT NULL,
-    country_id integer,
-    balance real NOT NULL,
-    prev_balance real,
-    phone character varying,
-    created_at timestamp NOT NULL,
-    updated_at timestamp,
-
-    CONSTRAINT users_pk PRIMARY KEY (id)
-);`,
-				`CREATE TABLE countries
-(
-    id integer NOT NULL,
-    name character varying NOT NULL,
-    
-    CONSTRAINT countries_pk PRIMARY KEY (id)
-)`,
-				`ALTER TABLE users ADD CONSTRAINT user_country_fk FOREIGN KEY (country_id) REFERENCES countries(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE countries",
-			},
+			Title:      "test pg with go-entity-repository with internal interfaces",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/go-entity-repository_interfaces_internal",
 		},
 		{
-			Title: "test pg with laravel-models",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   serial NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`CREATE TABLE entities
-		(
-		    entity_type character varying NOT NULL,
-		    entity_id character varying NOT NULL,
-		    name character varying NOT NULL,
-		
-		    CONSTRAINT entities_pk PRIMARY KEY (entity_type, entity_id)
-		);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TABLE entities",
-			},
+			Title:      "test pg with laravel-models",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/laravel-models_export",
+			TaskName:   "pg/laravel-models/per-table",
 		},
 		{
-			Title: "test pg with grpc-crud",
-			InitQueries: []string{
-				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    current_mood mood NOT NULL,
-		    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`INSERT INTO users (id, name, current_mood) VALUES
-		(1, 'a', 'ok'),
-		(2, 'b', 'ok')
-		`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TYPE mood",
-			},
+			Title:      "test pg with grpc-crud",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/grpc-crud",
+			TaskName:   "pg/grpc-crud/all",
 		},
 		{
-			Title: "test pg with grpc-crud with all options",
-			InitQueries: []string{
-				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL,
-		    current_mood mood NOT NULL,
-		    pay_period interval,
-		    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		
-		    CONSTRAINT users_pk PRIMARY KEY (id)
-		);`,
-				`INSERT INTO users (id, name, current_mood) VALUES
-		(1, 'a', 'ok'),
-		(2, 'b', 'ok')
-		`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-				"DROP TYPE mood",
-			},
+			Title:      "test pg with grpc-crud with all options",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/grpc-crud-with-all",
+			TaskName:   "pg/grpc-crud-with-options/all",
 		},
 		{
-			Title: "test pg with custom",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL PRIMARY KEY,
-		    name character varying NOT NULL
-		);`,
-				`CREATE TABLE phones
-		(
-		    user_id   integer NOT NULL,
-		    number character varying NOT NULL
-		);`,
-				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE phones",
-				"DROP TABLE users",
-			},
+			Title:      "test pg with custom",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/custom",
 		},
 		{
-			Title: "test pg with ddl",
-			InitQueries: []string{
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL,
-		    name character varying NOT NULL
-		);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE users",
-			},
+			Title:      "test pg with ddl",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/ddl",
+			TaskName:   "pg/ddl/all",
 		},
 		{
-			Title: "test pg with dbml (all in one file)",
-			InitQueries: []string{
-				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL PRIMARY KEY,
-		    name character varying NOT NULL,
-			current_mood mood
-		);`,
-				`CREATE TABLE phones
-		(
-		    user_id   integer NOT NULL,
-		    number character varying NOT NULL
-		);`,
-				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE phones",
-				"DROP TABLE users",
-				"DROP TYPE mood",
-			},
+			Title:      "test pg with dbml (all in one file)",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/dbml/all",
 		},
 		{
-			Title: "test pg with dbml (per table",
-			InitQueries: []string{
-				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
-				`CREATE TABLE users
-		(
-		    id   integer NOT NULL PRIMARY KEY,
-		    name character varying NOT NULL,
-			current_mood mood
-		);`,
-				`CREATE TABLE phones
-		(
-		    user_id   integer NOT NULL,
-		    number character varying NOT NULL
-		);`,
-				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
-			},
-			DownQueries: []string{
-				"DROP TABLE phones",
-				"DROP TABLE users",
-				"DROP TYPE mood",
-			},
+			Title:      "test pg with dbml (per table)",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/dbml/per-table",
 		},
@@ -416,10 +157,7 @@ func TestPGExport(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
-			mustExecQueries(env.db, tCase.InitQueries)
-
 			t.Cleanup(func() {
-				mustExecQueries(env.db, tCase.DownQueries)
 				removeDir("./out")
 			})
 

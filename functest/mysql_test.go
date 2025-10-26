@@ -56,7 +56,7 @@ func TestMySQLExport(t *testing.T) {
 		TaskName   string
 	}{
 		{
-			Title: "test mysql with csv",
+			Title: "test mysql with custom",
 			InitQueries: []string{
 				`CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -70,7 +70,7 @@ func TestMySQLExport(t *testing.T) {
 				"DROP TABLE users",
 			},
 			ConfigPath: "mysql_test.yml",
-			TaskName:   "mysql/custom_export",
+			TaskName:   "mysql/custom",
 		},
 		{
 			Title: "test mysql with ddl",

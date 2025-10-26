@@ -1,12 +1,16 @@
 Table users {
   id integer [primary key, not null]
   name varchar [not null]
-  current_mood mood
+  balance real [not null]
+  prev_balance real
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  current_mood mood [not null]
+  updated_at timestamp
 }
 
 Table phones {
-  user_id integer [not null]
-  number varchar [not null]
+  user_id integer [primary key, not null]
+  number varchar [primary key, not null]
 }
 
 Ref: phones.user_id > users.id

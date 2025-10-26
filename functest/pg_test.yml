@@ -4,7 +4,7 @@ databases:
     dsn: $PG_DSN
 
 tasks:
-  pg/ddl:
+  pg/ddl/all:
     activities:
       - format: ddl
         out:
@@ -20,7 +20,7 @@ tasks:
         out:
           dir: ./out
 
-  pg/csv_export:
+  pg/csv:
     activities:
       - format: csv
         spec:
@@ -38,6 +38,8 @@ tasks:
     activities:
       - format: diagram
         spec:
+          image:
+            format: svg
           style:
             font:
               family: courier
@@ -100,7 +102,7 @@ tasks:
         out:
           dir: ./out
 
-  pg/grpc-crud:
+  pg/grpc-crud/all:
     activities:
       - format: grpc-crud
         spec:
@@ -110,7 +112,7 @@ tasks:
         out:
           dir: ./out
 
-  pg/grpc-crud-with-all:
+  pg/grpc-crud-with-options/all:
     activities:
       - format: grpc-crud
         spec:
@@ -126,7 +128,7 @@ tasks:
         out:
           dir: ./out
 
-  pg/laravel-models_export:
+  pg/laravel-models/per-table:
     activities:
       - format: laravel-models
         table_per_file: true

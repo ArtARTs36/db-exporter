@@ -1,6 +1,6 @@
 Table phones {
-  user_id integer [not null]
-  number varchar [not null]
+  user_id integer [primary key, not null]
+  number varchar [primary key, not null]
 }
 
 Ref: phones.user_id > users.id

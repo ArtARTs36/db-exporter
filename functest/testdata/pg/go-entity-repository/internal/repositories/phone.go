@@ -13,40 +13,46 @@ import (
 )
 
 const (
-	tableCountries = "countries"
+	tablePhones = "phones"
 )
 
-type PGCountryRepository struct {
+type PGPhoneRepository struct {
 	db *sqlx.DB
 }
 
-type ListCountryFilter struct {
-	IDs []int
+type ListPhoneFilter struct {
+	UserIDs []int
+	Numbers []string
 }
 
-type GetCountryFilter struct {
-	ID int
+type GetPhoneFilter struct {
+	UserID int
+	Number string
 }
 
-type DeleteCountryFilter struct {
-	IDs []int
+type DeletePhoneFilter struct {
+	UserIDs []int
+	Numbers []string
 }
 
-func NewPGCountryRepository(db *sqlx.DB) *PGCountryRepository {
-	return &PGCountryRepository{db: db}
+func NewPGPhoneRepository(db *sqlx.DB) *PGPhoneRepository {
+	return &PGPhoneRepository{db: db}
 }
 
-func (repo *PGCountryRepository) Get(
+func (repo *PGPhoneRepository) Get(
 	ctx context.Context,
-	filter *GetCountryFilter,
-) (*entities.Country, error) {
-	var ent entities.Country
+	filter *GetPhoneFilter,
+) (*entities.Phone, error) {
+	var ent entities.Phone
 
-	query := goqu.From(tableCountries).Select().Limit(1)
+	query := goqu.From(tablePhones).Select().Limit(1)
 
 	if filter != nil {
-		if filter.ID > 0 {
-			query = query.Where(goqu.C("id").Eq(filter.ID))
+		if filter.UserID > 0 {
+			query = query.Where(goqu.C("user_id").Eq(filter.UserID))
+		}
+		if len(filter.Number) > 0 {
+			query = query.Where(goqu.C("number").Eq(filter.Number))
 		}
 	}
 
@@ -63,17 +69,20 @@ func (repo *PGCountryRepository) Get(
 	return &ent, nil
 }
 
-func (repo *PGCountryRepository) List(
+func (repo *PGPhoneRepository) List(
 	ctx context.Context,
-	filter *ListCountryFilter,
-) ([]*entities.Country, error) {
-	var ents []*entities.Country
+	filter *ListPhoneFilter,
+) ([]*entities.Phone, error) {
+	var ents []*entities.Phone
 
-	query := goqu.From(tableCountries).Select()
+	query := goqu.From(tablePhones).Select()
 
 	if filter != nil {
-		if len(filter.IDs) > 0 {
-			query = query.Where(goqu.C("id").In(filter.IDs))
+		if len(filter.UserIDs) > 0 {
+			query = query.Where(goqu.C("user_id").In(filter.UserIDs))
+		}
+		if len(filter.Numbers) > 0 {
+			query = query.Where(goqu.C("number").In(filter.Numbers))
 		}
 	}
 
@@ -85,7 +94,7 @@ func (repo *PGCountryRepository) List(
 	err = repo.db.SelectContext(ctx, &ents, q, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return []*entities.Country{}, nil
+			return []*entities.Phone{}, nil
 		}
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -93,16 +102,16 @@ func (repo *PGCountryRepository) List(
 	return ents, nil
 }
 
-func (repo *PGCountryRepository) Create(
+func (repo *PGPhoneRepository) Create(
 	ctx context.Context,
-	country *entities.Country,
-) (*entities.Country, error) {
-	query, _, err := goqu.Insert(tableCountries).Rows(country).Returning("*").ToSQL()
+	phone *entities.Phone,
+) (*entities.Phone, error) {
+	query, _, err := goqu.Insert(tablePhones).Rows(phone).Returning("*").ToSQL()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build insert query: %w", err)
 	}
 
-	var created entities.Country
+	var created entities.Phone
 
 	err = repo.db.GetContext(ctx, &created, query)
 	if err != nil {
@@ -112,19 +121,19 @@ func (repo *PGCountryRepository) Create(
 	return &created, nil
 }
 
-func (repo *PGCountryRepository) Update(
+func (repo *PGPhoneRepository) Update(
 	ctx context.Context,
-	country *entities.Country,
-) (*entities.Country, error) {
-	query, _, err := goqu.Update(tableCountries).
-		Set(country).
+	phone *entities.Phone,
+) (*entities.Phone, error) {
+	query, _, err := goqu.Update(tablePhones).
+		Set(phone).
 		Returning("*").
 		ToSQL()
 	if err != nil {
 		return nil, fmt.Errorf("failed to build update query: %w", err)
 	}
 
-	var updated entities.Country
+	var updated entities.Phone
 
 	err = repo.db.GetContext(ctx, &updated, query)
 	if err != nil {
@@ -134,15 +143,18 @@ func (repo *PGCountryRepository) Update(
 	return &updated, nil
 }
 
-func (repo *PGCountryRepository) Delete(
+func (repo *PGPhoneRepository) Delete(
 	ctx context.Context,
-	filter *DeleteCountryFilter,
+	filter *DeletePhoneFilter,
 ) (count int64, err error) {
-	query := goqu.From(tableCountries).Delete()
+	query := goqu.From(tablePhones).Delete()
 
 	if filter != nil {
-		if len(filter.IDs) > 0 {
-			query = query.Where(goqu.C("id").In(filter.IDs))
+		if len(filter.UserIDs) > 0 {
+			query = query.Where(goqu.C("user_id").In(filter.UserIDs))
+		}
+		if len(filter.Numbers) > 0 {
+			query = query.Where(goqu.C("number").In(filter.Numbers))
 		}
 	}
 

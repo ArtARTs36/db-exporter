@@ -4,7 +4,7 @@ databases:
     dsn: $MYSQL_DSN
 
 tasks:
-  mysql/custom_export:
+  mysql/custom:
     activities:
       - format: custom
         spec:

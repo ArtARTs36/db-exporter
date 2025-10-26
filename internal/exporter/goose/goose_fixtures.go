@@ -42,7 +42,7 @@ func (e *FixturesExporter) ExportPerFile(
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries and rendering migration files")
 
 	for i, table := range params.Schema.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
+		data, err := e.dataLoader.Load(ctx, params.Conn, table)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +91,7 @@ func (e *FixturesExporter) Export(
 	slog.DebugContext(ctx, "[goose-fixtures-exporter] building queries")
 
 	for _, table := range params.Schema.Tables.List() {
-		data, err := e.dataLoader.Load(ctx, params.Conn, table.Name.Value)
+		data, err := e.dataLoader.Load(ctx, params.Conn, table)
 		if err != nil {
 			return nil, err
 		}
