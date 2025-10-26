@@ -1,6 +1,7 @@
 package dbml
 
 import (
+	"github.com/artarts36/gds"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -96,5 +97,55 @@ func TestMapper_mapDefault(t *testing.T) {
 		got, err := mper.mapDefault(test.Column)
 		require.NoError(t, err)
 		assert.Equal(t, test.Expected, got)
+	}
+}
+
+func TestMapper_mapEnums(t *testing.T) {
+	tests := []struct {
+		Title    string
+		Schema   *schema.Schema
+		Expected []*dbml.Enum
+	}{
+		{
+			Title:    "empty",
+			Schema:   &schema.Schema{},
+			Expected: []*dbml.Enum{},
+		},
+		{
+			Title: "filled",
+			Schema: &schema.Schema{
+				Enums: map[string]*schema.Enum{
+					"my_enum": {
+						Name: gds.NewString("my_enum"),
+						Values: []string{
+							"ok", "good",
+						},
+					},
+				},
+			},
+			Expected: []*dbml.Enum{
+				{
+					Name: "my_enum",
+					Values: []dbml.EnumValue{
+						{
+							Name: "ok",
+						},
+						{
+							Name: "good",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	mper := &mapper{}
+
+	for _, test := range tests {
+		t.Run(test.Title, func(t *testing.T) {
+			got := mper.mapEnums(test.Schema)
+
+			assert.Equal(t, test.Expected, got)
+		})
 	}
 }

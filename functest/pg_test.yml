@@ -133,6 +133,19 @@ tasks:
         out:
           dir: ./out
 
+  pg/dbml/all:
+    activities:
+      - format: dbml
+        out:
+          dir: ./out
+
+  pg/dbml/per-table:
+    activities:
+      - format: dbml
+        table_per_file: true
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

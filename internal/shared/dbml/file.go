@@ -27,7 +27,7 @@ func (f *File) Render() string {
 		ref.Render(w)
 	}
 
-	if len(f.Enums) > 0 {
+	if w.Len() > 0 && len(f.Enums) > 0 {
 		w.WriteString("\n")
 	}
 

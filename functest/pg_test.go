@@ -362,16 +362,66 @@ func TestPGExport(t *testing.T) {
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/ddl",
 		},
+		{
+			Title: "test pg with dbml (all in one file)",
+			InitQueries: []string{
+				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
+				`CREATE TABLE users
+		(
+		    id   integer NOT NULL PRIMARY KEY,
+		    name character varying NOT NULL,
+			current_mood mood
+		);`,
+				`CREATE TABLE phones
+		(
+		    user_id   integer NOT NULL,
+		    number character varying NOT NULL
+		);`,
+				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE phones",
+				"DROP TABLE users",
+				"DROP TYPE mood",
+			},
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/dbml/all",
+		},
+		{
+			Title: "test pg with dbml (per table",
+			InitQueries: []string{
+				`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
+				`CREATE TABLE users
+		(
+		    id   integer NOT NULL PRIMARY KEY,
+		    name character varying NOT NULL,
+			current_mood mood
+		);`,
+				`CREATE TABLE phones
+		(
+		    user_id   integer NOT NULL,
+		    number character varying NOT NULL
+		);`,
+				`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
+			},
+			DownQueries: []string{
+				"DROP TABLE phones",
+				"DROP TABLE users",
+				"DROP TYPE mood",
+			},
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/dbml/per-table",
+		},
 	}
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
 			mustExecQueries(env.db, tCase.InitQueries)
 
-			defer func() {
+			t.Cleanup(func() {
 				mustExecQueries(env.db, tCase.DownQueries)
 				removeDir("./out")
-			}()
+			})
 
 			res, cmdErr := cmd.NewCommand(env.BinaryPath).Run(
 				t.Context(),
