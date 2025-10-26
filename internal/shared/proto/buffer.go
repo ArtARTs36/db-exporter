@@ -4,7 +4,6 @@ import "strings"
 
 type stringsBuffer interface {
 	WriteString(s string)
-	String() string
 }
 
 type stringsBuff struct {

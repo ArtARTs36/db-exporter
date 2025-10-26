@@ -38,7 +38,7 @@ func (s *pageStorage) Save(
 		}
 	}
 
-	slog.DebugContext(ctx, fmt.Sprintf("[pagestorage] saving %d files", len(pages)))
+	slog.DebugContext(ctx, fmt.Sprintf("[pagestorage] saving %d Files", len(pages)))
 
 	for _, page := range pages {
 		path := s.createPath(page, params)
@@ -57,7 +57,7 @@ func (s *pageStorage) Save(
 		writtenFiles = append(writtenFiles, wrFile)
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("[pagestorage] saved %d files", len(pages)))
+	slog.InfoContext(ctx, fmt.Sprintf("[pagestorage] saved %d Files", len(pages)))
 
 	return writtenFiles, nil
 }

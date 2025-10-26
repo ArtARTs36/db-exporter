@@ -56,8 +56,10 @@ func (f *File) AddEnum(name gds.String, values []string) {
 	f.pkg.registerEnumLocation(name.Value, f.name)
 }
 
-func (f *File) Render(indent *indentx.Indent) string {
-	return f.proto.Render(indent)
+func (f *File) Render(builder interface {
+	WriteString(s string)
+}, indent *indentx.Indent) {
+	f.proto.Render(builder, indent)
 }
 
 func (f *File) AddService(

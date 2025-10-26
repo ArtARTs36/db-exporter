@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 )
@@ -17,19 +18,20 @@ type ActivityResult struct {
 }
 
 type ExportActivityResult struct {
-	files []fs.FileInfo
+	Files []fs.FileInfo
 }
 
 type ActivityRunParams struct {
-	Activity config.Activity
-	Schema   *schema.Schema
-	Conn     *conn.Connection
+	Activity      config.Activity
+	Schema        *schema.Schema
+	Conn          *conn.Connection
+	WorkspaceTree workspace.Tree
 }
 
 func NewActivityResult() *ActivityResult {
 	return &ActivityResult{
 		Export: &ExportActivityResult{
-			files: []fs.FileInfo{},
+			Files: []fs.FileInfo{},
 		},
 	}
 }
@@ -45,9 +47,9 @@ func (r *ExportActivityResult) GetFiles() []fs.FileInfo {
 		return []fs.FileInfo{}
 	}
 
-	return r.files
+	return r.Files
 }
 
 func (r *ExportActivityResult) merge(that *ExportActivityResult) {
-	r.files = append(r.files, that.GetFiles()...)
+	r.Files = append(r.Files, that.GetFiles()...)
 }

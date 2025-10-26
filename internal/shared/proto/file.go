@@ -57,9 +57,7 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 	return opts
 }
 
-func (f *File) Render(indent *indentx.Indent) string {
-	buf := &stringsBuff{}
-
+func (f *File) Render(buf stringsBuffer, indent *indentx.Indent) {
 	f.writeSyntax(buf)
 	f.writePackage(buf)
 	f.writeImports(buf)
@@ -67,8 +65,6 @@ func (f *File) Render(indent *indentx.Indent) string {
 	f.writeServices(buf, indent)
 	f.writeMessages(buf, indent)
 	f.writeEnums(buf, indent)
-
-	return buf.String()
 }
 
 func (f *File) writeSyntax(buf stringsBuffer) {

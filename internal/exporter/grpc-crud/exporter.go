@@ -8,6 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/paginator"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/indentx"
 	"github.com/artarts36/db-exporter/internal/shared/proto"
@@ -44,7 +45,7 @@ func (e *Exporter) createPaginator(spec *config.GRPCCrudExportSpec) paginator.Pa
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
@@ -63,15 +64,20 @@ func (e *Exporter) ExportPerFile(
 			continue
 		}
 
-		prfile := pkg.CreateFile(fmt.Sprintf("%s_enum.proto", enum.Name.Value)).SetOptions(options)
-		prfile.AddEnum(*enum.Name, enum.Values)
+		err := params.Workspace.Write(
+			ctx,
+			fmt.Sprintf("%s_enum.proto", enum.Name.Value),
+			func(buffer workspace.Buffer,
+			) error {
+				prfile := pkg.CreateFile(fmt.Sprintf("%s_enum.proto", enum.Name.Value)).SetOptions(options)
+				prfile.AddEnum(*enum.Name, enum.Values)
+				prfile.Render(buffer, indent)
 
-		expPage := &exporter.ExportedPage{
-			FileName: prfile.Name(),
-			Content:  []byte(prfile.Render(indent)),
+				return nil
+			})
+		if err != nil {
+			return nil, fmt.Errorf("write enum to workspace: %w", err)
 		}
-
-		pages = append(pages, expPage)
 	}
 
 	pager := e.createPaginator(spec)
@@ -79,25 +85,27 @@ func (e *Exporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
-		if err != nil {
-			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
-		}
-
-		for _, enum := range table.UsingEnums {
-			if !enum.UsingInSingleTable() {
-				continue
+		err := params.Workspace.Write(ctx, prfile.Name(), func(buffer workspace.Buffer) error {
+			err := e.buildService(params.Schema.Driver, prfile, table, pager)
+			if err != nil {
+				return fmt.Errorf("build service for table %q: %w", table.Name, err)
 			}
 
-			prfile.AddEnum(*enum.Name, enum.Values)
-		}
+			for _, enum := range table.UsingEnums {
+				if !enum.UsingInSingleTable() {
+					continue
+				}
 
-		expPage := &exporter.ExportedPage{
-			FileName: prfile.Name(),
-			Content:  []byte(prfile.Render(indent)),
-		}
+				prfile.AddEnum(*enum.Name, enum.Values)
+			}
 
-		pages = append(pages, expPage)
+			prfile.Render(buffer, indent)
+
+			return nil
+		})
+		if err != nil {
+			return nil, fmt.Errorf("write table %q to workspace: %w", table.Name.Value, err)
+		}
 	}
 
 	return pages, nil
@@ -140,7 +148,7 @@ func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Pac
 }
 
 func (e *Exporter) Export(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
@@ -155,29 +163,26 @@ func (e *Exporter) Export(
 
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
-	for _, enum := range params.Schema.Enums {
-		if enum.Used == 0 {
-			continue
+	err := params.Workspace.Write(ctx, "services.proto", func(buffer workspace.Buffer) error {
+		for _, enum := range params.Schema.Enums {
+			if enum.Used == 0 {
+				continue
+			}
+
+			prfile.AddEnum(*enum.Name, enum.Values)
 		}
 
-		prfile.AddEnum(*enum.Name, enum.Values)
-	}
-
-	for _, table := range params.Schema.Tables.List() {
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
-		if err != nil {
-			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
+		for _, table := range params.Schema.Tables.List() {
+			err := e.buildService(params.Schema.Driver, prfile, table, pager)
+			if err != nil {
+				return fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
+			}
 		}
-	}
 
-	expPage := &exporter.ExportedPage{
-		FileName: "services.proto",
-		Content:  []byte(prfile.Render(indentx.NewIndent(spec.Indent))),
-	}
+		return nil
+	})
 
-	return []*exporter.ExportedPage{
-		expPage,
-	}, nil
+	return nil, err
 }
 
 func (e *Exporter) buildService(

@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"log/slog"
 
@@ -50,11 +51,11 @@ func (r *ExportActivityRunner) Run(ctx context.Context, expParams *ActivityRunPa
 		return nil, fmt.Errorf("failed to save generated pages: %w", err)
 	}
 
-	slog.InfoContext(ctx, fmt.Sprintf("[exportcmd] successful generated %d files", len(pages)))
+	slog.InfoContext(ctx, fmt.Sprintf("[exportcmd] successful generated %d Files", len(pages)))
 
 	return &ActivityResult{
 		Export: &ExportActivityResult{
-			files: generatedFiles,
+			Files: generatedFiles,
 		},
 	}, nil
 }
@@ -70,11 +71,21 @@ func (r *ExportActivityRunner) export(
 
 	sc := r.filterTables(params.Schema, params)
 
+	ws, err := params.WorkspaceTree.Create(workspace.Config{
+		Directory:  params.Activity.Out.Dir,
+		FilePrefix: params.Activity.Out.FilePrefix,
+		SkipExists: params.Activity.SkipExists,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create workspace: %w", err)
+	}
+
 	exporterParams := &exporter.ExportParams{
 		Schema:    sc,
 		Spec:      params.Activity.Spec,
 		Conn:      params.Conn,
 		Directory: fs.NewDirectory(r.fs, params.Activity.Out.Dir),
+		Workspace: ws,
 	}
 
 	export := func() ([]*exporter.ExportedPage, error) {
