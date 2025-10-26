@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type generator struct{}
@@ -43,6 +44,8 @@ func (*generator) mapValue(value interface{}) string {
 		return fmt.Sprintf("\"%s\"", v)
 	case float64:
 		return fmt.Sprintf("%f", v)
+	case time.Time:
+		return v.Format(time.RFC3339Nano)
 	case bool:
 		return strconv.FormatBool(v)
 	default:
