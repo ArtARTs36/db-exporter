@@ -3,14 +3,19 @@ package csv
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 type generator struct{}
 
-func (c *generator) generate(data *transformingData, columnDelimiter string) string {
-	sb := strings.Builder{}
+type stringsWriter interface {
+	WriteString(string)
+}
 
+func (c *generator) generate(
+	data *transformingData,
+	columnDelimiter string,
+	sb stringsWriter,
+) {
 	for i, col := range data.cols {
 		sb.WriteString(col)
 		if i < len(data.cols)-1 {
@@ -33,8 +38,6 @@ func (c *generator) generate(data *transformingData, columnDelimiter string) str
 			}
 		}
 	}
-
-	return sb.String()
 }
 
 func (*generator) mapValue(value interface{}) string {

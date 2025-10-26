@@ -180,3 +180,11 @@ func (s *GRPCCrudExportSpec) Validate() error {
 
 	return nil
 }
+
+func (c *CSVExportSpec) Validate() error {
+	if c.Delimiter == "" {
+		c.Delimiter = ","
+	}
+
+	return nil
+}
