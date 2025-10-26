@@ -84,7 +84,7 @@ func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(bu
 		return fmt.Errorf("write to buffer: %w", err)
 	}
 
-	size, err := file.Write([]byte(buf.buf.String()))
+	size, err := file.WriteString(buf.buf.String())
 	if err != nil {
 		return fmt.Errorf("write to file: %w", err)
 	}

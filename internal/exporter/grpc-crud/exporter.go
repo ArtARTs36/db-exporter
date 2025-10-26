@@ -160,6 +160,7 @@ func (e *Exporter) Export(
 
 	pkg := e.newPackage(spec)
 	pager := e.createPaginator(spec)
+	indent := indentx.NewIndent(spec.Indent)
 
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
@@ -178,6 +179,8 @@ func (e *Exporter) Export(
 				return fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 			}
 		}
+
+		prfile.Render(buffer, indent)
 
 		return nil
 	})

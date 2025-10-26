@@ -10,6 +10,10 @@ type fileBuffer struct {
 	buf strings.Builder
 }
 
+func NewBuffer() Buffer {
+	return &fileBuffer{}
+}
+
 func (b *fileBuffer) WriteString(s string) {
 	b.buf.WriteString(s)
 }
@@ -20,4 +24,8 @@ func (b *fileBuffer) WriteIndent(ind *indentx.Indent) {
 
 func (b *fileBuffer) Write(p []byte) (n int, err error) {
 	return b.buf.Write(p)
+}
+
+func (b *fileBuffer) String() string {
+	return b.buf.String()
 }

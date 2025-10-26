@@ -8,6 +8,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Exporter struct {
@@ -50,15 +51,9 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 					rows: tableData,
 				}
 
-				if len(spec.Transform) > 0 {
-					for _, transformer := range c.dataTransformers {
-						for _, transformSpec := range spec.Transform[table.Name.Value] {
-							trData, err = transformer(trData, transformSpec)
-							if err != nil {
-								return fmt.Errorf("failed to transform tableData: %w", err)
-							}
-						}
-					}
+				err = c.transform(table, trData, spec)
+				if err != nil {
+					return err
 				}
 
 				c.generator.generate(trData, spec.Delimiter, buffer)
@@ -71,6 +66,23 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 	}
 
 	return []*exporter.ExportedPage{}, nil
+}
+
+func (c *Exporter) transform(table *schema.Table, data *transformingData, spec *config.CSVExportSpec) error {
+	if len(spec.Transform) == 0 {
+		return nil
+	}
+
+	for _, transformer := range c.dataTransformers {
+		for _, transformSpec := range spec.Transform[table.Name.Value] {
+			var err error
+			data, err = transformer(data, transformSpec)
+			if err != nil {
+				return fmt.Errorf("transform table data: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func (c *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {

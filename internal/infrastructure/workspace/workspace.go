@@ -15,4 +15,5 @@ type Buffer interface {
 	WriteString(s string)
 	WriteIndent(ind *indentx.Indent)
 	Write(p []byte) (n int, err error)
+	String() string
 }

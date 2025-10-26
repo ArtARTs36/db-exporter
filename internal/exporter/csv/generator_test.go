@@ -1,6 +1,7 @@
 package csv
 
 import (
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"testing"
 
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
@@ -68,8 +69,10 @@ func TestGenerator_Generate(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.Title, func(t *testing.T) {
-			value := gen.generate(c.Data, c.Delimiter)
-			assert.Equal(t, c.Expected, value)
+			buf := workspace.NewBuffer()
+
+			gen.generate(c.Data, c.Delimiter, buf)
+			assert.Equal(t, c.Expected, buf.String())
 		})
 	}
 }
