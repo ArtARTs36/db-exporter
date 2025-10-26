@@ -10,11 +10,29 @@ tasks:
         out:
           dir: ./out
 
-  pg/custom:
+  pg/ddl/per-table:
+    activities:
+      - format: ddl
+        table_per_file: true
+        out:
+          dir: ./out
+
+  pg/custom/all:
     activities:
       - format: custom
         spec:
           template: '{% for table in schema.Tables %}{{ table.Name.Value }},{% endfor %}'
+          output:
+            extension: txt
+        out:
+          dir: ./out
+
+  pg/custom/per-table:
+    activities:
+      - format: custom
+        table_per_file: true
+        spec:
+          template: '{{ table.Name.Value }}'
           output:
             extension: txt
         out:

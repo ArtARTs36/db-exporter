@@ -134,14 +134,24 @@ func TestPGExport(t *testing.T) {
 			TaskName:   "pg/grpc-crud-with-options/all",
 		},
 		{
-			Title:      "test pg with custom",
+			Title:      "test pg with custom (all in one file)",
 			ConfigPath: "pg_test.yml",
-			TaskName:   "pg/custom",
+			TaskName:   "pg/custom/all",
 		},
 		{
-			Title:      "test pg with ddl",
+			Title:      "test pg with custom (per-table)",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/custom/per-table",
+		},
+		{
+			Title:      "test pg with ddl (all)",
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/ddl/all",
+		},
+		{
+			Title:      "test pg with ddl (per-table)",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/ddl/per-table",
 		},
 		{
 			Title:      "test pg with dbml (all in one file)",
