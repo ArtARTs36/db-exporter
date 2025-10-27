@@ -1,4 +1,4 @@
-package indentx
+package iox
 
 import "strings"
 
@@ -9,10 +9,10 @@ type Indent struct {
 	next *Indent
 }
 
-var zero = &Indent{}
+var zeroIndent = &Indent{}
 
-func Zero() *Indent {
-	return zero
+func ZeroIndent() *Indent {
+	return zeroIndent
 }
 
 func NewIndent(step int) *Indent {
