@@ -6,6 +6,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/graphql"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"strings"
 )
 
@@ -25,9 +26,12 @@ func (e *Exporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.buildEntity(table)
 
+		w := iox.NewWriter()
+		entity.Type.Build(w)
+
 		pages = append(pages, &exporter.ExportedPage{
 			FileName: fmt.Sprintf("%s.graphql", table.Name.Value),
-			Content:  []byte(entity.Type.Build()),
+			Content:  w.Bytes(),
 		})
 	}
 
@@ -42,8 +46,10 @@ func (e *Exporter) Export(
 
 	for _, table := range params.Schema.Tables.List() {
 		entity := e.buildEntity(table)
+		w := iox.NewWriter()
+		entity.Type.Build(w)
 
-		page = append(page, entity.Type.Build())
+		page = append(page, w.String())
 	}
 
 	return []*exporter.ExportedPage{
