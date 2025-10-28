@@ -75,7 +75,11 @@ select c.column_name as name,
 			when is_nullable = 'NO' THEN false
 			else true
 	   END as nullable,
-       c.column_default as default_value
+       c.column_default as default_value,
+       case 
+           when c.character_maximum_length is null THEN 0
+           else c.character_maximum_length
+       END as character_length
 from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`

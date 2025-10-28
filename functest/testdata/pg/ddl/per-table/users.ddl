@@ -3,7 +3,7 @@ CREATE TYPE mood AS ENUM ('ok', 'happy');
 CREATE TABLE users
 (
     id           integer NOT NULL,
-    name         character varying NOT NULL,
+    name         character varying(64) NOT NULL,
     balance      real NOT NULL,
     prev_balance real,
     created_at   timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
