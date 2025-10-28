@@ -166,6 +166,19 @@ tasks:
         out:
           dir: ./out
 
+  pg/graphql/all:
+    activities:
+      - format: graphql
+        out:
+          dir: ./out
+
+  pg/graphql/per-table:
+    activities:
+      - format: graphql
+        table_per_file: true
+        out:
+          dir: ./out
+
 options:
   print_stat: true
   debug: true

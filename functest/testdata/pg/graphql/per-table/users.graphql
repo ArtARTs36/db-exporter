@@ -1,0 +1,9 @@
+type User {
+  id: Int!
+  name: String!
+  balance: Float!
+  prevBalance: Float
+  createdAt: String!
+  currentMood: String!
+  updatedAt: String
+}
