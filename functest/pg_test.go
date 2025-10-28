@@ -163,6 +163,16 @@ func TestPGExport(t *testing.T) {
 			ConfigPath: "pg_test.yml",
 			TaskName:   "pg/dbml/per-table",
 		},
+		{
+			Title:      "test pg graphql (all)",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/graphql/all",
+		},
+		{
+			Title:      "test pg graphql (per-table)",
+			ConfigPath: "pg_test.yml",
+			TaskName:   "pg/graphql/per-table",
+		},
 	}
 
 	for _, tCase := range cases {

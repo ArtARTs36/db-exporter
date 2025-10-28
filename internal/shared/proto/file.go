@@ -58,7 +58,7 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 }
 
 func (f *File) Render(indent *iox.Indent) string {
-	buf := iox.NewWriter(indent)
+	buf := iox.NewWriterWithIndent(indent)
 
 	f.writeSyntax(buf)
 	f.writePackage(buf)

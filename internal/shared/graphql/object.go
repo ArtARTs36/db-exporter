@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"strings"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 )
 
 type Object struct {
@@ -40,18 +40,14 @@ func (t *Object) AttachField(prop *Field) {
 	t.fields = append(t.fields, prop)
 }
 
-func (t *Object) Build() string {
-	stringsBuilder := &strings.Builder{}
-
-	stringsBuilder.WriteString(t.kind + " " + t.name + " {\n")
+func (t *Object) Build(w iox.Writer) {
+	w.WriteString(t.kind + " " + t.name + " {\n")
 
 	for _, property := range t.fields {
-		property.Write(stringsBuilder)
+		property.Write(w)
 	}
 
-	stringsBuilder.WriteByte('}')
-
-	return stringsBuilder.String()
+	w.WriteInline("}")
 }
 
 func (t *Object) Name() string {

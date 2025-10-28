@@ -7,6 +7,7 @@ type Writer interface {
 	WriteInline(s string)
 	WriteNewLine()
 	String() string
+	Bytes() []byte
 
 	IncIndent() Writer
 	WithoutIndent() Writer
@@ -17,8 +18,12 @@ type sbWriter struct {
 	indent *Indent
 }
 
-func NewWriter(indent *Indent) Writer {
+func NewWriterWithIndent(indent *Indent) Writer {
 	return &sbWriter{b: &strings.Builder{}, indent: indent}
+}
+
+func NewWriter() Writer {
+	return NewWriterWithIndent(zeroIndent)
 }
 
 func (s *sbWriter) WriteString(val string) {
@@ -44,4 +49,8 @@ func (s *sbWriter) WriteNewLine() {
 
 func (s *sbWriter) WithoutIndent() Writer {
 	return &sbWriter{b: s.b, indent: ZeroIndent()}
+}
+
+func (s *sbWriter) Bytes() []byte {
+	return []byte(s.b.String())
 }
