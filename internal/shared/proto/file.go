@@ -57,21 +57,25 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 	return opts
 }
 
-func (f *File) Render(buf stringsBuffer, indent *iox.Indent) {
+func (f *File) Render(indent *iox.Indent) string {
+	buf := iox.NewWriterWithIndent(indent)
+
 	f.writeSyntax(buf)
 	f.writePackage(buf)
 	f.writeImports(buf)
 	f.writeOptions(buf)
-	f.writeServices(buf, indent)
-	f.writeMessages(buf, indent)
-	f.writeEnums(buf, indent)
+	f.writeServices(buf)
+	f.writeMessages(buf)
+	f.writeEnums(buf)
+
+	return buf.String()
 }
 
-func (f *File) writeSyntax(buf stringsBuffer) {
+func (f *File) writeSyntax(buf iox.Writer) {
 	buf.WriteString("syntax = \"proto3\";\n")
 }
 
-func (f *File) writeImports(buf stringsBuffer) {
+func (f *File) writeImports(buf iox.Writer) {
 	if f.Imports == nil || f.Imports.Len() == 0 {
 		return
 	}
@@ -83,7 +87,7 @@ func (f *File) writeImports(buf stringsBuffer) {
 	}
 }
 
-func (f *File) writeOptions(buf stringsBuffer) {
+func (f *File) writeOptions(buf iox.Writer) {
 	if len(f.Options) > 0 {
 		buf.WriteString("\n")
 	}
@@ -97,14 +101,14 @@ func (f *File) writeOptions(buf stringsBuffer) {
 	}
 }
 
-func (f *File) writeServices(buf stringsBuffer, indent *iox.Indent) {
+func (f *File) writeServices(buf iox.Writer) {
 	for _, service := range f.Services {
-		buf.WriteString("\n")
-		service.write(buf, indent)
+		buf.WriteNewLine()
+		service.write(buf)
 	}
 }
 
-func (f *File) writePackage(buf stringsBuffer) {
+func (f *File) writePackage(buf iox.Writer) {
 	if f.Package == "" {
 		return
 	}
@@ -112,10 +116,10 @@ func (f *File) writePackage(buf stringsBuffer) {
 	buf.WriteString("\npackage " + f.Package + ";\n")
 }
 
-func (f *File) writeMessages(buf stringsBuffer, indent *iox.Indent) {
+func (f *File) writeMessages(buf iox.Writer) {
 	for i, message := range f.Messages {
-		buf.WriteString("\n")
-		message.write(buf, indent)
+		buf.WriteNewLine()
+		message.write(buf)
 
 		if i < len(f.Messages)-1 {
 			buf.WriteString("\n")
@@ -123,7 +127,7 @@ func (f *File) writeMessages(buf stringsBuffer, indent *iox.Indent) {
 	}
 }
 
-func (f *File) writeEnums(buf stringsBuffer, indent *iox.Indent) {
+func (f *File) writeEnums(buf iox.Writer) {
 	if len(f.Enums) == 0 {
 		return
 	}
@@ -131,7 +135,7 @@ func (f *File) writeEnums(buf stringsBuffer, indent *iox.Indent) {
 	buf.WriteString("\n")
 
 	for _, enum := range f.Enums {
-		buf.WriteString("\n")
-		enum.write(buf, indent.Next())
+		buf.WriteNewLine()
+		enum.write(buf)
 	}
 }

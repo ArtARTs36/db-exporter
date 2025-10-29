@@ -5,13 +5,13 @@ import (
 )
 
 type Container struct {
-	PGCountryRepository *PGCountryRepository
-	PGUserRepository    *PGUserRepository
+	PGUserRepository  *PGUserRepository
+	PGPhoneRepository *PGPhoneRepository
 }
 
 func NewContainer(db *sqlx.DB) *Container {
 	return &Container{
-		PGCountryRepository: NewPGCountryRepository(db),
-		PGUserRepository:    NewPGUserRepository(db),
+		PGUserRepository:  NewPGUserRepository(db),
+		PGPhoneRepository: NewPGPhoneRepository(db),
 	}
 }

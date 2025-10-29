@@ -34,7 +34,7 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		tableData, err := c.dataLoader.Load(ctx, params.Conn, table.Name.Value)
+		tableData, err := c.dataLoader.Load(ctx, params.Conn, table)
 		if err != nil {
 			return nil, fmt.Errorf("load data from table %q: %w", table.Name.Value, err)
 		}

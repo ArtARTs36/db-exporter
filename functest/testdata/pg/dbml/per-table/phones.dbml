@@ -1,0 +1,6 @@
+Table phones {
+  user_id integer [primary key, not null]
+  number varchar [primary key, not null]
+}
+
+Ref: phones.user_id > users.id

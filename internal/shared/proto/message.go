@@ -1,19 +1,17 @@
 package proto
 
-import (
-	"github.com/artarts36/db-exporter/internal/shared/iox"
-)
+import "github.com/artarts36/db-exporter/internal/shared/iox"
 
 type Message struct {
 	Name   string
 	Fields []*Field
 }
 
-func (m *Message) write(buf stringsBuffer, indent *iox.Indent) {
+func (m *Message) write(buf iox.Writer) {
 	buf.WriteString("message " + m.Name + " {")
 
 	if len(m.Fields) > 0 {
-		buf.WriteString("\n")
+		buf.WriteNewLine()
 	}
 
 	for i, field := range m.Fields {
@@ -21,7 +19,7 @@ func (m *Message) write(buf stringsBuffer, indent *iox.Indent) {
 			buf.WriteString("\n")
 		}
 
-		field.write(buf, indent.Next())
+		field.write(buf.IncIndent())
 	}
 
 	buf.WriteString("}")

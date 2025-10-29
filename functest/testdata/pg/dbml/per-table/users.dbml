@@ -1,0 +1,9 @@
+Table users {
+  id integer [primary key, not null]
+  name varchar [not null]
+  balance real [not null]
+  prev_balance real
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  current_mood mood [not null]
+  updated_at timestamp
+}

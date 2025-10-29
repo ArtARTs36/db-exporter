@@ -381,7 +381,7 @@
           "properties": {
             "format": {
               "type": "string",
-              "enum": ["png", "jpeg"],
+              "enum": ["png", "svg"],
               "default": "png"
             },
             "compression": {

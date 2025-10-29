@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"fmt"
-	"strings"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 )
 
 type Field struct {
@@ -35,7 +35,7 @@ func (p *Field) Comment(comment string) *Field {
 	return p
 }
 
-func (p *Field) Write(w *strings.Builder) {
+func (p *Field) Write(w iox.Writer) {
 	kind := p.typ.Name()
 	if p.list {
 		kind = fmt.Sprintf("[%s!]", kind)

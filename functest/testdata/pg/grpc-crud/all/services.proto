@@ -1,0 +1,165 @@
+syntax = "proto3";
+
+package org.service;
+
+import "google/protobuf/timestamp.proto";
+
+option optimize_for = SPEED;
+
+// Service for working with users.
+service UsersService {
+  // Get all users.
+  rpc List(ListUsersRequest) returns (ListUsersResponse) {};
+
+  // Get a user.
+  rpc Get(GetUserRequest) returns (GetUserResponse) {};
+
+  // Delete a user.
+  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
+
+  // Create a new user.
+  rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
+
+  // Patch an existing user.
+  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {};
+}
+
+// Service for working with phones.
+service PhonesService {
+  // Get all phones.
+  rpc List(ListPhonesRequest) returns (ListPhonesResponse) {};
+
+  // Get a phone.
+  rpc Get(GetPhoneRequest) returns (GetPhoneResponse) {};
+
+  // Delete a phone.
+  rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {};
+
+  // Create a new phone.
+  rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {};
+
+  // Patch an existing phone.
+  rpc Patch(PatchPhoneRequest) returns (PatchPhoneResponse) {};
+}
+
+message User {
+  int64 id = 1;
+  string name = 2;
+  double balance = 3;
+  double prev_balance = 4;
+  google.protobuf.Timestamp created_at = 5;
+  Mood current_mood = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message ListUsersRequest {
+  repeated int64 ids = 1;
+
+  // Maximum number of results per page.
+  uint64 page_size = 2;
+
+  // The number of records to skip before starting to fetch the records.
+  uint64 offset = 3;
+}
+
+message ListUsersResponse {
+  repeated User items = 1;
+}
+
+message GetUserRequest {
+  int64 id = 1;
+}
+
+message GetUserResponse {
+  User User = 1;
+}
+
+message DeleteUserRequest {
+  int64 id = 1;
+}
+
+message DeleteUserResponse {}
+
+message CreateUserRequest {
+  int64 id = 1;
+  string name = 2;
+  double balance = 3;
+  double prev_balance = 4;
+  Mood current_mood = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message CreateUserResponse {
+  User User = 1;
+}
+
+message PatchUserRequest {
+  int64 id = 1;
+  string name = 2;
+  double balance = 3;
+  double prev_balance = 4;
+  Mood current_mood = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message PatchUserResponse {
+  User User = 1;
+}
+
+message Phone {
+  int64 user_id = 1;
+  string number = 2;
+}
+
+message ListPhonesRequest {
+
+  // Maximum number of results per page.
+  uint64 page_size = 1;
+
+  // The number of records to skip before starting to fetch the records.
+  uint64 offset = 2;
+}
+
+message ListPhonesResponse {
+  repeated Phone items = 1;
+}
+
+message GetPhoneRequest {
+  int64 user_id = 1;
+  string number = 2;
+}
+
+message GetPhoneResponse {
+  Phone Phone = 1;
+}
+
+message DeletePhoneRequest {
+  int64 user_id = 1;
+  string number = 2;
+}
+
+message DeletePhoneResponse {}
+
+message CreatePhoneRequest {
+  int64 user_id = 1;
+  string number = 2;
+}
+
+message CreatePhoneResponse {
+  Phone Phone = 1;
+}
+
+message PatchPhoneRequest {
+  int64 user_id = 1;
+  string number = 2;
+}
+
+message PatchPhoneResponse {
+  Phone Phone = 1;
+}
+
+enum Mood {
+  MOOD_UNDEFINED = 0;
+  MOOD_OK = 1;
+  MOOD_HAPPY = 2;
+}

@@ -138,8 +138,7 @@ enum UserStatus {
   USERSTATUS_ACTIVE = 1;
   USERSTATUS_BANNED = 2;
 }`
-	got := stringsBuff{}
-	f.Render(&got, iox.NewIndent(2))
+	got := f.Render(iox.NewIndent(2))
 
-	assert.Equal(t, expected, got.String())
+	assert.Equal(t, expected, got)
 }

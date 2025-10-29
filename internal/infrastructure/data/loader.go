@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 
 	"log/slog"
 
@@ -17,10 +18,10 @@ func NewLoader() *Loader {
 	return &Loader{}
 }
 
-func (l *Loader) Load(ctx context.Context, conn *conn.Connection, table string) (TableData, error) {
+func (l *Loader) Load(ctx context.Context, conn *conn.Connection, table *schema.Table) (TableData, error) {
 	data := make(TableData, 0)
 
-	q := fmt.Sprintf("select * from %s", table)
+	q := fmt.Sprintf("select * from %s", table.Name.Value)
 
 	db, err := conn.Connect(ctx)
 	if err != nil {
@@ -61,11 +62,23 @@ func (l *Loader) Load(ctx context.Context, conn *conn.Connection, table string) 
 		for i, colName := range cols {
 			val, _ := columnPointers[i].(*interface{})
 
-			m[colName] = *val
+			m[colName] = l.mapValue(*val, table.GetColumn(colName))
 		}
 
 		data = append(data, m)
 	}
 
 	return data, nil
+}
+
+func (l *Loader) mapValue(value interface{}, col *schema.Column) interface{} {
+	switch v := value.(type) {
+	case []byte:
+		if col.Enum != nil {
+			return string(v)
+		}
+		return v
+	default:
+		return v
+	}
 }

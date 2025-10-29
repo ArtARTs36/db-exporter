@@ -70,6 +70,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 			table.AddEnum(schemaColumn.Enum)
 		} else if col.DataTypeLength.Valid {
 			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
+			schemaColumn.CharacterLength = col.DataTypeLength.Int16
 		}
 
 		if col.AutoIncrement {

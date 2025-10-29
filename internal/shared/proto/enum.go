@@ -36,15 +36,16 @@ func (e *Enum) AddValue(value ...string) {
 	}
 }
 
-func (e *Enum) write(buf stringsBuffer, indent *iox.Indent) {
+func (e *Enum) write(buf iox.Writer) {
 	buf.WriteString(e.Name.Prepend("enum ").Append(" {").Value)
+	buf.WriteNewLine()
 
-	buf.WriteString("\n")
+	valuesBuf := buf.IncIndent()
 
 	for i, v := range e.Values {
-		buf.WriteString(indent.Curr() + v + " = " + strconv.Itoa(i) + ";")
-		buf.WriteString("\n")
+		valuesBuf.WriteString(v + " = " + strconv.Itoa(i) + ";")
+		valuesBuf.WriteNewLine()
 	}
 
-	buf.WriteString("}")
+	buf.WriteInline("}")
 }

@@ -3,6 +3,7 @@ package modifiers
 import (
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/shared/proto/opts/bufvalidate"
+	"strconv"
 )
 
 type BufValidate struct {
@@ -29,7 +30,9 @@ func (p *BufValidate) ModifyField(field *presentation.Field) {
 			field.AddOption(bufvalidate.Email())
 		}
 
-		if field.Column().Type.Length != "" {
+		if field.Column().CharacterLength > 0 {
+			field.AddOption(bufvalidate.MaxLen(strconv.Itoa(int(field.Column().CharacterLength))))
+		} else if field.Column().Type.Length != "" {
 			field.AddOption(bufvalidate.MaxLen(field.Column().Type.Length))
 		}
 	}

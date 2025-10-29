@@ -230,14 +230,23 @@ func (b *PostgresDDLBuilder) createColumnDefinition(
 	}
 
 	return fmt.Sprintf(
-		"    %s%s%s%s%s%s",
+		"    %s%s%s%s%s%s%s",
 		column.Name.Value,
 		strings.Repeat(" ", spacesAfterColumnName),
 		colType.Name,
+		b.wrapCharacterLength(column.CharacterLength),
 		notNull,
 		defaultValue,
 		comma,
 	), nil
+}
+
+func (b *PostgresDDLBuilder) wrapCharacterLength(v int16) string {
+	if v == 0 {
+		return ""
+	}
+
+	return fmt.Sprintf("(%d)", v)
 }
 
 func (b *PostgresDDLBuilder) createEnumsDDL(sch *schema.Schema, opts BuildDDLOpts) *DDL {

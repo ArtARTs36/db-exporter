@@ -6,19 +6,20 @@ import (
 )
 
 type Column struct {
-	Name           gds.String           `db:"name"`
-	TableName      gds.String           `db:"table_name"`
-	Type           Type                 `db:"-"`
-	TypeRaw        gds.String           `db:"type_raw"`
-	Nullable       bool                 `db:"nullable"`
-	PrimaryKey     *PrimaryKey          `db:"-"`
-	UniqueKey      *UniqueKey           `db:"-"`
-	ForeignKey     *ForeignKey          `db:"-"`
-	Comment        gds.String           `db:"comment"`
-	DefaultRaw     sql.NullString       `db:"default_value"`
-	Default        *ColumnDefault       `db:"-"`
-	UsingSequences map[string]*Sequence `db:"-"`
-	Enum           *Enum                `db:"-"`
+	Name            gds.String           `db:"name"`
+	TableName       gds.String           `db:"table_name"`
+	Type            Type                 `db:"-"`
+	TypeRaw         gds.String           `db:"type_raw"`
+	CharacterLength int16                `db:"character_length"`
+	Nullable        bool                 `db:"nullable"`
+	PrimaryKey      *PrimaryKey          `db:"-"`
+	UniqueKey       *UniqueKey           `db:"-"`
+	ForeignKey      *ForeignKey          `db:"-"`
+	Comment         gds.String           `db:"comment"`
+	DefaultRaw      sql.NullString       `db:"default_value"`
+	Default         *ColumnDefault       `db:"-"`
+	UsingSequences  map[string]*Sequence `db:"-"`
+	Enum            *Enum                `db:"-"`
 
 	IsAutoincrement bool `db:"-"`
 }

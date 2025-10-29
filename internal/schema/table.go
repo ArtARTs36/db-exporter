@@ -5,8 +5,9 @@ import (
 )
 
 type Table struct {
-	Name    gds.String `db:"Name"`
-	Columns []*Column  `db:"-"`
+	Name      gds.String         `db:"Name"`
+	Columns   []*Column          `db:"-"`
+	columnMap map[string]*Column `db:"-"`
 
 	PrimaryKey  *PrimaryKey            `db:"-"`
 	ForeignKeys map[string]*ForeignKey `db:"-"`
@@ -27,6 +28,7 @@ func NewTable(name gds.String) *Table {
 		UniqueKeys:     map[string]*UniqueKey{},
 		UsingSequences: map[string]*Sequence{},
 		UsingEnums:     map[string]*Enum{},
+		columnMap:      map[string]*Column{},
 	}
 }
 
@@ -43,10 +45,8 @@ func (t *Table) ColumnsNames() []string {
 }
 
 func (t *Table) GetColumn(name string) *Column {
-	for _, column := range t.Columns {
-		if column.Name.Equal(name) {
-			return column
-		}
+	if c, ok := t.columnMap[name]; ok {
+		return c
 	}
 
 	return nil
@@ -96,6 +96,7 @@ func (t *Table) GetPKColumns() []*Column {
 
 func (t *Table) AddColumn(col *Column) {
 	t.Columns = append(t.Columns, col)
+	t.columnMap[col.Name.Value] = col
 }
 
 func (t *Table) AddEnum(enum *Enum) {

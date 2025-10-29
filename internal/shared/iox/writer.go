@@ -4,36 +4,53 @@ import "strings"
 
 type Writer interface {
 	WriteString(s string)
-	WriteIndent(indent *Indent)
-	Write(p []byte) (n int, err error)
-	WriteByte(b byte)
+	WriteInline(s string)
+	WriteNewLine()
 	String() string
+	Bytes() []byte
+
+	IncIndent() Writer
+	WithoutIndent() Writer
 }
 
-type fileBuffer struct {
-	buf strings.Builder
+type sbWriter struct {
+	b      *strings.Builder
+	indent *Indent
 }
 
-func NewBuffer() Writer {
-	return &fileBuffer{}
+func NewWriterWithIndent(indent *Indent) Writer {
+	return &sbWriter{b: &strings.Builder{}, indent: indent}
 }
 
-func (b *fileBuffer) WriteString(s string) {
-	b.buf.WriteString(s)
+func NewWriter() Writer {
+	return NewWriterWithIndent(zeroIndent)
 }
 
-func (b *fileBuffer) WriteIndent(ind *Indent) {
-	b.buf.WriteString(ind.Curr())
+func (s *sbWriter) WriteString(val string) {
+	s.b.WriteString(s.indent.Curr())
+	s.b.WriteString(val)
 }
 
-func (b *fileBuffer) Write(p []byte) (n int, err error) {
-	return b.buf.Write(p)
+func (s *sbWriter) WriteInline(val string) {
+	s.b.WriteString(val)
 }
 
-func (b *fileBuffer) String() string {
-	return b.buf.String()
+func (s *sbWriter) String() string {
+	return s.b.String()
 }
 
-func (b *fileBuffer) WriteByte(c byte) {
-	b.buf.WriteByte(c)
+func (s *sbWriter) IncIndent() Writer {
+	return &sbWriter{b: s.b, indent: s.indent.Next()}
+}
+
+func (s *sbWriter) WriteNewLine() {
+	s.b.WriteString("\n")
+}
+
+func (s *sbWriter) WithoutIndent() Writer {
+	return &sbWriter{b: s.b, indent: ZeroIndent()}
+}
+
+func (s *sbWriter) Bytes() []byte {
+	return []byte(s.b.String())
 }

@@ -75,7 +75,11 @@ select c.column_name as name,
 			when is_nullable = 'NO' THEN false
 			else true
 	   END as nullable,
-       c.column_default as default_value
+       c.column_default as default_value,
+       case 
+           when c.character_maximum_length is null THEN 0
+           else c.character_maximum_length
+       END as character_length
 from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`
@@ -119,13 +123,7 @@ order by c.ordinal_position`
 	for _, col := range cols {
 		table, tableExists := sch.Tables.Get(col.TableName)
 		if !tableExists {
-			table = &schema.Table{
-				Name:           col.TableName,
-				ForeignKeys:    map[string]*schema.ForeignKey{},
-				UniqueKeys:     map[string]*schema.UniqueKey{},
-				UsingSequences: map[string]*schema.Sequence{},
-				UsingEnums:     map[string]*schema.Enum{},
-			}
+			table = schema.NewTable(col.TableName)
 
 			sch.Tables.Add(table)
 		}

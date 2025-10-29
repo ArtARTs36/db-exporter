@@ -22,47 +22,45 @@ type FieldOption struct {
 
 type ConstValue string
 
-func (f *Field) write(buf stringsBuffer, indent *iox.Indent) {
+func (f *Field) write(buf iox.Writer) {
 	if f.TopComment != "" {
-		buf.WriteString(indent.Curr())
 		buf.WriteString("// " + f.TopComment)
-		buf.WriteString("\n")
+		buf.WriteNewLine()
 	}
 
-	buf.WriteString(indent.Curr())
+	buf.WriteString("")
 
 	if f.Repeated {
-		buf.WriteString("repeated ")
+		buf.WriteInline("repeated ")
 	}
 
-	buf.WriteString(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID))
+	buf.WriteInline(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID))
 
 	if len(f.Options) > 0 {
-		buf.WriteString(" [")
+		buf.WriteInline(" [")
 
 		if len(f.Options) == 1 {
-			f.Options[0].write(buf, iox.Zero())
+			f.Options[0].write(buf.WithoutIndent())
 		} else {
-			buf.WriteString("\n")
+			buf.WriteNewLine()
 			for i, opt := range f.Options {
-				opt.write(buf, indent.Next())
+				opt.write(buf.IncIndent())
 
 				if i < len(f.Options)-1 {
-					buf.WriteString(",")
+					buf.WriteInline(",")
 				}
-				buf.WriteString("\n")
+				buf.WriteNewLine()
 			}
-			buf.WriteString(indent.Curr())
+			buf.WriteString("")
 		}
 
-		buf.WriteString("]")
+		buf.WriteInline("]")
 	}
 
-	buf.WriteString(";\n")
+	buf.WriteInline(";\n")
 }
 
-func (f *FieldOption) write(buf stringsBuffer, indent *iox.Indent) {
-	buf.WriteString(indent.Curr())
+func (f *FieldOption) write(buf iox.Writer) {
 	buf.WriteString(f.Name + " = " + f.resolveValue())
 }
 
@@ -78,14 +76,5 @@ func (f *FieldOption) resolveValue() string {
 		return strconv.FormatBool(val)
 	default:
 		return fmt.Sprint(val)
-	}
-}
-
-func (f *Field) Clone() *Field {
-	return &Field{
-		Repeated: f.Repeated,
-		Type:     f.Type,
-		Name:     f.Name,
-		ID:       f.ID,
 	}
 }
