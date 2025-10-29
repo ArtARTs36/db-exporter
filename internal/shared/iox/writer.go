@@ -11,6 +11,8 @@ type Writer interface {
 
 	IncIndent() Writer
 	WithoutIndent() Writer
+	WriteByte(b byte)
+	Len() int
 }
 
 type sbWriter struct {
@@ -53,4 +55,12 @@ func (s *sbWriter) WithoutIndent() Writer {
 
 func (s *sbWriter) Bytes() []byte {
 	return []byte(s.b.String())
+}
+
+func (s *sbWriter) WriteByte(b byte) {
+	s.b.WriteByte(b)
+}
+
+func (s *sbWriter) Len() int {
+	return s.b.Len()
 }

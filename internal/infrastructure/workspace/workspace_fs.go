@@ -3,6 +3,7 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"log/slog"
 
 	"github.com/artarts36/db-exporter/internal/shared/fs"
@@ -13,7 +14,7 @@ type FSWorkspace struct {
 
 	fs fs.Driver
 
-	writerFn func(ctx context.Context, path string, writer func(buffer Buffer) error) error
+	writerFn func(ctx context.Context, path string, writer func(buffer iox.Writer) error) error
 
 	store *store
 }
@@ -40,7 +41,7 @@ func newFSWorkspace(
 	return ws
 }
 
-func (w *FSWorkspace) Write(ctx context.Context, path string, writer func(buffer Buffer) error) error {
+func (w *FSWorkspace) Write(ctx context.Context, path string, writer func(buffer iox.Writer) error) error {
 	return w.writerFn(ctx, path, writer)
 }
 
@@ -52,7 +53,7 @@ func (w *FSWorkspace) setupWriter() {
 	}
 }
 
-func (w *FSWorkspace) writeNewFile(ctx context.Context, path string, writer func(buffer Buffer) error) error {
+func (w *FSWorkspace) writeNewFile(ctx context.Context, path string, writer func(buffer iox.Writer) error) error {
 	if w.fs.Exists(path) {
 		return nil
 	}
@@ -60,7 +61,7 @@ func (w *FSWorkspace) writeNewFile(ctx context.Context, path string, writer func
 	return w.write(ctx, path, writer)
 }
 
-func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(buffer Buffer) error) error {
+func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(buffer iox.Writer) error) error {
 	path := w.pathTo(filename)
 
 	file, err := w.fs.OpenFile(path)
@@ -77,14 +78,14 @@ func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(bu
 		}
 	}()
 
-	buf := &fileBuffer{}
+	buf := iox.NewWriter()
 
 	err = writer(buf)
 	if err != nil {
 		return fmt.Errorf("write to buffer: %w", err)
 	}
 
-	size, err := file.WriteString(buf.buf.String())
+	size, err := file.Write(buf.Bytes())
 	if err != nil {
 		return fmt.Errorf("write to file: %w", err)
 	}

@@ -180,10 +180,10 @@ func (e *Exporter) Export(
 			}
 		}
 
-	expPage := &exporter.ExportedPage{
-		FileName: "services.proto",
-		Content:  []byte(prfile.Render(iox.NewIndent(spec.Indent))),
-	}
+		expPage := &exporter.ExportedPage{
+			FileName: "services.proto",
+			Content:  []byte(prfile.Render(iox.NewWriterWithIndent(spec.Indent))),
+		}
 
 		return nil
 	})

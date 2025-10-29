@@ -1,7 +1,7 @@
 package dbml
 
 import (
-	"strings"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -59,7 +59,7 @@ func TestEnum_Render(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Title, func(t *testing.T) {
-			w := &strings.Builder{}
+			w := iox.NewWriter()
 
 			test.Enum.Render(w)
 
