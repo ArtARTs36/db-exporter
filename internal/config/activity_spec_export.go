@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -58,8 +59,8 @@ type GRPCCrudExportSpec struct {
 }
 
 type MarkdownExportSpec struct {
-	WithDiagram bool              `yaml:"with_diagram" json:"with_diagram"`
-	Diagram     DiagramExportSpec `yaml:"diagram" json:"diagram"`
+	WithDiagram bool                  `yaml:"with_diagram" json:"with_diagram"`
+	Diagram     diagram.Specification `yaml:"diagram" json:"diagram"`
 }
 
 type LaravelModelsExportSpec struct {

@@ -3,7 +3,6 @@ package diagram
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	graphviz2 "github.com/artarts36/db-exporter/internal/shared/graphviz"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -23,7 +22,7 @@ func NewGraphBuilder(renderer *template.Renderer) *GraphBuilder {
 func (b *GraphBuilder) Build(
 	ctx context.Context,
 	tables *schema.TableMap,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 	w io.Writer,
 ) error {
 	graph, err := b.buildGraph(ctx, tables, spec)
@@ -52,7 +51,7 @@ func (b *GraphBuilder) Build(
 func (b *GraphBuilder) buildGraph(
 	ctx context.Context,
 	tables *schema.TableMap,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 ) (*graphviz2.Graph, error) {
 	graph, err := graphviz2.CreateGraph(ctx, spec.Style.Font.Family)
 	if err != nil {
@@ -87,7 +86,7 @@ func (b *GraphBuilder) buildGraph(
 func (b *GraphBuilder) buildNodes(
 	graph *graphviz2.Graph,
 	tables *schema.TableMap,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 ) (map[string]*graphviz2.Node, error) {
 	tablesNodes := map[string]*graphviz2.Node{}
 
@@ -127,7 +126,7 @@ func (b *GraphBuilder) buildEdges(
 	graph *graphviz2.Graph,
 	tables *schema.TableMap,
 	tablesNodes map[string]*graphviz2.Node,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 ) (int, error) {
 	edges := 0
 

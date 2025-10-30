@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
+	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 
 	"github.com/artarts36/specw"
 
@@ -92,7 +93,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameCustom:
 		spec = new(CustomExportSpec)
 	case ExporterNameDiagram:
-		spec = new(DiagramExportSpec)
+		spec = new(diagram.Specification)
 	default:
 		return nil, fmt.Errorf("format %q unsupported", format)
 	}

@@ -1,22 +1,23 @@
-package config
+package diagram
 
 import (
 	"fmt"
+
 	"github.com/artarts36/specw"
 	"golang.org/x/image/colornames"
 )
 
-type DiagramImageFormat string
+type ImageFormat string
 
 const (
-	DiagramImageFormatUnspecified DiagramImageFormat = ""
-	DiagramImageFormatSVG         DiagramImageFormat = "svg"
-	DiagramImageFormatPNG         DiagramImageFormat = "png"
+	FormatUnspecified ImageFormat = ""
+	FormatSVG         ImageFormat = "svg"
+	ImageFormatPNG    ImageFormat = "png"
 )
 
-type DiagramExportSpec struct {
+type Specification struct {
 	Image struct {
-		Format DiagramImageFormat `yaml:"format" json:"format"`
+		Format ImageFormat `yaml:"format" json:"format"`
 	} `yaml:"image" json:"image"`
 	Style struct {
 		Background struct {
@@ -39,14 +40,14 @@ type DiagramExportSpec struct {
 	} `yaml:"style" json:"style"`
 }
 
-func (s *DiagramExportSpec) Validate() error {
+func (s *Specification) Validate() error {
 	const (
 		defaultGridCellSize = 30
 		defaultFontSize     = 32
 	)
 
-	if s.Image.Format == DiagramImageFormatUnspecified {
-		s.Image.Format = DiagramImageFormatSVG
+	if s.Image.Format == FormatUnspecified {
+		s.Image.Format = FormatSVG
 	} else if !s.Image.Format.Valid() {
 		return fmt.Errorf("unknown image format: %s", s.Image.Format)
 	}
@@ -87,6 +88,6 @@ func (s *DiagramExportSpec) Validate() error {
 	return nil
 }
 
-func (f DiagramImageFormat) Valid() bool {
-	return f == DiagramImageFormatSVG || f == DiagramImageFormatPNG
+func (f ImageFormat) Valid() bool {
+	return f == FormatSVG || f == ImageFormatPNG
 }
