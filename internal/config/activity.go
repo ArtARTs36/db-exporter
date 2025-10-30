@@ -7,6 +7,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
+	"github.com/artarts36/db-exporter/internal/exporter/laravel"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 	"github.com/artarts36/db-exporter/internal/exporter/migrations"
 
@@ -90,7 +91,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameCSV:
 		spec = new(csv.Specification)
 	case ExporterNameLaravelModels:
-		spec = new(LaravelModelsExportSpec)
+		spec = new(laravel.ModelsSpecification)
 	case ExporterNameGoEntityRepository:
 		spec = new(GoEntityRepositorySpec)
 	case ExporterNameJSONSchema:

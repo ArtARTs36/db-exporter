@@ -27,11 +27,6 @@ type GoEntitiesExportSpec struct {
 	Package  string `yaml:"package" json:"package"` // default: entities
 }
 
-type LaravelModelsExportSpec struct {
-	Namespace string `yaml:"namespace" json:"namespace"`
-	TimeAs    string `yaml:"time_as" json:"time_as"` // datetime, carbon
-}
-
 type GoEntityRepositorySpecRepoInterfacesPlace string
 
 const (
