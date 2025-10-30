@@ -1,7 +1,7 @@
 package factory
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/cli/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/custom"

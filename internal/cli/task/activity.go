@@ -2,7 +2,7 @@ package task
 
 import (
 	"context"
-	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/cli/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/cli/cmd"
+	"github.com/artarts36/db-exporter/internal/cli/config"
 	"github.com/artarts36/db-exporter/internal/cli/task"
 	"strings"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/factory"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/git"
