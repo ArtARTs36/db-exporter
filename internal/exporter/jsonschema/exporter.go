@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 )
@@ -23,7 +22,7 @@ func (e *Exporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.JSONSchemaExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -49,7 +48,7 @@ func (e *Exporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.JSONSchemaExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -67,7 +66,7 @@ func (e *Exporter) Export(
 	}, nil
 }
 
-func (e *Exporter) buildJSONSchema(spec *config.JSONSchemaExportSpec, tables []*schema.Table) ([]byte, error) {
+func (e *Exporter) buildJSONSchema(spec *Specification, tables []*schema.Table) ([]byte, error) {
 	sch := e.mapper.mapJSONSchema(spec, tables)
 
 	marshaller := sch.Marshal

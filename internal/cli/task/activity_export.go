@@ -3,10 +3,10 @@ package task
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/cli/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"log/slog"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"

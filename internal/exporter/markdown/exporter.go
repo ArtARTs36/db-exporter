@@ -3,7 +3,6 @@ package markdown
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
@@ -35,9 +34,9 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.MarkdownExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected MarkdownExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	var diag *exporter.ExportedPage
@@ -99,9 +98,9 @@ func (e *Exporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.MarkdownExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected MarkdownExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	var diag *exporter.ExportedPage

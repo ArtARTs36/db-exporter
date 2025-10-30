@@ -1,7 +1,6 @@
 package goentity
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 	"github.com/artarts36/gds"
@@ -49,7 +48,7 @@ func (e *Entity) Call(pkg *golang.Package) string {
 }
 
 type MapEntitiesParams struct {
-	SourceDriver config.DatabaseDriver
+	SourceDriver schema.DatabaseDriver
 	Tables       []*schema.Table
 	Package      *golang.Package
 	Enums        map[string]*golang.StringEnum
@@ -77,7 +76,7 @@ func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
 }
 
 type MapEntityParams struct {
-	SourceDriver config.DatabaseDriver
+	SourceDriver schema.DatabaseDriver
 	Table        *schema.Table
 	Package      *golang.Package
 	Enums        map[string]*golang.StringEnum

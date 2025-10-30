@@ -6,7 +6,6 @@ import (
 
 	"github.com/tyler-sommer/stick"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -29,9 +28,9 @@ func (e *Exporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.CustomExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected CustomExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	pager := e.pager.Of(spec.Template)
@@ -52,9 +51,9 @@ func (e *Exporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.CustomExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected CustomExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
@@ -79,7 +78,7 @@ func (e *Exporter) ExportPerFile(
 	return pages, err
 }
 
-func (e *Exporter) filenameCreator(spec *config.CustomExportSpec) func(tableName string) string {
+func (e *Exporter) filenameCreator(spec *Specification) func(tableName string) string {
 	if spec.Output.Extension == "" {
 		return func(tableName string) string {
 			return tableName

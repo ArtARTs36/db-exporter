@@ -3,7 +3,6 @@ package pg
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/shared/regex"
@@ -84,7 +83,7 @@ from information_schema.columns c
 where c.table_schema = $1
 order by c.ordinal_position`
 
-	sch := schema.NewSchema(config.DatabaseDriverPostgres)
+	sch := schema.NewSchema(schema.DatabaseDriverPostgres)
 
 	var cols []*schema.Column
 

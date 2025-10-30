@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/dbml-go/core"
@@ -38,7 +37,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 }
 
 func (l *Loader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) {
-	sch := schema.NewSchema(config.DatabaseDriverDBML)
+	sch := schema.NewSchema(schema.DatabaseDriverDBML)
 	sch.Enums = l.collectEnums(parsedDBML)
 
 	for _, tbl := range parsedDBML.Tables {

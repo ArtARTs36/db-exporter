@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
@@ -25,7 +25,7 @@ func NewCreator(
 func (c *Creator) Create(
 	ctx context.Context,
 	tables *schema.TableMap,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 ) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
@@ -38,7 +38,7 @@ func (c *Creator) Create(
 		buf = bytes.NewBuffer(c.injectGrid(buf.Bytes(), c.buildGridString(spec)))
 	}
 
-	if spec.Image.Format == config.DiagramImageFormatPNG {
+	if spec.Image.Format == ImageFormatPNG {
 		var rerr error
 
 		bb, rerr := c.renderer.Render(ctx, buf.Bytes(), spec.Style.Font.Family)
@@ -87,7 +87,7 @@ func (c *Creator) injectGrid(content []byte, grid string) []byte {
 	return buf.Bytes()
 }
 
-func (c *Creator) buildGridString(spec *config.DiagramExportSpec) string {
+func (c *Creator) buildGridString(spec *Specification) string {
 	return fmt.Sprintf(`<defs>
     <pattern id="gridPattern" width="%d" height="%d" patternUnits="userSpaceOnUse">
       <!-- Horizontal lines -->
