@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
@@ -56,11 +55,6 @@ type GRPCCrudExportSpec struct {
 		GoogleAPIFieldBehavior specw.BoolObject[struct{}] `yaml:"google.api.field_behavior" json:"google.api.field_behavior"`
 		BufValidateField       specw.BoolObject[struct{}] `yaml:"buf.validate.field" json:"buf.validate.field"`
 	}] `yaml:"with" json:"with"`
-}
-
-type MarkdownExportSpec struct {
-	WithDiagram bool                  `yaml:"with_diagram" json:"with_diagram"`
-	Diagram     diagram.Specification `yaml:"diagram" json:"diagram"`
 }
 
 type LaravelModelsExportSpec struct {
@@ -150,13 +144,6 @@ func (m *MigrationsSpec) Validate() error {
 		return fmt.Errorf("target have driver %q, which unsupported migrate queries", m.Target)
 	}
 
-	return nil
-}
-
-func (s *MarkdownExportSpec) Validate() error {
-	if err := s.Diagram.Validate(); err != nil {
-		return fmt.Errorf("diagram: %w", err)
-	}
 	return nil
 }
 

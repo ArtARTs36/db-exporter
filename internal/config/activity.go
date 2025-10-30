@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
+	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 
 	"github.com/artarts36/specw"
 
@@ -79,7 +80,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameGoEntities:
 		spec = new(GoEntitiesExportSpec)
 	case ExporterNameMd:
-		spec = new(MarkdownExportSpec)
+		spec = new(markdown.Specification)
 	case ExporterNameGrpcCrud:
 		spec = new(GRPCCrudExportSpec)
 	case ExporterNameCSV:
