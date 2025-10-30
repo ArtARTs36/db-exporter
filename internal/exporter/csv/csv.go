@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 )
@@ -27,7 +26,7 @@ func NewExporter(
 }
 
 func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.CSVExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}

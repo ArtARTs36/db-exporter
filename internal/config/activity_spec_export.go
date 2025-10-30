@@ -62,17 +62,6 @@ type MarkdownExportSpec struct {
 	Diagram     DiagramExportSpec `yaml:"diagram" json:"diagram"`
 }
 
-type CSVExportSpec struct {
-	Delimiter string                           `yaml:"delimiter" json:"delimiter"`
-	Transform map[string][]ExportSpecTransform `yaml:"transform" json:"transform"`
-}
-
-type ExportSpecTransform struct {
-	OnlyColumns   []string          `yaml:"only_columns" json:"only_columns"`
-	SkipColumns   []string          `yaml:"skip_columns" json:"skip_columns"`
-	RenameColumns map[string]string `yaml:"rename_columns" json:"rename_columns"`
-}
-
 type LaravelModelsExportSpec struct {
 	Namespace string `yaml:"namespace" json:"namespace"`
 	TimeAs    string `yaml:"time_as" json:"time_as"` // datetime, carbon

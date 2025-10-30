@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/csv"
 
 	"github.com/artarts36/specw"
 
@@ -81,7 +82,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameGrpcCrud:
 		spec = new(GRPCCrudExportSpec)
 	case ExporterNameCSV:
-		spec = new(CSVExportSpec)
+		spec = new(csv.Specification)
 	case ExporterNameLaravelModels:
 		spec = new(LaravelModelsExportSpec)
 	case ExporterNameGoEntityRepository:
