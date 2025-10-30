@@ -1,7 +1,6 @@
 package jsonschema
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/jsonschema"
 )
@@ -9,7 +8,7 @@ import (
 type mapper struct{}
 
 func (e *mapper) mapJSONSchema(
-	spec *config.JSONSchemaExportSpec,
+	spec *Specification,
 	tables []*schema.Table,
 ) *jsonschema.Schema {
 	sch := jsonschema.Draft04()

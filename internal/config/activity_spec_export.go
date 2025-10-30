@@ -64,14 +64,6 @@ type GoEntityRepositorySpec struct {
 	} `yaml:"repositories" json:"repositories"`
 }
 
-type JSONSchemaExportSpec struct {
-	Pretty bool `yaml:"pretty" json:"pretty"`
-	Schema struct {
-		Title       string `yaml:"title" json:"title"`
-		Description string `yaml:"description" json:"description"`
-	} `yaml:"schema" json:"schema"`
-}
-
 type MigrationsSpec struct {
 	Use struct {
 		IfNotExists bool `yaml:"if_not_exists" json:"if_not_exists"`

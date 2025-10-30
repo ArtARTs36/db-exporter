@@ -5,6 +5,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
+	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
 
 	"github.com/artarts36/specw"
@@ -91,7 +92,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameGoEntityRepository:
 		spec = new(GoEntityRepositorySpec)
 	case ExporterNameJSONSchema:
-		spec = new(JSONSchemaExportSpec)
+		spec = new(jsonschema.Specification)
 	case ExporterNameCustom:
 		spec = new(CustomExportSpec)
 	case ExporterNameDiagram:
