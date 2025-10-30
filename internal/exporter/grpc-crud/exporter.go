@@ -17,7 +17,7 @@ import (
 type Exporter struct{}
 
 type buildProcedureContext struct {
-	sourceDriver config.DatabaseDriver
+	sourceDriver schema.DatabaseDriver
 
 	service *presentation.Service
 
@@ -181,7 +181,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
 	pager paginator.Paginator,

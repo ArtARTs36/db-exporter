@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/go-sql-driver/mysql"
 	"os"
 	"path/filepath"
@@ -66,7 +67,7 @@ func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
 					"databases[%s] have unsupported driver %q. Available: %v",
 					activity.Database,
 					db.Driver,
-					DatabaseDrivers,
+					schema.DatabaseDrivers,
 				)
 			}
 
@@ -75,7 +76,7 @@ func (l *Loader) validate(cfg *Config) error { //nolint:gocognit // todo
 					"databases[%s] have driver %q which read schema unsupported. Available: %v",
 					activity.Database,
 					db.Driver,
-					readableDatabaseDrivers,
+					schema.GetReadableDatabaseDrivers(),
 				)
 			}
 
@@ -110,14 +111,14 @@ func (l *Loader) fillDefaults(cfg *Config) error {
 			continue
 		}
 
-		if database.Driver == DatabaseDriverMySQL {
+		if database.Driver == schema.DatabaseDriverMySQL {
 			dsn, err := mysql.ParseDSN(database.DSN.Value)
 			if err != nil {
 				return fmt.Errorf("parse dsn %q: %w", database.DSN.Value, err)
 			}
 			database.Schema = dsn.DBName
 		} else {
-			database.Schema = DefaultDatabaseSchema
+			database.Schema = schema.DefaultDatabaseSchema
 		}
 
 		cfg.Databases[name] = database

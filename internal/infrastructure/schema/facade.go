@@ -7,15 +7,14 @@ import (
 	"github.com/artarts36/db-exporter/internal/infrastructure/schema/mysql"
 	"github.com/artarts36/db-exporter/internal/infrastructure/schema/pg"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-var loaders = map[config.DatabaseDriver]Loader{
-	config.DatabaseDriverPostgres: pg.NewLoader(),
-	config.DatabaseDriverDBML:     dbml.NewLoader(),
-	config.DatabaseDriverMySQL:    mysql.NewLoader(),
+var loaders = map[schema.DatabaseDriver]Loader{
+	schema.DatabaseDriverPostgres: pg.NewLoader(),
+	schema.DatabaseDriverDBML:     dbml.NewLoader(),
+	schema.DatabaseDriverMySQL:    mysql.NewLoader(),
 }
 
 func LoadForPool(ctx context.Context, pool *conn.Pool) (map[string]*schema.Schema, error) {

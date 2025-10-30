@@ -1,7 +1,6 @@
 package sql
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/gds"
 	"github.com/stretchr/testify/require"
@@ -27,7 +26,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 					Name:    gds.String{Value: "cars"},
 					Columns: []*schema.Column{},
 				}),
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name:        *gds.NewString("init"),
@@ -47,7 +46,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						},
 					},
 				}),
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name: *gds.NewString("init"),
@@ -76,7 +75,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						ColumnsNames: gds.NewStrings("id"),
 					},
 				}),
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name: *gds.NewString("init"),
@@ -132,7 +131,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						},
 					},
 				}),
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name: *gds.NewString("init"),
@@ -183,7 +182,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 					Values: []string{"a", "b", "c", "d"},
 					Used:   1,
 				}},
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name: *gds.NewString("init"),
@@ -241,7 +240,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						DataType: sqltype.PGInteger,
 					},
 				},
-				Driver: config.DatabaseDriverPostgres,
+				Driver: schema.DatabaseDriverPostgres,
 			},
 			ExpectedDDL: &DDL{
 				Name: *gds.NewString("init"),

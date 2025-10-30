@@ -10,7 +10,6 @@ import (
 	_ "github.com/go-sql-driver/mysql" // mysql driver
 	"github.com/jmoiron/sqlx"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -40,7 +39,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 		return nil, fmt.Errorf("load constraints: %w", err)
 	}
 
-	sch := schema.NewSchema(config.DatabaseDriverMySQL)
+	sch := schema.NewSchema(schema.DatabaseDriverMySQL)
 
 	for _, col := range columns {
 		table, tableExists := sch.Tables.Get(col.TableName)

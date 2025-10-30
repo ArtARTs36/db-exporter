@@ -1,13 +1,12 @@
 package sqltype
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[schema.Type]schema.Type{ //nolint:exhaustive,lll // not need
-	config.DatabaseDriverDBML: {
-		config.DatabaseDriverPostgres: {
+var transitSQLTypeMap = map[schema.DatabaseDriver]map[schema.DatabaseDriver]map[schema.Type]schema.Type{ //nolint:exhaustive,lll // not need
+	schema.DatabaseDriverDBML: {
+		schema.DatabaseDriverPostgres: {
 			DBMLChar:    PGCharacter,
 			DBMLVarchar: PGCharacterVarying,
 			DBMLBinary:  PGBytea,
@@ -23,7 +22,7 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			DBMLFloat:  PGDoublePrecision,
 			DBMLFloat8: PGFloat8,
 		},
-		config.DatabaseDriverMySQL: {
+		schema.DatabaseDriverMySQL: {
 			DBMLChar:    MySQLChar,
 			DBMLVarchar: MySQLLongText,
 			DBMLBinary:  MySQLLongBlob,
@@ -40,8 +39,8 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 			DBMLFloat8: PGFloat8,
 		},
 	},
-	config.DatabaseDriverPostgres: {
-		config.DatabaseDriverDBML: {
+	schema.DatabaseDriverPostgres: {
+		schema.DatabaseDriverDBML: {
 			PGCharacter:        DBMLChar,
 			PGCharacterVarying: DBMLVarchar,
 			PGBytea:            DBMLBinary,
@@ -59,7 +58,7 @@ var transitSQLTypeMap = map[config.DatabaseDriver]map[config.DatabaseDriver]map[
 		},
 
 		// https://dev.mysql.com/doc/workbench/en/wb-migration-database-postgresql-typemapping.html
-		config.DatabaseDriverMySQL: {
+		schema.DatabaseDriverMySQL: {
 			PGInt:                MySQLInt,
 			PGSmallInt:           MySQLSmallInt,
 			PGBigint:             MySQLInt,

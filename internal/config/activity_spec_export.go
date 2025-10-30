@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/specw"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
@@ -116,7 +117,7 @@ type MigrationsSpec struct {
 		IfNotExists bool `yaml:"if_not_exists" json:"if_not_exists"`
 		IfExists    bool `yaml:"if_exists" json:"if_exists"`
 	} `yaml:"use"`
-	Target DatabaseDriver `yaml:"target" json:"target"`
+	Target schema.DatabaseDriver `yaml:"target" json:"target"`
 }
 
 type CustomExportSpec struct {
@@ -134,7 +135,7 @@ func (s *CustomExportSpec) Validate() error {
 	return nil
 }
 
-func (m *MigrationsSpec) InjectDatabaseDriver(driver DatabaseDriver) {
+func (m *MigrationsSpec) InjectDatabaseDriver(driver schema.DatabaseDriver) {
 	if m.Target != "" {
 		return
 	}
@@ -151,7 +152,7 @@ func (m *MigrationsSpec) Validate() error {
 		return fmt.Errorf(
 			"target have unsupported driver %q. Available: %v",
 			m.Target,
-			writeableDatabaseDrivers,
+			schema.GetWriteableDatabaseDrivers(),
 		)
 	}
 

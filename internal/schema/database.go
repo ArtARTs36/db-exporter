@@ -1,4 +1,4 @@
-package config
+package schema
 
 import (
 	"github.com/artarts36/specw"
@@ -58,4 +58,12 @@ func (d DatabaseDriver) CanWrite() bool {
 
 func (d DatabaseDriver) CanMigrate() bool {
 	return slices.Contains(migrateableDatabaseDrivers, d)
+}
+
+func GetReadableDatabaseDrivers() []DatabaseDriver {
+	return readableDatabaseDrivers
+}
+
+func GetWriteableDatabaseDrivers() []DatabaseDriver {
+	return writeableDatabaseDrivers
 }

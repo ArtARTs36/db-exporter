@@ -1,7 +1,6 @@
 package goentity
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -33,7 +32,7 @@ func NewGoPropertyMapper() *GoPropertyMapper {
 }
 
 func (m *GoPropertyMapper) mapColumns(
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	columns []*schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImportCallback addImportCallback,
@@ -80,7 +79,7 @@ func (m *GoPropertyMapper) mapColumns(
 }
 
 func (m *GoPropertyMapper) mapGoType(
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	col *schema.Column,
 	enums map[string]*golang.StringEnum,
 	addImport func(pkg string),

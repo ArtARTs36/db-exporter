@@ -2,7 +2,6 @@ package sql
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/gds"
 	"log/slog"
@@ -19,7 +18,7 @@ type BuildDDLOpts struct {
 	UseIfNotExists bool
 	UseIfExists    bool
 
-	Source config.DatabaseDriver
+	Source schema.DatabaseDriver
 }
 
 func NewPostgresDDLBuilder() *PostgresDDLBuilder {
@@ -117,7 +116,7 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 
 func (b *PostgresDDLBuilder) buildCreateTable(
 	table *schema.Table,
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	params BuildDDLOpts,
 ) (*DDL, error) {
 	if len(table.Columns) == 0 {
@@ -208,7 +207,7 @@ func (b *PostgresDDLBuilder) buildCreateTable(
 
 func (b *PostgresDDLBuilder) createColumnDefinition(
 	column *schema.Column,
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	maxColumnLen int,
 	comma string,
 ) (string, error) {
@@ -224,7 +223,7 @@ func (b *PostgresDDLBuilder) createColumnDefinition(
 		defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 	}
 
-	colType, err := sqltype.TransitSQLType(sourceDriver, config.DatabaseDriverPostgres, column.Type)
+	colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverPostgres, column.Type)
 	if err != nil {
 		return "", fmt.Errorf("failed to map column type: %w", err)
 	}
@@ -349,11 +348,11 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 type CreateSequenceParams struct {
 	UseIfNotExists bool
 
-	Source config.DatabaseDriver
+	Source schema.DatabaseDriver
 }
 
 func (b *PostgresDDLBuilder) CreateSequence(seq *schema.Sequence, params CreateSequenceParams) (string, error) {
-	dType, err := sqltype.TransitSQLType(params.Source, config.DatabaseDriverPostgres, seq.DataType)
+	dType, err := sqltype.TransitSQLType(params.Source, schema.DatabaseDriverPostgres, seq.DataType)
 	if err != nil {
 		return "", err
 	}

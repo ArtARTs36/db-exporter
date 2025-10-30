@@ -44,14 +44,14 @@ type CommandRunParams struct {
 	Config    *config.Config
 	TaskNames []string
 
-	dbs   map[string]config.Database
+	dbs   map[string]schema.Database
 	tasks map[string]config.Task
 }
 
 func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	start := time.Now()
 	tasks := make(map[string]config.Task, 0)
-	dbs := make(map[string]config.Database, 0)
+	dbs := make(map[string]schema.Database, 0)
 
 	if len(params.TaskNames) == 0 {
 		tasks = params.Config.Tasks
@@ -209,7 +209,7 @@ func (c *Command) printStat(result *task.ActivityResult) {
 	printExport()
 }
 
-func databaseNames(dbs map[string]config.Database) []string {
+func databaseNames(dbs map[string]schema.Database) []string {
 	names := make([]string, 0, len(dbs))
 	for name := range dbs {
 		names = append(names, name)
