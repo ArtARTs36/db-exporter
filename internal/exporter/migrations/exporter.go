@@ -4,14 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
-	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 	"log/slog"
 
 	"github.com/tyler-sommer/stick"
 
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/sql"
 )
 
 type Exporter struct {
@@ -41,7 +40,7 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.MigrationsSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -79,7 +78,7 @@ func (e *Exporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *Exporter) mapBuildDDLOpts(spec *config.MigrationsSpec) sql.BuildDDLOpts {
+func (e *Exporter) mapBuildDDLOpts(spec *Specification) sql.BuildDDLOpts {
 	return sql.BuildDDLOpts{
 		UseIfNotExists: spec.Use.IfNotExists,
 		UseIfExists:    spec.Use.IfExists,
@@ -90,7 +89,7 @@ func (e *Exporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.MigrationsSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}

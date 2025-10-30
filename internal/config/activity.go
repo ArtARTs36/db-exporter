@@ -7,6 +7,7 @@ import (
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/markdown"
+	"github.com/artarts36/db-exporter/internal/exporter/migrations"
 
 	"github.com/artarts36/specw"
 
@@ -78,7 +79,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	switch format {
 	case ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML, ExporterNameMermaid:
 	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
-		spec = new(MigrationsSpec)
+		spec = new(migrations.Specification)
 	case ExporterNameGoEntities:
 		spec = new(GoEntitiesExportSpec)
 	case ExporterNameMd:
