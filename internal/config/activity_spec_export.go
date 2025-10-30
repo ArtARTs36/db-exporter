@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/schema"
-	"github.com/artarts36/specw"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type ExporterName string
@@ -33,28 +31,6 @@ const (
 type GoEntitiesExportSpec struct {
 	GoModule string `yaml:"go_module" json:"go_module"`
 	Package  string `yaml:"package" json:"package"` // default: entities
-}
-
-type PaginationType string
-
-const (
-	PaginationTypeOffset PaginationType = "offset"
-	PaginationTypeToken  PaginationType = "token"
-	PaginationTypeNone   PaginationType = "none"
-)
-
-type GRPCCrudExportSpec struct {
-	Package    string                                     `yaml:"package" json:"package"`
-	Indent     int                                        `yaml:"indent" json:"indent"`
-	Options    orderedmap.OrderedMap[string, interface{}] `yaml:"options" json:"options"`
-	Pagination PaginationType                             `yaml:"pagination" json:"pagination"`
-	With       specw.BoolObject[struct {
-		GoogleApiHttp specw.BoolObject[struct { //nolint:revive // <- not readable
-			PathPrefix string `yaml:"path_prefix" json:"path_prefix"`
-		}] `yaml:"google.api.http" json:"google.api.http"`
-		GoogleAPIFieldBehavior specw.BoolObject[struct{}] `yaml:"google.api.field_behavior" json:"google.api.field_behavior"`
-		BufValidateField       specw.BoolObject[struct{}] `yaml:"buf.validate.field" json:"buf.validate.field"`
-	}] `yaml:"with" json:"with"`
 }
 
 type LaravelModelsExportSpec struct {
@@ -142,18 +118,6 @@ func (m *MigrationsSpec) Validate() error {
 
 	if !m.Target.CanMigrate() {
 		return fmt.Errorf("target have driver %q, which unsupported migrate queries", m.Target)
-	}
-
-	return nil
-}
-
-func (s *GRPCCrudExportSpec) Validate() error {
-	if s.Indent == 0 {
-		s.Indent = 2
-	}
-
-	if s.Pagination == "" {
-		s.Pagination = PaginationTypeOffset
 	}
 
 	return nil

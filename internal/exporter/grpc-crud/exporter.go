@@ -3,7 +3,7 @@ package grpccrud
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/paginator"
@@ -31,12 +31,12 @@ func NewExporter() *Exporter {
 	return &Exporter{}
 }
 
-func (e *Exporter) createPaginator(spec *config.GRPCCrudExportSpec) paginator.Paginator {
-	if spec.Pagination == config.PaginationTypeToken {
+func (e *Exporter) createPaginator(spec *Specification) paginator.Paginator {
+	if spec.Pagination == paginationTypeToken {
 		return &paginator.Token{}
 	}
 
-	if spec.Pagination == config.PaginationTypeNone {
+	if spec.Pagination == paginationTypeNone {
 		return &paginator.None{}
 	}
 
@@ -47,7 +47,7 @@ func (e *Exporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
 		return nil, fmt.Errorf("invalid spec")
 	}
@@ -103,7 +103,7 @@ func (e *Exporter) ExportPerFile(
 	return pages, nil
 }
 
-func (e *Exporter) newPackage(spec *config.GRPCCrudExportSpec) *presentation.Package {
+func (e *Exporter) newPackage(spec *Specification) *presentation.Package {
 	configurators := []presentation.Configurator{}
 
 	commentsModifier := &modifiers.Comments{}
@@ -143,9 +143,9 @@ func (e *Exporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GRPCCrudExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected GRPCCrudExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	options := proto.PrepareOptions(spec.Options)
