@@ -1,9 +1,5 @@
 package config
 
-import (
-	"fmt"
-)
-
 type ExporterName string
 
 const (
@@ -60,19 +56,4 @@ type GoEntityRepositorySpec struct {
 			WithMocks bool                                      `yaml:"with_mocks" json:"with_mocks"`
 		} `yaml:"interfaces" json:"interfaces"`
 	} `yaml:"repositories" json:"repositories"`
-}
-
-type CustomExportSpec struct {
-	Template string `yaml:"template" json:"template"`
-	Output   struct {
-		Extension string `yaml:"extension" json:"extension"`
-	} `yaml:"output" json:"output"`
-}
-
-func (s *CustomExportSpec) Validate() error {
-	if s.Template == "" {
-		return fmt.Errorf("custom export template is required")
-	}
-
-	return nil
 }

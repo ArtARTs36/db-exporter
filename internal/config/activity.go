@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
+	"github.com/artarts36/db-exporter/internal/exporter/custom"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
@@ -95,7 +96,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameJSONSchema:
 		spec = new(jsonschema.Specification)
 	case ExporterNameCustom:
-		spec = new(CustomExportSpec)
+		spec = new(custom.Specification)
 	case ExporterNameDiagram:
 		spec = new(diagram.Specification)
 	default:
