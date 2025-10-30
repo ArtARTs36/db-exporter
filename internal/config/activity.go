@@ -5,6 +5,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/exporter/csv"
 	"github.com/artarts36/db-exporter/internal/exporter/custom"
 	"github.com/artarts36/db-exporter/internal/exporter/diagram"
+	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
 	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
 	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
 	"github.com/artarts36/db-exporter/internal/exporter/laravel"
@@ -83,7 +84,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
 		spec = new(migrations.Specification)
 	case ExporterNameGoEntities:
-		spec = new(GoEntitiesExportSpec)
+		spec = new(goentity.EntitySpecification)
 	case ExporterNameMd:
 		spec = new(markdown.Specification)
 	case ExporterNameGrpcCrud:
@@ -93,7 +94,7 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	case ExporterNameLaravelModels:
 		spec = new(laravel.ModelsSpecification)
 	case ExporterNameGoEntityRepository:
-		spec = new(GoEntityRepositorySpec)
+		spec = new(goentity.EntityRepositorySpecification)
 	case ExporterNameJSONSchema:
 		spec = new(jsonschema.Specification)
 	case ExporterNameCustom:

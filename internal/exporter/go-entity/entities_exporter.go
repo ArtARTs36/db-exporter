@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
@@ -44,7 +43,7 @@ func (e *EntitiesExporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GoEntitiesExportSpec)
+	spec, ok := params.Spec.(*EntitySpecification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -103,7 +102,7 @@ func (e *EntitiesExporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GoEntitiesExportSpec)
+	spec, ok := params.Spec.(*EntitySpecification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -87,7 +86,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.GoEntityRepositorySpec)
+	spec, ok := params.Spec.(*EntityRepositorySpecification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -128,7 +127,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		repositories = append(repositories, repository)
 
 		entityRepos := []*Repository{}
-		if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity {
+		if spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceWithEntity {
 			entityRepos = []*Repository{repository}
 		}
 
@@ -154,8 +153,8 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					"Repositories":               []*Repository{repository},
 					"RepoNameMaxLength":          pipeline.store.repoNameMaxLength,
 					"RepoInterfaceNameMaxLength": pipeline.store.repoInterfaceMaxLength,
-					"GenInterfaces":              spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository,                                             //nolint:lll // not need
-					"GenFilters":                 spec.Repositories.Interfaces.Place == "" || spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
+					"GenInterfaces":              spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceWithRepository,                                             //nolint:lll // not need
+					"GenFilters":                 spec.Repositories.Interfaces.Place == "" || spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 					"WithMocks":                  spec.Repositories.Interfaces.WithMocks,
 				},
 			},
@@ -165,7 +164,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 		}
 		pages = append(pages, page)
 
-		if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+		if spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceEntity {
 			entityRepoPageName := fmt.Sprintf(
 				"%s/%s_repo.go",
 				pipeline.packages.entity.ProjectRelativePath,
@@ -208,7 +207,7 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 					"Container": map[string]interface{}{
 						"Name": gds.NewString(spec.Repositories.Container.StructName).Pascal().String(),
 					},
-					"GenInterfaces": spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
+					"GenInterfaces": spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceWithRepository, //nolint:lll // not need
 				},
 			})
 		if rerr != nil {
@@ -241,12 +240,12 @@ func (e *RepositoryExporter) allocateRepositoryFilters(
 
 func (e *RepositoryExporter) calculatePages(
 	params *exporter.ExportParams,
-	spec *config.GoEntityRepositorySpec,
+	spec *EntityRepositorySpecification,
 ) int {
 	const defaultPageTypes = 2
 
 	pageTypes := defaultPageTypes
-	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+	if spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceEntity {
 		pageTypes++
 	}
 
@@ -261,7 +260,7 @@ func (e *RepositoryExporter) calculatePages(
 }
 
 func (e *RepositoryExporter) buildRepositoryPackage(
-	spec *config.GoEntityRepositorySpec,
+	spec *EntityRepositorySpecification,
 	goModule string,
 ) (*golang.Package, error) {
 	pkgName := "repositories"
