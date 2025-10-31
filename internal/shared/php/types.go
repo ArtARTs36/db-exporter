@@ -1,30 +1,12 @@
 package php
 
-type Type int
+type Type string
 
 const (
-	TypeUndefined Type = iota
-	TypeInt
-	TypeFloat
-	TypeBool
-	TypeString
-	TypeObject
+	TypeUndefined Type = ""
+	TypeInt       Type = "int"
+	TypeFloat     Type = "float"
+	TypeBool      Type = "bool"
+	TypeString    Type = "string"
+	TypeObject    Type = "object"
 )
-
-func (t Type) String() string {
-	switch t {
-	case TypeUndefined:
-		return ""
-	case TypeInt:
-		return "int"
-	case TypeFloat:
-		return "float"
-	case TypeBool:
-		return "bool"
-	case TypeString:
-		return "string"
-	case TypeObject:
-		return "object"
-	}
-	return ""
-}

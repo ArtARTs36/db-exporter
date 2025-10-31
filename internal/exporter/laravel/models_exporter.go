@@ -216,7 +216,7 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 		Name:         pk.Name.Value,
 		IsMultiple:   false,
 		Column:       pkColumnName,
-		Type:         pkColType.String(),
+		Type:         string(pkColType),
 		Incrementing: pkColumn.IsAutoincrement,
 	}
 
@@ -230,13 +230,13 @@ func (*ModelsExporter) mapPhpType(
 ) string {
 	switch {
 	case col.Type.IsInteger:
-		return php.TypeInt.String()
+		return string(php.TypeInt)
 	case col.Type.IsFloat:
-		return php.TypeFloat.String()
+		return string(php.TypeFloat)
 	case col.Type.IsStringable:
-		return php.TypeString.String()
+		return string(php.TypeString)
 	case col.Type.IsBoolean:
-		return php.TypeBool.String()
+		return string(php.TypeBool)
 	case col.Type.IsDatetime:
 		if !col.Name.Equal("created_at", "updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)
