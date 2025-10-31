@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+
+	"github.com/tyler-sommer/stick"
+
 	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/php"
-	"github.com/tyler-sommer/stick"
 )
 
 type ModelsExporter struct {
@@ -56,7 +57,7 @@ func (e *ModelsExporter) ExportPerFile(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.LaravelModelsExportSpec)
+	spec, ok := params.Spec.(*ModelsSpecification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -92,7 +93,7 @@ func (e *ModelsExporter) Export(
 	_ context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.LaravelModelsExportSpec)
+	spec, ok := params.Spec.(*ModelsSpecification)
 	if !ok {
 		return nil, errors.New("got invalid spec")
 	}
@@ -117,7 +118,7 @@ func (e *ModelsExporter) Export(
 	}, nil
 }
 
-func (e *ModelsExporter) selectNamespace(spec *config.LaravelModelsExportSpec) string {
+func (e *ModelsExporter) selectNamespace(spec *ModelsSpecification) string {
 	if spec.Namespace != "" {
 		return spec.Namespace
 	}
@@ -127,7 +128,7 @@ func (e *ModelsExporter) selectNamespace(spec *config.LaravelModelsExportSpec) s
 
 func (e *ModelsExporter) makeLaravelModelSchema(
 	tables []*schema.Table,
-	spec *config.LaravelModelsExportSpec,
+	spec *ModelsSpecification,
 	namespace string,
 ) *laravelModelSchema {
 	modelSchema := &laravelModelSchema{
@@ -215,7 +216,7 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 		Name:         pk.Name.Value,
 		IsMultiple:   false,
 		Column:       pkColumnName,
-		Type:         pkColType.String(),
+		Type:         string(pkColType),
 		Incrementing: pkColumn.IsAutoincrement,
 	}
 
@@ -225,17 +226,17 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 func (*ModelsExporter) mapPhpType(
 	col *schema.Column,
 	model *laravelModel,
-	spec *config.LaravelModelsExportSpec,
+	spec *ModelsSpecification,
 ) string {
 	switch {
 	case col.Type.IsInteger:
-		return php.TypeInt.String()
+		return string(php.TypeInt)
 	case col.Type.IsFloat:
-		return php.TypeFloat.String()
+		return string(php.TypeFloat)
 	case col.Type.IsStringable:
-		return php.TypeString.String()
+		return string(php.TypeString)
 	case col.Type.IsBoolean:
-		return php.TypeBool.String()
+		return string(php.TypeBool)
 	case col.Type.IsDatetime:
 		if !col.Name.Equal("created_at", "updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)

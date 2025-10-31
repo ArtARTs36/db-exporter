@@ -2,16 +2,15 @@ package conn
 
 import (
 	"context"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"log/slog"
 
 	"github.com/jmoiron/sqlx"
-
-	"github.com/artarts36/db-exporter/internal/config"
 )
 
 type Connection struct {
 	db  *sqlx.DB
-	cfg config.Database
+	cfg schema.Database
 }
 
 func NewOpenedConnection(db *sqlx.DB) (*Connection, error) {
@@ -20,7 +19,7 @@ func NewOpenedConnection(db *sqlx.DB) (*Connection, error) {
 	}, nil
 }
 
-func NewConnection(cfg config.Database) *Connection {
+func NewConnection(cfg schema.Database) *Connection {
 	return &Connection{cfg: cfg}
 }
 
@@ -49,6 +48,6 @@ func (c *Connection) Close() error {
 	return c.db.Close()
 }
 
-func (c *Connection) Database() config.Database {
+func (c *Connection) Database() schema.Database {
 	return c.cfg
 }

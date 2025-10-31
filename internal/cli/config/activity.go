@@ -2,6 +2,16 @@ package config
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/exporter/csv"
+	"github.com/artarts36/db-exporter/internal/exporter/custom"
+	"github.com/artarts36/db-exporter/internal/exporter/diagram"
+	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
+	grpccrud "github.com/artarts36/db-exporter/internal/exporter/grpc-crud"
+	"github.com/artarts36/db-exporter/internal/exporter/jsonschema"
+	"github.com/artarts36/db-exporter/internal/exporter/laravel"
+	"github.com/artarts36/db-exporter/internal/exporter/markdown"
+	"github.com/artarts36/db-exporter/internal/exporter/migrations"
+
 	"github.com/artarts36/specw"
 
 	"gopkg.in/yaml.v3"
@@ -72,25 +82,25 @@ func (s *Activity) newSpec(format ExporterName) (interface{}, error) {
 	switch format {
 	case ExporterNameGooseFixtures, ExporterNameGraphql, ExporterNameDBML, ExporterNameMermaid:
 	case ExporterNameGoose, ExporterNameGoSQLMigrate, ExporterNameLaravelMigrationsRaw, ExporterNameDDL:
-		spec = new(MigrationsSpec)
+		spec = new(migrations.Specification)
 	case ExporterNameGoEntities:
-		spec = new(GoEntitiesExportSpec)
+		spec = new(goentity.EntitySpecification)
 	case ExporterNameMd:
-		spec = new(MarkdownExportSpec)
+		spec = new(markdown.Specification)
 	case ExporterNameGrpcCrud:
-		spec = new(GRPCCrudExportSpec)
+		spec = new(grpccrud.Specification)
 	case ExporterNameCSV:
-		spec = new(CSVExportSpec)
+		spec = new(csv.Specification)
 	case ExporterNameLaravelModels:
-		spec = new(LaravelModelsExportSpec)
+		spec = new(laravel.ModelsSpecification)
 	case ExporterNameGoEntityRepository:
-		spec = new(GoEntityRepositorySpec)
+		spec = new(goentity.EntityRepositorySpecification)
 	case ExporterNameJSONSchema:
-		spec = new(JSONSchemaExportSpec)
+		spec = new(jsonschema.Specification)
 	case ExporterNameCustom:
-		spec = new(CustomExportSpec)
+		spec = new(custom.Specification)
 	case ExporterNameDiagram:
-		spec = new(DiagramExportSpec)
+		spec = new(diagram.Specification)
 	default:
 		return nil, fmt.Errorf("format %q unsupported", format)
 	}

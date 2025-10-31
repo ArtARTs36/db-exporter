@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/gds"
 )
 
@@ -10,7 +9,7 @@ type Schema struct {
 	Sequences map[string]*Sequence
 	Enums     map[string]*Enum
 
-	Driver config.DatabaseDriver
+	Driver DatabaseDriver
 }
 
 type ForeignKey struct {
@@ -24,7 +23,7 @@ type ForeignKey struct {
 	IsInitiallyDeferred bool
 }
 
-func NewSchema(driver config.DatabaseDriver) *Schema {
+func NewSchema(driver DatabaseDriver) *Schema {
 	return &Schema{
 		Tables:    NewTableMap(),
 		Sequences: map[string]*Sequence{},

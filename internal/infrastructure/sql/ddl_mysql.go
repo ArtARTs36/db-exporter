@@ -2,7 +2,6 @@ package sql
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/gds"
 	"slices"
@@ -42,7 +41,7 @@ func (b *MySQLDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DD
 
 func (b *MySQLDDLBuilder) buildCreateTable( //nolint:funlen // not need
 	table *schema.Table,
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	params BuildDDLOpts,
 ) (*DDL, error) {
 	if len(table.Columns) == 0 {
@@ -96,11 +95,11 @@ func (b *MySQLDDLBuilder) buildCreateTable( //nolint:funlen // not need
 		spacesAfterColumnName := maxColumnLen - len(colName) + 1
 
 		defaultValue := ""
-		if column.DefaultRaw.Valid && sourceDriver == config.DatabaseDriverMySQL {
+		if column.DefaultRaw.Valid && sourceDriver == schema.DatabaseDriverMySQL {
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
-		colType, err := sqltype.TransitSQLType(sourceDriver, config.DatabaseDriverMySQL, column.Type)
+		colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverMySQL, column.Type)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map column type: %w", err)
 		}

@@ -3,11 +3,9 @@ package sqltype
 import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/schema"
-
-	"github.com/artarts36/db-exporter/internal/config"
 )
 
-func TransitSQLType(source, target config.DatabaseDriver, dataType schema.Type) (schema.Type, error) {
+func TransitSQLType(source, target schema.DatabaseDriver, dataType schema.Type) (schema.Type, error) {
 	if source == target {
 		return dataType, nil
 	}

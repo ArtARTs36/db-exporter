@@ -3,8 +3,6 @@ package diagram
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
-
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 )
@@ -23,9 +21,9 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.DiagramExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
@@ -50,9 +48,9 @@ func (e *Exporter) ExportPerFile(
 }
 
 func (e *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {
-	spec, ok := params.Spec.(*config.DiagramExportSpec)
+	spec, ok := params.Spec.(*Specification)
 	if !ok {
-		return nil, fmt.Errorf("invalid spec, expected DiagramExportSpec, got %T", params.Spec)
+		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
 	diagram, err := e.buildDiagramPage(
@@ -72,7 +70,7 @@ func (e *Exporter) buildDiagramPage(
 	ctx context.Context,
 	tables *schema.TableMap,
 	filename string,
-	spec *config.DiagramExportSpec,
+	spec *Specification,
 ) (*exporter.ExportedPage, error) {
 	c, err := e.creator.Create(ctx, tables, spec)
 	if err != nil {

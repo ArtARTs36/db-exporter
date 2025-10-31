@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
@@ -18,7 +17,7 @@ type mapper struct {
 func (e *mapper) mapTable(
 	ctx context.Context,
 	tbl *schema.Table,
-	source config.DatabaseDriver,
+	source schema.DatabaseDriver,
 ) (*dbml.Table, []*dbml.Ref, error) {
 	table := &dbml.Table{
 		Name:    tbl.Name.Value,
@@ -50,11 +49,11 @@ func (e *mapper) mapTable(
 
 func (e *mapper) mapColumn(
 	ctx context.Context,
-	source config.DatabaseDriver,
+	source schema.DatabaseDriver,
 	table *schema.Table,
 	col *schema.Column,
 ) (*dbml.Column, error) {
-	typ, err := sqltype.TransitSQLType(source, config.DatabaseDriverDBML, col.Type)
+	typ, err := sqltype.TransitSQLType(source, schema.DatabaseDriverDBML, col.Type)
 	if err != nil {
 		return nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
 	}

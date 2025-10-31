@@ -1,6 +1,7 @@
 package config
 
 import (
+	goentity "github.com/artarts36/db-exporter/internal/exporter/go-entity"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -25,7 +26,7 @@ spec:
 `,
 			Expected: Activity{
 				Format: "go-entities",
-				Spec: &GoEntitiesExportSpec{
+				Spec: &goentity.EntitySpecification{
 					Package: "model",
 				},
 				Database: "db1",

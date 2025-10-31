@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/cli/config"
+	"github.com/artarts36/db-exporter/internal/cli/task"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	schemaInfra "github.com/artarts36/db-exporter/internal/infrastructure/schema"
 	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
-	"github.com/artarts36/db-exporter/internal/task"
 	"log/slog"
 	"os"
 	"time"
@@ -49,14 +49,14 @@ type CommandRunParams struct {
 	Config    *config.Config
 	TaskNames []string
 
-	dbs   map[string]config.Database
+	dbs   map[string]schema.Database
 	tasks map[string]config.Task
 }
 
 func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 	start := time.Now()
 	tasks := make(map[string]config.Task, 0)
-	dbs := make(map[string]config.Database, 0)
+	dbs := make(map[string]schema.Database, 0)
 
 	if len(params.TaskNames) == 0 {
 		tasks = params.Config.Tasks
@@ -219,7 +219,7 @@ func (c *Command) printStat(result *task.ActivityResult) {
 	printExport()
 }
 
-func databaseNames(dbs map[string]config.Database) []string {
+func databaseNames(dbs map[string]schema.Database) []string {
 	names := make([]string, 0, len(dbs))
 	for name := range dbs {
 		names = append(names, name)

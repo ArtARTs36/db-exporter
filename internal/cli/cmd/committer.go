@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/cli/config"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/ci-space/cienv"
 	"log/slog"

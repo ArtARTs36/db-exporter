@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
@@ -26,7 +25,7 @@ type erPipeline struct {
 func (e *RepositoryExporter) buildPipeline(
 	ctx context.Context,
 	params *exporter.ExportParams,
-	spec *config.GoEntityRepositorySpec,
+	spec *EntityRepositorySpecification,
 ) (*erPipeline, error) {
 	pipeline := &erPipeline{}
 
@@ -46,8 +45,8 @@ func (e *RepositoryExporter) buildPipeline(
 
 	pipeline.packages.filters = repoPkg
 	pipeline.packages.interfaces = repoPkg
-	if spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceWithEntity ||
-		spec.Repositories.Interfaces.Place == config.GoEntityRepositorySpecRepoInterfacesPlaceEntity {
+	if spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceWithEntity ||
+		spec.Repositories.Interfaces.Place == RepositorySpecRepoInterfacesPlaceEntity {
 		pipeline.packages.filters = entityPkg
 		pipeline.packages.interfaces = entityPkg
 	}

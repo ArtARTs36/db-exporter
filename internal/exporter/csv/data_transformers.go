@@ -2,11 +2,10 @@ package csv
 
 import (
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
 )
 
-type DataTransformer func(data *transformingData, spec config.ExportSpecTransform) (*transformingData, error)
+type DataTransformer func(data *transformingData, spec SpecificationTransform) (*transformingData, error)
 
 type transformingData struct {
 	cols []string
@@ -14,7 +13,7 @@ type transformingData struct {
 }
 
 func SkipColumnsDataTransformer() DataTransformer {
-	return func(trData *transformingData, spec config.ExportSpecTransform) (*transformingData, error) {
+	return func(trData *transformingData, spec SpecificationTransform) (*transformingData, error) {
 		if len(spec.SkipColumns) == 0 {
 			return trData, nil
 		}
@@ -31,7 +30,7 @@ func SkipColumnsDataTransformer() DataTransformer {
 }
 
 func OnlyColumnsDataTransformer() DataTransformer {
-	return func(data *transformingData, spec config.ExportSpecTransform) (*transformingData, error) {
+	return func(data *transformingData, spec SpecificationTransform) (*transformingData, error) {
 		if len(spec.OnlyColumns) == 0 {
 			return data, nil
 		}
@@ -48,7 +47,7 @@ func OnlyColumnsDataTransformer() DataTransformer {
 }
 
 func RenameColumnsDataTransformer() DataTransformer {
-	return func(trData *transformingData, spec config.ExportSpecTransform) (*transformingData, error) {
+	return func(trData *transformingData, spec SpecificationTransform) (*transformingData, error) {
 		if len(spec.RenameColumns) == 0 {
 			return trData, nil
 		}

@@ -1,10 +1,13 @@
 package config
 
-import "github.com/artarts36/specw"
+import (
+	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/specw"
+)
 
 type Config struct {
-	Databases map[string]Database `yaml:"databases" json:"databases"`
-	Tasks     map[string]Task     `yaml:"tasks" json:"tasks"`
+	Databases map[string]schema.Database `yaml:"databases" json:"databases"`
+	Tasks     map[string]Task            `yaml:"tasks" json:"tasks"`
 	Options   struct {
 		WithMigrationsTable bool `yaml:"with_migrations_table" json:"with_migrations_table"`
 		PrintStat           bool `yaml:"print_stat" json:"print_stat"`
@@ -45,8 +48,8 @@ func (c *Config) GetDefaultDatabaseName() (string, bool) {
 	return "", false
 }
 
-func (c *Config) UsingDatabases() map[string]Database {
-	dbs := map[string]Database{}
+func (c *Config) UsingDatabases() map[string]schema.Database {
+	dbs := map[string]schema.Database{}
 
 	for _, task := range c.Tasks {
 		for _, activity := range task.Activities {

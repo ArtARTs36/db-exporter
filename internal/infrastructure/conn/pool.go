@@ -3,7 +3,7 @@ package conn
 import (
 	"errors"
 	"fmt"
-	"github.com/artarts36/db-exporter/internal/config"
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Pool struct {
@@ -16,7 +16,7 @@ func NewPool() *Pool {
 	}
 }
 
-func (p *Pool) Setup(ds map[string]config.Database) {
+func (p *Pool) Setup(ds map[string]schema.Database) {
 	for name, d := range ds {
 		p.connections[name] = NewConnection(d)
 	}

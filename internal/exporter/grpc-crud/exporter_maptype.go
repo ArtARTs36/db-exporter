@@ -1,7 +1,6 @@
 package grpccrud
 
 import (
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/presentation"
 	"github.com/artarts36/db-exporter/internal/infrastructure/sqltype"
 	"github.com/artarts36/db-exporter/internal/schema"
@@ -9,7 +8,7 @@ import (
 )
 
 func (e *Exporter) mapType(
-	sourceDriver config.DatabaseDriver,
+	sourceDriver schema.DatabaseDriver,
 	column *schema.Column,
 	file *presentation.File,
 ) string {
