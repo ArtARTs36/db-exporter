@@ -14,7 +14,7 @@ type FSWorkspace struct {
 
 	fs fs.Driver
 
-	writerFn func(ctx context.Context, path string, writer func(buffer iox.Writer) error) error
+	writerFn func(ctx context.Context, file *WritingFile) error
 
 	store *store
 }
@@ -41,8 +41,8 @@ func newFSWorkspace(
 	return ws
 }
 
-func (w *FSWorkspace) Write(ctx context.Context, path string, writer func(buffer iox.Writer) error) error {
-	return w.writerFn(ctx, path, writer)
+func (w *FSWorkspace) Write(ctx context.Context, file *WritingFile) error {
+	return w.writerFn(ctx, file)
 }
 
 func (w *FSWorkspace) setupWriter() {
@@ -53,16 +53,16 @@ func (w *FSWorkspace) setupWriter() {
 	}
 }
 
-func (w *FSWorkspace) writeNewFile(ctx context.Context, path string, writer func(buffer iox.Writer) error) error {
-	if w.fs.Exists(path) {
+func (w *FSWorkspace) writeNewFile(ctx context.Context, file *WritingFile) error {
+	if w.fs.Exists(file.Filename) {
 		return nil
 	}
 
-	return w.write(ctx, path, writer)
+	return w.write(ctx, file)
 }
 
-func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(buffer iox.Writer) error) error {
-	path := w.pathTo(filename)
+func (w *FSWorkspace) write(ctx context.Context, wrFile *WritingFile) error {
+	path := w.pathTo(wrFile.Filename)
 
 	file, err := w.fs.OpenFile(path)
 	if err != nil {
@@ -80,7 +80,7 @@ func (w *FSWorkspace) write(ctx context.Context, filename string, writer func(bu
 
 	buf := iox.NewWriter()
 
-	err = writer(buf)
+	err = wrFile.Writer(buf)
 	if err != nil {
 		return fmt.Errorf("write to buffer: %w", err)
 	}

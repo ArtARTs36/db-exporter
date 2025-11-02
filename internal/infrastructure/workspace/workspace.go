@@ -7,5 +7,11 @@ import (
 
 type Workspace interface {
 	// Write file to workspace.
-	Write(ctx context.Context, filename string, writer func(buffer iox.Writer) error) error
+	Write(ctx context.Context, file *WritingFile) error
+}
+
+type WritingFile struct {
+	Filename string
+	Writer   func(buffer iox.Writer) error
+	Indent   *iox.Indent
 }

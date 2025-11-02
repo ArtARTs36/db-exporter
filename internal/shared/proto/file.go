@@ -57,7 +57,7 @@ func PrepareOptions(options orderedmap.OrderedMap[string, interface{}]) map[stri
 	return opts
 }
 
-func (f *File) Render(buf iox.Writer) string {
+func (f *File) Render(buf iox.Writer) {
 	f.writeSyntax(buf)
 	f.writePackage(buf)
 	f.writeImports(buf)
@@ -65,8 +65,6 @@ func (f *File) Render(buf iox.Writer) string {
 	f.writeServices(buf)
 	f.writeMessages(buf)
 	f.writeEnums(buf)
-
-	return buf.String()
 }
 
 func (f *File) writeSyntax(buf iox.Writer) {

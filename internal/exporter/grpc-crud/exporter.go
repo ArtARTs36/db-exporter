@@ -53,7 +53,6 @@ func (e *Exporter) ExportPerFile(
 		return nil, fmt.Errorf("invalid spec")
 	}
 
-	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len()+len(params.Schema.Enums))
 	options := proto.PrepareOptions(spec.Options)
 	indent := iox.NewIndent(spec.Indent)
 
@@ -66,15 +65,18 @@ func (e *Exporter) ExportPerFile(
 
 		err := params.Workspace.Write(
 			ctx,
-			fmt.Sprintf("%s_enum.proto", enum.Name.Value),
-			func(buffer workspace.Buffer,
-			) error {
-				prfile := pkg.CreateFile(fmt.Sprintf("%s_enum.proto", enum.Name.Value)).SetOptions(options)
-				prfile.AddEnum(*enum.Name, enum.Values)
-				prfile.Render(buffer, indent)
+			&workspace.WritingFile{
+				Filename: fmt.Sprintf("%s_enum.proto", enum.Name.Value),
+				Indent:   indent,
+				Writer: func(buffer iox.Writer) error {
+					prfile := pkg.CreateFile(fmt.Sprintf("%s_enum.proto", enum.Name.Value)).SetOptions(options)
+					prfile.AddEnum(*enum.Name, enum.Values)
+					prfile.Render(buffer)
 
-				return nil
-			})
+					return nil
+				},
+			},
+		)
 		if err != nil {
 			return nil, fmt.Errorf("write enum to workspace: %w", err)
 		}
@@ -85,30 +87,34 @@ func (e *Exporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := params.Workspace.Write(ctx, prfile.Name(), func(buffer workspace.Buffer) error {
-			err := e.buildService(params.Schema.Driver, prfile, table, pager)
-			if err != nil {
-				return fmt.Errorf("build service for table %q: %w", table.Name, err)
-			}
-
-			for _, enum := range table.UsingEnums {
-				if !enum.UsingInSingleTable() {
-					continue
+		err := params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: prfile.Name(),
+			Indent:   indent,
+			Writer: func(buffer iox.Writer) error {
+				err := e.buildService(params.Schema.Driver, prfile, table, pager)
+				if err != nil {
+					return fmt.Errorf("build service for table %q: %w", table.Name, err)
 				}
 
-				prfile.AddEnum(*enum.Name, enum.Values)
-			}
+				for _, enum := range table.UsingEnums {
+					if !enum.UsingInSingleTable() {
+						continue
+					}
 
-			prfile.Render(buffer, indent)
+					prfile.AddEnum(*enum.Name, enum.Values)
+				}
 
-			return nil
+				prfile.Render(buffer)
+
+				return nil
+			},
 		})
 		if err != nil {
 			return nil, fmt.Errorf("write table %q to workspace: %w", table.Name.Value, err)
 		}
 	}
 
-	return pages, nil
+	return []*exporter.ExportedPage{}, nil
 }
 
 func (e *Exporter) newPackage(spec *Specification) *presentation.Package {
@@ -164,28 +170,28 @@ func (e *Exporter) Export(
 
 	prfile := pkg.CreateFile("services.proto").SetOptions(options)
 
-	err := params.Workspace.Write(ctx, "services.proto", func(buffer workspace.Buffer) error {
-		for _, enum := range params.Schema.Enums {
-			if enum.Used == 0 {
-				continue
+	err := params.Workspace.Write(ctx, &workspace.WritingFile{
+		Filename: prfile.Name(),
+		Indent:   indent,
+		Writer: func(buffer iox.Writer) error {
+			for _, enum := range params.Schema.Enums {
+				if enum.Used == 0 {
+					continue
+				}
+
+				prfile.AddEnum(*enum.Name, enum.Values)
 			}
 
-			prfile.AddEnum(*enum.Name, enum.Values)
-		}
-
-		for _, table := range params.Schema.Tables.List() {
-			err := e.buildService(params.Schema.Driver, prfile, table, pager)
-			if err != nil {
-				return fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
+			for _, table := range params.Schema.Tables.List() {
+				err := e.buildService(params.Schema.Driver, prfile, table, pager)
+				if err != nil {
+					return fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
+				}
 			}
-		}
 
-		expPage := &exporter.ExportedPage{
-			FileName: "services.proto",
-			Content:  []byte(prfile.Render(iox.NewWriterWithIndent(spec.Indent))),
-		}
-
-		return nil
+			prfile.Render(buffer)
+			return nil
+		},
 	})
 
 	return nil, err

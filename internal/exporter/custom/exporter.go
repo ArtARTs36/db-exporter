@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 
 	"github.com/tyler-sommer/stick"
 
-	"github.com/artarts36/db-exporter/internal/exporter/common"
-	"github.com/artarts36/db-exporter/internal/config"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -33,12 +32,15 @@ func (e *Exporter) Export(
 		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
-	err := params.Workspace.Write(ctx, e.filenameCreator(spec)("result"), func(buffer workspace.Buffer) error {
-		return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
-			"schema": &exportingSchema{
-				Tables: params.Schema.Tables.List(),
-			},
-		}, buffer)
+	err := params.Workspace.Write(ctx, &workspace.WritingFile{
+		Filename: e.filenameCreator(spec)("result"),
+		Writer: func(buffer iox.Writer) error {
+			return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
+				"schema": &exportingSchema{
+					Tables: params.Schema.Tables.List(),
+				},
+			}, buffer)
+		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("write table to workspace: %w", err)
@@ -61,10 +63,13 @@ func (e *Exporter) ExportPerFile(
 	createFilename := e.filenameCreator(spec)
 
 	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
-		err := params.Workspace.Write(ctx, createFilename(table.Name.Value), func(buffer workspace.Buffer) error {
-			return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
-				"table": table,
-			}, buffer)
+		err := params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: createFilename(table.Name.Value),
+			Writer: func(buffer iox.Writer) error {
+				return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
+					"table": table,
+				}, buffer)
+			},
 		})
 		if err != nil {
 			return fmt.Errorf("write table to workspace: %w", err)

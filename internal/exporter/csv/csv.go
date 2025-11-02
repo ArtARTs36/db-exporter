@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
@@ -42,10 +43,9 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 			continue
 		}
 
-		err = params.Workspace.Write(
-			ctx,
-			fmt.Sprintf("%s.csv", table.Name.String()),
-			func(buffer workspace.Buffer) error {
+		err = params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: fmt.Sprintf("%s.csv", table.Name.String()),
+			Writer: func(buffer iox.Writer) error {
 				trData := &transformingData{
 					cols: table.ColumnsNames(),
 					rows: tableData,
@@ -59,7 +59,8 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 				c.generator.generate(trData, spec.Delimiter, buffer)
 
 				return nil
-			})
+			},
+		})
 		if err != nil {
 			return nil, fmt.Errorf("write table data to workspace: %w", err)
 		}
@@ -68,7 +69,7 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 	return []*exporter.ExportedPage{}, nil
 }
 
-func (c *Exporter) transform(table *schema.Table, data *transformingData, spec *config.CSVExportSpec) error {
+func (c *Exporter) transform(table *schema.Table, data *transformingData, spec *Specification) error {
 	if len(spec.Transform) == 0 {
 		return nil
 	}

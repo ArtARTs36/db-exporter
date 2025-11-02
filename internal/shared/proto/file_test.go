@@ -138,7 +138,8 @@ enum UserStatus {
   USERSTATUS_ACTIVE = 1;
   USERSTATUS_BANNED = 2;
 }`
-	got := f.Render(iox.NewIndent(2))
+	w := iox.NewWriter()
+	f.Render(w)
 
-	assert.Equal(t, expected, got)
+	assert.Equal(t, expected, w.String())
 }
