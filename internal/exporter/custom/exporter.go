@@ -3,10 +3,11 @@ package custom
 import (
 	"context"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 
 	"github.com/tyler-sommer/stick"
 
-	"github.com/artarts36/db-exporter/internal/exporter/common"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/template"
@@ -14,18 +15,16 @@ import (
 
 type Exporter struct {
 	renderer *template.Renderer
-	pager    *common.Pager
 }
 
 func NewExporter(
 	renderer *template.Renderer,
-	pager *common.Pager,
 ) *Exporter {
-	return &Exporter{renderer: renderer, pager: pager}
+	return &Exporter{renderer: renderer}
 }
 
 func (e *Exporter) Export(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*Specification)
@@ -33,22 +32,25 @@ func (e *Exporter) Export(
 		return nil, fmt.Errorf("invalid spec, expected Specification, got %T", params.Spec)
 	}
 
-	pager := e.pager.Of(spec.Template)
-
-	p, err := pager.Export(e.filenameCreator(spec)("result"), map[string]stick.Value{
-		"schema": &exportingSchema{
-			Tables: params.Schema.Tables.List(),
+	err := params.Workspace.Write(ctx, &workspace.WritingFile{
+		Filename: e.filenameCreator(spec)("result"),
+		Writer: func(buffer iox.Writer) error {
+			return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
+				"schema": &exportingSchema{
+					Tables: params.Schema.Tables.List(),
+				},
+			}, buffer)
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("write table to workspace: %w", err)
 	}
 
-	return []*exporter.ExportedPage{p}, nil
+	return nil, nil
 }
 
 func (e *Exporter) ExportPerFile(
-	_ context.Context,
+	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
 	spec, ok := params.Spec.(*Specification)
@@ -58,19 +60,20 @@ func (e *Exporter) ExportPerFile(
 
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
-	pager := e.pager.Of(spec.Template)
-
 	createFilename := e.filenameCreator(spec)
 
 	err := params.Schema.Tables.EachWithErr(func(table *schema.Table) error {
-		p, err := pager.Export(createFilename(table.Name.Value), map[string]stick.Value{
-			"table": table,
+		err := params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: createFilename(table.Name.Value),
+			Writer: func(buffer iox.Writer) error {
+				return e.renderer.RenderTo(spec.Template, map[string]stick.Value{
+					"table": table,
+				}, buffer)
+			},
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("write table to workspace: %w", err)
 		}
-
-		pages = append(pages, p)
 
 		return nil
 	})

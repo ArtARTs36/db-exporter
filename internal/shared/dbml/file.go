@@ -1,6 +1,8 @@
 package dbml
 
-import "strings"
+import (
+	"github.com/artarts36/db-exporter/internal/shared/iox"
+)
 
 type File struct {
 	Tables []*Table
@@ -8,9 +10,7 @@ type File struct {
 	Enums  []*Enum
 }
 
-func (f *File) Render() string {
-	w := &strings.Builder{}
-
+func (f *File) Render(w iox.Writer) {
 	for i, table := range f.Tables {
 		table.Render(w)
 
@@ -34,6 +34,4 @@ func (f *File) Render() string {
 	for _, enum := range f.Enums {
 		enum.Render(w)
 	}
-
-	return w.String()
 }

@@ -2,6 +2,7 @@ package dbml
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"strings"
 )
 
@@ -29,7 +30,7 @@ type ColumnSettings struct {
 	null bool
 }
 
-func (t *Table) Render(w *strings.Builder) {
+func (t *Table) Render(w iox.Writer) {
 	w.WriteString("Table " + t.Name + " {\n")
 
 	for _, column := range t.Columns {

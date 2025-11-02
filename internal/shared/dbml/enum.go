@@ -2,6 +2,7 @@ package dbml
 
 import (
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"strings"
 )
 
@@ -20,7 +21,7 @@ type EnumValueSettings struct {
 	Note string
 }
 
-func (e *Enum) Render(w *strings.Builder) {
+func (e *Enum) Render(w iox.Writer) {
 	w.WriteString("Enum " + e.Name + " {\n")
 
 	for _, value := range e.Values {
@@ -32,7 +33,7 @@ func (e *Enum) Render(w *strings.Builder) {
 	w.WriteByte('}')
 }
 
-func (v *EnumValue) Render(w *strings.Builder) {
+func (v *EnumValue) Render(w iox.Writer) {
 	w.WriteByte('"')
 	w.WriteString(v.Name)
 	w.WriteByte('"')

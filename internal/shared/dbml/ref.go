@@ -1,7 +1,7 @@
 package dbml
 
 import (
-	"strings"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 )
 
 type Ref struct {
@@ -10,6 +10,6 @@ type Ref struct {
 	To   string
 }
 
-func (r *Ref) Render(w *strings.Builder) {
+func (r *Ref) Render(w iox.Writer) {
 	w.WriteString("Ref: " + r.From + " " + r.Type + " " + r.To + "\n")
 }

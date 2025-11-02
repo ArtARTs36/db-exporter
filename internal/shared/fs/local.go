@@ -38,3 +38,7 @@ func (*Local) Write(path string, content []byte) (FileInfo, error) {
 
 	return FileInfo{Path: path, Size: int64(size)}, err
 }
+
+func (*Local) OpenFile(path string) (*os.File, error) {
+	return os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
+}

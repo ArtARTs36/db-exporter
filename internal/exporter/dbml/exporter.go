@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
+	"github.com/artarts36/db-exporter/internal/schema"
 	"github.com/artarts36/db-exporter/internal/shared/dbml"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 )
 
 type Exporter struct {
@@ -21,60 +24,89 @@ func (e *Exporter) ExportPerFile(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	pagesLen := params.Schema.Tables.Len()
-	if len(params.Schema.Enums) > 0 {
-		pagesLen++
-	}
-
-	pages := make([]*exporter.ExportedPage, 0, pagesLen)
-
 	for _, tbl := range params.Schema.Tables.List() {
-		dbmlFile := &dbml.File{}
-		table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map table %q: w", err)
-		}
-		dbmlFile.Tables = []*dbml.Table{table}
-		dbmlFile.Refs = refs
+		err := params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: fmt.Sprintf("%s.dbml", tbl.Name.Value),
+			Writer: func(buffer iox.Writer) error {
+				dbmlFile := &dbml.File{}
+				table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
+				if err != nil {
+					return fmt.Errorf("failed to map table %q: w", err)
+				}
+				dbmlFile.Tables = []*dbml.Table{table}
+				dbmlFile.Refs = refs
 
-		pages = append(pages, &exporter.ExportedPage{
-			FileName: fmt.Sprintf("%s.dbml", tbl.Name.Value),
-			Content:  []byte(dbmlFile.Render()),
+				dbmlFile.Render(buffer)
+
+				return nil
+			},
 		})
+		if err != nil {
+			return nil, fmt.Errorf("write table %q to workspace: %w", tbl.Name.Value, err)
+		}
 	}
 
-	enumFile := &dbml.File{Enums: e.mapper.mapEnums(params.Schema)}
-	pages = append(pages, &exporter.ExportedPage{
-		FileName: "enums.dbml",
-		Content:  []byte(enumFile.Render()),
-	})
+	err := params.Workspace.Write(ctx, &workspace.WritingFile{
+		Filename: "enums.dbml",
+		Writer: func(buffer iox.Writer) error {
+			dbmlFile := &dbml.File{
+				Enums: e.mapper.mapEnums(params.Schema),
+			}
 
-	return pages, nil
+			dbmlFile.Render(buffer)
+
+			return nil
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("write enums to workspace: %w", err)
+	}
+
+	return nil, nil
 }
 
 func (e *Exporter) Export(
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
-	dbmlFile := &dbml.File{
-		Tables: make([]*dbml.Table, 0, params.Schema.Tables.Len()),
-		Refs:   make([]*dbml.Ref, 0),
-		Enums:  e.mapper.mapEnums(params.Schema),
-	}
+	err := params.Workspace.Write(ctx, &workspace.WritingFile{
+		Filename: "schema.dbml",
+		Writer: func(buffer iox.Writer) error {
+			dbmlFile := &dbml.File{
+				Tables: make([]*dbml.Table, 0, params.Schema.Tables.Len()),
+				Refs:   make([]*dbml.Ref, 0),
+				Enums:  e.mapper.mapEnums(params.Schema),
+			}
 
-	for _, tbl := range params.Schema.Tables.List() {
-		table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
-		if err != nil {
-			return nil, fmt.Errorf("failed to map table %q: %w", tbl.Name, err)
-		}
-		dbmlFile.Tables = append(dbmlFile.Tables, table)
-		dbmlFile.Refs = append(dbmlFile.Refs, refs...)
-	}
+			for _, tbl := range params.Schema.Tables.List() {
+				err := e.exportTable(ctx, tbl, params, dbmlFile)
+				if err != nil {
+					return fmt.Errorf("export table %q: %w", tbl.Name, err)
+				}
+			}
 
-	return []*exporter.ExportedPage{
-		{
-			FileName: "schema.dbml",
-			Content:  []byte(dbmlFile.Render()),
+			dbmlFile.Render(buffer)
+
+			return nil
 		},
-	}, nil
+	})
+
+	return nil, err
+}
+
+func (e *Exporter) exportTable(
+	ctx context.Context,
+	tbl *schema.Table,
+	params *exporter.ExportParams,
+	dbmlFile *dbml.File,
+) error {
+	table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
+	if err != nil {
+		return fmt.Errorf("map table: %w", err)
+	}
+
+	dbmlFile.Tables = append(dbmlFile.Tables, table)
+	dbmlFile.Refs = append(dbmlFile.Refs, refs...)
+
+	return nil
 }

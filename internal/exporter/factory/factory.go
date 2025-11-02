@@ -68,7 +68,7 @@ func CreateExporters(renderer *template.Renderer) map[config.ExporterName]export
 		config.ExporterNameJSONSchema: jsonschema.NewExporter(),
 		config.ExporterNameGraphql:    graphql.NewExporter(),
 		config.ExporterNameDBML:       dbml.NewExporter(),
-		config.ExporterNameCustom:     custom.NewExporter(renderer, pager),
+		config.ExporterNameCustom:     custom.NewExporter(renderer),
 		config.ExporterNameDDL:        ddl.NewExporter(pager, ddlBuilderManager),
 		config.ExporterNameMermaid:    mermaid.NewExporter(),
 	}

@@ -1,8 +1,8 @@
 package dbml
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 )
 
@@ -97,7 +97,7 @@ func TestRender_Build(t *testing.T) {
 
 	for _, tCase := range cases {
 		t.Run(tCase.Title, func(t *testing.T) {
-			w := &strings.Builder{}
+			w := iox.NewWriter()
 
 			tCase.Table.Render(w)
 
