@@ -4,6 +4,8 @@ github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18 h1:a0BSeYaq9jpqD
 github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18/go.mod h1:LVETs2AVtd7Ph3snI3Ig9wuccciwpsTl0z4TNub3z4A=
 github.com/artarts36/gds v0.2.4 h1:RO1tUnTtv1jYhX+Zd8tnFTUrzoss10DPOFZk4H64F9Y=
 github.com/artarts36/gds v0.2.4/go.mod h1:CvBjGkRiHY8YLZDWb3RFAy+Ve7yQdjHQqTmKfjjlWjY=
+github.com/artarts36/gds v0.2.5 h1:95FcE7VZqA21Do4eCKNokzS0GLzZn66swts8k97EO2U=
+github.com/artarts36/gds v0.2.5/go.mod h1:CvBjGkRiHY8YLZDWb3RFAy+Ve7yQdjHQqTmKfjjlWjY=
 github.com/artarts36/singlecli v0.1.2 h1:dpvQGZ/HiJ/5NoVg/movytI7q9mitXifLXNtQLRBGdI=
 github.com/artarts36/singlecli v0.1.2/go.mod h1:cyUkPJcc6vYWqcYPMcpuNn4NLi0AkfuA3j/LPeJUOCo=
 github.com/artarts36/specw v0.1.2 h1:35Dj0B++/JDqOwWT4jyPfhPkWceBM3OjpjvK8SnyCcM=

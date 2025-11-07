@@ -1,6 +1,6 @@
 Table users {
   id integer [primary key, not null]
-  name varchar [not null]
+  name varchar [not null, note: 'user name']
   balance real [not null]
   prev_balance real
   created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]

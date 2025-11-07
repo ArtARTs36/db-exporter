@@ -64,6 +64,7 @@ func (f *Field) CopyType(b *Field) *Field {
 	f.proto.Type = b.proto.Type
 	f.proto.Repeated = b.proto.Repeated
 	f.column = b.column
+	f.proto.TopComment = b.proto.TopComment
 
 	return f
 }

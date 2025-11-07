@@ -13,6 +13,8 @@ CREATE TABLE users
     CONSTRAINT users_pk PRIMARY KEY (id)
 );
 
+COMMENT ON COLUMN users.name IS 'user name';
+
 CREATE TABLE phones
 (
     user_id integer NOT NULL,

@@ -69,6 +69,7 @@ func TestPGExport(t *testing.T) {
 		    CONSTRAINT phones_pk PRIMARY KEY (user_id, number)
 		);`,
 		`ALTER TABLE phones ADD CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id);`,
+		`COMMENT ON COLUMN users.name IS 'user name';`,
 		`INSERT INTO users (id, name, balance, prev_balance, created_at, current_mood) VALUES
 		(1, 'Artem', 999999999, null, '2025-10-26 21:21:27.699806', 'ok'),
 		(2, 'Ivan', 88888888, null, '2025-10-26 21:21:27.699806', 'happy');`,

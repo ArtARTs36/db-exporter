@@ -11,10 +11,6 @@ type Indent struct {
 
 var zeroIndent = &Indent{}
 
-func ZeroIndent() *Indent {
-	return zeroIndent
-}
-
 func NewIndent(step int) *Indent {
 	return &Indent{
 		step: strings.Repeat(" ", step),

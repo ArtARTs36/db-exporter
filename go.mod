@@ -4,7 +4,7 @@ go 1.24.7
 
 require (
 	github.com/artarts36/dbml-go v0.0.0-20241109000810-f4e3c96fdf18
-	github.com/artarts36/gds v0.2.4
+	github.com/artarts36/gds v0.2.5
 	github.com/artarts36/singlecli v0.1.2
 	github.com/artarts36/specw v0.1.2
 	github.com/ci-space/cienv v0.0.0-20251013231827-b9293e57a1d5

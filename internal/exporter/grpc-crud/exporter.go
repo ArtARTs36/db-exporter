@@ -228,6 +228,10 @@ func (e *Exporter) buildService(
 					}
 
 					field.SetColumn(column)
+
+					if column.Comment.IsNotEmpty() {
+						field.SetTopComment(column.Comment.WithSuffix(".").Value)
+					}
 				}
 
 				fieldName := column.Name.Snake().Lower().Value

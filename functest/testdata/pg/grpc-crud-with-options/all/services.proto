@@ -86,6 +86,8 @@ service PhonesService {
 
 message User {
   int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // user name.
   string name = 2 [(google.api.field_behavior) = REQUIRED];
   double balance = 3 [(google.api.field_behavior) = REQUIRED];
   double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
@@ -137,6 +139,7 @@ message CreateUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
+  // user name.
   string name = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.max_len = 64,
@@ -167,6 +170,7 @@ message PatchUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
+  // user name.
   string name = 2 [
     (buf.validate.field).required = true,
     (buf.validate.field).string.max_len = 64,

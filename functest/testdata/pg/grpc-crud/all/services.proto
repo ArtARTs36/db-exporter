@@ -44,6 +44,8 @@ service PhonesService {
 
 message User {
   int64 id = 1;
+
+  // user name.
   string name = 2;
   double balance = 3;
   double prev_balance = 4;
@@ -82,6 +84,8 @@ message DeleteUserResponse {}
 
 message CreateUserRequest {
   int64 id = 1;
+
+  // user name.
   string name = 2;
   double balance = 3;
   double prev_balance = 4;
@@ -95,6 +99,8 @@ message CreateUserResponse {
 
 message PatchUserRequest {
   int64 id = 1;
+
+  // user name.
   string name = 2;
   double balance = 3;
   double prev_balance = 4;

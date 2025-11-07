@@ -48,7 +48,7 @@ func (s *sbWriter) WriteNewLine() {
 }
 
 func (s *sbWriter) WithoutIndent() Writer {
-	return &sbWriter{b: s.b, indent: ZeroIndent()}
+	return &sbWriter{b: s.b, indent: zeroIndent}
 }
 
 func (s *sbWriter) Bytes() []byte {
