@@ -64,21 +64,21 @@ func (b *GraphBuilder) buildGraph(
 		graph.SetBackgroundColor(*spec.Style.Background.Color)
 	}
 
-	slog.Debug("[graphbuilder] mapping graph")
+	slog.DebugContext(ctx, "[graphbuilder] mapping graph nodes")
 
 	tablesNodes, err := b.buildNodes(graph, tables, spec)
 	if err != nil {
 		return nil, fmt.Errorf("build nodes: %w", err)
 	}
 
-	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
+	slog.DebugContext(ctx, fmt.Sprintf("[graphbuilder] builded %d nodes", len(tablesNodes)))
 
 	edgesCount, err := b.buildEdges(graph, tables, tablesNodes, spec)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build edges: %w", err)
 	}
 
-	slog.Debug(fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
+	slog.DebugContext(ctx, fmt.Sprintf("[graphbuilder] builded %d edges", edgesCount))
 
 	return graph, nil
 }
@@ -91,12 +91,16 @@ func (b *GraphBuilder) buildNodes(
 	tablesNodes := map[string]*graphviz2.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
+		slog.Debug("[graphbuilder] creating node for table", slog.String("table.name", table.Name.Value))
+
 		node, graphErr := graph.CreateNode(table.Name.Value)
 		if graphErr != nil {
 			return fmt.Errorf("failed to create node for table %q: %w", table.Name.Value, graphErr)
 		}
 
 		node.SetFontSize(spec.Style.Font.Size)
+
+		slog.Debug("[graphbuilder] rendering html for table node", slog.String("table.name", table.Name.Value))
 
 		ht, tableErr := b.renderer.Render("@embed/diagram/table.html", map[string]stick.Value{
 			"table": mapTable(table),
