@@ -419,7 +419,7 @@ func (e *Exporter) buildCreateProcedure(
 func (e *Exporter) buildUpdateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	buildCtx.service.AddProcedureFn("Update", presentation.ProcedureTypeUpdate,
+	buildCtx.service.AddProcedure("Update", presentation.ProcedureTypeUpdate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
 
@@ -438,16 +438,6 @@ func (e *Exporter) buildUpdateProcedure(
 					}
 				})
 			}
-		},
-		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Update%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
 		},
 	)
 

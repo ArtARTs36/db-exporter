@@ -40,7 +40,7 @@ service UsersService {
   }
 
   // Update an existing user.
-  rpc Update(UpdateUserRequest) returns (UpdateUserResponse) {
+  rpc Update(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       put: "/v1/users/{id}"
     };
@@ -78,7 +78,7 @@ service PhonesService {
   }
 
   // Update an existing phone.
-  rpc Update(UpdatePhoneRequest) returns (UpdatePhoneResponse) {
+  rpc Update(UpdatePhoneRequest) returns (Phone) {
     option (google.api.http) = {
       put: "/v1/phones/{user_id}/{number}"
     };
@@ -230,12 +230,6 @@ message UpdateUserRequest {
   ];
 }
 
-message UpdateUserResponse {
-  User user = 1 [
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
 message Phone {
   int64 user_id = 1 [
     (google.api.field_behavior) = REQUIRED
@@ -313,12 +307,6 @@ message UpdatePhoneRequest {
 
   string number = 2 [
     (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message UpdatePhoneResponse {
-  Phone phone = 1 [
     (google.api.field_behavior) = REQUIRED
   ];
 }

@@ -22,7 +22,7 @@ service UsersService {
   rpc Create(CreateUserRequest) returns (User) {};
 
   // Update an existing user.
-  rpc Update(UpdateUserRequest) returns (UpdateUserResponse) {};
+  rpc Update(UpdateUserRequest) returns (User) {};
 }
 
 // Service for working with phones.
@@ -40,7 +40,7 @@ service PhonesService {
   rpc Create(CreatePhoneRequest) returns (Phone) {};
 
   // Update an existing phone.
-  rpc Update(UpdatePhoneRequest) returns (UpdatePhoneResponse) {};
+  rpc Update(UpdatePhoneRequest) returns (Phone) {};
 }
 
 message User {
@@ -103,10 +103,6 @@ message UpdateUserRequest {
   google.protobuf.Timestamp updated_at = 6;
 }
 
-message UpdateUserResponse {
-  User user = 1;
-}
-
 message Phone {
   int64 user_id = 1;
   string number = 2;
@@ -142,10 +138,6 @@ message CreatePhoneRequest {
 message UpdatePhoneRequest {
   int64 user_id = 1;
   string number = 2;
-}
-
-message UpdatePhoneResponse {
-  Phone phone = 1;
 }
 
 enum Mood {
