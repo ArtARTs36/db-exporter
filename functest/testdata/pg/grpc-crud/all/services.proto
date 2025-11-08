@@ -80,7 +80,8 @@ message DeleteUserRequest {
   int64 id = 1;
 }
 
-message DeleteUserResponse {}
+message DeleteUserResponse {
+}
 
 message CreateUserRequest {
   int64 id = 1;
@@ -144,7 +145,8 @@ message DeletePhoneRequest {
   string number = 2;
 }
 
-message DeletePhoneResponse {}
+message DeletePhoneResponse {
+}
 
 message CreatePhoneRequest {
   int64 user_id = 1;

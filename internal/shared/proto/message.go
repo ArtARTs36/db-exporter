@@ -16,10 +16,7 @@ func (m *Message) write(buf iox.Writer) {
 	}
 
 	buf.WriteString("message " + m.Name + " {")
-
-	if len(m.Fields) > 0 {
-		buf.WriteNewLine()
-	}
+	buf.WriteNewLine()
 
 	for i, field := range m.Fields {
 		if (i > 0 && len(m.Fields[i-1].Options) > 1) || field.TopComment != "" {
