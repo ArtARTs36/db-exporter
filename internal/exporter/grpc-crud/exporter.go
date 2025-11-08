@@ -208,8 +208,8 @@ func (e *Exporter) buildService(
 			Build: e.buildCreateProcedure,
 		},
 		{
-			Type:  presentation.ProcedureTypePatch,
-			Build: e.buildPatchProcedure,
+			Type:  presentation.ProcedureTypeUpdate,
+			Build: e.buildUpdateProcedure,
 		},
 	}
 
@@ -413,12 +413,12 @@ func (e *Exporter) buildCreateProcedure(
 	return nil
 }
 
-func (e *Exporter) buildPatchProcedure(
+func (e *Exporter) buildUpdateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	buildCtx.service.AddProcedureFn("Patch", presentation.ProcedureTypePatch,
+	buildCtx.service.AddProcedureFn("Update", presentation.ProcedureTypeUpdate,
 		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
+			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.service.TableMessage().Table().Columns {
 				if e.columnAutofilled(col) {
@@ -438,7 +438,7 @@ func (e *Exporter) buildPatchProcedure(
 		},
 		func(message *presentation.Message) {
 			message.
-				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
+				SetName(fmt.Sprintf("Update%sResponse", buildCtx.tableSingularName)).
 				CreateField(
 					buildCtx.service.TableMessage().SingularNameForField(),
 					func(field *presentation.Field) {

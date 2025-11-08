@@ -28,7 +28,7 @@ func (m *GoogleApiHttp) ModifyProcedure(proc *presentation.Procedure) {
 		opt = googleapi.Get(m.pathTo(basePath, proc.Service().TableMessage()))
 	case presentation.ProcedureTypeCreate:
 		opt = googleapi.Post(basePath)
-	case presentation.ProcedureTypePatch:
+	case presentation.ProcedureTypeUpdate:
 		opt = googleapi.Patch(m.pathTo(basePath, proc.Service().TableMessage()))
 	case presentation.ProcedureTypeDelete:
 		opt = googleapi.Delete(m.pathTo(basePath, proc.Service().TableMessage()))

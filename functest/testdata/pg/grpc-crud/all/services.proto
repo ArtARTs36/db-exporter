@@ -20,8 +20,8 @@ service UsersService {
   // Create a new user.
   rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
 
-  // Patch an existing user.
-  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {};
+  // Update an existing user.
+  rpc Update(UpdateUserRequest) returns (UpdateUserResponse) {};
 }
 
 // Service for working with phones.
@@ -38,8 +38,8 @@ service PhonesService {
   // Create a new phone.
   rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {};
 
-  // Patch an existing phone.
-  rpc Patch(PatchPhoneRequest) returns (PatchPhoneResponse) {};
+  // Update an existing phone.
+  rpc Update(UpdatePhoneRequest) returns (UpdatePhoneResponse) {};
 }
 
 message User {
@@ -98,7 +98,7 @@ message CreateUserResponse {
   User user = 1;
 }
 
-message PatchUserRequest {
+message UpdateUserRequest {
   int64 id = 1;
 
   // user name.
@@ -109,7 +109,7 @@ message PatchUserRequest {
   google.protobuf.Timestamp updated_at = 6;
 }
 
-message PatchUserResponse {
+message UpdateUserResponse {
   User user = 1;
 }
 
@@ -157,12 +157,12 @@ message CreatePhoneResponse {
   Phone phone = 1;
 }
 
-message PatchPhoneRequest {
+message UpdatePhoneRequest {
   int64 user_id = 1;
   string number = 2;
 }
 
-message PatchPhoneResponse {
+message UpdatePhoneResponse {
   Phone phone = 1;
 }
 

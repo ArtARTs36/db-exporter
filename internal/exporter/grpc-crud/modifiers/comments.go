@@ -36,8 +36,8 @@ func (c *Comments) generateCommentForProcedure(p *presentation.Procedure) string
 		return fmt.Sprintf("Get a %s.", singleName)
 	case presentation.ProcedureTypeDelete:
 		return fmt.Sprintf("Delete a %s.", singleName)
-	case presentation.ProcedureTypePatch:
-		return fmt.Sprintf("Patch an existing %s.", singleName)
+	case presentation.ProcedureTypeUpdate:
+		return fmt.Sprintf("Update an existing %s.", singleName)
 	default:
 		return ""
 	}

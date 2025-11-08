@@ -8,7 +8,7 @@ const (
 	ProcedureTypeList   ProcedureType = "List"
 	ProcedureTypeGet    ProcedureType = "Get"
 	ProcedureTypeCreate ProcedureType = "Create"
-	ProcedureTypePatch  ProcedureType = "Patch"
+	ProcedureTypeUpdate ProcedureType = "Update"
 	ProcedureTypeDelete ProcedureType = "Delete"
 )
 
