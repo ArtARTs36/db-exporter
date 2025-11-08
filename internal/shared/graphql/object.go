@@ -47,7 +47,7 @@ func (t *Object) Build(w iox.Writer) {
 		property.Write(w)
 	}
 
-	w.WriteInline("}")
+	w.WriteString("}")
 }
 
 func (t *Object) Name() string {

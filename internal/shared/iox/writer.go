@@ -4,7 +4,6 @@ import "strings"
 
 type Writer interface {
 	WriteString(s string)
-	WriteInline(s string)
 	WriteNewLine()
 	String() string
 	Bytes() []byte
@@ -35,10 +34,6 @@ func NewWriter() Writer {
 
 func (s *sbWriter) WriteString(val string) {
 	s.b.WriteString(s.indent.Curr())
-	s.b.WriteString(val)
-}
-
-func (s *sbWriter) WriteInline(val string) {
 	s.b.WriteString(val)
 }
 
