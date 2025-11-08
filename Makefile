@@ -55,4 +55,4 @@ check: lint validate-test-cases test functest
 
 .PHONY: validate-test-cases
 validate-test-cases:
-	protolint lint .
+	protolint lint -config_path=functest/protolint.yaml ./functest
