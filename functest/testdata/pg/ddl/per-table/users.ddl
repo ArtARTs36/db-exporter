@@ -9,6 +9,7 @@ CREATE TABLE users
     created_at   timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     current_mood mood NOT NULL,
     updated_at   timestamp without time zone,
+    deleted_at   timestamp without time zone,
 
     CONSTRAINT users_pk PRIMARY KEY (id)
 );

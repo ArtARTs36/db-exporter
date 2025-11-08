@@ -114,6 +114,10 @@ message User {
   google.protobuf.Timestamp updated_at = 7 [
     (google.api.field_behavior) = OPTIONAL
   ];
+
+  google.protobuf.Timestamp deleted_at = 8 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListUsersRequest {
@@ -121,13 +125,18 @@ message ListUsersRequest {
     (google.api.field_behavior) = OPTIONAL
   ];
 
+  // If set to `true`, soft-deleted resources will be returned alongside active resources.
+  bool show_deleted = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
   // Maximum number of results per page.
-  uint64 page_size = 2 [
+  uint64 page_size = 3 [
     (google.api.field_behavior) = OPTIONAL
   ];
 
   // Token of the requested results page.
-  string page_token = 3 [
+  string page_token = 4 [
     (google.api.field_behavior) = OPTIONAL
   ];
 }

@@ -58,6 +58,7 @@ func TestPGExport(t *testing.T) {
 		    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		    current_mood mood NOT NULL,
 		    updated_at timestamp,
+		    deleted_at timestamp,
 		
 		    CONSTRAINT users_pk PRIMARY KEY (id)
 		);`,

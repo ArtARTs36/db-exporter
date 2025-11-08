@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $created_at
  * @property  $current_mood
  * @property \Illuminate\Support\Carbon $updated_at
+ * @property \Illuminate\Support\Carbon $deleted_at
  */
 class User extends Model
 {
@@ -21,4 +22,7 @@ class User extends Model
     protected $keyType = 'int';
 
     protected $table = 'users';
+    protected $dates = [
+        'deleted_at',
+    ];
 }

@@ -53,16 +53,20 @@ message User {
   google.protobuf.Timestamp created_at = 5;
   Mood current_mood = 6;
   google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp deleted_at = 8;
 }
 
 message ListUsersRequest {
   repeated int64 ids = 1;
 
+  // If set to `true`, soft-deleted resources will be returned alongside active resources.
+  bool show_deleted = 2;
+
   // Maximum number of results per page.
-  uint64 page_size = 2;
+  uint64 page_size = 3;
 
   // The number of records to skip before starting to fetch the records.
-  uint64 offset = 3;
+  uint64 offset = 4;
 }
 
 message ListUsersResponse {

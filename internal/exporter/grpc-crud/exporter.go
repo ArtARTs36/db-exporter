@@ -3,7 +3,6 @@ package grpccrud
 import (
 	"context"
 	"fmt"
-
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/paginator"
@@ -319,6 +318,13 @@ func (e *Exporter) buildListProcedure(
 				)
 			}
 
+			if message.Service().TableMessage().Table().SupportsSoftDelete() {
+				message.CreateField("show_deleted", func(field *presentation.Field) {
+					field.SetType("bool")
+					field.SetTopComment("If set to `true`, soft-deleted resources will be returned alongside active resources.")
+				})
+			}
+
 			buildCtx.paginator.AddPaginationToRequest(message)
 		},
 		func(message *presentation.Message) {
@@ -453,9 +459,13 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return true
 	}
 
+	if col.Name.Equal("deleted_at") {
+		return true
+	}
+
 	if !col.DefaultRaw.Valid {
 		return false
 	}
 
-	return col.Name.Equal("id", "created_at", "updated_at", "deleted_at")
+	return col.Name.Equal("id", "created_at", "updated_at")
 }
