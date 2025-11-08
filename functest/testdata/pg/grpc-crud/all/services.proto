@@ -109,7 +109,6 @@ message Phone {
 }
 
 message ListPhonesRequest {
-
   // Maximum number of results per page.
   uint64 page_size = 1;
 

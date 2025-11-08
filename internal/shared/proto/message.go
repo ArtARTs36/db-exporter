@@ -25,7 +25,7 @@ func (m *Message) write(buf iox.Writer) {
 
 func (m *Message) writeFields(buf iox.Writer) {
 	for i, field := range m.Fields {
-		if (i > 0 && m.Fields[i-1].hasOptions()) || field.TopComment != "" {
+		if i > 0 && (m.Fields[i-1].hasOptions() || field.TopComment != "") {
 			buf.WriteNewLine()
 		}
 
