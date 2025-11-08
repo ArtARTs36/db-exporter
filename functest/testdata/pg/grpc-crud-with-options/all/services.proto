@@ -32,7 +32,7 @@ service UsersService {
   }
 
   // Create a new user.
-  rpc Create(CreateUserRequest) returns (CreateUserResponse) {
+  rpc Create(CreateUserRequest) returns (User) {
     option (google.api.http) = {
       post: "/v1/users"
     };
@@ -70,7 +70,7 @@ service PhonesService {
   }
 
   // Create a new phone.
-  rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {
+  rpc Create(CreatePhoneRequest) returns (Phone) {
     option (google.api.http) = {
       post: "/v1/phones"
     };
@@ -197,12 +197,6 @@ message CreateUserRequest {
   ];
 }
 
-message CreateUserResponse {
-  User user = 1 [
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
 message UpdateUserRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
@@ -316,12 +310,6 @@ message CreatePhoneRequest {
 
   string number = 2 [
     (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message CreatePhoneResponse {
-  Phone phone = 1 [
     (google.api.field_behavior) = REQUIRED
   ];
 }

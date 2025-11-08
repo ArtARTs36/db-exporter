@@ -378,7 +378,7 @@ func (e *Exporter) buildCreateProcedure(
 		return nil
 	}
 
-	buildCtx.service.AddProcedureFn("Create", presentation.ProcedureTypeCreate,
+	buildCtx.service.AddProcedure("Create", presentation.ProcedureTypeCreate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
@@ -397,16 +397,6 @@ func (e *Exporter) buildCreateProcedure(
 					}
 				})
 			}
-		},
-		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
 		},
 	)
 

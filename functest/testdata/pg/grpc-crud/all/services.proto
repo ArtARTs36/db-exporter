@@ -18,7 +18,7 @@ service UsersService {
   rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
 
   // Create a new user.
-  rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
+  rpc Create(CreateUserRequest) returns (User) {};
 
   // Update an existing user.
   rpc Update(UpdateUserRequest) returns (UpdateUserResponse) {};
@@ -36,7 +36,7 @@ service PhonesService {
   rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {};
 
   // Create a new phone.
-  rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {};
+  rpc Create(CreatePhoneRequest) returns (Phone) {};
 
   // Update an existing phone.
   rpc Update(UpdatePhoneRequest) returns (UpdatePhoneResponse) {};
@@ -94,10 +94,6 @@ message CreateUserRequest {
   google.protobuf.Timestamp updated_at = 6;
 }
 
-message CreateUserResponse {
-  User user = 1;
-}
-
 message UpdateUserRequest {
   int64 id = 1;
 
@@ -151,10 +147,6 @@ message DeletePhoneResponse {
 message CreatePhoneRequest {
   int64 user_id = 1;
   string number = 2;
-}
-
-message CreatePhoneResponse {
-  Phone phone = 1;
 }
 
 message UpdatePhoneRequest {

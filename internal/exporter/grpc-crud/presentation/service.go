@@ -12,6 +12,31 @@ type Service struct {
 	proto *proto.Service
 }
 
+func (s *Service) AddProcedure(name string, typ ProcedureType, reqBuild func(message *Message)) *Service {
+	req := newMessage(MessageTypeRequest, s)
+
+	reqBuild(req)
+
+	p := &Procedure{
+		proto: &proto.ServiceProcedure{
+			Name:    name,
+			Param:   req.proto.Name,
+			Returns: s.table.Name(),
+			Options: make([]*proto.ServiceProcedureOption, 0),
+		},
+		typ:     typ,
+		service: s,
+	}
+
+	s.file.AddMessage(req.proto)
+
+	s.file.cfg.modifyProcedure(p)
+
+	s.proto.Procedures = append(s.proto.Procedures, p.proto)
+
+	return s
+}
+
 func (s *Service) AddProcedureFn(
 	name string,
 	typ ProcedureType,
