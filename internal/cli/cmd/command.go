@@ -8,7 +8,9 @@ import (
 	"github.com/artarts36/db-exporter/internal/cli/task"
 	"github.com/artarts36/db-exporter/internal/infrastructure/conn"
 	schemaInfra "github.com/artarts36/db-exporter/internal/infrastructure/schema"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
 	"github.com/artarts36/db-exporter/internal/schema"
+	"github.com/artarts36/db-exporter/internal/shared/fs"
 	"github.com/artarts36/db-exporter/internal/shared/migrations"
 	"log/slog"
 	"os"
@@ -22,6 +24,7 @@ type Command struct {
 
 	tablePrinter tablePrinter
 	committer    *Committer
+	fsDriver     fs.Driver
 }
 
 type tablePrinter func(headers []string, rows [][]string)
@@ -31,12 +34,14 @@ func NewCommand(
 	activityRunner task.ActivityRunner,
 	tblPrinter tablePrinter,
 	committer *Committer,
+	fsDriver fs.Driver,
 ) *Command {
 	return &Command{
 		migrationsTblDetector: migrationsTblDetector,
 		activityRunner:        activityRunner,
 		tablePrinter:          tblPrinter,
 		committer:             committer,
+		fsDriver:              fsDriver,
 	}
 }
 
@@ -153,6 +158,7 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 	}
 
 	result := task.NewActivityResult()
+	workspaceTree := workspace.NewFSTree(c.fsDriver)
 
 	for taskName, ttask := range params.tasks {
 		slog.InfoContext(ctx, "[command] running task", slog.String("task", taskName))
@@ -163,19 +169,15 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 				return nil, fmt.Errorf("failed to get connection for database %q", activity.Database)
 			}
 
-			activityResult, genErr := c.activityRunner.Run(ctx, &task.ActivityRunParams{
-				Activity: activity,
-				Schema:   schemas[activity.Database],
-				Conn:     cn,
+			_, genErr := c.activityRunner.Run(ctx, &task.ActivityRunParams{
+				Activity:      activity,
+				Schema:        schemas[activity.Database],
+				Conn:          cn,
+				WorkspaceTree: workspaceTree,
 			})
 			if genErr != nil {
 				return nil, genErr
 			}
-			if activityResult == nil {
-				return nil, fmt.Errorf("activity runner returns nil result")
-			}
-
-			result.Merge(activityResult)
 		}
 
 		if len(result.Export.GetFiles()) > 0 && ttask.Commit.Valid() {
@@ -187,6 +189,14 @@ func (c *Command) run(ctx context.Context, params *CommandRunParams) (*task.Acti
 				return nil, fmt.Errorf("failed to commit: %w", err)
 			}
 		}
+	}
+
+	for _, info := range workspaceTree.Files() {
+		result.Merge(&task.ActivityResult{
+			Export: &task.ExportActivityResult{
+				Files: []fs.FileInfo{*info},
+			},
+		})
 	}
 
 	return result, nil

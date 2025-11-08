@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/infrastructure/data"
+	"github.com/artarts36/db-exporter/internal/infrastructure/workspace"
+	"github.com/artarts36/db-exporter/internal/schema"
 )
 
 type Exporter struct {
@@ -31,13 +34,6 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 		return nil, errors.New("got invalid spec")
 	}
 
-	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
-
-	delimiter := spec.Delimiter
-	if delimiter == "" {
-		delimiter = ","
-	}
-
 	for _, table := range params.Schema.Tables.List() {
 		tableData, err := c.dataLoader.Load(ctx, params.Conn, table)
 		if err != nil {
@@ -47,33 +43,47 @@ func (c *Exporter) ExportPerFile(ctx context.Context, params *exporter.ExportPar
 			continue
 		}
 
-		trData := &transformingData{
-			cols: table.ColumnsNames(),
-			rows: tableData,
-		}
-
-		if len(spec.Transform) > 0 {
-			for _, transformer := range c.dataTransformers {
-				for _, transformSpec := range spec.Transform[table.Name.Value] {
-					trData, err = transformer(trData, transformSpec)
-					if err != nil {
-						return nil, fmt.Errorf("failed to transform tableData: %w", err)
-					}
+		err = params.Workspace.Write(ctx, &workspace.WritingFile{
+			Filename: fmt.Sprintf("%s.csv", table.Name.String()),
+			Writer: func(buffer iox.Writer) error {
+				trData := &transformingData{
+					cols: table.ColumnsNames(),
+					rows: tableData,
 				}
-			}
+
+				err = c.transform(table, trData, spec)
+				if err != nil {
+					return err
+				}
+
+				c.generator.generate(trData, spec.Delimiter, buffer)
+
+				return nil
+			},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("write table data to workspace: %w", err)
 		}
-
-		pageContent := c.generator.generate(trData, delimiter)
-
-		p := &exporter.ExportedPage{
-			FileName: fmt.Sprintf("%s.csv", table.Name.String()),
-			Content:  []byte(pageContent),
-		}
-
-		pages = append(pages, p)
 	}
 
-	return pages, nil
+	return []*exporter.ExportedPage{}, nil
+}
+
+func (c *Exporter) transform(table *schema.Table, data *transformingData, spec *Specification) error {
+	if len(spec.Transform) == 0 {
+		return nil
+	}
+
+	for _, transformer := range c.dataTransformers {
+		for _, transformSpec := range spec.Transform[table.Name.Value] {
+			var err error
+			data, err = transformer(data, transformSpec)
+			if err != nil {
+				return fmt.Errorf("transform table data: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func (c *Exporter) Export(ctx context.Context, params *exporter.ExportParams) ([]*exporter.ExportedPage, error) {

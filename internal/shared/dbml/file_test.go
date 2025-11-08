@@ -1,6 +1,7 @@
 package dbml
 
 import (
+	"github.com/artarts36/db-exporter/internal/shared/iox"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,6 +80,8 @@ Ref: posts.user_id > users.id
 Enum UserStatus {
   "new"
 }`
+	w := iox.NewWriter()
+	file.Render(w)
 
-	assert.Equal(t, expected, file.Render())
+	assert.Equal(t, expected, w.String())
 }
