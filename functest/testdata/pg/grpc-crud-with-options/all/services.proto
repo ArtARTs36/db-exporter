@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package org.service;
 
+import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "buf/validate/validate.proto";
 
 option optimize_for = SPEED;
 
