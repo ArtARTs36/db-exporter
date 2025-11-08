@@ -89,7 +89,6 @@ message CreateUserRequest {
   double balance = 3;
   double prev_balance = 4;
   Mood current_mood = 5;
-  google.protobuf.Timestamp updated_at = 6;
 }
 
 message UpdateUserRequest {
@@ -100,7 +99,6 @@ message UpdateUserRequest {
   double balance = 3;
   double prev_balance = 4;
   Mood current_mood = 5;
-  google.protobuf.Timestamp updated_at = 6;
 }
 
 message Phone {

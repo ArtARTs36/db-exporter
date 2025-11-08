@@ -192,10 +192,6 @@ message CreateUserRequest {
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
-
-  google.protobuf.Timestamp updated_at = 6 [
-    (google.api.field_behavior) = OPTIONAL
-  ];
 }
 
 message UpdateUserRequest {
@@ -223,10 +219,6 @@ message UpdateUserRequest {
   Mood current_mood = 5 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
-  ];
-
-  google.protobuf.Timestamp updated_at = 6 [
-    (google.api.field_behavior) = OPTIONAL
   ];
 }
 

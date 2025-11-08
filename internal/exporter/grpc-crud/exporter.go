@@ -449,7 +449,7 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return true
 	}
 
-	if col.Name.Equal("deleted_at") {
+	if col.Name.Equal("deleted_at", "delete_time", "updated_at", "update_time") {
 		return true
 	}
 
@@ -457,5 +457,5 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return false
 	}
 
-	return col.Name.Equal("id", "created_at", "updated_at")
+	return col.Name.Equal("id", "created_at", "create_time", "expire_time", "purge_time")
 }
