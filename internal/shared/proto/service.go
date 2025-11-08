@@ -51,10 +51,12 @@ func (s *ServiceProcedure) write(buf iox.Writer) {
 		buf.WriteString("// " + s.CommentTop + "\n")
 	}
 
-	buf.WriteString("rpc " + s.Name + "(" + s.Param + ") returns (" + s.Returns + ") {")
+	rpc := buf.Line()
+	rpc.WriteString("rpc " + s.Name + "(" + s.Param + ") returns (" + s.Returns + ") {")
 
 	if len(s.Options) == 0 {
-		buf.WriteInline("};\n")
+		rpc.WriteString("};")
+		buf.WriteNewLine()
 		return
 	}
 

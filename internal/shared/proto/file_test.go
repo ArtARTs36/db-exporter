@@ -122,7 +122,9 @@ service UserService {
 
 // Request for get user.
 message GetUserRequest {
-  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message GetUserResponse {

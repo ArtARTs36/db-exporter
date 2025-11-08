@@ -28,39 +28,44 @@ func (f *Field) write(buf iox.Writer) {
 		buf.WriteNewLine()
 	}
 
-	buf.WriteString("")
+	fieldLine := buf.Line()
 
 	if f.Repeated {
-		buf.WriteInline("repeated ")
+		fieldLine.WriteString("repeated ")
 	}
 
-	buf.WriteInline(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID))
+	fieldLine.WriteString(f.Type + " " + f.Name + " = " + strconv.Itoa(f.ID))
 
 	if len(f.Options) > 0 {
-		buf.WriteInline(" [")
+		fieldLine.WriteString(" [")
+		buf.WriteNewLine()
 
-		if len(f.Options) == 1 {
-			f.Options[0].write(buf.WithoutIndent())
-		} else {
-			buf.WriteNewLine()
-			for i, opt := range f.Options {
-				opt.write(buf.IncIndent())
+		optsBuf := buf.IncIndent()
 
-				if i < len(f.Options)-1 {
-					buf.WriteInline(",")
-				}
-				buf.WriteNewLine()
+		// write options
+		for i, opt := range f.Options {
+			optLine := optsBuf.Line()
+			opt.write(optLine)
+
+			if i < len(f.Options)-1 {
+				optLine.WriteString(",")
 			}
-			buf.WriteString("")
+			buf.WriteNewLine()
 		}
-
-		buf.WriteInline("]")
+		// close options
+		buf.WriteString("];")
+		buf.WriteNewLine()
+	} else {
+		fieldLine.WriteString(";")
+		buf.WriteNewLine()
 	}
-
-	buf.WriteInline(";\n")
 }
 
-func (f *FieldOption) write(buf iox.Writer) {
+func (f *Field) hasOptions() bool {
+	return len(f.Options) > 0
+}
+
+func (f *FieldOption) write(buf iox.StringWriter) {
 	buf.WriteString(f.Name + " = " + f.resolveValue())
 }
 

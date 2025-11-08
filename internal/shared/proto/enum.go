@@ -47,5 +47,5 @@ func (e *Enum) write(buf iox.Writer) {
 		valuesBuf.WriteNewLine()
 	}
 
-	buf.WriteInline("}")
+	buf.WriteString("}")
 }

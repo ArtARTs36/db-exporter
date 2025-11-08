@@ -85,32 +85,61 @@ service PhonesService {
 }
 
 message User {
-  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 
   // user name.
-  string name = 2 [(google.api.field_behavior) = REQUIRED];
-  double balance = 3 [(google.api.field_behavior) = REQUIRED];
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
-  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = REQUIRED];
-  Mood current_mood = 6 [(google.api.field_behavior) = REQUIRED];
-  google.protobuf.Timestamp updated_at = 7 [(google.api.field_behavior) = OPTIONAL];
+  string name = 2 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  double balance = 3 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
+  google.protobuf.Timestamp created_at = 5 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  Mood current_mood = 6 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Timestamp updated_at = 7 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListUsersRequest {
-  repeated int64 ids = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated int64 ids = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Maximum number of results per page.
-  uint64 page_size = 2 [(google.api.field_behavior) = OPTIONAL];
+  uint64 page_size = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Token of the requested results page.
-  string page_token = 3 [(google.api.field_behavior) = OPTIONAL];
+  string page_token = 3 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListUsersResponse {
-  repeated User items = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated User items = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Next page token.
-  string next_page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string next_page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message GetUserRequest {
@@ -121,7 +150,9 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message DeleteUserRequest {
@@ -152,17 +183,24 @@ message CreateUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
   Mood current_mood = 5 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
 
-  google.protobuf.Timestamp updated_at = 6 [(google.api.field_behavior) = OPTIONAL];
+  google.protobuf.Timestamp updated_at = 6 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message CreateUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message PatchUserRequest {
@@ -183,38 +221,58 @@ message PatchUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
   Mood current_mood = 5 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
 
-  google.protobuf.Timestamp updated_at = 6 [(google.api.field_behavior) = OPTIONAL];
+  google.protobuf.Timestamp updated_at = 6 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message PatchUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message Phone {
-  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
-  string number = 2 [(google.api.field_behavior) = REQUIRED];
+  int64 user_id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  string number = 2 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message ListPhonesRequest {
 
   // Maximum number of results per page.
-  uint64 page_size = 1 [(google.api.field_behavior) = OPTIONAL];
+  uint64 page_size = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Token of the requested results page.
-  string page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListPhonesResponse {
-  repeated Phone items = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated Phone items = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Next page token.
-  string next_page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string next_page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message GetPhoneRequest {
@@ -230,7 +288,9 @@ message GetPhoneRequest {
 }
 
 message GetPhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message DeletePhoneRequest {
@@ -261,7 +321,9 @@ message CreatePhoneRequest {
 }
 
 message CreatePhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message PatchPhoneRequest {
@@ -277,7 +339,9 @@ message PatchPhoneRequest {
 }
 
 message PatchPhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 enum Mood {

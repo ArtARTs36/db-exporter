@@ -18,13 +18,17 @@ func (m *Message) write(buf iox.Writer) {
 	buf.WriteString("message " + m.Name + " {")
 	buf.WriteNewLine()
 
+	m.writeFields(buf)
+
+	buf.WriteString("}")
+}
+
+func (m *Message) writeFields(buf iox.Writer) {
 	for i, field := range m.Fields {
-		if (i > 0 && len(m.Fields[i-1].Options) > 1) || field.TopComment != "" {
-			buf.WriteString("\n")
+		if (i > 0 && m.Fields[i-1].hasOptions()) || field.TopComment != "" {
+			buf.WriteNewLine()
 		}
 
 		field.write(buf.IncIndent())
 	}
-
-	buf.WriteString("}")
 }

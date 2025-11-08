@@ -11,6 +11,13 @@ type Writer interface {
 
 	IncIndent() Writer
 	WithoutIndent() Writer
+	Len() int
+
+	Line() *LineWriter
+}
+
+type StringWriter interface {
+	WriteString(s string)
 }
 
 type sbWriter struct {
@@ -53,4 +60,20 @@ func (s *sbWriter) WithoutIndent() Writer {
 
 func (s *sbWriter) Bytes() []byte {
 	return []byte(s.b.String())
+}
+
+func (s *sbWriter) Len() int {
+	return s.b.Len()
+}
+
+func (s *sbWriter) Line() *LineWriter {
+	s.writeIndent()
+
+	return &LineWriter{
+		b: s.b,
+	}
+}
+
+func (s *sbWriter) writeIndent() {
+	s.b.WriteString(s.indent.Curr())
 }
