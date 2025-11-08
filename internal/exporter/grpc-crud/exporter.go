@@ -219,29 +219,7 @@ func (e *Exporter) buildService(
 	srv := prfile.AddService(
 		table,
 		func(message *presentation.TableMessage) {
-			for _, column := range table.Columns {
-				creator := func(field *presentation.Field) {
-					field.SetType(mapColumnType(column))
-
-					if !column.Nullable {
-						field.AsRequired()
-					}
-
-					field.SetColumn(column)
-
-					if column.Comment.IsNotEmpty() {
-						field.SetTopComment(column.Comment.WithSuffix(".").Value)
-					}
-				}
-
-				fieldName := column.Name.Snake().Lower().Value
-
-				if column.IsPrimaryKey() {
-					message.CreatePrimaryKeyField(fieldName, column.Name.Value, creator)
-				} else {
-					message.CreateField(fieldName, column.Name.Value, creator)
-				}
-			}
+			e.mapTableMessage(message, table, mapColumnType)
 		},
 	)
 
@@ -261,6 +239,36 @@ func (e *Exporter) buildService(
 	}
 
 	return nil
+}
+
+func (e *Exporter) mapTableMessage(
+	message *presentation.TableMessage,
+	table *schema.Table,
+	mapColumnType func(col *schema.Column) string,
+) {
+	for _, column := range table.Columns {
+		creator := func(field *presentation.Field) {
+			field.SetType(mapColumnType(column))
+
+			if !column.Nullable {
+				field.AsRequired()
+			}
+
+			field.SetColumn(column)
+
+			if column.Comment.IsNotEmpty() {
+				field.SetTopComment(column.Comment.WithSuffix(".").Value)
+			}
+		}
+
+		fieldName := column.Name.Snake().Lower().Value
+
+		if column.IsPrimaryKey() {
+			message.CreatePrimaryKeyField(fieldName, column.Name.Value, creator)
+		} else {
+			message.CreateField(fieldName, column.Name.Value, creator)
+		}
+	}
 }
 
 func (e *Exporter) buildGetProcedure(
@@ -286,7 +294,7 @@ func (e *Exporter) buildGetProcedure(
 			message.
 				SetName(fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName)).
 				CreateField(
-					buildCtx.tableSingularName,
+					buildCtx.service.TableMessage().SingularNameForField(),
 					func(field *presentation.Field) {
 						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 					},
@@ -393,7 +401,7 @@ func (e *Exporter) buildCreateProcedure(
 			message.
 				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
 				CreateField(
-					buildCtx.service.TableMessage().Table().Name.Pascal().Singular().Value,
+					buildCtx.service.TableMessage().SingularNameForField(),
 					func(field *presentation.Field) {
 						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 					},
@@ -431,7 +439,7 @@ func (e *Exporter) buildPatchProcedure(
 			message.
 				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
 				CreateField(
-					buildCtx.service.TableMessage().Table().Name.Pascal().Singular().Value,
+					buildCtx.service.TableMessage().SingularNameForField(),
 					func(field *presentation.Field) {
 						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
 					},

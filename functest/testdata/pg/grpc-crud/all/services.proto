@@ -73,7 +73,7 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-  User User = 1;
+  User user = 1;
 }
 
 message DeleteUserRequest {
@@ -94,7 +94,7 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  User User = 1;
+  User user = 1;
 }
 
 message PatchUserRequest {
@@ -109,7 +109,7 @@ message PatchUserRequest {
 }
 
 message PatchUserResponse {
-  User User = 1;
+  User user = 1;
 }
 
 message Phone {
@@ -136,7 +136,7 @@ message GetPhoneRequest {
 }
 
 message GetPhoneResponse {
-  Phone Phone = 1;
+  Phone phone = 1;
 }
 
 message DeletePhoneRequest {
@@ -152,7 +152,7 @@ message CreatePhoneRequest {
 }
 
 message CreatePhoneResponse {
-  Phone Phone = 1;
+  Phone phone = 1;
 }
 
 message PatchPhoneRequest {
@@ -161,7 +161,7 @@ message PatchPhoneRequest {
 }
 
 message PatchPhoneResponse {
-  Phone Phone = 1;
+  Phone phone = 1;
 }
 
 enum Mood {

@@ -48,7 +48,8 @@ func TestFile_Render(t *testing.T) {
 		},
 		Messages: []*Message{
 			{
-				Name: "GetUserRequest",
+				Name:       "GetUserRequest",
+				TopComment: "Request for get user.",
 				Fields: []*Field{
 					{
 						Type: "int64",
@@ -119,6 +120,7 @@ service UserService {
   }
 }
 
+// Request for get user.
 message GetUserRequest {
   int64 id = 1 [(google.api.field_behavior) = REQUIRED];
 }

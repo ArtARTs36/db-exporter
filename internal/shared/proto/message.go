@@ -3,11 +3,18 @@ package proto
 import "github.com/artarts36/db-exporter/internal/shared/iox"
 
 type Message struct {
-	Name   string
-	Fields []*Field
+	Name       string
+	TopComment string
+	Fields     []*Field
 }
 
 func (m *Message) write(buf iox.Writer) {
+	if m.TopComment != "" {
+		buf.WriteString("// ")
+		buf.WriteString(m.TopComment)
+		buf.WriteNewLine()
+	}
+
 	buf.WriteString("message " + m.Name + " {")
 
 	if len(m.Fields) > 0 {

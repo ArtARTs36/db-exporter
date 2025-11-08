@@ -121,7 +121,7 @@ message GetUserRequest {
 }
 
 message GetUserResponse {
-  User User = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message DeleteUserRequest {
@@ -161,7 +161,7 @@ message CreateUserRequest {
 }
 
 message CreateUserResponse {
-  User User = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message PatchUserRequest {
@@ -192,7 +192,7 @@ message PatchUserRequest {
 }
 
 message PatchUserResponse {
-  User User = 1 [(google.api.field_behavior) = REQUIRED];
+  User user = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message Phone {
@@ -229,7 +229,7 @@ message GetPhoneRequest {
 }
 
 message GetPhoneResponse {
-  Phone Phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message DeletePhoneRequest {
@@ -259,7 +259,7 @@ message CreatePhoneRequest {
 }
 
 message CreatePhoneResponse {
-  Phone Phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 message PatchPhoneRequest {
@@ -275,7 +275,7 @@ message PatchPhoneRequest {
 }
 
 message PatchPhoneResponse {
-  Phone Phone = 1 [(google.api.field_behavior) = REQUIRED];
+  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
 enum Mood {

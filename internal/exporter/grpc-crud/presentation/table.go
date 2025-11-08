@@ -12,7 +12,8 @@ type TableMessage struct {
 	fields     map[string]*Field
 	PrimaryKey []*Field
 
-	message *Message
+	message              *Message
+	singularNameForField string
 }
 
 func newTableMessage(table *schema.Table, srv *Service) *TableMessage {
@@ -26,7 +27,8 @@ func newTableMessage(table *schema.Table, srv *Service) *TableMessage {
 			srv: srv,
 			typ: MessageTypeTable,
 		},
-		fields: make(map[string]*Field),
+		fields:               make(map[string]*Field),
+		singularNameForField: table.Name.Singular().Lower().Value,
 	}
 
 	if table.PrimaryKey != nil {
@@ -60,6 +62,10 @@ func (t *TableMessage) CreatePrimaryKeyField(name string, columnName string, cre
 	t.PrimaryKey = append(t.PrimaryKey, field)
 
 	return t
+}
+
+func (t *TableMessage) SingularNameForField() string {
+	return t.singularNameForField
 }
 
 func (t *TableMessage) createField(name string, columnName string, creator func(*Field)) *Field {
