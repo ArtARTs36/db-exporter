@@ -35,15 +35,15 @@ func NewExporter() *Exporter {
 }
 
 func (e *Exporter) createPaginator(spec *Specification) paginator.Paginator {
-	if spec.Pagination == paginationTypeToken {
-		return &paginator.Token{}
+	if spec.Pagination == paginationTypeOffset {
+		return &paginator.Offset{}
 	}
 
 	if spec.Pagination == paginationTypeNone {
 		return &paginator.None{}
 	}
 
-	return &paginator.Offset{}
+	return &paginator.Token{}
 }
 
 func (e *Exporter) ExportPerFile(

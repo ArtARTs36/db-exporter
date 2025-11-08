@@ -565,7 +565,7 @@
         "pagination": {
           "type": "string",
           "enum": ["offset", "token", "none"],
-          "default": "offset"
+          "default": "token"
         },
         "with": {
           "type": "object",
