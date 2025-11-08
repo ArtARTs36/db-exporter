@@ -6,6 +6,8 @@ import (
 	"github.com/artarts36/gds"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"log/slog"
+	"slices"
+	"strings"
 )
 
 type File struct {
@@ -75,6 +77,14 @@ func (f *File) writeSyntax(buf iox.Writer) {
 	buf.WriteString("syntax = \"proto3\";\n")
 }
 
+func (f *File) getSortedImports() []string {
+	imports := f.Imports.List()
+
+	slices.SortFunc(imports, strings.Compare)
+
+	return imports
+}
+
 func (f *File) writeImports(buf iox.Writer) {
 	if f.Imports == nil || f.Imports.Len() == 0 {
 		return
@@ -82,7 +92,7 @@ func (f *File) writeImports(buf iox.Writer) {
 
 	buf.WriteString("\n")
 
-	for _, im := range f.Imports.List() {
+	for _, im := range f.getSortedImports() {
 		buf.WriteString("import \"" + im + "\";\n")
 	}
 }

@@ -3,7 +3,6 @@ package grpccrud
 import (
 	"context"
 	"fmt"
-
 	"github.com/artarts36/db-exporter/internal/exporter/exporter"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/modifiers"
 	"github.com/artarts36/db-exporter/internal/exporter/grpc-crud/paginator"
@@ -14,9 +13,12 @@ import (
 	"github.com/artarts36/gds"
 )
 
+// Exporter based on https://google.aip.dev/121
 type Exporter struct{}
 
 type buildProcedureContext struct {
+	spec *Specification
+
 	sourceDriver schema.DatabaseDriver
 
 	service *presentation.Service
@@ -32,15 +34,15 @@ func NewExporter() *Exporter {
 }
 
 func (e *Exporter) createPaginator(spec *Specification) paginator.Paginator {
-	if spec.Pagination == paginationTypeToken {
-		return &paginator.Token{}
+	if spec.Pagination == paginationTypeOffset {
+		return &paginator.Offset{}
 	}
 
 	if spec.Pagination == paginationTypeNone {
 		return &paginator.None{}
 	}
 
-	return &paginator.Offset{}
+	return &paginator.Token{}
 }
 
 func (e *Exporter) ExportPerFile(
@@ -79,7 +81,7 @@ func (e *Exporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
+		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
@@ -164,7 +166,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
+		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
@@ -181,6 +183,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
+	spec *Specification,
 	sourceDriver schema.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
@@ -207,8 +210,12 @@ func (e *Exporter) buildService(
 			Build: e.buildCreateProcedure,
 		},
 		{
-			Type:  presentation.ProcedureTypePatch,
-			Build: e.buildPatchProcedure,
+			Type:  presentation.ProcedureTypeUpdate,
+			Build: e.buildUpdateProcedure,
+		},
+		{
+			Type:  presentation.ProcedureTypeUndelete,
+			Build: e.buildUndeleteProcedure,
 		},
 	}
 
@@ -224,6 +231,7 @@ func (e *Exporter) buildService(
 	)
 
 	buildCtx := &buildProcedureContext{
+		spec:         spec,
 		sourceDriver: sourceDriver,
 		service:      srv,
 		paginator:    pager,
@@ -278,7 +286,7 @@ func (e *Exporter) buildGetProcedure(
 		return nil
 	}
 
-	buildCtx.service.AddProcedureFn(
+	buildCtx.service.AddProcedure(
 		"Get",
 		presentation.ProcedureTypeGet,
 		func(message *presentation.Message) {
@@ -290,15 +298,34 @@ func (e *Exporter) buildGetProcedure(
 				})
 			}
 		},
+	)
+
+	return nil
+}
+
+// https://google.aip.dev/164
+func (e *Exporter) buildUndeleteProcedure(
+	buildCtx *buildProcedureContext,
+) error {
+	if buildCtx.service.TableMessage().PrimaryKey == nil {
+		return nil
+	}
+
+	if !buildCtx.service.TableMessage().Table().SupportsSoftDelete() {
+		return nil
+	}
+
+	buildCtx.service.AddProcedure(
+		"Undelete",
+		presentation.ProcedureTypeUndelete,
 		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
+			message.SetName(fmt.Sprintf("Undelete%sRequest", buildCtx.tableSingularName))
+
+			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+				message.CreateField(pkField.Name(), func(field *presentation.Field) {
+					field.CopyType(pkField).AsRequired()
+				})
+			}
 		},
 	)
 
@@ -322,6 +349,13 @@ func (e *Exporter) buildListProcedure(
 							NotRequired()
 					},
 				)
+			}
+
+			if message.Service().TableMessage().Table().SupportsSoftDelete() {
+				message.CreateField("show_deleted", func(field *presentation.Field) {
+					field.SetType("bool")
+					field.SetTopComment("If set to `true`, soft-deleted resources will be returned alongside active resources.")
+				})
 			}
 
 			buildCtx.paginator.AddPaginationToRequest(message)
@@ -349,23 +383,36 @@ func (e *Exporter) buildDeleteProcedure(
 
 	var err error
 
-	buildCtx.service.AddProcedureFn(
-		"Delete",
-		presentation.ProcedureTypeDelete,
-		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
+	requestFn := func(message *presentation.Message) {
+		message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
 
-			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
-				message.CreateField(pkField.Name(), func(field *presentation.Field) {
-					field.CopyType(pkField)
-					field.AsRequired()
-				})
-			}
-		},
-		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName))
-		},
-	)
+		for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+			message.CreateField(pkField.Name(), func(field *presentation.Field) {
+				field.CopyType(pkField)
+				field.AsRequired()
+			})
+		}
+	}
+
+	if buildCtx.spec.RPC.Delete.Returns == deleteReturnsWrapper {
+		buildCtx.service.AddProcedureFn(
+			"Delete",
+			presentation.ProcedureTypeDelete,
+			requestFn,
+			func(message *presentation.Message) {
+				message.SetName(fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName))
+			},
+		)
+	} else {
+		buildCtx.service.File().AddImport("google/protobuf/empty.proto")
+
+		buildCtx.service.AddProcedureWithResponseName(
+			"Delete",
+			presentation.ProcedureTypeDelete,
+			requestFn,
+			"google.protobuf.Empty",
+		)
+	}
 
 	return err
 }
@@ -377,7 +424,7 @@ func (e *Exporter) buildCreateProcedure(
 		return nil
 	}
 
-	buildCtx.service.AddProcedureFn("Create", presentation.ProcedureTypeCreate,
+	buildCtx.service.AddProcedure("Create", presentation.ProcedureTypeCreate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
@@ -397,27 +444,17 @@ func (e *Exporter) buildCreateProcedure(
 				})
 			}
 		},
-		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Create%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
-		},
 	)
 
 	return nil
 }
 
-func (e *Exporter) buildPatchProcedure(
+func (e *Exporter) buildUpdateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	buildCtx.service.AddProcedureFn("Patch", presentation.ProcedureTypePatch,
+	buildCtx.service.AddProcedure("Update", presentation.ProcedureTypeUpdate,
 		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Patch%sRequest", buildCtx.tableSingularName))
+			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
 
 			for _, col := range buildCtx.service.TableMessage().Table().Columns {
 				if e.columnAutofilled(col) {
@@ -435,16 +472,6 @@ func (e *Exporter) buildPatchProcedure(
 				})
 			}
 		},
-		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Patch%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
-		},
 	)
 
 	return nil
@@ -455,9 +482,13 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return true
 	}
 
+	if col.Name.Equal("deleted_at", "delete_time", "updated_at", "update_time") {
+		return true
+	}
+
 	if !col.DefaultRaw.Valid {
 		return false
 	}
 
-	return col.Name.Equal("id", "created_at", "updated_at", "deleted_at")
+	return col.Name.Equal("id", "created_at", "create_time", "expire_time", "purge_time")
 }

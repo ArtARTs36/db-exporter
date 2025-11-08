@@ -3,7 +3,11 @@ name: validate-test-cases
 on:
   push:
     branches: ['master']
+    paths:
+      - 'functest/**'
   pull_request:
+    paths:
+      - 'functest/**'
 
 permissions:
   contents: read
@@ -12,7 +16,7 @@ permissions:
 
 jobs:
   protolint:
-    name: code-lint
+    name: protolint for grpc-crud
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -20,3 +24,6 @@ jobs:
 
       - name: Run linter
         uses: ci-space/protolint-action@master
+        with:
+          dir: functest
+          config_path: functest/protolint.yaml

@@ -551,10 +551,21 @@
             ]
           }
         },
+        "rpc": {
+          "type": "object",
+          "delete": {
+            "type": "object",
+            "returns": {
+              "type": "string",
+              "enum": ["empty", "wrapper"],
+              "default": "empty"
+            }
+          }
+        },
         "pagination": {
           "type": "string",
           "enum": ["offset", "token", "none"],
-          "default": "offset"
+          "default": "token"
         },
         "with": {
           "type": "object",

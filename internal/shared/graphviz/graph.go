@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
 	"io"
+	"log/slog"
 )
 
 type Graph struct {
@@ -44,10 +45,14 @@ func (g *Graph) CreateNode(name string) (*Node, error) {
 		return nil, fmt.Errorf("create graphviz node %s: %w", name, err)
 	}
 
+	slog.Debug("[graph] set shape", slog.String("shape", string(cgraph.PlainTextShape)))
+
 	node.SetShape(cgraph.PlainTextShape)
 	if err = node.SafeSet("labeljust", "c", ""); err != nil {
 		return nil, fmt.Errorf("set labeljust: %w", err)
 	}
+
+	slog.Debug("[graph] set font name", slog.String("font", g.font))
 
 	node.SetFontName(g.font)
 

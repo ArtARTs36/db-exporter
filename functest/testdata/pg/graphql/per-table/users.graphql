@@ -7,4 +7,5 @@ type User {
   createdAt: String!
   currentMood: String!
   updatedAt: String
+  deletedAt: String
 }

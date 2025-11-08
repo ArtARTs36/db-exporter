@@ -122,7 +122,9 @@ service UserService {
 
 // Request for get user.
 message GetUserRequest {
-  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message GetUserResponse {
@@ -136,7 +138,7 @@ message GetUserResponse {
 }
 
 enum UserStatus {
-  USERSTATUS_UNDEFINED = 0;
+  USERSTATUS_UNSPECIFIED = 0;
   USERSTATUS_ACTIVE = 1;
   USERSTATUS_BANNED = 2;
 }`

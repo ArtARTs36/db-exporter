@@ -102,3 +102,19 @@ func (t *Table) AddColumn(col *Column) {
 func (t *Table) AddEnum(enum *Enum) {
 	t.UsingEnums[enum.Name.Value] = enum
 }
+
+var softDeletedColumnNames = []string{
+	"deleted_at",
+	"delete_time",
+}
+
+func (t *Table) SupportsSoftDelete() bool {
+	for _, name := range softDeletedColumnNames {
+		_, ok := t.columnMap[name]
+		if ok {
+			return true
+		}
+	}
+
+	return false
+}

@@ -2,9 +2,10 @@ syntax = "proto3";
 
 package org.service;
 
-import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
 
@@ -18,30 +19,37 @@ service UsersService {
   }
 
   // Get a user.
-  rpc Get(GetUserRequest) returns (GetUserResponse) {
+  rpc Get(GetUserRequest) returns (User) {
     option (google.api.http) = {
       get: "/v1/users/{id}"
     };
   }
 
   // Delete a user.
-  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {
+  rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/users/{id}"
     };
   }
 
   // Create a new user.
-  rpc Create(CreateUserRequest) returns (CreateUserResponse) {
+  rpc Create(CreateUserRequest) returns (User) {
     option (google.api.http) = {
       post: "/v1/users"
     };
   }
 
-  // Patch an existing user.
-  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {
+  // Update an existing user.
+  rpc Update(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       put: "/v1/users/{id}"
+    };
+  }
+
+  // Restore a soft-deleted user.
+  rpc Undelete(UndeleteUserRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/v1/users/{id}:undelete"
     };
   }
 }
@@ -56,28 +64,28 @@ service PhonesService {
   }
 
   // Get a phone.
-  rpc Get(GetPhoneRequest) returns (GetPhoneResponse) {
+  rpc Get(GetPhoneRequest) returns (Phone) {
     option (google.api.http) = {
       get: "/v1/phones/{user_id}/{number}"
     };
   }
 
   // Delete a phone.
-  rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {
+  rpc Delete(DeletePhoneRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/phones/{user_id}/{number}"
     };
   }
 
   // Create a new phone.
-  rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {
+  rpc Create(CreatePhoneRequest) returns (Phone) {
     option (google.api.http) = {
       post: "/v1/phones"
     };
   }
 
-  // Patch an existing phone.
-  rpc Patch(PatchPhoneRequest) returns (PatchPhoneResponse) {
+  // Update an existing phone.
+  rpc Update(UpdatePhoneRequest) returns (Phone) {
     option (google.api.http) = {
       put: "/v1/phones/{user_id}/{number}"
     };
@@ -85,32 +93,70 @@ service PhonesService {
 }
 
 message User {
-  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 
   // user name.
-  string name = 2 [(google.api.field_behavior) = REQUIRED];
-  double balance = 3 [(google.api.field_behavior) = REQUIRED];
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
-  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = REQUIRED];
-  Mood current_mood = 6 [(google.api.field_behavior) = REQUIRED];
-  google.protobuf.Timestamp updated_at = 7 [(google.api.field_behavior) = OPTIONAL];
+  string name = 2 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  double balance = 3 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
+  google.protobuf.Timestamp created_at = 5 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  Mood current_mood = 6 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  google.protobuf.Timestamp updated_at = 7 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
+  google.protobuf.Timestamp deleted_at = 8 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListUsersRequest {
-  repeated int64 ids = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated int64 ids = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
+  // If set to `true`, soft-deleted resources will be returned alongside active resources.
+  bool show_deleted = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Maximum number of results per page.
-  uint64 page_size = 2 [(google.api.field_behavior) = OPTIONAL];
+  uint64 page_size = 3 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Token of the requested results page.
-  string page_token = 3 [(google.api.field_behavior) = OPTIONAL];
+  string page_token = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListUsersResponse {
-  repeated User items = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated User items = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Next page token.
-  string next_page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string next_page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message GetUserRequest {
@@ -120,18 +166,12 @@ message GetUserRequest {
   ];
 }
 
-message GetUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
-}
-
 message DeleteUserRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
 }
-
-message DeleteUserResponse {}
 
 message CreateUserRequest {
   int64 id = 1 [
@@ -151,20 +191,17 @@ message CreateUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
   Mood current_mood = 5 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
-
-  google.protobuf.Timestamp updated_at = 6 [(google.api.field_behavior) = OPTIONAL];
 }
 
-message CreateUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
-}
-
-message PatchUserRequest {
+message UpdateUserRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
@@ -182,38 +219,54 @@ message PatchUserRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 
-  double prev_balance = 4 [(google.api.field_behavior) = OPTIONAL];
+  double prev_balance = 4 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
+
   Mood current_mood = 5 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
-
-  google.protobuf.Timestamp updated_at = 6 [(google.api.field_behavior) = OPTIONAL];
 }
 
-message PatchUserResponse {
-  User user = 1 [(google.api.field_behavior) = REQUIRED];
+message UndeleteUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message Phone {
-  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
-  string number = 2 [(google.api.field_behavior) = REQUIRED];
+  int64 user_id = 1 [
+    (google.api.field_behavior) = REQUIRED
+  ];
+
+  string number = 2 [
+    (google.api.field_behavior) = REQUIRED
+  ];
 }
 
 message ListPhonesRequest {
-
   // Maximum number of results per page.
-  uint64 page_size = 1 [(google.api.field_behavior) = OPTIONAL];
+  uint64 page_size = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Token of the requested results page.
-  string page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message ListPhonesResponse {
-  repeated Phone items = 1 [(google.api.field_behavior) = OPTIONAL];
+  repeated Phone items = 1 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 
   // Next page token.
-  string next_page_token = 2 [(google.api.field_behavior) = OPTIONAL];
+  string next_page_token = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message GetPhoneRequest {
@@ -228,10 +281,6 @@ message GetPhoneRequest {
   ];
 }
 
-message GetPhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
-}
-
 message DeletePhoneRequest {
   int64 user_id = 1 [
     (buf.validate.field).required = true,
@@ -243,8 +292,6 @@ message DeletePhoneRequest {
     (google.api.field_behavior) = REQUIRED
   ];
 }
-
-message DeletePhoneResponse {}
 
 message CreatePhoneRequest {
   int64 user_id = 1 [
@@ -258,11 +305,7 @@ message CreatePhoneRequest {
   ];
 }
 
-message CreatePhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
-}
-
-message PatchPhoneRequest {
+message UpdatePhoneRequest {
   int64 user_id = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
@@ -274,12 +317,8 @@ message PatchPhoneRequest {
   ];
 }
 
-message PatchPhoneResponse {
-  Phone phone = 1 [(google.api.field_behavior) = REQUIRED];
-}
-
 enum Mood {
-  MOOD_UNDEFINED = 0;
+  MOOD_UNSPECIFIED = 0;
   MOOD_OK = 1;
   MOOD_HAPPY = 2;
 }

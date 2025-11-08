@@ -28,7 +28,7 @@ functest: functest/pg functest/mysql
 
 .PHONY: functest/pg
 functest/pg:
-	docker-compose down
+	#docker-compose down
 	go build -o ./functest/db-exporter cmd/main.go
 	docker-compose up postgres -d
 	sleep 5
@@ -55,4 +55,4 @@ check: lint validate-test-cases test functest
 
 .PHONY: validate-test-cases
 validate-test-cases:
-	protolint lint .
+	protolint lint -config_path=functest/protolint.yaml ./functest

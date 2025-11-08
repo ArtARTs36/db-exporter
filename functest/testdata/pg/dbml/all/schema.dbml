@@ -6,6 +6,7 @@ Table users {
   created_at timestamp [not null, default: `CURRENT_TIMESTAMP`]
   current_mood mood [not null]
   updated_at timestamp
+  deleted_at timestamp
 }
 
 Table phones {

@@ -13,4 +13,5 @@ type User struct {
 	CreatedAt   time.Time       `db:"created_at"`
 	CurrentMood string          `db:"current_mood"`
 	UpdatedAt   sql.NullTime    `db:"updated_at"`
+	DeletedAt   sql.NullTime    `db:"deleted_at"`
 }

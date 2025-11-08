@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package org.service;
 
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
@@ -12,16 +13,19 @@ service UsersService {
   rpc List(ListUsersRequest) returns (ListUsersResponse) {};
 
   // Get a user.
-  rpc Get(GetUserRequest) returns (GetUserResponse) {};
+  rpc Get(GetUserRequest) returns (User) {};
 
   // Delete a user.
-  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
+  rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {};
 
   // Create a new user.
-  rpc Create(CreateUserRequest) returns (CreateUserResponse) {};
+  rpc Create(CreateUserRequest) returns (User) {};
 
-  // Patch an existing user.
-  rpc Patch(PatchUserRequest) returns (PatchUserResponse) {};
+  // Update an existing user.
+  rpc Update(UpdateUserRequest) returns (User) {};
+
+  // Restore a soft-deleted user.
+  rpc Undelete(UndeleteUserRequest) returns (User) {};
 }
 
 // Service for working with phones.
@@ -30,16 +34,16 @@ service PhonesService {
   rpc List(ListPhonesRequest) returns (ListPhonesResponse) {};
 
   // Get a phone.
-  rpc Get(GetPhoneRequest) returns (GetPhoneResponse) {};
+  rpc Get(GetPhoneRequest) returns (Phone) {};
 
   // Delete a phone.
-  rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {};
+  rpc Delete(DeletePhoneRequest) returns (google.protobuf.Empty) {};
 
   // Create a new phone.
-  rpc Create(CreatePhoneRequest) returns (CreatePhoneResponse) {};
+  rpc Create(CreatePhoneRequest) returns (Phone) {};
 
-  // Patch an existing phone.
-  rpc Patch(PatchPhoneRequest) returns (PatchPhoneResponse) {};
+  // Update an existing phone.
+  rpc Update(UpdatePhoneRequest) returns (Phone) {};
 }
 
 message User {
@@ -52,16 +56,20 @@ message User {
   google.protobuf.Timestamp created_at = 5;
   Mood current_mood = 6;
   google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp deleted_at = 8;
 }
 
 message ListUsersRequest {
   repeated int64 ids = 1;
 
+  // If set to `true`, soft-deleted resources will be returned alongside active resources.
+  bool show_deleted = 2;
+
   // Maximum number of results per page.
-  uint64 page_size = 2;
+  uint64 page_size = 3;
 
   // The number of records to skip before starting to fetch the records.
-  uint64 offset = 3;
+  uint64 offset = 4;
 }
 
 message ListUsersResponse {
@@ -72,15 +80,9 @@ message GetUserRequest {
   int64 id = 1;
 }
 
-message GetUserResponse {
-  User user = 1;
-}
-
 message DeleteUserRequest {
   int64 id = 1;
 }
-
-message DeleteUserResponse {}
 
 message CreateUserRequest {
   int64 id = 1;
@@ -90,14 +92,9 @@ message CreateUserRequest {
   double balance = 3;
   double prev_balance = 4;
   Mood current_mood = 5;
-  google.protobuf.Timestamp updated_at = 6;
 }
 
-message CreateUserResponse {
-  User user = 1;
-}
-
-message PatchUserRequest {
+message UpdateUserRequest {
   int64 id = 1;
 
   // user name.
@@ -105,11 +102,10 @@ message PatchUserRequest {
   double balance = 3;
   double prev_balance = 4;
   Mood current_mood = 5;
-  google.protobuf.Timestamp updated_at = 6;
 }
 
-message PatchUserResponse {
-  User user = 1;
+message UndeleteUserRequest {
+  int64 id = 1;
 }
 
 message Phone {
@@ -118,7 +114,6 @@ message Phone {
 }
 
 message ListPhonesRequest {
-
   // Maximum number of results per page.
   uint64 page_size = 1;
 
@@ -135,37 +130,23 @@ message GetPhoneRequest {
   string number = 2;
 }
 
-message GetPhoneResponse {
-  Phone phone = 1;
-}
-
 message DeletePhoneRequest {
   int64 user_id = 1;
   string number = 2;
 }
-
-message DeletePhoneResponse {}
 
 message CreatePhoneRequest {
   int64 user_id = 1;
   string number = 2;
 }
 
-message CreatePhoneResponse {
-  Phone phone = 1;
-}
-
-message PatchPhoneRequest {
+message UpdatePhoneRequest {
   int64 user_id = 1;
   string number = 2;
 }
 
-message PatchPhoneResponse {
-  Phone phone = 1;
-}
-
 enum Mood {
-  MOOD_UNDEFINED = 0;
+  MOOD_UNSPECIFIED = 0;
   MOOD_OK = 1;
   MOOD_HAPPY = 2;
 }
