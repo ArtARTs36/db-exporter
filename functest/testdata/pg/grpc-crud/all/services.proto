@@ -12,7 +12,7 @@ service UsersService {
   rpc List(ListUsersRequest) returns (ListUsersResponse) {};
 
   // Get a user.
-  rpc Get(GetUserRequest) returns (GetUserResponse) {};
+  rpc Get(GetUserRequest) returns (User) {};
 
   // Delete a user.
   rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
@@ -30,7 +30,7 @@ service PhonesService {
   rpc List(ListPhonesRequest) returns (ListPhonesResponse) {};
 
   // Get a phone.
-  rpc Get(GetPhoneRequest) returns (GetPhoneResponse) {};
+  rpc Get(GetPhoneRequest) returns (Phone) {};
 
   // Delete a phone.
   rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {};
@@ -70,10 +70,6 @@ message ListUsersResponse {
 
 message GetUserRequest {
   int64 id = 1;
-}
-
-message GetUserResponse {
-  User user = 1;
 }
 
 message DeleteUserRequest {
@@ -130,10 +126,6 @@ message ListPhonesResponse {
 message GetPhoneRequest {
   int64 user_id = 1;
   string number = 2;
-}
-
-message GetPhoneResponse {
-  Phone phone = 1;
 }
 
 message DeletePhoneRequest {

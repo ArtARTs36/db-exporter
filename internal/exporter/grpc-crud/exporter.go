@@ -279,7 +279,7 @@ func (e *Exporter) buildGetProcedure(
 		return nil
 	}
 
-	buildCtx.service.AddProcedureFn(
+	buildCtx.service.AddProcedure(
 		"Get",
 		presentation.ProcedureTypeGet,
 		func(message *presentation.Message) {
@@ -290,16 +290,6 @@ func (e *Exporter) buildGetProcedure(
 					field.CopyType(pkField).AsRequired()
 				})
 			}
-		},
-		func(message *presentation.Message) {
-			message.
-				SetName(fmt.Sprintf("Get%sResponse", buildCtx.tableSingularName)).
-				CreateField(
-					buildCtx.service.TableMessage().SingularNameForField(),
-					func(field *presentation.Field) {
-						field.SetType(buildCtx.service.TableMessage().Name()).AsRequired()
-					},
-				)
 		},
 	)
 

@@ -18,7 +18,7 @@ service UsersService {
   }
 
   // Get a user.
-  rpc Get(GetUserRequest) returns (GetUserResponse) {
+  rpc Get(GetUserRequest) returns (User) {
     option (google.api.http) = {
       get: "/v1/users/{id}"
     };
@@ -56,7 +56,7 @@ service PhonesService {
   }
 
   // Get a phone.
-  rpc Get(GetPhoneRequest) returns (GetPhoneResponse) {
+  rpc Get(GetPhoneRequest) returns (Phone) {
     option (google.api.http) = {
       get: "/v1/phones/{user_id}/{number}"
     };
@@ -145,12 +145,6 @@ message ListUsersResponse {
 message GetUserRequest {
   int64 id = 1 [
     (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message GetUserResponse {
-  User user = 1 [
     (google.api.field_behavior) = REQUIRED
   ];
 }
@@ -277,12 +271,6 @@ message GetPhoneRequest {
 
   string number = 2 [
     (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message GetPhoneResponse {
-  Phone phone = 1 [
     (google.api.field_behavior) = REQUIRED
   ];
 }
