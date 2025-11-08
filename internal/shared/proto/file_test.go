@@ -136,7 +136,7 @@ message GetUserResponse {
 }
 
 enum UserStatus {
-  USERSTATUS_UNDEFINED = 0;
+  USERSTATUS_UNSPECIFIED = 0;
   USERSTATUS_ACTIVE = 1;
   USERSTATUS_BANNED = 2;
 }`

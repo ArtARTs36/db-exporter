@@ -19,7 +19,7 @@ func NewEnum(name gds.String, valuesCount int) *Enum {
 		valuePrefix: name.Upper().Append("_"),
 	}
 
-	enum.AddValue("UNDEFINED")
+	enum.AddValue("UNSPECIFIED")
 
 	return enum
 }

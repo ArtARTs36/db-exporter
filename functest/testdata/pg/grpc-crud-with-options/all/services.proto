@@ -279,7 +279,7 @@ message PatchPhoneResponse {
 }
 
 enum Mood {
-  MOOD_UNDEFINED = 0;
+  MOOD_UNSPECIFIED = 0;
   MOOD_OK = 1;
   MOOD_HAPPY = 2;
 }
