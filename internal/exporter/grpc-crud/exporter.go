@@ -18,6 +18,8 @@ import (
 type Exporter struct{}
 
 type buildProcedureContext struct {
+	spec *Specification
+
 	sourceDriver schema.DatabaseDriver
 
 	service *presentation.Service
@@ -80,7 +82,7 @@ func (e *Exporter) ExportPerFile(
 	for _, table := range params.Schema.Tables.List() {
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
+		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name, err)
 		}
@@ -165,7 +167,7 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
-		err := e.buildService(params.Schema.Driver, prfile, table, pager)
+		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
 		}
@@ -182,6 +184,7 @@ func (e *Exporter) Export(
 }
 
 func (e *Exporter) buildService(
+	spec *Specification,
 	sourceDriver schema.DatabaseDriver,
 	prfile *presentation.File,
 	table *schema.Table,
@@ -225,6 +228,7 @@ func (e *Exporter) buildService(
 	)
 
 	buildCtx := &buildProcedureContext{
+		spec:         spec,
 		sourceDriver: sourceDriver,
 		service:      srv,
 		paginator:    pager,
@@ -340,23 +344,36 @@ func (e *Exporter) buildDeleteProcedure(
 
 	var err error
 
-	buildCtx.service.AddProcedureFn(
-		"Delete",
-		presentation.ProcedureTypeDelete,
-		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
+	requestFn := func(message *presentation.Message) {
+		message.SetName(fmt.Sprintf("Delete%sRequest", buildCtx.tableSingularName))
 
-			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
-				message.CreateField(pkField.Name(), func(field *presentation.Field) {
-					field.CopyType(pkField)
-					field.AsRequired()
-				})
-			}
-		},
-		func(message *presentation.Message) {
-			message.SetName(fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName))
-		},
-	)
+		for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+			message.CreateField(pkField.Name(), func(field *presentation.Field) {
+				field.CopyType(pkField)
+				field.AsRequired()
+			})
+		}
+	}
+
+	if buildCtx.spec.RPC.Delete.Returns == deleteReturnsWrapper {
+		buildCtx.service.AddProcedureFn(
+			"Delete",
+			presentation.ProcedureTypeDelete,
+			requestFn,
+			func(message *presentation.Message) {
+				message.SetName(fmt.Sprintf("Delete%sResponse", buildCtx.tableSingularName))
+			},
+		)
+	} else {
+		buildCtx.service.File().AddImport("google/protobuf/empty.proto")
+
+		buildCtx.service.AddProcedureWithResponseName(
+			"Delete",
+			presentation.ProcedureTypeDelete,
+			requestFn,
+			"google.protobuf.Empty",
+		)
+	}
 
 	return err
 }

@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package org.service;
 
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
@@ -15,7 +16,7 @@ service UsersService {
   rpc Get(GetUserRequest) returns (User) {};
 
   // Delete a user.
-  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {};
+  rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {};
 
   // Create a new user.
   rpc Create(CreateUserRequest) returns (User) {};
@@ -33,7 +34,7 @@ service PhonesService {
   rpc Get(GetPhoneRequest) returns (Phone) {};
 
   // Delete a phone.
-  rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {};
+  rpc Delete(DeletePhoneRequest) returns (google.protobuf.Empty) {};
 
   // Create a new phone.
   rpc Create(CreatePhoneRequest) returns (Phone) {};
@@ -74,9 +75,6 @@ message GetUserRequest {
 
 message DeleteUserRequest {
   int64 id = 1;
-}
-
-message DeleteUserResponse {
 }
 
 message CreateUserRequest {
@@ -131,9 +129,6 @@ message GetPhoneRequest {
 message DeletePhoneRequest {
   int64 user_id = 1;
   string number = 2;
-}
-
-message DeletePhoneResponse {
 }
 
 message CreatePhoneRequest {

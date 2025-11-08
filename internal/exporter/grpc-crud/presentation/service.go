@@ -13,6 +13,15 @@ type Service struct {
 }
 
 func (s *Service) AddProcedure(name string, typ ProcedureType, reqBuild func(message *Message)) *Service {
+	return s.AddProcedureWithResponseName(name, typ, reqBuild, s.table.Name())
+}
+
+func (s *Service) AddProcedureWithResponseName(
+	name string,
+	typ ProcedureType,
+	reqBuild func(message *Message),
+	responseName string,
+) *Service {
 	req := newMessage(MessageTypeRequest, s)
 
 	reqBuild(req)
@@ -21,7 +30,7 @@ func (s *Service) AddProcedure(name string, typ ProcedureType, reqBuild func(mes
 		proto: &proto.ServiceProcedure{
 			Name:    name,
 			Param:   req.proto.Name,
-			Returns: s.table.Name(),
+			Returns: responseName,
 			Options: make([]*proto.ServiceProcedureOption, 0),
 		},
 		typ:     typ,

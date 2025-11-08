@@ -5,12 +5,19 @@ import (
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
-type paginationType string
+type (
+	paginationType string
+
+	deleteReturns string
+)
 
 const (
 	paginationTypeOffset paginationType = "offset"
 	paginationTypeToken  paginationType = "token"
 	paginationTypeNone   paginationType = "none"
+
+	deleteReturnsEmpty   deleteReturns = "empty"
+	deleteReturnsWrapper deleteReturns = "wrapper"
 )
 
 type Specification struct {
@@ -25,6 +32,11 @@ type Specification struct {
 		GoogleAPIFieldBehavior specw.BoolObject[struct{}] `yaml:"google.api.field_behavior" json:"google.api.field_behavior"`
 		BufValidateField       specw.BoolObject[struct{}] `yaml:"buf.validate.field" json:"buf.validate.field"`
 	}] `yaml:"with" json:"with"`
+	RPC struct {
+		Delete struct {
+			Returns deleteReturns `yaml:"delete" json:"delete"`
+		} `yaml:"delete" json:"delete"`
+	} `yaml:"rpc" json:"rpc"`
 }
 
 func (s *Specification) Validate() error {
@@ -34,6 +46,10 @@ func (s *Specification) Validate() error {
 
 	if s.Pagination == "" {
 		s.Pagination = paginationTypeOffset
+	}
+
+	if s.RPC.Delete.Returns == "" {
+		s.RPC.Delete.Returns = deleteReturnsEmpty
 	}
 
 	return nil

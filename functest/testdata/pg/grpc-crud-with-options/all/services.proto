@@ -4,6 +4,7 @@ package org.service;
 
 import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
@@ -25,7 +26,7 @@ service UsersService {
   }
 
   // Delete a user.
-  rpc Delete(DeleteUserRequest) returns (DeleteUserResponse) {
+  rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/users/{id}"
     };
@@ -63,7 +64,7 @@ service PhonesService {
   }
 
   // Delete a phone.
-  rpc Delete(DeletePhoneRequest) returns (DeletePhoneResponse) {
+  rpc Delete(DeletePhoneRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/phones/{user_id}/{number}"
     };
@@ -154,9 +155,6 @@ message DeleteUserRequest {
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
-}
-
-message DeleteUserResponse {
 }
 
 message CreateUserRequest {
@@ -285,9 +283,6 @@ message DeletePhoneRequest {
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
-}
-
-message DeletePhoneResponse {
 }
 
 message CreatePhoneRequest {
