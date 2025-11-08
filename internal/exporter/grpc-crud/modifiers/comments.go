@@ -38,6 +38,8 @@ func (c *Comments) generateCommentForProcedure(p *presentation.Procedure) string
 		return fmt.Sprintf("Delete a %s.", singleName)
 	case presentation.ProcedureTypeUpdate:
 		return fmt.Sprintf("Update an existing %s.", singleName)
+	case presentation.ProcedureTypeUndelete:
+		return fmt.Sprintf("Restore a soft-deleted %s.", singleName)
 	default:
 		return ""
 	}

@@ -23,6 +23,9 @@ service UsersService {
 
   // Update an existing user.
   rpc Update(UpdateUserRequest) returns (User) {};
+
+  // Restore a soft-deleted user.
+  rpc Undelete(UndeleteUserRequest) returns (User) {};
 }
 
 // Service for working with phones.
@@ -99,6 +102,10 @@ message UpdateUserRequest {
   double balance = 3;
   double prev_balance = 4;
   Mood current_mood = 5;
+}
+
+message UndeleteUserRequest {
+  int64 id = 1;
 }
 
 message Phone {

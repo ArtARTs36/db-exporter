@@ -213,6 +213,10 @@ func (e *Exporter) buildService(
 			Type:  presentation.ProcedureTypeUpdate,
 			Build: e.buildUpdateProcedure,
 		},
+		{
+			Type:  presentation.ProcedureTypeUndelete,
+			Build: e.buildUndeleteProcedure,
+		},
 	}
 
 	mapColumnType := func(col *schema.Column) string {
@@ -287,6 +291,34 @@ func (e *Exporter) buildGetProcedure(
 		presentation.ProcedureTypeGet,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Get%sRequest", buildCtx.tableSingularName))
+
+			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
+				message.CreateField(pkField.Name(), func(field *presentation.Field) {
+					field.CopyType(pkField).AsRequired()
+				})
+			}
+		},
+	)
+
+	return nil
+}
+
+func (e *Exporter) buildUndeleteProcedure(
+	buildCtx *buildProcedureContext,
+) error {
+	if buildCtx.service.TableMessage().PrimaryKey == nil {
+		return nil
+	}
+
+	if !buildCtx.service.TableMessage().Table().SupportsSoftDelete() {
+		return nil
+	}
+
+	buildCtx.service.AddProcedure(
+		"Undelete",
+		presentation.ProcedureTypeUndelete,
+		func(message *presentation.Message) {
+			message.SetName(fmt.Sprintf("Undelete%sRequest", buildCtx.tableSingularName))
 
 			for _, pkField := range buildCtx.service.TableMessage().PrimaryKey {
 				message.CreateField(pkField.Name(), func(field *presentation.Field) {
