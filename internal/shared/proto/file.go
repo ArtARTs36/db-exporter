@@ -80,9 +80,7 @@ func (f *File) writeSyntax(buf iox.Writer) {
 func (f *File) getSortedImports() []string {
 	imports := f.Imports.List()
 
-	slices.SortFunc(imports, func(a, b string) int {
-		return strings.Compare(a, b)
-	})
+	slices.SortFunc(imports, strings.Compare)
 
 	return imports
 }

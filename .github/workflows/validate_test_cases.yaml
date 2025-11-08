@@ -21,4 +21,4 @@ jobs:
       - name: Run linter
         uses: ci-space/protolint-action@master
         with:
-          dir: ./functest
+          dir: functest
