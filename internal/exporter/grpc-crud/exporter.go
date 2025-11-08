@@ -14,6 +14,7 @@ import (
 	"github.com/artarts36/gds"
 )
 
+// Exporter based on https://google.aip.dev/121
 type Exporter struct{}
 
 type buildProcedureContext struct {
