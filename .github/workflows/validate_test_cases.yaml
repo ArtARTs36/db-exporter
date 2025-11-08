@@ -22,3 +22,4 @@ jobs:
         uses: ci-space/protolint-action@master
         with:
           dir: functest
+          config_path: functest/protolint.yaml
