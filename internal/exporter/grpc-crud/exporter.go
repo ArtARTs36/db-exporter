@@ -433,21 +433,11 @@ func (e *Exporter) buildCreateProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.service.TableMessage().Table().Columns {
-				if e.columnAutofilled(col) {
-					continue
-				}
-
-				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
-
-				message.CreateField(tableField.Name(), func(field *presentation.Field) {
-					field.CopyType(tableField)
-
-					if !col.Nullable {
-						field.AsRequired()
-					}
-				})
-			}
+			message.CreateField(buildCtx.service.TableMessage().SingularNameForField(), func(fld *presentation.Field) {
+				fld.
+					SetType(buildCtx.service.TableMessage().Name()).
+					AsRequired()
+			})
 		},
 	)
 
