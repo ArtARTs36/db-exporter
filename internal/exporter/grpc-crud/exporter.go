@@ -267,6 +267,10 @@ func (e *Exporter) mapTableMessage(
 			if column.Comment.IsNotEmpty() {
 				field.SetTopComment(column.Comment.WithSuffix(".").Value)
 			}
+
+			if e.columnAutofilled(column) {
+				field.AsAutofilled()
+			}
 		}
 
 		fieldName := column.Name.Snake().Lower().Value
@@ -417,6 +421,7 @@ func (e *Exporter) buildDeleteProcedure(
 	return err
 }
 
+// https://google.aip.dev/133
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
@@ -428,27 +433,18 @@ func (e *Exporter) buildCreateProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.service.TableMessage().Table().Columns {
-				if e.columnAutofilled(col) {
-					continue
-				}
-
-				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
-
-				message.CreateField(tableField.Name(), func(field *presentation.Field) {
-					field.CopyType(tableField)
-
-					if !col.Nullable {
-						field.AsRequired()
-					}
-				})
-			}
+			message.CreateField(buildCtx.service.TableMessage().SingularNameForField(), func(fld *presentation.Field) {
+				fld.
+					SetType(buildCtx.service.TableMessage().Name()).
+					AsRequired()
+			})
 		},
 	)
 
 	return nil
 }
 
+// https://google.aip.dev/134
 func (e *Exporter) buildUpdateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
@@ -456,25 +452,21 @@ func (e *Exporter) buildUpdateProcedure(
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
 
-			for _, col := range buildCtx.service.TableMessage().Table().Columns {
-				if e.columnAutofilled(col) {
-					continue
-				}
-
-				tableField, _ := message.Service().TableMessage().GetField(col.Name.Value)
-
-				message.CreateField(tableField.Name(), func(field *presentation.Field) {
-					field.CopyType(tableField)
-
-					if !col.Nullable {
-						field.AsRequired()
-					}
-				})
-			}
+			message.CreateField(buildCtx.service.TableMessage().SingularNameForField(), func(fld *presentation.Field) {
+				fld.
+					SetType(buildCtx.service.TableMessage().Name()).
+					AsRequired()
+			})
 		},
 	)
 
 	return nil
+}
+
+var autofilledTimestampColumnNames = map[string]bool{
+	"deleted_at": true, "delete_time": true,
+	"updated_at": true, "update_time": true,
+	"created_at": true, "create_time": true,
 }
 
 func (e *Exporter) columnAutofilled(col *schema.Column) bool {
@@ -482,13 +474,15 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return true
 	}
 
-	if col.Name.Equal("deleted_at", "delete_time", "updated_at", "update_time") {
+	if col.Type.IsDatetime || col.Type.IsDate {
+		if autofilledTimestampColumnNames[col.Name.Lower().Value] {
+			return true
+		}
+	}
+
+	if col.DefaultRaw.Valid && col.IsPrimaryKey() {
 		return true
 	}
 
-	if !col.DefaultRaw.Valid {
-		return false
-	}
-
-	return col.Name.Equal("id", "created_at", "create_time", "expire_time", "purge_time")
+	return false
 }

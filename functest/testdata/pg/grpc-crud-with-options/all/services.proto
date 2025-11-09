@@ -111,7 +111,7 @@ message User {
   ];
 
   google.protobuf.Timestamp created_at = 5 [
-    (google.api.field_behavior) = REQUIRED
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
   Mood current_mood = 6 [
@@ -119,11 +119,11 @@ message User {
   ];
 
   google.protobuf.Timestamp updated_at = 7 [
-    (google.api.field_behavior) = OPTIONAL
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
   google.protobuf.Timestamp deleted_at = 8 [
-    (google.api.field_behavior) = OPTIONAL
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 }
 
@@ -174,56 +174,14 @@ message DeleteUserRequest {
 }
 
 message CreateUserRequest {
-  int64 id = 1 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  // user name.
-  string name = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.max_len = 64,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  double balance = 3 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  double prev_balance = 4 [
-    (google.api.field_behavior) = OPTIONAL
-  ];
-
-  Mood current_mood = 5 [
+  User user = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
 message UpdateUserRequest {
-  int64 id = 1 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  // user name.
-  string name = 2 [
-    (buf.validate.field).required = true,
-    (buf.validate.field).string.max_len = 64,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  double balance = 3 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  double prev_balance = 4 [
-    (google.api.field_behavior) = OPTIONAL
-  ];
-
-  Mood current_mood = 5 [
+  User user = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
@@ -294,24 +252,14 @@ message DeletePhoneRequest {
 }
 
 message CreatePhoneRequest {
-  int64 user_id = 1 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  string number = 2 [
+  Phone phone = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
 }
 
 message UpdatePhoneRequest {
-  int64 user_id = 1 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-
-  string number = 2 [
+  Phone phone = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];

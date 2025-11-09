@@ -14,8 +14,13 @@ func (m *GoogleAPIFieldBehavior) ModifyField(field *presentation.Field) {
 }
 
 func (m *GoogleAPIFieldBehavior) option(field *presentation.Field) *proto.FieldOption {
+	if field.Autofilled() {
+		return googleapi.FieldOutputOnly()
+	}
+
 	if field.IsRequired() {
 		return googleapi.FieldRequired()
 	}
+
 	return googleapi.FieldOptional()
 }

@@ -12,6 +12,8 @@ type Field struct {
 
 	proto   *proto.Field
 	message *Message
+
+	autofilled bool
 }
 
 func (f *Field) AddOption(option *proto.FieldOption) *Field {
@@ -76,4 +78,12 @@ func (f *Field) Column() *schema.Column {
 func (f *Field) SetColumn(column *schema.Column) *Field {
 	f.column = column
 	return f
+}
+
+func (f *Field) Autofilled() bool {
+	return f.autofilled
+}
+
+func (f *Field) AsAutofilled() {
+	f.autofilled = true
 }

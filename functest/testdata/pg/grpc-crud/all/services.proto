@@ -85,23 +85,11 @@ message DeleteUserRequest {
 }
 
 message CreateUserRequest {
-  int64 id = 1;
-
-  // user name.
-  string name = 2;
-  double balance = 3;
-  double prev_balance = 4;
-  Mood current_mood = 5;
+  User user = 1;
 }
 
 message UpdateUserRequest {
-  int64 id = 1;
-
-  // user name.
-  string name = 2;
-  double balance = 3;
-  double prev_balance = 4;
-  Mood current_mood = 5;
+  User user = 1;
 }
 
 message UndeleteUserRequest {
@@ -136,13 +124,11 @@ message DeletePhoneRequest {
 }
 
 message CreatePhoneRequest {
-  int64 user_id = 1;
-  string number = 2;
+  Phone phone = 1;
 }
 
 message UpdatePhoneRequest {
-  int64 user_id = 1;
-  string number = 2;
+  Phone phone = 1;
 }
 
 enum Mood {
