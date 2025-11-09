@@ -14,7 +14,7 @@ runs:
     using: composite
     steps:
         - name: Download db-exporter binary
-          run: wget -O db-exporter.zip https://github.com/ArtARTs36/db-exporter/releases/download/v0.5.3/db-exporter-linux-amd64.zip && unzip -j db-exporter.zip db-exporter
+          run: wget -O db-exporter.zip https://github.com/ArtARTs36/db-exporter/releases/download/v0.5.7/db-exporter-linux-amd64.zip && unzip -j db-exporter.zip db-exporter
           shell: bash
         - name: Run db-exporter
           id: run-binary
