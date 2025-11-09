@@ -72,7 +72,7 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 		}
 	}
 
-	slog.InfoContext(ctx, "[command] use databases", slog.Any("databases", databaseNames(dbs)))
+	slog.DebugContext(ctx, "[command] db selected", slog.Any("databases", databaseNames(dbs)))
 
 	c.setupLogger(params.Config.Options.Debug)
 
@@ -92,7 +92,7 @@ func (c *Command) Run(ctx context.Context, params *CommandRunParams) error {
 		slog.String("execution_time", time.Since(start).String()),
 	)
 
-	if params.Config.Options.PrintStat {
+	if !params.Config.Options.NoPrintStat {
 		c.printStat(result)
 	}
 

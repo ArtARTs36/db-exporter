@@ -10,7 +10,7 @@ type Config struct {
 	Tasks     map[string]Task            `yaml:"tasks" json:"tasks"`
 	Options   struct {
 		WithMigrationsTable bool `yaml:"with_migrations_table" json:"with_migrations_table"`
-		PrintStat           bool `yaml:"print_stat" json:"print_stat"`
+		NoPrintStat         bool `yaml:"no_print_stat" json:"no_print_stat"`
 		Debug               bool `yaml:"debug" json:"debug"`
 	} `yaml:"options"`
 }

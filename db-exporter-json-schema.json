@@ -23,7 +23,7 @@
           "type": "boolean",
           "default": false
         },
-        "print_stat": {
+        "no_print_stat": {
           "type": "boolean",
           "default": false
         },
