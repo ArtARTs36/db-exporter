@@ -425,10 +425,6 @@ func (e *Exporter) buildDeleteProcedure(
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
-	if buildCtx.service.TableMessage().Table().PrimaryKey == nil {
-		return nil
-	}
-
 	buildCtx.service.AddProcedure("Create", presentation.ProcedureTypeCreate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Create%sRequest", buildCtx.tableSingularName))
@@ -448,6 +444,10 @@ func (e *Exporter) buildCreateProcedure(
 func (e *Exporter) buildUpdateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
+	if buildCtx.service.TableMessage().Table().PrimaryKey == nil {
+		return nil
+	}
+
 	buildCtx.service.AddProcedure("Update", presentation.ProcedureTypeUpdate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
