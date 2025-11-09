@@ -111,7 +111,7 @@ message User {
   ];
 
   google.protobuf.Timestamp created_at = 5 [
-    (google.api.field_behavior) = REQUIRED
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
   Mood current_mood = 6 [
@@ -119,11 +119,11 @@ message User {
   ];
 
   google.protobuf.Timestamp updated_at = 7 [
-    (google.api.field_behavior) = OPTIONAL
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 
   google.protobuf.Timestamp deleted_at = 8 [
-    (google.api.field_behavior) = OPTIONAL
+    (google.api.field_behavior) = OUTPUT_ONLY
   ];
 }
 

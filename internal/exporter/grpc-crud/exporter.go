@@ -267,6 +267,10 @@ func (e *Exporter) mapTableMessage(
 			if column.Comment.IsNotEmpty() {
 				field.SetTopComment(column.Comment.WithSuffix(".").Value)
 			}
+
+			if e.columnAutofilled(column) {
+				field.AsAutofilled()
+			}
 		}
 
 		fieldName := column.Name.Snake().Lower().Value
@@ -417,6 +421,7 @@ func (e *Exporter) buildDeleteProcedure(
 	return err
 }
 
+// https://google.aip.dev/133
 func (e *Exporter) buildCreateProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
@@ -477,18 +482,26 @@ func (e *Exporter) buildUpdateProcedure(
 	return nil
 }
 
+var autofilledTimestampColumnNames = map[string]bool{
+	"deleted_at": true, "delete_time": true,
+	"updated_at": true, "update_time": true,
+	"created_at": true, "create_time": true,
+}
+
 func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 	if col.IsAutoincrement {
 		return true
 	}
 
-	if col.Name.Equal("deleted_at", "delete_time", "updated_at", "update_time") {
+	if col.Type.IsDatetime || col.Type.IsDate {
+		if autofilledTimestampColumnNames[col.Name.Lower().Value] {
+			return true
+		}
+	}
+
+	if col.DefaultRaw.Valid && col.IsPrimaryKey() {
 		return true
 	}
 
-	if !col.DefaultRaw.Valid {
-		return false
-	}
-
-	return col.Name.Equal("id", "created_at", "create_time", "expire_time", "purge_time")
+	return false
 }
