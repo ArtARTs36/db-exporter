@@ -68,12 +68,15 @@ message ListUsersRequest {
   // Maximum number of results per page.
   uint64 page_size = 3;
 
-  // The number of records to skip before starting to fetch the records.
-  uint64 offset = 4;
+  // Token of the requested results page.
+  string page_token = 4;
 }
 
 message ListUsersResponse {
   repeated User items = 1;
+
+  // Next page token.
+  string next_page_token = 2;
 }
 
 message GetUserRequest {
@@ -105,12 +108,15 @@ message ListPhonesRequest {
   // Maximum number of results per page.
   uint64 page_size = 1;
 
-  // The number of records to skip before starting to fetch the records.
-  uint64 offset = 2;
+  // Token of the requested results page.
+  string page_token = 2;
 }
 
 message ListPhonesResponse {
   repeated Phone items = 1;
+
+  // Next page token.
+  string next_page_token = 2;
 }
 
 message GetPhoneRequest {

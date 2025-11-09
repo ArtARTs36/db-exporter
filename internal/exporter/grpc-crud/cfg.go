@@ -45,10 +45,8 @@ func (s *Specification) Validate() error {
 	}
 
 	if s.Pagination == "" {
-		s.Pagination = paginationTypeOffset
+		s.Pagination = paginationTypeToken
 	}
-
-	// panic(fmt.Sprintf("returns: %q", s.RPC.Delete.Returns))
 
 	if s.RPC.Delete.Returns == "" {
 		s.RPC.Delete.Returns = deleteReturnsEmpty
