@@ -18,14 +18,14 @@ service UsersService {
   // Delete a user.
   rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {};
 
+  // Restore a soft-deleted user.
+  rpc Undelete(UndeleteUserRequest) returns (User) {};
+
   // Create a new user.
   rpc Create(CreateUserRequest) returns (User) {};
 
   // Update an existing user.
   rpc Update(UpdateUserRequest) returns (User) {};
-
-  // Restore a soft-deleted user.
-  rpc Undelete(UndeleteUserRequest) returns (User) {};
 }
 
 // Service for working with phones.
@@ -84,16 +84,16 @@ message DeleteUserRequest {
   int64 id = 1;
 }
 
+message UndeleteUserRequest {
+  int64 id = 1;
+}
+
 message CreateUserRequest {
   User user = 1;
 }
 
 message UpdateUserRequest {
   User user = 1;
-}
-
-message UndeleteUserRequest {
-  int64 id = 1;
 }
 
 message Phone {

@@ -102,7 +102,7 @@
                 }
               }
             }
-          ],
+          ]
         },
         "push": {
           "type": "boolean",
@@ -553,12 +553,19 @@
         },
         "rpc": {
           "type": "object",
-          "delete": {
-            "type": "object",
-            "returns": {
-              "type": "string",
-              "enum": ["empty", "wrapper"],
-              "default": "empty"
+          "properties": {
+            "delete": {
+              "type": "object",
+              "properties": {
+                "returns": {
+                  "type": "string",
+                  "enum": [
+                    "empty",
+                    "wrapper"
+                  ],
+                  "default": "empty"
+                }
+              }
             }
           }
         },

@@ -206,16 +206,16 @@ func (e *Exporter) buildService(
 			Build: e.buildDeleteProcedure,
 		},
 		{
+			Type:  presentation.ProcedureTypeUndelete,
+			Build: e.buildUndeleteProcedure,
+		},
+		{
 			Type:  presentation.ProcedureTypeCreate,
 			Build: e.buildCreateProcedure,
 		},
 		{
 			Type:  presentation.ProcedureTypeUpdate,
 			Build: e.buildUpdateProcedure,
-		},
-		{
-			Type:  presentation.ProcedureTypeUndelete,
-			Build: e.buildUndeleteProcedure,
 		},
 	}
 

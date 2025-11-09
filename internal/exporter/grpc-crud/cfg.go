@@ -34,7 +34,7 @@ type Specification struct {
 	}] `yaml:"with" json:"with"`
 	RPC struct {
 		Delete struct {
-			Returns deleteReturns `yaml:"delete" json:"delete"`
+			Returns deleteReturns `yaml:"returns" json:"returns"`
 		} `yaml:"delete" json:"delete"`
 	} `yaml:"rpc" json:"rpc"`
 }
@@ -47,6 +47,8 @@ func (s *Specification) Validate() error {
 	if s.Pagination == "" {
 		s.Pagination = paginationTypeOffset
 	}
+
+	// panic(fmt.Sprintf("returns: %q", s.RPC.Delete.Returns))
 
 	if s.RPC.Delete.Returns == "" {
 		s.RPC.Delete.Returns = deleteReturnsEmpty

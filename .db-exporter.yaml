@@ -10,39 +10,11 @@ tasks:
         table_per_file: true
         spec:
           package: 'org.user_manager'
-        out:
-          dir: './out/grpc-crud-1'
-
-  grpc-crud-2: # step 1: with field_behavior
-    activities:
-      - format: grpc-crud
-        table_per_file: true
-        spec:
-          package: 'org.user_manager'
-          pagination: token
           with:
             google.api.field_behavior: true
+            google.api.http: true
         out:
-          dir: './out/grpc-crud-2'
-
-  diagram:
-    activities:
-      - format: diagram
-        spec:
-          style:
-            font:
-              family: Courier
-
-            background:
-              grid:
-                line_color: '#ccc'
-
-            table:
-              name:
-                background_color: '#3498db'
-                text_color: 'white'
-        out:
-          dir: ./
+          dir: './out/grpc-crud-1'
 
 options:
   print_stat: true

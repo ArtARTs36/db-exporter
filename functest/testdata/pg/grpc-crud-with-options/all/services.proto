@@ -32,6 +32,13 @@ service UsersService {
     };
   }
 
+  // Restore a soft-deleted user.
+  rpc Undelete(UndeleteUserRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/v1/users/{id}:undelete"
+    };
+  }
+
   // Create a new user.
   rpc Create(CreateUserRequest) returns (User) {
     option (google.api.http) = {
@@ -43,13 +50,6 @@ service UsersService {
   rpc Update(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
       put: "/v1/users/{id}"
-    };
-  }
-
-  // Restore a soft-deleted user.
-  rpc Undelete(UndeleteUserRequest) returns (User) {
-    option (google.api.http) = {
-      post: "/v1/users/{id}:undelete"
     };
   }
 }
@@ -173,6 +173,13 @@ message DeleteUserRequest {
   ];
 }
 
+message UndeleteUserRequest {
+  int64 id = 1 [
+    (buf.validate.field).required = true,
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
 message CreateUserRequest {
   User user = 1 [
     (buf.validate.field).required = true,
@@ -182,13 +189,6 @@ message CreateUserRequest {
 
 message UpdateUserRequest {
   User user = 1 [
-    (buf.validate.field).required = true,
-    (google.api.field_behavior) = REQUIRED
-  ];
-}
-
-message UndeleteUserRequest {
-  int64 id = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
