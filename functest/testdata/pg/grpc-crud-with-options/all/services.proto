@@ -5,6 +5,7 @@ package org.service;
 import "buf/validate/validate.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
@@ -192,6 +193,11 @@ message UpdateUserRequest {
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
   ];
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2 [
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 message Phone {
@@ -262,6 +268,11 @@ message UpdatePhoneRequest {
   Phone phone = 1 [
     (buf.validate.field).required = true,
     (google.api.field_behavior) = REQUIRED
+  ];
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2 [
+    (google.api.field_behavior) = OPTIONAL
   ];
 }
 
