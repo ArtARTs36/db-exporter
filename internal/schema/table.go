@@ -110,8 +110,12 @@ var softDeletedColumnNames = []string{
 
 func (t *Table) SupportsSoftDelete() bool {
 	for _, name := range softDeletedColumnNames {
-		_, ok := t.columnMap[name]
-		if ok {
+		col, ok := t.columnMap[name]
+		if !ok {
+			continue
+		}
+
+		if col.Type.IsDatetime || col.Type.IsDate {
 			return true
 		}
 	}

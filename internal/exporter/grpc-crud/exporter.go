@@ -336,6 +336,7 @@ func (e *Exporter) buildUndeleteProcedure(
 	return nil
 }
 
+// https://google.aip.dev/132
 func (e *Exporter) buildListProcedure(
 	buildCtx *buildProcedureContext,
 ) error {
