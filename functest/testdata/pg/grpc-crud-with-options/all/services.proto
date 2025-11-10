@@ -49,7 +49,7 @@ service UsersService {
   // Update an existing user.
   rpc Update(UpdateUserRequest) returns (User) {
     option (google.api.http) = {
-      put: "/v1/users/{id}"
+      patch: "/v1/users/{id}"
     };
   }
 }

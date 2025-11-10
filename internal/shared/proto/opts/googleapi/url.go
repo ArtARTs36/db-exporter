@@ -11,7 +11,7 @@ func Post(url string) *proto.ServiceProcedureOption {
 }
 
 func Patch(url string) *proto.ServiceProcedureOption {
-	return opt("put", url)
+	return opt("patch", url)
 }
 
 func Delete(url string) *proto.ServiceProcedureOption {
