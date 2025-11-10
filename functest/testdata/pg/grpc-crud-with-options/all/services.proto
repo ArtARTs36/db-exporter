@@ -87,7 +87,7 @@ service PhonesService {
   // Update an existing phone.
   rpc Update(UpdatePhoneRequest) returns (Phone) {
     option (google.api.http) = {
-      put: "/v1/phones/{user_id}/{number}"
+      patch: "/v1/phones/{user_id}/{number}"
     };
   }
 }
