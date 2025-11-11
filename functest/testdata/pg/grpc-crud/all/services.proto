@@ -3,6 +3,7 @@ syntax = "proto3";
 package org.service;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 
 option optimize_for = SPEED;
@@ -97,6 +98,9 @@ message CreateUserRequest {
 
 message UpdateUserRequest {
   User user = 1;
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 message Phone {
@@ -135,6 +139,9 @@ message CreatePhoneRequest {
 
 message UpdatePhoneRequest {
   Phone phone = 1;
+
+  // The list of fields to update.
+  google.protobuf.FieldMask update_mask = 2;
 }
 
 enum Mood {

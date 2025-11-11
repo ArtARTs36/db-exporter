@@ -450,6 +450,8 @@ func (e *Exporter) buildUpdateProcedure(
 		return nil
 	}
 
+	buildCtx.service.File().AddImport("google/protobuf/field_mask.proto")
+
 	buildCtx.service.AddProcedure("Update", presentation.ProcedureTypeUpdate,
 		func(message *presentation.Message) {
 			message.SetName(fmt.Sprintf("Update%sRequest", buildCtx.tableSingularName))
@@ -458,6 +460,10 @@ func (e *Exporter) buildUpdateProcedure(
 				fld.
 					SetType(buildCtx.service.TableMessage().Name()).
 					AsRequired()
+			})
+
+			message.CreateField("update_mask", func(field *presentation.Field) {
+				field.SetType("google.protobuf.FieldMask").SetTopComment("The list of fields to update.")
 			})
 		},
 	)
