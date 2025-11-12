@@ -41,7 +41,7 @@ jobs:
           FUNCTEST: on
           MYSQL_DSN: test:test@tcp(localhost:5499)/users
           DB_EXPORTER_BIN: ${{ github.workspace }}/functest/db-exporter
-        run: go build -o ./functest/db-exporter cmd/main.go
+        run: go build -o ./functest/db-exporter cmd/db-exporter/main.go
 
       - name: Upload binary to artifacts
         uses: actions/upload-artifact@v4

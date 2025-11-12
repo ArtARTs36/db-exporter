@@ -11,7 +11,7 @@ tasks:
         spec:
           package: 'org.user_manager'
           options:
-            go_package: github.com/my-org/user-manager/pkg/user-manager-api
+            go_package: github.com/my-org/user-manager/pkg/api
           with:
             google.api.field_behavior: true # Генерируем опцию field_behavior для полей запросов
             google.api.http: true # Генерируем опцию google.api.http для заполнения адреса для методов

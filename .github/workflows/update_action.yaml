@@ -33,7 +33,7 @@ jobs:
 
       - name: Generate new config file
         run: |
-          go run ./cmd/main.go --singlecli-codegen-ga
+          go run ./cmd/db-exporter/main.go --singlecli-codegen-ga
 
       - name: Commit changes
         if: ${{ steps.prev_version.outputs.hash != hashFiles('action.yaml') }}

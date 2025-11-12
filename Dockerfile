@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 
 RUN apk add --update gcc libc-dev
-RUN GOOS=linux CGO_ENABLED=1 go build -trimpath -ldflags="-s -w -extldflags=-static -X 'main.Version=${APP_VERSION}' -X 'main.BuildDate=${BUILD_TIME}'" -o /go/bin/db-exporter /go/src/github.com/artarts36/db-exporter/cmd/main.go
+RUN GOOS=linux CGO_ENABLED=1 go build -trimpath -ldflags="-s -w -extldflags=-static -X 'main.Version=${APP_VERSION}' -X 'main.BuildDate=${BUILD_TIME}'" -o /go/bin/db-exporter /go/src/github.com/artarts36/db-exporter/cmd/db-exporter/main.go
 
 ######################################################
 
