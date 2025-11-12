@@ -9,7 +9,7 @@ import (
 type GoogleAPIFieldBehavior struct{}
 
 func (m *GoogleAPIFieldBehavior) ModifyField(field *presentation.Field) {
-	field.Message().Service().File().AddImport("google/api/annotations.proto")
+	field.Message().Service().File().AddImport("google/api/field_behavior.proto")
 	field.AddOption(m.option(field))
 }
 

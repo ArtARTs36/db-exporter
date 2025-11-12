@@ -1,0 +1,19 @@
+databases:
+  default:
+    driver: postgres
+    dsn: "host=localhost port=5419 user=test password=test dbname=users sslmode=disable" # DSN к базе данных Postgres
+
+tasks:
+  my-grpc-crud:
+    activities:
+      - format: grpc-crud
+        table_per_file: true # Этот параметр указывает, что для каждой таблицы должен генерироваться отдельный файл
+        spec:
+          package: 'org.user_manager'
+          options:
+            go_package: github.com/my-org/user-manager/pkg/user-manager-api
+          with:
+            google.api.field_behavior: true # Генерируем опцию field_behavior для полей запросов
+            google.api.http: true # Генерируем опцию google.api.http для заполнения адреса для методов
+        out:
+          dir: './contracts'
