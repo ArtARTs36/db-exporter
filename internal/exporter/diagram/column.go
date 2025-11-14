@@ -57,7 +57,7 @@ func mapColumn(col *schema.Column) *diagramColumn {
 	case col.DataType.IsDatetime:
 		column.Type = "datetime"
 	default:
-		column.Type = col.TypeRaw.Value
+		column.Type = col.DataType.Name
 	}
 
 	return column

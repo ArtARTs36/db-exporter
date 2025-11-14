@@ -152,8 +152,6 @@ order by c.ordinal_position`
 			table.UsingEnums[enum.Name.Value] = enum
 		}
 
-		fmt.Println(col.TypeRaw.Value)
-
 		domain, domainExists := sch.Domains.Get(col.TypeRaw.Value)
 		if domainExists {
 			col.Domain = domain
