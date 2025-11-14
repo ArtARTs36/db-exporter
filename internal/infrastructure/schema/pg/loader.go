@@ -123,14 +123,12 @@ order by c.ordinal_position`
 	// loading domains
 	slog.DebugContext(ctx, "[pgloader] loading domains")
 
-	domains, err := l.loadDomains(ctx, cn)
+	sch.Domains, err = l.loadDomains(ctx, cn)
 	if err != nil {
 		return nil, fmt.Errorf("load domains: %w", err)
 	}
 
-	sch.Domains = domains
-
-	slog.DebugContext(ctx, "[pgloader] domains loaded", slog.Int("domains_count", domains.Len()))
+	slog.DebugContext(ctx, "[pgloader] domains loaded", slog.Int("domains_count", sch.Domains.Len()))
 
 	// mapping columns
 	for _, col := range cols {
