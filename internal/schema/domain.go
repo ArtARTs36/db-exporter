@@ -2,7 +2,7 @@ package schema
 
 type Domain struct {
 	Name     string
-	DataType Type
+	DataType DataType
 
 	ConstraintName string
 	CheckClause    string

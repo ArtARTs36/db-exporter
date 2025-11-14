@@ -2,7 +2,7 @@ package schema
 
 import "fmt"
 
-type Type struct {
+type DataType struct {
 	Name string
 
 	Length string
@@ -20,8 +20,8 @@ type Type struct {
 	IsInterval   bool
 }
 
-func (t *Type) Clone() Type {
-	return Type{
+func (t *DataType) Clone() DataType {
+	return DataType{
 		Name:         t.Name,
 		Length:       t.Length,
 		IsNumeric:    t.IsNumeric,
@@ -38,21 +38,21 @@ func (t *Type) Clone() Type {
 	}
 }
 
-func (t *Type) WithLength(length string) Type {
+func (t *DataType) WithLength(length string) DataType {
 	newType := t.Clone()
 	newType.Length = length
 
 	return newType
 }
 
-func (t *Type) MarkAsUUID() Type {
+func (t *DataType) MarkAsUUID() DataType {
 	newType := t.Clone()
 	newType.IsUUID = true
 
 	return newType
 }
 
-func (t *Type) String() string {
+func (t *DataType) String() string {
 	if t.Length == "" {
 		return t.Name
 	}

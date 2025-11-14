@@ -232,7 +232,7 @@ func (b *PostgresDDLBuilder) createColumnDefinition(
 		defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 	}
 
-	colTypeName := column.DataType.Name
+	var colTypeName string
 	if column.DomainName.Valid {
 		colTypeName = column.DomainName.String
 	} else {

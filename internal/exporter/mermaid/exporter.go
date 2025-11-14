@@ -82,7 +82,7 @@ func (e *Exporter) addTableToDiagram(diagram *mermaid.ErDiagram, table *schema.T
 	}
 }
 
-func (e *Exporter) mapFieldType(typ schema.Type) string {
+func (e *Exporter) mapFieldType(typ schema.DataType) string {
 	switch {
 	case typ.IsDate:
 		return "date"

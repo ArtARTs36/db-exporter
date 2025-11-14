@@ -8,24 +8,24 @@ import (
 // DBML([a-zA-Z1-9]+)\s+= schema.DataType\{Name: "(.*)"(.*)
 
 var (
-	DBMLChar    = schema.Type{Name: "char", IsStringable: true}
-	DBMLVarchar = schema.Type{Name: "varchar", IsStringable: true}
-	DBMLBinary  = schema.Type{Name: "binary", IsBinary: true}
-	DBMLText    = schema.Type{Name: "text", IsStringable: true}
+	DBMLChar    = schema.DataType{Name: "char", IsStringable: true}
+	DBMLVarchar = schema.DataType{Name: "varchar", IsStringable: true}
+	DBMLBinary  = schema.DataType{Name: "binary", IsBinary: true}
+	DBMLText    = schema.DataType{Name: "text", IsStringable: true}
 
-	DBMLInt       = schema.Type{Name: "int", IsInteger: true, IsNumeric: true}
-	DBMLInteger   = schema.Type{Name: "integer", IsInteger: true, IsNumeric: true}
-	DBMLTimestamp = schema.Type{Name: "timestamp", IsDatetime: true}
-	DBMLUUID      = schema.Type{Name: "uuid", IsUUID: true, IsStringable: true}
+	DBMLInt       = schema.DataType{Name: "int", IsInteger: true, IsNumeric: true}
+	DBMLInteger   = schema.DataType{Name: "integer", IsInteger: true, IsNumeric: true}
+	DBMLTimestamp = schema.DataType{Name: "timestamp", IsDatetime: true}
+	DBMLUUID      = schema.DataType{Name: "uuid", IsUUID: true, IsStringable: true}
 
-	DBMLFloat  = schema.Type{Name: "float", IsFloat: true, IsNumeric: true}
-	DBMLFloat8 = schema.Type{Name: "float8", IsFloat: true, IsNumeric: true}
+	DBMLFloat  = schema.DataType{Name: "float", IsFloat: true, IsNumeric: true}
+	DBMLFloat8 = schema.DataType{Name: "float8", IsFloat: true, IsNumeric: true}
 
-	DBMLBoolean = schema.Type{Name: "boolean", IsBoolean: true}
-	DBMLBool    = schema.Type{Name: "bool", IsBoolean: true}
+	DBMLBoolean = schema.DataType{Name: "boolean", IsBoolean: true}
+	DBMLBool    = schema.DataType{Name: "bool", IsBoolean: true}
 )
 
-var dbmlTypeMap = map[string]schema.Type{
+var dbmlTypeMap = map[string]schema.DataType{
 	"char":    DBMLChar,
 	"varchar": DBMLVarchar,
 	"binary":  DBMLBinary,
@@ -43,11 +43,11 @@ var dbmlTypeMap = map[string]schema.Type{
 	"bool":    DBMLBool,
 }
 
-func MapDBMLType(name string) schema.Type {
+func MapDBMLType(name string) schema.DataType {
 	return mapType(dbmlTypeMap, name)
 }
 
-func mapGoTypeFromDBML(t schema.Type) golang.Type {
+func mapGoTypeFromDBML(t schema.DataType) golang.Type {
 	if t.IsStringable {
 		return golang.TypeString
 	}

@@ -5,67 +5,67 @@ import "github.com/artarts36/db-exporter/internal/schema"
 // PG([a-zA-Z1-9]+)\s+= schema.DataType\{Name: "(.*)"
 
 var (
-	PGText             = schema.Type{Name: "text", IsStringable: false}
-	PGUUID             = schema.Type{Name: "uuid", IsStringable: true, IsUUID: true}
-	PGCharacter        = schema.Type{Name: "character", IsStringable: true}
-	PGChar             = schema.Type{Name: "char", IsStringable: true}
-	PGCharacterVarying = schema.Type{Name: "character varying", IsStringable: true}
-	PGBpchar           = schema.Type{Name: "bpchar", IsStringable: true}
+	PGText             = schema.DataType{Name: "text", IsStringable: false}
+	PGUUID             = schema.DataType{Name: "uuid", IsStringable: true, IsUUID: true}
+	PGCharacter        = schema.DataType{Name: "character", IsStringable: true}
+	PGChar             = schema.DataType{Name: "char", IsStringable: true}
+	PGCharacterVarying = schema.DataType{Name: "character varying", IsStringable: true}
+	PGBpchar           = schema.DataType{Name: "bpchar", IsStringable: true}
 
-	PGTimestampWithoutTZ = schema.Type{Name: "timestamp without time zone", IsDatetime: true}
-	PGTimestampWithTZ    = schema.Type{Name: "timestamp with time zone", IsDatetime: true}
-	PGTimeWithoutTZ      = schema.Type{Name: "time without time zone", IsDatetime: true}
-	PGTimeWithTZ         = schema.Type{Name: "time with time zone", IsDatetime: true}
-	PGDate               = schema.Type{Name: "date", IsDate: true}
-	PGInterval           = schema.Type{Name: "interval", IsInterval: true}
+	PGTimestampWithoutTZ = schema.DataType{Name: "timestamp without time zone", IsDatetime: true}
+	PGTimestampWithTZ    = schema.DataType{Name: "timestamp with time zone", IsDatetime: true}
+	PGTimeWithoutTZ      = schema.DataType{Name: "time without time zone", IsDatetime: true}
+	PGTimeWithTZ         = schema.DataType{Name: "time with time zone", IsDatetime: true}
+	PGDate               = schema.DataType{Name: "date", IsDate: true}
+	PGInterval           = schema.DataType{Name: "interval", IsInterval: true}
 
-	PGBoolean = schema.Type{Name: "boolean", IsBoolean: true}
-	PGBit     = schema.Type{Name: "bit"}
+	PGBoolean = schema.DataType{Name: "boolean", IsBoolean: true}
+	PGBit     = schema.DataType{Name: "bit"}
 
-	PGBytea = schema.Type{Name: "bytea"}
+	PGBytea = schema.DataType{Name: "bytea"}
 
-	PGInteger     = schema.Type{Name: "integer", IsInteger: true, IsNumeric: true}
-	PGBigint      = schema.Type{Name: "bigint", IsInteger: true, IsNumeric: true}
-	PGInt         = schema.Type{Name: "int", IsInteger: true, IsNumeric: true}
-	PGInt4        = schema.Type{Name: "int4", IsInteger: true, IsNumeric: true}
-	PGInt8        = schema.Type{Name: "int8", IsInteger: true, IsNumeric: true}
-	PGSmallInt    = schema.Type{Name: "smallint", IsInteger: true, IsNumeric: true}
-	PGSmallSerial = schema.Type{Name: "smallserial", IsInteger: true, IsNumeric: true}
-	PGSerial      = schema.Type{Name: "serial", IsInteger: true, IsNumeric: true}
-	PGBigSerial   = schema.Type{Name: "bigserial", IsInteger: true, IsNumeric: true}
+	PGInteger     = schema.DataType{Name: "integer", IsInteger: true, IsNumeric: true}
+	PGBigint      = schema.DataType{Name: "bigint", IsInteger: true, IsNumeric: true}
+	PGInt         = schema.DataType{Name: "int", IsInteger: true, IsNumeric: true}
+	PGInt4        = schema.DataType{Name: "int4", IsInteger: true, IsNumeric: true}
+	PGInt8        = schema.DataType{Name: "int8", IsInteger: true, IsNumeric: true}
+	PGSmallInt    = schema.DataType{Name: "smallint", IsInteger: true, IsNumeric: true}
+	PGSmallSerial = schema.DataType{Name: "smallserial", IsInteger: true, IsNumeric: true}
+	PGSerial      = schema.DataType{Name: "serial", IsInteger: true, IsNumeric: true}
+	PGBigSerial   = schema.DataType{Name: "bigserial", IsInteger: true, IsNumeric: true}
 
-	PGMoney   = schema.Type{Name: "money"}
-	PGNumeric = schema.Type{Name: "numeric", IsNumeric: true}
+	PGMoney   = schema.DataType{Name: "money"}
+	PGNumeric = schema.DataType{Name: "numeric", IsNumeric: true}
 
-	PGReal            = schema.Type{Name: "real", IsFloat: true, IsNumeric: true}
-	PGDoublePrecision = schema.Type{Name: "double precision", IsFloat: true, IsNumeric: true}
-	PGFloat8          = schema.Type{Name: "float8", IsFloat: true, IsNumeric: true}
-	PGDecimal         = schema.Type{Name: "decimal", IsFloat: true, IsNumeric: true}
+	PGReal            = schema.DataType{Name: "real", IsFloat: true, IsNumeric: true}
+	PGDoublePrecision = schema.DataType{Name: "double precision", IsFloat: true, IsNumeric: true}
+	PGFloat8          = schema.DataType{Name: "float8", IsFloat: true, IsNumeric: true}
+	PGDecimal         = schema.DataType{Name: "decimal", IsFloat: true, IsNumeric: true}
 
-	PGCidr    = schema.Type{Name: "cidr"}
-	PGInet    = schema.Type{Name: "inet"}
-	PGMacaddr = schema.Type{Name: "macaddr"}
+	PGCidr    = schema.DataType{Name: "cidr"}
+	PGInet    = schema.DataType{Name: "inet"}
+	PGMacaddr = schema.DataType{Name: "macaddr"}
 
-	PGXML   = schema.Type{Name: "xml"}
-	PGJSON  = schema.Type{Name: "json", IsJSON: true}
-	PGJSONB = schema.Type{Name: "jsonb", IsJSON: true}
+	PGXML   = schema.DataType{Name: "xml"}
+	PGJSON  = schema.DataType{Name: "json", IsJSON: true}
+	PGJSONB = schema.DataType{Name: "jsonb", IsJSON: true}
 
-	PGTSVector = schema.Type{Name: "tsvector"}
-	PGTSQuery  = schema.Type{Name: "tsquery"}
+	PGTSVector = schema.DataType{Name: "tsvector"}
+	PGTSQuery  = schema.DataType{Name: "tsquery"}
 
-	PGArray = schema.Type{Name: "array"}
+	PGArray = schema.DataType{Name: "array"}
 
-	PGPoint        = schema.Type{Name: "point"}
-	PGLine         = schema.Type{Name: "line"}
-	PGLseg         = schema.Type{Name: "lseg"}
-	PGBox          = schema.Type{Name: "box"}
-	PGPath         = schema.Type{Name: "path"}
-	PGPolygon      = schema.Type{Name: "polygon"}
-	PGCircle       = schema.Type{Name: "circle"}
-	PGTxidSnapshot = schema.Type{Name: "txid_snapshot"}
+	PGPoint        = schema.DataType{Name: "point"}
+	PGLine         = schema.DataType{Name: "line"}
+	PGLseg         = schema.DataType{Name: "lseg"}
+	PGBox          = schema.DataType{Name: "box"}
+	PGPath         = schema.DataType{Name: "path"}
+	PGPolygon      = schema.DataType{Name: "polygon"}
+	PGCircle       = schema.DataType{Name: "circle"}
+	PGTxidSnapshot = schema.DataType{Name: "txid_snapshot"}
 )
 
-var pgTypeMap = map[string]schema.Type{
+var pgTypeMap = map[string]schema.DataType{
 	"text":              PGText,
 	"uuid":              PGUUID,
 	"character":         PGCharacter,
@@ -126,6 +126,6 @@ var pgTypeMap = map[string]schema.Type{
 	"txid_snapshot": PGTxidSnapshot,
 }
 
-func MapPGType(name string) schema.Type {
+func MapPGType(name string) schema.DataType {
 	return mapType(pgTypeMap, name)
 }

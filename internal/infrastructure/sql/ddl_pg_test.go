@@ -167,7 +167,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						},
 						{
 							Name:     *gds.NewString("status"),
-							DataType: schema.Type{Name: "status"},
+							DataType: schema.DataType{Name: "status"},
 							Enum: &schema.Enum{
 								Name:   gds.NewString("status"),
 								Values: []string{"a", "b", "c", "d"},
@@ -215,7 +215,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 						},
 						{
 							Name:     *gds.NewString("status"),
-							DataType: schema.Type{Name: "status"},
+							DataType: schema.DataType{Name: "status"},
 							UsingSequences: map[string]*schema.Sequence{
 								"users_id_seq": &schema.Sequence{
 									Name: "users_id_seq",
