@@ -1,4 +1,6 @@
 gen:
+	docker-compose up
+
 	@echo "> generate .proto"
 	db-exporter
 

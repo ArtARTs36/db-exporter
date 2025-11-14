@@ -1,9 +1,27 @@
 services:
   postgres:
     image: postgres:12
-    ports:
-      - 5419:5432
     environment:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
       - POSTGRES_DB=users
+
+  migrations:
+    image: cispace/goose-postgres
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - postgres
+    environment:
+      GOOSE_DBSTRING: "host=postgres user=test password=test dbname=users sslmode=disable"
+    command: up
+
+  db-exporter:
+    image: artarts36/db-exporter:0.6.0
+    user: "1000:1000"
+    volumes:
+      - ./:/app
+    depends_on:
+      - migrations
+    environment:
+      PG_DSN: "host=postgres user=test password=test dbname=users sslmode=disable"

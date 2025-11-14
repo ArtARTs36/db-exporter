@@ -1,3 +1,8 @@
+-- +goose Up
+-- +goose StatementBegin
+
+CREATE EXTENSION "uuid-ossp";
+
 CREATE TYPE user_status AS ENUM ('active', 'blocked');
 
 CREATE TABLE users
@@ -9,3 +14,11 @@ CREATE TABLE users
     status       user_status NOT NULL,
     deleted_at   timestamp without time zone
 );
+
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE users;
+DROP TYPE user_status;
+-- +goose StatementEnd

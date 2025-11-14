@@ -1,7 +1,7 @@
 databases:
   default:
     driver: postgres
-    dsn: "host=localhost port=5419 user=test password=test dbname=users sslmode=disable" # DSN к базе данных Postgres
+    dsn: $PG_DSN # DSN к базе данных Postgres
 
 tasks:
   my-grpc-crud:
@@ -14,6 +14,7 @@ tasks:
             go_package: github.com/my-org/user-manager/pkg/api
           with:
             google.api.field_behavior: true # Генерируем опцию field_behavior для полей запросов
-            google.api.http: true # Генерируем опцию google.api.http для заполнения адреса для методов
+            google.api.http: # Генерируем опцию google.api.http для заполнения адреса для методов
+              path_prefix: /v1
         out:
           dir: './contracts'
