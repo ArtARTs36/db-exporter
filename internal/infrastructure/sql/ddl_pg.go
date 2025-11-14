@@ -35,7 +35,7 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 		UpQueries: make([]string, 0,
 			(len(schema.Enums)*oneTypeQueries)+
 				(len(schema.Sequences)*oneTypeQueries)+
-				(schema.Tables.Len()*oneTypeQueries),
+				(schema.Tables.Len()*oneTypeQueries)+schema.Domains.Len(),
 		),
 		DownQueries: []string{},
 	}
@@ -88,6 +88,15 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 					}
 					ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
 					ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
+				}
+				return nil
+			},
+		},
+		{
+			name: "build domains drop queries",
+			action: func() error {
+				for _, domain := range schema.Domains.List() {
+					ddl.DownQueries = append(ddl.DownQueries, b.dropType(domain.Name, params.UseIfExists))
 				}
 				return nil
 			},
@@ -333,6 +342,13 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 			if enum.UsingInSingleTable() {
 				ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
 				ddl.DownQueries = append(ddl.DownQueries, b.dropType(enum.Name.Value, opts.UseIfExists))
+			}
+		}
+
+		for _, domain := range table.UsingDomains {
+			if domain.UsingInSingleTable() {
+				ddl.UpQueries = append(ddl.UpQueries, b.CreateDomain(domain))
+				ddl.DownQueries = append(ddl.DownQueries, b.dropType(domain.Name, opts.UseIfExists))
 			}
 		}
 

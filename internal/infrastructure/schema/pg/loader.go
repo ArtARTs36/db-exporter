@@ -153,7 +153,7 @@ order by c.ordinal_position`
 		domain, domainExists := sch.Domains.Get(col.TypeRaw.Value)
 		if domainExists {
 			col.Domain = domain
-			domain.Used++
+			domain.UsingInTables = append(domain.UsingInTables, table.Name.Value)
 			table.UsingDomains[domain.Name] = domain
 		}
 
