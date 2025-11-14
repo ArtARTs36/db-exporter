@@ -6,4 +6,6 @@ type Domain struct {
 
 	ConstraintName string
 	CheckClause    string
+
+	Used int
 }

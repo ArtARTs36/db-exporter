@@ -15,6 +15,7 @@ type Table struct {
 
 	UsingSequences map[string]*Sequence `db:"-"`
 	UsingEnums     map[string]*Enum     `db:"-"`
+	UsingDomains   map[string]*Domain   `db:"-"`
 
 	columnsNames []string `db:"-"`
 
@@ -28,6 +29,7 @@ func NewTable(name gds.String) *Table {
 		UniqueKeys:     map[string]*UniqueKey{},
 		UsingSequences: map[string]*Sequence{},
 		UsingEnums:     map[string]*Enum{},
+		UsingDomains:   map[string]*Domain{},
 		columnMap:      map[string]*Column{},
 	}
 }

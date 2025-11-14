@@ -232,16 +232,23 @@ func (b *PostgresDDLBuilder) createColumnDefinition(
 		defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 	}
 
-	colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverPostgres, column.Type)
-	if err != nil {
-		return "", fmt.Errorf("failed to map column type: %w", err)
+	colTypeName := column.Type.Name
+	if column.DomainName.Valid {
+		colTypeName = column.DomainName.String
+	} else {
+		colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverPostgres, column.Type)
+		if err != nil {
+			return "", fmt.Errorf("failed to map column type: %w", err)
+		}
+
+		colTypeName = colType.Name
 	}
 
 	return fmt.Sprintf(
 		"    %s%s%s%s%s%s%s",
 		column.Name.Value,
 		strings.Repeat(" ", spacesAfterColumnName),
-		colType.Name,
+		colTypeName,
 		b.wrapCharacterLength(column.CharacterLength),
 		notNull,
 		defaultValue,

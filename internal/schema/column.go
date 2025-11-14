@@ -19,7 +19,10 @@ type Column struct {
 	DefaultRaw      sql.NullString       `db:"default_value"`
 	Default         *ColumnDefault       `db:"-"`
 	UsingSequences  map[string]*Sequence `db:"-"`
-	Enum            *Enum                `db:"-"`
+	DomainName      sql.NullString       `db:"domain_name"`
+
+	Enum   *Enum   `db:"-"`
+	Domain *Domain `db:"-"`
 
 	IsAutoincrement bool `db:"-"`
 }

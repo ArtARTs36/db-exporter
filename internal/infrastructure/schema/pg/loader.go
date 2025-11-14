@@ -64,6 +64,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 	query := `
 select c.column_name as name,
        c.table_name,
+       c.domain_name as domain_name,
        case
 			when (c.data_type = 'USER-DEFINED') then c.udt_name
 			else c.data_type
@@ -149,6 +150,15 @@ order by c.ordinal_position`
 			enum.Used++
 			enum.UsingInTables = append(enum.UsingInTables, table.Name.Value)
 			table.UsingEnums[enum.Name.Value] = enum
+		}
+
+		fmt.Println(col.TypeRaw.Value)
+
+		domain, domainExists := sch.Domains.Get(col.TypeRaw.Value)
+		if domainExists {
+			col.Domain = domain
+			domain.Used++
+			table.UsingDomains[domain.Name] = domain
 		}
 
 		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
