@@ -27,7 +27,7 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 
 type isLastLine func() bool
 
-func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
+func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) { //nolint:funlen//not need
 	const oneTypeQueries = 1
 
 	ddl := &DDL{
