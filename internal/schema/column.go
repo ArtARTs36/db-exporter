@@ -8,7 +8,7 @@ import (
 type Column struct {
 	Name            gds.String           `db:"name"`
 	TableName       gds.String           `db:"table_name"`
-	Type            Type                 `db:"-"`
+	DataType        Type                 `db:"-"`
 	TypeRaw         gds.String           `db:"type_raw"`
 	CharacterLength int16                `db:"character_length"`
 	Nullable        bool                 `db:"nullable"`

@@ -29,7 +29,7 @@ func (p *BufValidate) addOption(field *presentation.Field) bool {
 		return false
 	}
 
-	colType := field.Column().Type
+	colType := field.Column().DataType
 
 	switch {
 	case colType.IsUUID:
@@ -46,8 +46,8 @@ func (p *BufValidate) addOption(field *presentation.Field) bool {
 		if field.Column().CharacterLength > 0 {
 			field.AddOption(bufvalidate.MaxLen(strconv.Itoa(int(field.Column().CharacterLength))))
 			added = true
-		} else if field.Column().Type.Length != "" {
-			field.AddOption(bufvalidate.MaxLen(field.Column().Type.Length))
+		} else if field.Column().DataType.Length != "" {
+			field.AddOption(bufvalidate.MaxLen(field.Column().DataType.Length))
 			added = true
 		}
 

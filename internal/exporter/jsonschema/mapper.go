@@ -60,13 +60,13 @@ func (e *mapper) prepareDefaultValue(col *schema.Column) interface{} {
 
 func (e *mapper) mapFormat(column *schema.Column) jsonschema.Format {
 	switch {
-	case column.Type.IsDatetime:
+	case column.DataType.IsDatetime:
 		return jsonschema.FormatDateTime
-	case column.Type.IsUUID:
+	case column.DataType.IsUUID:
 		return jsonschema.FormatUUID
-	case column.Type.IsDate:
+	case column.DataType.IsDate:
 		return jsonschema.FormatDate
-	case column.Type.IsStringable:
+	case column.DataType.IsStringable:
 		if column.Name.Equal("email") || column.Name.Ends("_email") {
 			return jsonschema.FormatEmail
 		} else if column.Name.Equal("uri") || column.Name.Ends("_uri") {

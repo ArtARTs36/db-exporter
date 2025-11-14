@@ -88,7 +88,7 @@ func (m *GoPropertyMapper) mapGoType(
 		return e.Name.Value
 	}
 
-	goType := sqltype.MapGoType(sourceDriver, col.Type)
+	goType := sqltype.MapGoType(sourceDriver, col.DataType)
 
 	if !col.Nullable {
 		if goType.PackagePath != "" {

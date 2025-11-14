@@ -141,7 +141,7 @@ order by c.ordinal_position`
 			sch.Tables.Add(table)
 		}
 
-		col.Type = sqltype.MapPGType(col.TypeRaw.Value)
+		col.DataType = sqltype.MapPGType(col.TypeRaw.Value)
 		col.Default = l.parseColumnDefault(col)
 
 		enum, enumExists := sch.Enums[col.TypeRaw.Value]
@@ -217,7 +217,7 @@ func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
 		}
 	}
 
-	if col.Type.IsInteger {
+	if col.DataType.IsInteger {
 		if parsedInt, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
 			return &schema.ColumnDefault{
 				Type:  schema.ColumnDefaultTypeValue,

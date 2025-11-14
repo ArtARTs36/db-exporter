@@ -117,7 +117,7 @@ func (t *Table) SupportsSoftDelete() bool {
 			continue
 		}
 
-		if col.Type.IsDatetime || col.Type.IsDate {
+		if col.DataType.IsDatetime || col.DataType.IsDate {
 			return true
 		}
 	}

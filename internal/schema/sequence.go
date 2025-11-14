@@ -20,7 +20,7 @@ func (s *Sequence) UsedOnce() bool {
 func CreateSequenceForColumn(col *Column) *Sequence {
 	return &Sequence{
 		Name:     fmt.Sprintf("%s_%s_seq", col.TableName.Value, col.Name.Value),
-		DataType: col.Type,
+		DataType: col.DataType,
 		Used:     0,
 	}
 }
