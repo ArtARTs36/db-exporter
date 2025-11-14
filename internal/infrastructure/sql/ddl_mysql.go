@@ -99,7 +99,7 @@ func (b *MySQLDDLBuilder) buildCreateTable( //nolint:funlen // not need
 			defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 		}
 
-		colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverMySQL, column.Type)
+		colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverMySQL, column.DataType)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map column type: %w", err)
 		}

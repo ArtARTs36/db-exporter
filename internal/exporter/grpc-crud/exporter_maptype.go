@@ -21,7 +21,7 @@ func (e *Exporter) mapType(
 		return column.Enum.Name.Pascal().Value
 	}
 
-	goType := sqltype.MapGoType(sourceDriver, column.Type)
+	goType := sqltype.MapGoType(sourceDriver, column.DataType)
 
 	switch goType {
 	case golang.TypeInt, golang.TypeInt16, golang.TypeInt64:

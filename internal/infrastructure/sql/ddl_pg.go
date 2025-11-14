@@ -27,7 +27,7 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 
 type isLastLine func() bool
 
-func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) {
+func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) { //nolint:funlen//not need
 	const oneTypeQueries = 1
 
 	ddl := &DDL{
@@ -35,7 +35,7 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 		UpQueries: make([]string, 0,
 			(len(schema.Enums)*oneTypeQueries)+
 				(len(schema.Sequences)*oneTypeQueries)+
-				(schema.Tables.Len()*oneTypeQueries),
+				(schema.Tables.Len()*oneTypeQueries)+schema.Domains.Len(),
 		),
 		DownQueries: []string{},
 	}
@@ -49,6 +49,15 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 			action: func() error {
 				for _, enum := range schema.Enums {
 					ddl.UpQueries = append(ddl.UpQueries, b.CreateEnum(enum))
+				}
+				return nil
+			},
+		},
+		{
+			name: "build domains create queries",
+			action: func() error {
+				for _, domain := range schema.Domains.List() {
+					ddl.UpQueries = append(ddl.UpQueries, b.CreateDomain(domain))
 				}
 				return nil
 			},
@@ -79,6 +88,15 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 					}
 					ddl.UpQueries = append(ddl.UpQueries, tableDDL.UpQueries...)
 					ddl.DownQueries = append(ddl.DownQueries, tableDDL.DownQueries...)
+				}
+				return nil
+			},
+		},
+		{
+			name: "build domains drop queries",
+			action: func() error {
+				for _, domain := range schema.Domains.List() {
+					ddl.DownQueries = append(ddl.DownQueries, b.dropType(domain.Name, params.UseIfExists))
 				}
 				return nil
 			},
@@ -223,16 +241,23 @@ func (b *PostgresDDLBuilder) createColumnDefinition(
 		defaultValue = fmt.Sprintf(" DEFAULT %s", column.DefaultRaw.String)
 	}
 
-	colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverPostgres, column.Type)
-	if err != nil {
-		return "", fmt.Errorf("failed to map column type: %w", err)
+	var colTypeName string
+	if column.DomainName.Valid {
+		colTypeName = column.DomainName.String
+	} else {
+		colType, err := sqltype.TransitSQLType(sourceDriver, schema.DatabaseDriverPostgres, column.DataType)
+		if err != nil {
+			return "", fmt.Errorf("failed to map column type: %w", err)
+		}
+
+		colTypeName = colType.Name
 	}
 
 	return fmt.Sprintf(
 		"    %s%s%s%s%s%s%s",
 		column.Name.Value,
 		strings.Repeat(" ", spacesAfterColumnName),
-		colType.Name,
+		colTypeName,
 		b.wrapCharacterLength(column.CharacterLength),
 		notNull,
 		defaultValue,
@@ -320,6 +345,13 @@ func (b *PostgresDDLBuilder) BuildPerTable(sch *schema.Schema, opts BuildDDLOpts
 			}
 		}
 
+		for _, domain := range table.UsingDomains {
+			if domain.UsingInSingleTable() {
+				ddl.UpQueries = append(ddl.UpQueries, b.CreateDomain(domain))
+				ddl.DownQueries = append(ddl.DownQueries, b.dropType(domain.Name, opts.UseIfExists))
+			}
+		}
+
 		for _, sequence := range table.UsingSequences {
 			if sequence.UsedOnce() {
 				seqSQL, serr := b.CreateSequence(sequence, createSeqParams)
@@ -375,6 +407,15 @@ func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
 	}
 
 	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name.Value, valuesString)
+}
+
+func (b *PostgresDDLBuilder) CreateDomain(domain *schema.Domain) string {
+	return fmt.Sprintf(`CREATE DOMAIN %s AS %s CONSTRAINT %s %s;`,
+		domain.Name,
+		domain.DataType.Name,
+		domain.ConstraintName,
+		domain.CheckClause,
+	)
 }
 
 func (b *PostgresDDLBuilder) dropType(name string, ifExists bool) string {

@@ -48,6 +48,7 @@ func TestPGExport(t *testing.T) {
 	env := initPgTestEnvironment()
 
 	mustExecQueries(env.db, []string{
+		`CREATE DOMAIN phone_number AS CHARACTER VARYING CHECK (VALUE ~ '^\+?\d{10,15}$')`,
 		`CREATE TYPE mood AS ENUM ('ok', 'happy');`,
 		`CREATE TABLE users
 		(
@@ -65,7 +66,7 @@ func TestPGExport(t *testing.T) {
 		`CREATE TABLE phones
 		(
 		    user_id   integer NOT NULL,
-		    number character varying NOT NULL,
+		    number phone_number NOT NULL,
 		    
 		    CONSTRAINT phones_pk PRIMARY KEY (user_id, number)
 		);`,
@@ -81,6 +82,7 @@ func TestPGExport(t *testing.T) {
 			`DROP TABLE phones;`,
 			`DROP TABLE users;`,
 			`DROP TYPE mood;`,
+			`DROP TYPE phone_number;`,
 		})
 	})
 

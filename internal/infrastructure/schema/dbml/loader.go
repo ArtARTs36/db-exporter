@@ -56,7 +56,7 @@ func (l *Loader) buildSchema(parsedDBML *core.DBML) (*schema.Schema, error) {
 		for _, col := range tbl.Columns {
 			column := &schema.Column{
 				Name:            *gds.NewString(col.Name),
-				Type:            sqltype.MapDBMLType(col.Type),
+				DataType:        sqltype.MapDBMLType(col.Type),
 				TableName:       table.Name,
 				Nullable:        col.Settings.Null,
 				IsAutoincrement: col.Settings.Increment,

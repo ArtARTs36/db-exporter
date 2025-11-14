@@ -42,22 +42,22 @@ func mapColumn(col *schema.Column) *diagramColumn {
 	}
 
 	switch {
-	case col.Type.IsUUID:
+	case col.DataType.IsUUID:
 		column.Type = "uuid"
-	case col.Type.IsInteger:
+	case col.DataType.IsInteger:
 		column.Type = "integer"
-	case col.Type.IsFloat:
+	case col.DataType.IsFloat:
 		column.Type = "float"
-	case col.Type.IsBoolean:
+	case col.DataType.IsBoolean:
 		column.Type = "boolean"
-	case col.Type.IsNumeric:
+	case col.DataType.IsNumeric:
 		column.Type = "number"
-	case col.Type.IsStringable:
+	case col.DataType.IsStringable:
 		column.Type = "string"
-	case col.Type.IsDatetime:
+	case col.DataType.IsDatetime:
 		column.Type = "datetime"
 	default:
-		column.Type = col.TypeRaw.Value
+		column.Type = col.DataType.Name
 	}
 
 	return column

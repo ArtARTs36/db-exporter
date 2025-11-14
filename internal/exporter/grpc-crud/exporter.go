@@ -482,7 +482,7 @@ func (e *Exporter) columnAutofilled(col *schema.Column) bool {
 		return true
 	}
 
-	if col.Type.IsDatetime || col.Type.IsDate {
+	if col.DataType.IsDatetime || col.DataType.IsDate {
 		if autofilledTimestampColumnNames[col.Name.Lower().Value] {
 			return true
 		}

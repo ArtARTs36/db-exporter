@@ -7,11 +7,11 @@ import (
 
 func mapJSONType(col *schema.Column) jsonschema.Type {
 	switch {
-	case col.Type.IsNumeric:
+	case col.DataType.IsNumeric:
 		return jsonschema.TypeNumber
-	case col.Type.IsStringable:
+	case col.DataType.IsStringable:
 		return jsonschema.TypeString
-	case col.Type.IsBoolean:
+	case col.DataType.IsBoolean:
 		return jsonschema.TypeBoolean
 	default:
 		return jsonschema.TypeString

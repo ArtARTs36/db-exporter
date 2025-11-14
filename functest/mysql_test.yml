@@ -11,7 +11,7 @@ tasks:
           template: |
             {% for table in schema.Tables %}{{ table.Name.Value }}
             -
-            {% for column in table.Columns %}{{ column.Name.String }} - {{ column.Type.Name }} ({{ column.Type.Length }})
+            {% for column in table.Columns %}{{ column.Name.String }} - {{ column.DataType.Name }} ({{ column.DataType.Length }})
             {% endfor %}---{% endfor %}
           output:
             extension: txt

@@ -64,7 +64,7 @@ func (e *Exporter) addTableToDiagram(diagram *mermaid.ErDiagram, table *schema.T
 	for i, column := range table.Columns {
 		fields[i] = &mermaid.EntityField{
 			Name:     column.Name.Pascal().Singular().Value,
-			DataType: e.mapFieldType(column.Type),
+			DataType: e.mapFieldType(column.DataType),
 			KeyType:  e.mapKeyType(column),
 		}
 	}
@@ -82,7 +82,7 @@ func (e *Exporter) addTableToDiagram(diagram *mermaid.ErDiagram, table *schema.T
 	}
 }
 
-func (e *Exporter) mapFieldType(typ schema.Type) string {
+func (e *Exporter) mapFieldType(typ schema.DataType) string {
 	switch {
 	case typ.IsDate:
 		return "date"

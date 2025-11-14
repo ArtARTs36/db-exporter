@@ -53,7 +53,7 @@ func (e *mapper) mapColumn(
 	table *schema.Table,
 	col *schema.Column,
 ) (*dbml.Column, error) {
-	typ, err := sqltype.TransitSQLType(source, schema.DatabaseDriverDBML, col.Type)
+	typ, err := sqltype.TransitSQLType(source, schema.DatabaseDriverDBML, col.DataType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to map column %q type: %w", col.Name, err)
 	}

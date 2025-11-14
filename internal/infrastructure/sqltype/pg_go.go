@@ -5,7 +5,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/shared/golang"
 )
 
-var pgGoTypeMap = map[schema.Type]golang.Type{
+var pgGoTypeMap = map[schema.DataType]golang.Type{
 	PGInteger: golang.TypeInt,
 	PGInt4:    golang.TypeInt,
 	PGInt8:    golang.TypeInt,
@@ -30,7 +30,7 @@ var pgGoTypeMap = map[schema.Type]golang.Type{
 	PGBytea: golang.TypeByteSlice,
 }
 
-func mapGoTypeFromPG(t schema.Type) golang.Type {
+func mapGoTypeFromPG(t schema.DataType) golang.Type {
 	if t.IsStringable {
 		return golang.TypeString
 	}

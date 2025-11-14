@@ -4,7 +4,7 @@ import (
 	"github.com/artarts36/db-exporter/internal/schema"
 )
 
-var transitSQLTypeMap = map[schema.DatabaseDriver]map[schema.DatabaseDriver]map[schema.Type]schema.Type{ //nolint:exhaustive,lll // not need
+var transitSQLTypeMap = map[schema.DatabaseDriver]map[schema.DatabaseDriver]map[schema.DataType]schema.DataType{ //nolint:exhaustive,lll // not need
 	schema.DatabaseDriverDBML: {
 		schema.DatabaseDriverPostgres: {
 			DBMLChar:    PGCharacter,

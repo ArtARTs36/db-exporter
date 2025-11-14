@@ -1,5 +1,7 @@
 CREATE TYPE mood AS ENUM ('ok', 'happy');
 
+CREATE DOMAIN phone_number AS character varying CONSTRAINT phone_number_check CHECK (((VALUE)::text ~ '^\+?\d{10,15}$'::text));
+
 CREATE TABLE users
 (
     id           integer NOT NULL,
@@ -19,7 +21,7 @@ COMMENT ON COLUMN users.name IS 'user name';
 CREATE TABLE phones
 (
     user_id integer NOT NULL,
-    number  character varying NOT NULL,
+    number  phone_number NOT NULL,
 
     CONSTRAINT phones_pk PRIMARY KEY (user_id, number),
     CONSTRAINT phone_user_id_fk FOREIGN KEY (user_id) REFERENCES users (id)

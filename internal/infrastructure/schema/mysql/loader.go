@@ -58,7 +58,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 			UsingSequences: make(map[string]*schema.Sequence),
 		}
 
-		schemaColumn.Type = sqltype.MapMySQLType(col.DataType.Value)
+		schemaColumn.DataType = sqltype.MapMySQLType(col.DataType.Value)
 		if col.DataType.Value == "enum" {
 			schemaColumn.Enum = &schema.Enum{
 				Name:          col.Name.Append("_enum"),
@@ -68,7 +68,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 			}
 			table.AddEnum(schemaColumn.Enum)
 		} else if col.DataTypeLength.Valid {
-			schemaColumn.Type = schemaColumn.Type.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
+			schemaColumn.DataType = schemaColumn.DataType.WithLength(fmt.Sprintf("%d", col.DataTypeLength.Int16))
 			schemaColumn.CharacterLength = col.DataTypeLength.Int16
 		}
 

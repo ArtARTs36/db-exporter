@@ -22,6 +22,7 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "empty table",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name:    gds.String{Value: "cars"},
 					Columns: []*schema.Column{},
@@ -37,12 +38,13 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "table with 1 column",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name: gds.String{Value: "cars"},
 					Columns: []*schema.Column{
 						{
-							Name: *gds.NewString("id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("id"),
+							DataType: sqltype.PGInteger,
 						},
 					},
 				}),
@@ -62,12 +64,13 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "table with 1 column and primary key",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name: gds.String{Value: "cars"},
 					Columns: []*schema.Column{
 						{
-							Name: *gds.NewString("id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("id"),
+							DataType: sqltype.PGInteger,
 						},
 					},
 					PrimaryKey: &schema.PrimaryKey{
@@ -93,20 +96,21 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "table with deferrable foreign keys",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name: gds.String{Value: "users"},
 					Columns: []*schema.Column{
 						{
-							Name: *gds.NewString("id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("id"),
+							DataType: sqltype.PGInteger,
 						},
 						{
-							Name: *gds.NewString("car_id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("car_id"),
+							DataType: sqltype.PGInteger,
 						},
 						{
-							Name: *gds.NewString("mobile_id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("mobile_id"),
+							DataType: sqltype.PGInteger,
 						},
 					},
 					PrimaryKey: &schema.PrimaryKey{
@@ -153,16 +157,17 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "column with enum",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name: gds.String{Value: "users"},
 					Columns: []*schema.Column{
 						{
-							Name: *gds.NewString("id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("id"),
+							DataType: sqltype.PGInteger,
 						},
 						{
-							Name: *gds.NewString("status"),
-							Type: schema.Type{Name: "status"},
+							Name:     *gds.NewString("status"),
+							DataType: schema.DataType{Name: "status"},
 							Enum: &schema.Enum{
 								Name:   gds.NewString("status"),
 								Values: []string{"a", "b", "c", "d"},
@@ -200,16 +205,17 @@ func TestDDLBuilder_Build(t *testing.T) {
 		{
 			Name: "column with sequence",
 			Schema: &schema.Schema{
+				Domains: gds.NewMap[string, *schema.Domain](),
 				Tables: schema.NewTableMap(&schema.Table{
 					Name: gds.String{Value: "users"},
 					Columns: []*schema.Column{
 						{
-							Name: *gds.NewString("id"),
-							Type: sqltype.PGInteger,
+							Name:     *gds.NewString("id"),
+							DataType: sqltype.PGInteger,
 						},
 						{
-							Name: *gds.NewString("status"),
-							Type: schema.Type{Name: "status"},
+							Name:     *gds.NewString("status"),
+							DataType: schema.DataType{Name: "status"},
 							UsingSequences: map[string]*schema.Sequence{
 								"users_id_seq": &schema.Sequence{
 									Name: "users_id_seq",

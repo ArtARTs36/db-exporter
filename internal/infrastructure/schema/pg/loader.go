@@ -64,6 +64,7 @@ func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema,
 	query := `
 select c.column_name as name,
        c.table_name,
+       c.domain_name as domain_name,
        case
 			when (c.data_type = 'USER-DEFINED') then c.udt_name
 			else c.data_type
@@ -119,6 +120,17 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sch.Sequences)))
 
+	// loading domains
+	slog.DebugContext(ctx, "[pgloader] loading domains")
+
+	sch.Domains, err = l.loadDomains(ctx, cn)
+	if err != nil {
+		return nil, fmt.Errorf("load domains: %w", err)
+	}
+
+	slog.DebugContext(ctx, "[pgloader] domains loaded", slog.Int("domains_count", sch.Domains.Len()))
+
+	// mapping columns
 	for _, col := range cols {
 		table, tableExists := sch.Tables.Get(col.TableName)
 		if !tableExists {
@@ -127,7 +139,7 @@ order by c.ordinal_position`
 			sch.Tables.Add(table)
 		}
 
-		col.Type = sqltype.MapPGType(col.TypeRaw.Value)
+		col.DataType = sqltype.MapPGType(col.TypeRaw.Value)
 		col.Default = l.parseColumnDefault(col)
 
 		enum, enumExists := sch.Enums[col.TypeRaw.Value]
@@ -136,6 +148,13 @@ order by c.ordinal_position`
 			enum.Used++
 			enum.UsingInTables = append(enum.UsingInTables, table.Name.Value)
 			table.UsingEnums[enum.Name.Value] = enum
+		}
+
+		domain, domainExists := sch.Domains.Get(col.TypeRaw.Value)
+		if domainExists {
+			col.Domain = domain
+			domain.UsingInTables = append(domain.UsingInTables, table.Name.Value)
+			table.UsingDomains[domain.Name] = domain
 		}
 
 		if col.Default != nil && col.Default.Type == schema.ColumnDefaultTypeAutoincrement {
@@ -194,7 +213,7 @@ func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
 		}
 	}
 
-	if col.Type.IsInteger {
+	if col.DataType.IsInteger {
 		if parsedInt, intErr := strconv.Atoi(col.DefaultRaw.String); intErr == nil {
 			return &schema.ColumnDefault{
 				Type:  schema.ColumnDefaultTypeValue,

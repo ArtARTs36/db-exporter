@@ -178,13 +178,13 @@ func (*ModelsExporter) createModelPrimaryKey(table *schema.Table) laravelModelPr
 
 	mapType := func(col *schema.Column) php.Type {
 		switch {
-		case col.Type.IsInteger:
+		case col.DataType.IsInteger:
 			return php.TypeInt
-		case col.Type.IsFloat:
+		case col.DataType.IsFloat:
 			return php.TypeFloat
-		case col.Type.IsBoolean:
+		case col.DataType.IsBoolean:
 			return php.TypeBool
-		case col.Type.IsStringable:
+		case col.DataType.IsStringable:
 			return php.TypeString
 		}
 
@@ -229,15 +229,15 @@ func (*ModelsExporter) mapPhpType(
 	spec *ModelsSpecification,
 ) string {
 	switch {
-	case col.Type.IsInteger:
+	case col.DataType.IsInteger:
 		return string(php.TypeInt)
-	case col.Type.IsFloat:
+	case col.DataType.IsFloat:
 		return string(php.TypeFloat)
-	case col.Type.IsStringable:
+	case col.DataType.IsStringable:
 		return string(php.TypeString)
-	case col.Type.IsBoolean:
+	case col.DataType.IsBoolean:
 		return string(php.TypeBool)
-	case col.Type.IsDatetime:
+	case col.DataType.IsDatetime:
 		if !col.Name.Equal("created_at", "updated_at") {
 			model.Dates = append(model.Dates, col.Name.Value)
 		}
