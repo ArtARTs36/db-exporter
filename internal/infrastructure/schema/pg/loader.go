@@ -119,6 +119,19 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, fmt.Sprintf("[pgloader] loaded %d sequences", len(sch.Sequences)))
 
+	// loading domains
+	slog.DebugContext(ctx, "[pgloader] loading domains")
+
+	domains, err := l.loadDomains(ctx, cn)
+	if err != nil {
+		return nil, fmt.Errorf("load domains: %w", err)
+	}
+
+	sch.Domains = domains
+
+	slog.DebugContext(ctx, "[pgloader] domains loaded", slog.Int("domains_count", domains.Len()))
+
+	// mapping columns
 	for _, col := range cols {
 		table, tableExists := sch.Tables.Get(col.TableName)
 		if !tableExists {

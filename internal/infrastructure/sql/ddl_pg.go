@@ -54,6 +54,15 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 			},
 		},
 		{
+			name: "build domains create queries",
+			action: func() error {
+				for _, domain := range schema.Domains.List() {
+					ddl.UpQueries = append(ddl.UpQueries, b.CreateDomain(domain))
+				}
+				return nil
+			},
+		},
+		{
 			name: "build sequences create queries",
 			action: func() error {
 				for _, sequence := range schema.Sequences {
@@ -375,6 +384,15 @@ func (b *PostgresDDLBuilder) CreateEnum(enum *schema.Enum) string {
 	}
 
 	return fmt.Sprintf(`CREATE TYPE %s AS ENUM (%s);`, enum.Name.Value, valuesString)
+}
+
+func (b *PostgresDDLBuilder) CreateDomain(domain *schema.Domain) string {
+	return fmt.Sprintf(`CREATE DOMAIN %s AS %s CONSTRAINT %s %s;`,
+		domain.Name,
+		domain.DataType.Name,
+		domain.ConstraintName,
+		domain.CheckClause,
+	)
 }
 
 func (b *PostgresDDLBuilder) dropType(name string, ifExists bool) string {

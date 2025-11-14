@@ -1,5 +1,7 @@
 CREATE TYPE mood AS ENUM ('ok', 'happy');
 
+CREATE DOMAIN phone_number AS character varying CONSTRAINT phone_number_check CHECK (((VALUE)::text ~ '^\+?\d{10,15}$'::text));
+
 CREATE TABLE users
 (
     id           integer NOT NULL,

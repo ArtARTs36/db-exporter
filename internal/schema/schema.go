@@ -8,6 +8,7 @@ type Schema struct {
 	Tables    *TableMap
 	Sequences map[string]*Sequence
 	Enums     map[string]*Enum
+	Domains   *gds.Map[string, *Domain]
 
 	Driver DatabaseDriver
 }
@@ -38,6 +39,7 @@ func (s *Schema) Clone() *Schema {
 		Sequences: s.Sequences,
 		Enums:     s.Enums,
 		Driver:    s.Driver,
+		Domains:   s.Domains,
 	}
 }
 
