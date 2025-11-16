@@ -79,6 +79,10 @@ func (e *Exporter) ExportPerFile(
 	pager := e.createPaginator(spec)
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		prfile := pkg.CreateFile(fmt.Sprintf("%s.proto", table.Name.Snake().Lower())).SetOptions(options)
 
 		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
