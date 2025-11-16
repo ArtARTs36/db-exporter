@@ -27,7 +27,7 @@ func NewPostgresDDLBuilder() *PostgresDDLBuilder {
 
 type isLastLine func() bool
 
-func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) { //nolint:funlen//not need
+func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (*DDL, error) { //nolint:funlen,gocognit,lll //not need
 	const oneTypeQueries = 1
 
 	ddl := &DDL{
@@ -82,7 +82,7 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 			name: "build tables create/drop queries",
 			action: func() error {
 				for _, table := range schema.Tables.List() {
-					if table.IsPartition() {
+					if table.IsPartition() { // @todo need generate partition bounds.
 						continue
 					}
 

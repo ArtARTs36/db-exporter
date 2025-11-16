@@ -15,7 +15,7 @@ type partitionRel struct {
 	ParentTable gds.String `db:"parent_table"`
 }
 
-func (l *Loader) loadPartitions(ctx context.Context, cn *conn.Connection, tableNames []string) ([]*partitionRel, error) {
+func (l *Loader) loadPartitions(ctx context.Context, cn *conn.Connection, tblNames []string) ([]*partitionRel, error) {
 	query := `SELECT
     inhrelid::regclass AS child_table,
     inhparent::regclass AS parent_table
@@ -34,7 +34,7 @@ ORDER BY inhrelid
 
 	var partitions []*partitionRel
 
-	query, args, err := sqlx.In(query, tableNames)
+	query, args, err := sqlx.In(query, tblNames)
 	if err != nil {
 		return nil, fmt.Errorf("build query: %w", err)
 	}

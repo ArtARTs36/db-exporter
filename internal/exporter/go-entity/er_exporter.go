@@ -82,7 +82,7 @@ func (e *RepositoryExporter) renderEnums(pipeline *erPipeline, sch *schema.Schem
 	return pages, enums, nil
 }
 
-func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
+func (e *RepositoryExporter) ExportPerFile( //nolint:funlen,gocognit // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {

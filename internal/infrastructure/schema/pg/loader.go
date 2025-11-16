@@ -55,7 +55,7 @@ func NewLoader() *Loader {
 	return &Loader{}
 }
 
-func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen,gocognit,lll // not need
 	db, err := cn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("connect to db: %w", err)
