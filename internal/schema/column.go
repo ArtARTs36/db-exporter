@@ -6,24 +6,26 @@ import (
 )
 
 type Column struct {
-	Name            gds.String           `db:"name"`
-	TableName       gds.String           `db:"table_name"`
-	DataType        DataType             `db:"-"`
+	Name            gds.String           `db:"name"`       // Name of column.
+	TableName       gds.String           `db:"table_name"` // Name of table.
+	DataType        DataType             `db:"-"`          // Column datatype
 	TypeRaw         gds.String           `db:"type_raw"`
-	CharacterLength int16                `db:"character_length"`
-	Nullable        bool                 `db:"nullable"`
-	PrimaryKey      *PrimaryKey          `db:"-"`
-	UniqueKey       *UniqueKey           `db:"-"`
-	ForeignKey      *ForeignKey          `db:"-"`
-	Comment         gds.String           `db:"comment"`
+	CharacterLength int16                `db:"character_length"` // Length of character.
+	Nullable        bool                 `db:"nullable"`         // True, if column supports null value
+	PrimaryKey      *PrimaryKey          `db:"-"`                // Primary key.
+	UniqueKey       *UniqueKey           `db:"-"`                // Unique key.
+	ForeignKey      *ForeignKey          `db:"-"`                // The foreign key referenced by this column.
+	Comment         gds.String           `db:"comment"`          // Comment for column.
 	DefaultRaw      sql.NullString       `db:"default_value"`
 	Default         *ColumnDefault       `db:"-"`
-	UsingSequences  map[string]*Sequence `db:"-"`
-	DomainName      sql.NullString       `db:"domain_name"`
+	UsingSequences  map[string]*Sequence `db:"-"`           // Map of using sequences.
+	DomainName      sql.NullString       `db:"domain_name"` // Name of domain (for PostgreSQL).
 
-	Enum   *Enum   `db:"-"`
-	Domain *Domain `db:"-"`
+	Enum   *Enum   `db:"-"` // List of values this column.
+	Domain *Domain `db:"-"` // Domain  (for PostgreSQL)
 
+	// True, if the column supports auto-increment.
+	// Postgres sequence is also auto-increment=true.
 	IsAutoincrement bool `db:"-"`
 }
 

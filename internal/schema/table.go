@@ -5,21 +5,21 @@ import (
 )
 
 type Table struct {
-	Name      gds.String         `db:"Name"`
-	Columns   []*Column          `db:"-"`
+	Name      gds.String         `db:"name"` // Name of table.
+	Columns   []*Column          `db:"-"`    // List of table columns.
 	columnMap map[string]*Column `db:"-"`
 
-	PrimaryKey  *PrimaryKey            `db:"-"`
-	ForeignKeys map[string]*ForeignKey `db:"-"`
-	UniqueKeys  map[string]*UniqueKey  `db:"-"`
+	PrimaryKey  *PrimaryKey            `db:"-"` // Primary key of table.
+	ForeignKeys map[string]*ForeignKey `db:"-"` // Map of foreign keys.
+	UniqueKeys  map[string]*UniqueKey  `db:"-"` // Map of unique keys.
 
-	UsingSequences map[string]*Sequence `db:"-"`
-	UsingEnums     map[string]*Enum     `db:"-"`
-	UsingDomains   map[string]*Domain   `db:"-"`
+	UsingSequences map[string]*Sequence `db:"-"` // Map of using sequences.
+	UsingEnums     map[string]*Enum     `db:"-"` // Map of using enums.
+	UsingDomains   map[string]*Domain   `db:"-"` // Map of using domains.
 
 	columnsNames []string `db:"-"`
 
-	Comment string
+	Comment string // Comment for table.
 }
 
 func NewTable(name gds.String) *Table {
