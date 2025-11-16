@@ -79,6 +79,10 @@ func (e *EntitiesExporter) ExportPerFile(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		page, genErr := e.entityGenerator.GenerateEntity(&GenerateEntityParams{
 			Entity: e.entityMapper.MapEntity(&MapEntityParams{
 				SourceDriver: params.Schema.Driver,

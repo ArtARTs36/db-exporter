@@ -82,7 +82,7 @@ func (e *RepositoryExporter) renderEnums(pipeline *erPipeline, sch *schema.Schem
 	return pages, enums, nil
 }
 
-func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
+func (e *RepositoryExporter) ExportPerFile( //nolint:funlen,gocognit // not need
 	ctx context.Context,
 	params *exporter.ExportParams,
 ) ([]*exporter.ExportedPage, error) {
@@ -106,6 +106,10 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages = append(pages, enumPages...)
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		entity := e.entityMapper.MapEntity(&MapEntityParams{
 			SourceDriver: params.Schema.Driver,
 			Table:        table,

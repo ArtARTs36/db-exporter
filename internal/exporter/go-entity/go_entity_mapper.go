@@ -56,20 +56,24 @@ type MapEntitiesParams struct {
 
 func (m *EntityMapper) MapEntities(params *MapEntitiesParams) *Entities {
 	ents := &Entities{
-		Entities: make([]*Entity, len(params.Tables)),
+		Entities: make([]*Entity, 0, len(params.Tables)),
 		Imports:  golang.NewImportGroups(),
 	}
 	addImportCallback := func(pkg string) {
 		ents.Imports.AddStd(pkg)
 	}
 
-	for i, table := range params.Tables {
-		ents.Entities[i] = m.mapEntity(&MapEntityParams{
+	for _, table := range params.Tables {
+		if table.IsPartition() {
+			continue
+		}
+
+		ents.Entities = append(ents.Entities, m.mapEntity(&MapEntityParams{
 			SourceDriver: params.SourceDriver,
 			Table:        table,
 			Package:      params.Package,
 			Enums:        params.Enums,
-		}, addImportCallback)
+		}, addImportCallback))
 	}
 
 	return ents

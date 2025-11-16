@@ -55,7 +55,7 @@ func NewLoader() *Loader {
 	return &Loader{}
 }
 
-func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen,gocognit,lll // not need
 	db, err := cn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("connect to db: %w", err)
@@ -82,7 +82,7 @@ select c.column_name as name,
        END as character_length
 from information_schema.columns c
 where c.table_schema = $1
-order by c.ordinal_position`
+order by c.table_name, c.ordinal_position`
 
 	sch := schema.NewSchema(schema.DatabaseDriverPostgres)
 
@@ -130,6 +130,8 @@ order by c.ordinal_position`
 
 	slog.DebugContext(ctx, "[pgloader] domains loaded", slog.Int("domains_count", sch.Domains.Len()))
 
+	tableNames := gds.NewSet[string]()
+
 	// mapping columns
 	for _, col := range cols {
 		table, tableExists := sch.Tables.Get(col.TableName)
@@ -137,6 +139,7 @@ order by c.ordinal_position`
 			table = schema.NewTable(col.TableName)
 
 			sch.Tables.Add(table)
+			tableNames.Add(table.Name.Value)
 		}
 
 		col.DataType = sqltype.MapPGType(col.TypeRaw.Value)
@@ -182,6 +185,26 @@ order by c.ordinal_position`
 		l.applyConstraints(table, col, constraints[col.TableName.Value][col.Name.Value])
 
 		table.AddColumn(col)
+	}
+
+	partitions, err := l.loadPartitions(ctx, cn, tableNames.List())
+	if err != nil {
+		return nil, fmt.Errorf("load partitions: %w", err)
+	}
+
+	for _, partition := range partitions {
+		child, ok := sch.Tables.Get(partition.ChildTable)
+		if !ok {
+			return nil, fmt.Errorf("child table %q not found", partition.ChildTable)
+		}
+
+		parent, ok := sch.Tables.Get(partition.ParentTable)
+		if !ok {
+			return nil, fmt.Errorf("parent table %q not found", partition.ChildTable)
+		}
+
+		child.PartitionOf = parent
+		parent.Partitions = append(parent.Partitions, child)
 	}
 
 	return sch, nil

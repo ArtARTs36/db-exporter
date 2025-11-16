@@ -23,6 +23,10 @@ func (e *Exporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, params.Schema.Tables.Len())
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		entity := e.buildEntity(table)
 
 		w := iox.NewWriter()
@@ -46,6 +50,10 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		entity := e.buildEntity(table)
 		file.Types = append(file.Types, entity.Type)
 	}

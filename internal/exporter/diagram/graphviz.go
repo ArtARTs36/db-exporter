@@ -91,6 +91,10 @@ func (b *GraphBuilder) buildNodes(
 	tablesNodes := map[string]*graphviz2.Node{}
 
 	err := tables.EachWithErr(func(table *schema.Table) error {
+		if table.IsPartition() {
+			return nil
+		}
+
 		slog.Debug("[graphbuilder] creating node for table", slog.String("table.name", table.Name.Value))
 
 		node, graphErr := graph.CreateNode(table.Name.Value)

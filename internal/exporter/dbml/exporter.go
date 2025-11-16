@@ -29,6 +29,10 @@ func (e *Exporter) ExportPerFile(
 	pages := make([]*exporter.ExportedPage, 0, pagesLen)
 
 	for _, tbl := range params.Schema.Tables.List() {
+		if tbl.IsPartition() {
+			continue
+		}
+
 		dbmlFile := &dbml.File{}
 		table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
 		if err != nil {
@@ -63,6 +67,10 @@ func (e *Exporter) Export(
 	}
 
 	for _, tbl := range params.Schema.Tables.List() {
+		if tbl.IsPartition() {
+			continue
+		}
+
 		table, refs, err := e.mapper.mapTable(ctx, tbl, params.Schema.Driver)
 		if err != nil {
 			return nil, fmt.Errorf("failed to map table %q: %w", tbl.Name, err)
