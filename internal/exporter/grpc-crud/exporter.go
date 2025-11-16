@@ -170,6 +170,10 @@ func (e *Exporter) Export(
 	}
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		err := e.buildService(spec, params.Schema.Driver, prfile, table, pager)
 		if err != nil {
 			return nil, fmt.Errorf("build service for table %q: %w", table.Name.Value, err)
