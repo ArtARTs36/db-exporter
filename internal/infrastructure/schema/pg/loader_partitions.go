@@ -25,6 +25,7 @@ FROM pg_inherits
 WHERE
     child.relpartbound IS NOT NULL AND 
 	inhrelid::regclass IN (?)
+ORDER BY inhrelid
 `
 	db, err := cn.Connect(ctx)
 	if err != nil {

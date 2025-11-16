@@ -82,7 +82,7 @@ select c.column_name as name,
        END as character_length
 from information_schema.columns c
 where c.table_schema = $1
-order by c.ordinal_position`
+order by c.table_name, c.ordinal_position`
 
 	sch := schema.NewSchema(schema.DatabaseDriverPostgres)
 

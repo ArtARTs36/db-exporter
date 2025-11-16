@@ -106,6 +106,10 @@ func (e *RepositoryExporter) ExportPerFile( //nolint:funlen // not need
 	pages = append(pages, enumPages...)
 
 	for _, table := range params.Schema.Tables.List() {
+		if table.IsPartition() {
+			continue
+		}
+
 		entity := e.entityMapper.MapEntity(&MapEntityParams{
 			SourceDriver: params.Schema.Driver,
 			Table:        table,

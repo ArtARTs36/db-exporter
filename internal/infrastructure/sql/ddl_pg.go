@@ -82,6 +82,10 @@ func (b *PostgresDDLBuilder) Build(schema *schema.Schema, params BuildDDLOpts) (
 			name: "build tables create/drop queries",
 			action: func() error {
 				for _, table := range schema.Tables.List() {
+					if table.IsPartition() {
+						continue
+					}
+
 					tableDDL, err := b.buildCreateTable(table, schema.Driver, params)
 					if err != nil {
 						return err
