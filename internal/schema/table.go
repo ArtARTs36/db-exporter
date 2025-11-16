@@ -20,6 +20,9 @@ type Table struct {
 	columnsNames []string `db:"-"`
 
 	Comment string // Comment for table.
+
+	PartitionOf *Table // Parent table.
+	Partitions  []*Table
 }
 
 func NewTable(name gds.String) *Table {
@@ -31,6 +34,7 @@ func NewTable(name gds.String) *Table {
 		UsingEnums:     map[string]*Enum{},
 		UsingDomains:   map[string]*Domain{},
 		columnMap:      map[string]*Column{},
+		Partitions:     []*Table{},
 	}
 }
 
@@ -123,4 +127,8 @@ func (t *Table) SupportsSoftDelete() bool {
 	}
 
 	return false
+}
+
+func (t *Table) IsPartition() bool {
+	return t.PartitionOf != nil
 }
