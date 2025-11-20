@@ -6,28 +6,28 @@ import (
 	"fmt"
 	"github.com/artarts36/db-exporter/internal/cli/mcp/protocol"
 	"github.com/artarts36/db-exporter/internal/cli/mcp/tools"
+	"github.com/artarts36/db-exporter/internal/cli/mcp/transport"
 	"io"
-	"os"
 	"time"
 )
 
 // Server represents an MCP server
 type Server struct {
-	tools  *tools.Router
-	stdout io.Writer
-	stderr io.Writer
+	tools     *tools.Router
+	stderr    io.Writer
+	transport transport.Transport
 }
 
 // NewServer creates a new MCP server
 func NewServer(
 	router *tools.Router,
-	stdout,
 	stderr io.Writer,
+	transport transport.Transport,
 ) *Server {
 	return &Server{
-		tools:  router,
-		stdout: stdout,
-		stderr: stderr,
+		tools:     router,
+		stderr:    stderr,
+		transport: transport,
 	}
 }
 
@@ -37,38 +37,19 @@ const (
 
 // Run starts the MCP server
 func (s *Server) Run() error {
-	decoder := json.NewDecoder(os.Stdin)
-	encoder := json.NewEncoder(s.stdout)
-
-	for {
-		var request protocol.Request
-		if err := decoder.Decode(&request); err != nil {
-			if err == io.EOF {
-				// Normal termination
-				return nil
-			}
-			return fmt.Errorf("decode request: %w", err)
-		}
-
+	return s.transport.Listen(func(ctx context.Context, req *protocol.Request) (*protocol.Response, error) {
 		// Ensure JSONRPC version is set
-		if request.JSONRPC == "" {
-			request.JSONRPC = "2.0"
+		if req.JSONRPC == "" {
+			req.JSONRPC = "2.0"
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), reqTimeout)
+		defer cancel()
 
 		// Process the request
-		response := s.handleRequest(ctx, &request)
-		cancel()
-
-		// Only encode and send a response if there is one
-		// Notifications don't require a response
-		if response != nil {
-			if err := encoder.Encode(response); err != nil {
-				return fmt.Errorf("encode response: %w", err)
-			}
-		}
-	}
+		resp := s.handleRequest(ctx, req)
+		return resp, nil
+	})
 }
 
 // handleRequest handles a single JSON-RPC request
