@@ -48,6 +48,24 @@ func (c *Config) GetDefaultDatabaseName() (string, bool) {
 	return "", false
 }
 
+func (c *Config) GetDefaultDatabase() (schema.Database, bool) {
+	const defaultDBKey = "default"
+
+	if len(c.Databases) == 0 {
+		return schema.Database{}, false
+	}
+
+	if db, exists := c.Databases[defaultDBKey]; exists {
+		return db, true
+	}
+
+	for _, db := range c.Databases {
+		return db, true
+	}
+
+	return schema.Database{}, false
+}
+
 func (c *Config) UsingDatabases() map[string]schema.Database {
 	dbs := map[string]schema.Database{}
 

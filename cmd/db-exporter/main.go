@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/cli/cmd"
 	"github.com/artarts36/db-exporter/internal/cli/config"
+	"github.com/artarts36/db-exporter/internal/cli/mcp"
 	"github.com/artarts36/db-exporter/internal/cli/task"
 	"strings"
 
@@ -43,6 +44,10 @@ func main() {
 				Description: "task names of config file",
 				WithValue:   true,
 			},
+			{
+				Name:        "mcp",
+				Description: "run db-exporter in MCP mode",
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -56,6 +61,24 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
+	if ctx.HasOpt("mcp") {
+		return runMCP(ctx)
+	}
+	return runCliApp(ctx)
+}
+
+func runMCP(ctx *cli.Context) error {
+	fsystem := fs.NewLocal()
+
+	cfg, err := loadConfig(ctx, fsystem)
+	if err != nil {
+		return err
+	}
+
+	return mcp.Create(cfg).Run()
+}
+
+func runCliApp(ctx *cli.Context) error {
 	fsystem := fs.NewLocal()
 
 	cfg, err := loadConfig(ctx, fsystem)
