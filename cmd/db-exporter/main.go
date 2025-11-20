@@ -4,8 +4,12 @@ import (
 	"context"
 	"github.com/artarts36/db-exporter/internal/cli/cmd"
 	"github.com/artarts36/db-exporter/internal/cli/config"
+	"github.com/artarts36/db-exporter/internal/cli/mcp"
+	"github.com/artarts36/db-exporter/internal/cli/mcp/transport"
 	"github.com/artarts36/db-exporter/internal/cli/task"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/artarts36/db-exporter/internal/exporter/factory"
 	"github.com/artarts36/db-exporter/internal/shared/fs"
@@ -43,6 +47,11 @@ func main() {
 				Description: "task names of config file",
 				WithValue:   true,
 			},
+			{
+				Name:        "mcp",
+				Description: "run db-exporter in MCP mode. Enum: [console, http]",
+				WithValue:   true,
+			},
 		},
 		UsageExamples: []*cli.UsageExample{
 			{
@@ -56,6 +65,32 @@ func main() {
 }
 
 func run(ctx *cli.Context) error {
+	if ctx.HasOpt("mcp") {
+		return runMCP(ctx)
+	}
+	return runCliApp(ctx)
+}
+
+func runMCP(ctx *cli.Context) error {
+	fsystem := fs.NewLocal()
+
+	cfg, err := loadConfig(ctx, fsystem)
+	if err != nil {
+		return err
+	}
+
+	var tp transport.Transport
+
+	if mode, _ := ctx.GetOpt("mcp"); mode == "http" {
+		tp = transport.NewHTTP()
+	} else {
+		tp = transport.NewConsole(time.Minute, os.Stdin, os.Stdout)
+	}
+
+	return mcp.Create(cfg, tp).Run()
+}
+
+func runCliApp(ctx *cli.Context) error {
 	fsystem := fs.NewLocal()
 
 	cfg, err := loadConfig(ctx, fsystem)

@@ -17,18 +17,22 @@ var loaders = map[schema.DatabaseDriver]Loader{
 	schema.DatabaseDriverMySQL:    mysql.NewLoader(),
 }
 
+func Load(ctx context.Context, con *conn.Connection) (*schema.Schema, error) {
+	loader, ok := loaders[con.Database().Driver]
+	if !ok {
+		return nil, fmt.Errorf("schema loader for driver %q not found", con.Database().Driver)
+	}
+
+	return loader.Load(ctx, con)
+}
+
 func LoadForPool(ctx context.Context, pool *conn.Pool) (map[string]*schema.Schema, error) {
 	schemas := map[string]*schema.Schema{}
 
 	for db, con := range pool.All() {
 		var err error
 
-		loader, ok := loaders[con.Database().Driver]
-		if !ok {
-			return nil, fmt.Errorf("schema loader for driver %q not found", con.Database().Driver)
-		}
-
-		schemas[db], err = loader.Load(ctx, con)
+		schemas[db], err = Load(ctx, con)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load schema for database %q: %w", db, err)
 		}
