@@ -55,7 +55,7 @@ func NewLoader() *Loader {
 	return &Loader{}
 }
 
-func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen,gocognit,lll // not need
+func (l *Loader) Load(ctx context.Context, cn *conn.Connection) (*schema.Schema, error) { //nolint:funlen // not need
 	db, err := cn.Connect(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("connect to db: %w", err)
@@ -187,27 +187,43 @@ order by c.table_name, c.ordinal_position`
 		table.AddColumn(col)
 	}
 
-	partitions, err := l.loadPartitions(ctx, cn, tableNames.List())
+	if tableNames.IsNotEmpty() {
+		err = l.attachPartitions(ctx, sch, cn, tableNames.List())
+		if err != nil {
+			return nil, fmt.Errorf("attach partitions: %w", err)
+		}
+	}
+
+	return sch, nil
+}
+
+func (l *Loader) attachPartitions(
+	ctx context.Context,
+	sch *schema.Schema,
+	cn *conn.Connection,
+	tableNames []string,
+) error {
+	partitions, err := l.loadPartitions(ctx, cn, tableNames)
 	if err != nil {
-		return nil, fmt.Errorf("load partitions: %w", err)
+		return fmt.Errorf("load partitions: %w", err)
 	}
 
 	for _, partition := range partitions {
 		child, ok := sch.Tables.Get(partition.ChildTable)
 		if !ok {
-			return nil, fmt.Errorf("child table %q not found", partition.ChildTable)
+			return fmt.Errorf("child table %q not found", partition.ChildTable)
 		}
 
 		parent, ok := sch.Tables.Get(partition.ParentTable)
 		if !ok {
-			return nil, fmt.Errorf("parent table %q not found", partition.ChildTable)
+			return fmt.Errorf("parent table %q not found", partition.ChildTable)
 		}
 
 		child.PartitionOf = parent
 		parent.Partitions = append(parent.Partitions, child)
 	}
 
-	return sch, nil
+	return nil
 }
 
 func (l *Loader) parseColumnDefault(col *schema.Column) *schema.ColumnDefault {
