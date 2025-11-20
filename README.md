@@ -103,3 +103,9 @@ You can inject environment variables to config:
           tables:
             list: ${MY_TABLES}
     ```
+
+## Articles
+
+На русском:
+- [Генерируем CRUD для gRPC по схеме БД следуя Google AIP](https://tproger.ru/articles/generiruem-crud-dlya-grpc-po-sheme-bd)
+- [Генерируем документацию к БД и не мучаем разработчиков](https://dzen.ru/a/aOlhYHhHszJpeGgW)
